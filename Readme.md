@@ -1,3 +1,13 @@
+# For testing without composer installation of plugin
+add or extend this to the composer.json in the shop root
+<code>
+"autoload-dev": {\
+&nbsp; &nbsp; "psr-4": {\
+&nbsp; &nbsp; &nbsp; &nbsp; "Fatchip\\PayOne\\": "./source/modules/fc/fcpayone"\
+&nbsp; &nbsp; }\
+},
+</code>
+
 # PAYONE for Oxid
 ![license LGPL](https://img.shields.io/badge/license-LGPL-blue.svg)
 [![GitHub issues](https://img.shields.io/github/issues/PAYONE-GmbH/oxid-6.svg)](https://github.com/PAYONE-GmbH/oxid-6/issues)
