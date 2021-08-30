@@ -25,13 +25,6 @@ class FcPayOneLogList extends FcPayoneAdminList
 {
 
     /**
-     * Name of chosen object class (default null).
-     *
-     * @var string
-     */
-    protected $_sListClass = 'fcpotransactionstatus';
-
-    /**
      * Default SQL sorting parameter (default null).
      *
      * @var string

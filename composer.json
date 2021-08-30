@@ -1,6 +1,6 @@
 {
-  "name": "payone-gmbh/oxid-6",
-  "description": "The PAYONE module for Oxid 6",
+  "name": "payone-gmbh/oxid-7",
+  "description": "The PAYONE module for Oxid 7",
   "type": "oxideshop-module",
   "keywords": ["oxid", "modules", "eShop", "payment", "creditcard"],
   "homepage": "https://www.payone.com/",
