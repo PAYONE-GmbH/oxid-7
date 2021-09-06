@@ -104,26 +104,26 @@ $aModule = [
     ],
     'templates' => [
         // frontend
-        'fcpayoneiframe.tpl'                => 'fc/fcpayone/application/views/frontend/tpl/fcpayoneiframe.tpl',
+        'fcpayoneiframe.tpl'                => '/Application/views/frontend/tpl/fcpayoneiframe.tpl',
         // admin
-        'fcpayone_popup_main.tpl'           => 'fc/fcpayone/application/views/admin/tpl/popups/fcpayone_popup_main.tpl',
-        'fcpayone.tpl'                      => 'fc/fcpayone/application/views/admin/tpl/fcpayone.tpl',
-        'fcpayone_apilog.tpl'               => 'fc/fcpayone/application/views/admin/tpl/fcpayone_apilog.tpl',
-        'fcpayone_apilog_list.tpl'          => 'fc/fcpayone/application/views/admin/tpl/fcpayone_apilog_list.tpl',
-        'fcpayone_apilog_main.tpl'          => 'fc/fcpayone/application/views/admin/tpl/fcpayone_apilog_main.tpl',
-        'fcpayone_boni.tpl'                 => 'fc/fcpayone/application/views/admin/tpl/fcpayone_boni.tpl',
-        'fcpayone_boni_list.tpl'            => 'fc/fcpayone/application/views/admin/tpl/fcpayone_boni_list.tpl',
-        'fcpayone_boni_main.tpl'            => 'fc/fcpayone/application/views/admin/tpl/fcpayone_boni_main.tpl',
-        'fcpayone_cc_preview.tpl'           => 'fc/fcpayone/application/views/admin/tpl/fcpayone_cc_preview.tpl',
-        'fcpayone_list.tpl'                 => 'fc/fcpayone/application/views/admin/tpl/fcpayone_list.tpl',
-        'fcpayone_log.tpl'                  => 'fc/fcpayone/application/views/admin/tpl/fcpayone_log.tpl',
-        'fcpayone_log_list.tpl'             => 'fc/fcpayone/application/views/admin/tpl/fcpayone_log_list.tpl',
-        'fcpayone_main.tpl'                 => 'fc/fcpayone/application/views/admin/tpl/fcpayone_main.tpl',
-        'fcpayone_order.tpl'                => 'fc/fcpayone/application/views/admin/tpl/fcpayone_order.tpl',
-        'fcpayone_protocol.tpl'             => 'fc/fcpayone/application/views/admin/tpl/fcpayone_protocol.tpl',
-        'fcpayone_status_forwarding.tpl'    => 'fc/fcpayone/application/views/admin/tpl/fcpayone_status_forwarding.tpl',
-        'fcpayone_status_mapping.tpl'       => 'fc/fcpayone/application/views/admin/tpl/fcpayone_status_mapping.tpl',
-        'fcpayone_error_mapping.tpl'        => 'fc/fcpayone/application/views/admin/tpl/fcpayone_error_mapping.tpl',
+        'fcpayone_popup_main.tpl'           => '/Application/views/admin/tpl/popups/fcpayone_popup_main.tpl',
+        'fcpayone.tpl'                      => '/Application/views/admin/tpl/fcpayone.tpl',
+        'fcpayone_apilog.tpl'               => '/Application/views/admin/tpl/fcpayone_apilog.tpl',
+        'fcpayone_apilog_list.tpl'          => '/Application/views/admin/tpl/fcpayone_apilog_list.tpl',
+        'fcpayone_apilog_main.tpl'          => '/Application/views/admin/tpl/fcpayone_apilog_main.tpl',
+        'fcpayone_boni.tpl'                 => '/Application/views/admin/tpl/fcpayone_boni.tpl',
+        'fcpayone_boni_list.tpl'            => '/Application/views/admin/tpl/fcpayone_boni_list.tpl',
+        'fcpayone_boni_main.tpl'            => '/Application/views/admin/tpl/fcpayone_boni_main.tpl',
+        'fcpayone_cc_preview.tpl'           => '/Application/views/admin/tpl/fcpayone_cc_preview.tpl',
+        'fcpayone_list.tpl'                 => '/Application/views/admin/tpl/fcpayone_list.tpl',
+        'fcpayone_log.tpl'                  => '/Application/views/admin/tpl/fcpayone_log.tpl',
+        'fcpayone_log_list.tpl'             => '/Application/views/admin/tpl/fcpayone_log_list.tpl',
+        'fcpayone_main.tpl'                 => '/Application/views/admin/tpl/fcpayone_main.tpl',
+        'fcpayone_order.tpl'                => '/Application/views/admin/tpl/fcpayone_order.tpl',
+        'fcpayone_protocol.tpl'             => '/Application/views/admin/tpl/fcpayone_protocol.tpl',
+        'fcpayone_status_forwarding.tpl'    => '/Application/views/admin/tpl/fcpayone_status_forwarding.tpl',
+        'fcpayone_status_mapping.tpl'       => '/Application/views/admin/tpl/fcpayone_status_mapping.tpl',
+        'fcpayone_error_mapping.tpl'        => '/Application/views/admin/tpl/fcpayone_error_mapping.tpl',
     ],
     'events'        => [
         'onActivate'                        => Fatchip\PayOne\Core\FcPayOneEvents::class.'::onActivate',
@@ -133,122 +133,122 @@ $aModule = [
         [
             'template' => 'layout/base.tpl',
             'block' => 'base_js',
-            'file' => 'fcpo_base_js_extend'
+            'file' => '/Application/views/blocks/fcpo_base_js_extend.tpl'
         ],
         [
             'template' => 'layout/base.tpl',
             'block' => 'base_style',
-            'file' => 'fcpo_base_css_extend'
+            'file' => '/Application/views/blocks/fcpo_base_css_extend.tpl'
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'checkout_basket_main',
-            'file' => 'fcpo_basket_override'
+            'file' => '/Application/views/blocks/fcpo_basket_override.tpl'
         ],
         [
             'template' => 'widget/minibasket/minibasket.tpl',
             'block' => 'widget_minibasket_total',
-            'file' => 'fcpo_minibasket_total_override',
+            'file' => '/Application/views/blocks/fcpo_minibasket_total_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'checkout_order_address',
-            'file' => 'fcpo_order_override'
+            'file' => '/Application/views/blocks/fcpo_order_override.tpl'
         ],
         [
             'template' => 'page/checkout/user.tpl',
             'block' => 'checkout_user_main',
-            'file' => 'fcpo_user_override'
+            'file' => '/Application/views/blocks/fcpo_user_override.tpl'
         ],
         [
             'template' => '_formparams.tpl',
             'block' => 'admin_formparams',
-            'file' => 'fcpo_admin_formparams',
+            'file' => '/Application/views/blocks/fcpo_admin_formparams.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'change_payment',
-            'file' => 'fcpo_payment_override',
+            'file' => '/Application/views/blocks/fcpo_payment_override.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'select_payment',
-            'file' => 'fcpo_payment_select_override',
+            'file' => '/Application/views/blocks/fcpo_payment_select_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'order_basket',
-            'file' => 'fcpo_order_basket_override',
+            'file' => '/Application/views/blocks/fcpo_order_basket_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'checkout_order_errors',
-            'file' => 'fcpo_order_checkout_order_errors'
+            'file' => '/Application/views/blocks/fcpo_order_checkout_order_errors.tpl'
         ],
         [
             'template' => 'page/checkout/thankyou.tpl',
             'block' => 'checkout_thankyou_proceed',
-            'file' => 'fcpo_thankyou_checkout_thankyou',
+            'file' => '/Application/views/blocks/fcpo_thankyou_checkout_thankyou.tpl',
         ],
         [
             'template' => 'email/html/order_cust.tpl',
             'block' => 'email_html_order_cust_paymentinfo',
-            'file' => 'fcpo_email_html_order_cust_paymentinfo',
+            'file' => '/Application/views/blocks/fcpo_email_html_order_cust_paymentinfo.tpl',
         ],
         [
             'template' => 'email/plain/order_cust.tpl',
             'block' => 'email_plain_order_cust_paymentinfo',
-            'file' => 'fcpo_email_plain_order_cust_paymentinfo',
+            'file' => '/Application/views/blocks/fcpo_email_plain_order_cust_paymentinfo.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_colgroup',
-            'file' => 'fcpo_admin_order_list_colgroup',
+            'file' => '/Application/views/blocks/fcpo_admin_order_list_colgroup.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_filter',
-            'file' => 'fcpo_admin_order_list_filter',
+            'file' => '/Application/views/blocks/fcpo_admin_order_list_filter.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_sorting',
-            'file' => 'fcpo_admin_order_list_sorting',
+            'file' => '/Application/views/blocks/fcpo_admin_order_list_sorting.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_item',
-            'file' => 'fcpo_admin_order_list_item',
+            'file' => '/Application/views/blocks/fcpo_admin_order_list_item.tpl',
         ],
         [
             'template' => 'payment_list.tpl',
             'block' => 'admin_payment_list_filter',
-            'file' => 'fcpo_admin_payment_list_filter',
+            'file' => '/Application/views/blocks/fcpo_admin_payment_list_filter.tpl',
         ],
         [
             'template' => 'payment_main.tpl',
             'block' => 'admin_payment_main_form',
-            'file' => 'fcpo_admin_payment_main_form',
+            'file' => '/Application/views/blocks/fcpo_admin_payment_main_form.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_top',
-            'file' => 'fcpo_basket_btn_next',
+            'file' => '/Application/views/blocks/fcpo_basket_btn_next.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_bottom',
-            'file' => 'fcpo_basket_btn_next_bottom',
+            'file' => '/Application/views/blocks/fcpo_basket_btn_next_bottom.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'checkout_payment_errors',
-            'file' => 'fcpo_payment_errors',
+            'file' => '/Application/views/blocks/fcpo_payment_errors.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'checkout_basket_main',
-            'file' => 'fcpo_basket_errors',
+            'file' => '/Application/views/blocks/fcpo_basket_errors.tpl',
         ],
     ],
 ];
@@ -260,7 +260,7 @@ if (class_exists('\OxidEsales\Facts\Facts')) {
         $aModule['blocks'][] = [
                 'template' => 'roles_bemain.tpl',
                 'block' => 'admin_roles_bemain_form',
-                'file' => 'fcpo_admin_roles_bemain_form',
+                'file' => '/Application/views/blocks/fcpo_admin_roles_bemain_form.tpl',
         ];
         $aModule['extend'][OxidEsales\Eshop\Application\Controller\Admin\RolesBackendMain::class] = Fatchip\PayOne\Application\Controller\Admin\FcPayOneRolesBeMain::class;
     }

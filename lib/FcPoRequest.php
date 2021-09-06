@@ -150,16 +150,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     public function __construct()
     {
-        $oConfig = $this->getConfig();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         $this->addParameter('mid', $oConfig->getConfigParam('sFCPOMerchantID')); //PayOne Merchant ID
         $this->addParameter('portalid', $oConfig->getConfigParam('sFCPOPortalID')); //PayOne Portal ID
         $this->addParameter('key', md5($oConfig->getConfigParam('sFCPOPortalKey'))); //PayOne Portal Key
-        if ($oConfig->isUtf()) {
-            $this->addParameter('encoding', 'UTF-8'); //Encoding
-        }
-
+        $this->addParameter('encoding', 'UTF-8'); //Encoding
         $this->addParameter('integrator_name', 'oxid');
         $this->addParameter('integrator_version', $this->_oFcpoHelper->fcpoGetIntegratorVersion());
         $this->addParameter('solution_name', 'fatchip');
@@ -280,7 +277,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express' ||
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
             $oOrder->fcIsPayPalOrder() === true &&
-            $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
+            $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
         if ($oOrder->oxorder__oxdellname->value != '') {
@@ -359,7 +356,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _setPaymentParamsDebitNote($aDynvalue)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPODebitBICMandatory = $oConfig->getConfigParam('blFCPODebitBICMandatory');
 
         $this->addParameter('clearingtype', 'elv'); //Payment method
@@ -470,7 +467,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr)
     {
         $blAddRedirectUrls = false;
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
         switch ($sPaymentId) {
@@ -616,7 +613,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoAddSecInvoiceParameters($oOrder)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         $sSecinvoicePortalId = $oConfig->getConfigParam('sFCPOSecinvoicePortalId');
         $sSecinvoicePortalKeyHash = md5($oConfig->getConfigParam('sFCPOSecinvoicePortalKey'));
@@ -675,7 +672,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $mRedirectFunction = false, $sToken = false, $sDeliveryMD5 = false, $blAddAmazonLogoff = false)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $sShopURL = $oConfig->getCurrentShopUrl();
 
@@ -1114,7 +1111,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoAmazonPayCheckTransactionTimedOut($mOutput)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
 
         $blRetryWithAsync = (
@@ -1140,7 +1137,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoReturnToBasket($blLogout=true)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         // @todo: Redirect to basket with message, currently redirect without comment
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
@@ -1154,7 +1151,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _getFrontendHash($aHashParams)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         ksort($aHashParams, SORT_STRING);
         unset($aHashParams['key']);
         $aHashParams['key'] = $oConfig->getConfigParam('sFCPOPortalKey');
@@ -1218,7 +1215,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     public function fcpoIsB2B($oUser)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
 
         if ($blB2BModeActive) {
@@ -1256,7 +1253,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoAddRatePayParameters($oOrder, $aDynvalue)
     {
         // needed objects and data
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oRatePay = oxNew(FcPoRatepay::class);
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $oUser = $oOrder->getOrderUser();
@@ -1287,11 +1284,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $sShippingZip = ($oOrder->oxorder__oxdelzip->value) ? $oOrder->oxorder__oxdelzip->value : $oUser->oxuser__oxzip->value;
         $sShippingCity = ($oOrder->oxorder__oxdelcity->value) ? $oOrder->oxorder__oxdelcity->value : $oUser->oxuser__oxcity->value;
 
-        if ($oConfig->isUtf()) {
-            $this->addParameter('encoding', 'UTF-8');
-        } else {
-            $this->addParameter('encoding', 'ISO-8859-1');
-        }
+        $this->addParameter('encoding', 'UTF-8');
 
         // set common params
         $this->addParameter('clearingtype', 'fnc');
@@ -1490,7 +1483,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoGetCentPrice($mValue)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $dBruttoPrice = 0.00;
         if ($mValue instanceof oxBasketItem) {
             $oPrice = $mValue->getPrice();
@@ -1514,7 +1507,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $oUser = $oOrder->getOrderUser();
         $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
         $sAmazonAddressToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
@@ -1548,7 +1541,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoGetAmazonTimeout($sAmazonMode = null)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         if ($sAmazonMode === null) {
             $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
         }
@@ -1576,7 +1569,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoAddPayolutionParameters($oOrder)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $oUser = $oOrder->getOrderUser();
         $sWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('payolution_workorderid');
@@ -1612,11 +1605,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->addParameter('bic', $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_bic']);
         }
 
-        if ($oConfig->isUtf()) {
-            $this->addParameter('encoding', 'UTF-8');
-        } else {
-            $this->addParameter('encoding', 'ISO-8859-1');
-        }
+        $this->addParameter('encoding', 'UTF-8');
 
         $sIp = $this->_fcpoGetRemoteAddress();
         if ($sIp != '') {
@@ -1701,11 +1690,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->addParameter('workorderid', $sWorkorderId);
         }
 
-        if ($oConfig->isUtf()) {
-            $this->addParameter('encoding', 'UTF-8');
-        } else {
-            $this->addParameter('encoding', 'ISO-8859-1');
-        }
+        $this->addParameter('encoding', 'UTF-8');
 
         $sIp = $this->_fcpoGetRemoteAddress();
         if ($sIp != '') {
@@ -1770,11 +1755,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->addParameter('workorderid', $sWorkorderId);
         }
 
-        if ($oConfig->isUtf()) {
-            $this->addParameter('encoding', 'UTF-8');
-        } else {
-            $this->addParameter('encoding', 'ISO-8859-1');
-        }
+        $this->addParameter('encoding', 'UTF-8');
 
         $sIp = $this->_fcpoGetRemoteAddress();
         if ($sIp != '') {
@@ -2453,7 +2434,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             return;
         }
 
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOSecinvoicePortalKey =
             $oConfig->getConfigParam('sFCPOSecinvoicePortalKey');
         $sFCPOSecinvoicePortalId =
@@ -2771,7 +2752,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     public function sendStandardRequestAddresscheck($oUser, $blCheckDeliveryAddress = false)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $this->addParameter('request', 'addresscheck');
         $this->addParameter('mode', $oConfig->getConfigParam('sFCPOBoniOpMode')); //Operationmode live or test
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
@@ -2823,7 +2804,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoCheckUseFallbackBoniversum($aResponse)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sScore = $aResponse['score'];
         $sAddresscheckType = $this->_fcpoGetBoniAddresscheckType();
 
@@ -2851,7 +2832,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoGetAddressCheckType()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
 
         return $sAddressCheckType;
@@ -2865,7 +2846,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoGetBoniAddresscheckType()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOConsumerAddresscheck');
 
@@ -2902,7 +2883,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _fcpoNotBlockingPersonstatus($aResponse)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
         $sResponsePersonstatus = $aResponse['personstatus'];
 
@@ -3024,7 +3005,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         // Consumerscore only allowed in germany
         if ($this->getCountryIso2($oUser->oxuser__oxcountryid->value) == 'DE') {
-            $oConfig = $this->getConfig();
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
             $this->addParameter('request', 'consumerscore');
             $this->addParameter('mode', $oConfig->getConfigParam('sFCPOBoniOpMode')); //Operationmode live or test
             $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
@@ -3275,7 +3256,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
     protected function _logRequest($sResponse, $sStatus = '')
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oDb = DatabaseProvider::getDb();
         $sRequest = serialize($this->_aParameters);
         $sQuery = " INSERT INTO fcporequestlog (
@@ -3470,8 +3451,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                     $sQuery = "INSERT INTO fcpopdfmandates (OXORDERID, FCPO_FILENAME) VALUES (" . $oDb->quote($sOrderId) . ", " . $oDb->quote(basename($sDestinationFile)) . ")";
                     $oDb->Execute($sQuery);
                 }
-
-                $sReturn = $this->getConfig()->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
+                $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+                $sReturn = $oConfig->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
                 $sStatus = 'SUCCESS';
 
                 $aOutput = array(
@@ -3494,7 +3475,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     public function getRefNr($oOrder = false, $blAddPrefixToSession = false)
     {
-        $sRawPrefix = (string) $this->getConfig()->getConfigParam('sFCPORefPrefix');
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sRawPrefix = (string) $oConfig->getConfigParam('sFCPORefPrefix');
         $sSessionRefNr = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
         $blUseSessionRefNr = ($sSessionRefNr && !$oOrder);
         if ($blUseSessionRefNr) {

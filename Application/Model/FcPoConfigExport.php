@@ -127,7 +127,6 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
         $aResult = $oDb->getAll($sQuery);
 
         if (count($aResult)) {
-            $oStr = getStr();
             foreach ($aResult as $aRow) {
                 $sVarName = $aRow['oxvarname'];
                 $sVarType = $aRow['oxvartype'];
@@ -141,7 +140,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
 
                     $this->_aConfStrs[$sVarName] = $sVarVal;
                     if ($this->_aConfStrs[$sVarName]) {
-                        $this->_aConfStrs[$sVarName] = $oStr->htmlentities($this->_aConfStrs[$sVarName]);
+                        $this->_aConfStrs[$sVarName] = htmlentities($this->_aConfStrs[$sVarName]);
                     }
                 }
 
@@ -149,7 +148,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
                     if (in_array($sVarName, $this->_aSkipMultiline)) {
                         $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
                     } else {
-                        $this->_aConfArrs[$sVarName] = $oStr->htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
+                        $this->_aConfArrs[$sVarName] = htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
                     }
                 }
             }
@@ -279,7 +278,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcpoSetShopConfigVars($aShopIds)
     {
-        $oConf = $this->getConfig();
+        $oConf =$this->_oFcpoHelper->fcpoGetConfig();
 
         foreach ($aShopIds as $sShopId) {
             $oShop = oxNew('oxshop');
@@ -408,7 +407,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcpoGetShopXmlProtect()
     {
-        $oConf = $this->getConfig();
+        $oConf =$this->_oFcpoHelper->fcpoGetConfig();
         $sXml = $this->_sT . $this->_sT . "<protect>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<consumerscore>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConf->getShopConfVar('sFCPOBonicheck', $sShopId) == '-1' ? '0' : '1') . "</active>" . $this->_sN;
@@ -736,7 +735,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
                 $aModules[$sKey] = '<![CDATA[' . $sValue . ']]>';
             }
         } else {
-            $sModulesDir = $this->getConfig()->getModulesDir();
+            $sModulesDir =$this->_oFcpoHelper->getModulesDir();
             /** @var oxmodulelist $oModuleList */
             $oModuleList = $this->_oFcpoHelper->getFactoryObject("oxModuleList");
             $aOxidModules = $oModuleList->getModulesFromDir($sModulesDir);

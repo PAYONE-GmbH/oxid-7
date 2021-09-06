@@ -448,9 +448,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajax extends OxidTestCase
     public function test_fcpoReturnErrorMessage_Coverage()
     {
         $oTestObject = oxNew(FcPayOneAjax::class);
-        $oMockConfig = $this->getMock('oxconfig', array('isUtf'));
-        $oMockConfig->expects($this->any())->method('isUtf')->will($this->returnValue(false));
-
+        
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);

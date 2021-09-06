@@ -344,7 +344,7 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
         $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
         
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $sHtml = '
             <div class="content">
                 <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">2. '.$sTranslateInstallmentSelection.'</p>
@@ -400,11 +400,6 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoReturnErrorMessage($sMessage)
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        if (!$oConfig->isUtf()) {
-            $sMessage = utf8_encode($sMessage);
-        }
-        
         $sReturn  = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';

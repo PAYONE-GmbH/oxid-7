@@ -645,11 +645,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function getEncoding()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        if ($oConfig->isUtf()) {
-            return 'UTF-8';
-        }
-        return 'ISO-8859-1';
+        return 'UTF-8';
     }
 
     /**
@@ -1169,8 +1165,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _hasFilterDynDataMethod()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sVersion = $oConfig->getVersion();
+        $sVersion = $this->_oFcpoHelper->fcpoGetShopVersion();
         $blReturn = (version_compare($sVersion, '4.3.0', '>=')) ? true : false;
 
         return $blReturn;

@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Application\Model;
 
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use stdClass;
 
 class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
 {

@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Tests\Application\Model;
 
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
+use stdClass;
 
 class MockResult
 {

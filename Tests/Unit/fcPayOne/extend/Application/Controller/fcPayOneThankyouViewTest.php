@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Tests\Application\Controller;
 
 use Fatchip\PayOne\Application\Controller\FcPayOneThankyouView;
+use stdClass;
 
 class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends OxidTestCase
 {

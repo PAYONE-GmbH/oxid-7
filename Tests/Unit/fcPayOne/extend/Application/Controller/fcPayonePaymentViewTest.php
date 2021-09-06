@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Tests\Application\Controller;
 
 use Fatchip\PayOne\Application\Controller\FcPayOnePaymentView;
+use stdClass;
 
 class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends OxidTestCaseCompatibilityWrapper
 {
@@ -743,46 +744,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
         $oTestObject->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('isPaymentMethodAvailableToUser')->will($this->returnValue(true));
         $this->assertEquals(true, $oTestObject->getP24());
-    }
-
-    /**
-     * Testing get encoding for utf8
-     *
-     * @param  void
-     * @return void
-     */
-    public function test_getEncoding_Utf8()
-    {
-        $oMockConfig = $this->getMock('oxConfig', array('isUtf'));
-        $oMockConfig->expects($this->any())->method('isUtf')->will($this->returnValue(true));
-
-        $oTestObject = oxNew(FcPayOnePaymentView::class);
-
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
-        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-
-        $this->assertEquals('UTF-8', $oTestObject->getEncoding());
-    }
-
-    /**
-     * Testing get encoding for ascii
-     *
-     * @param  void
-     * @return void
-     */
-    public function test_getEncoding_NoUtf8()
-    {
-        $oTestObject = oxNew(FcPayOnePaymentView::class);
-
-        $oMockConfig = $this->getMock('oxConfig', array('isUtf'));
-        $oMockConfig->expects($this->any())->method('isUtf')->will($this->returnValue(false));
-
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
-        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-
-        $this->assertEquals('ISO-8859-1', $oTestObject->getEncoding());
     }
 
     /**

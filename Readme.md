@@ -10,7 +10,7 @@ add or extend this to the composer.json in the shop root
 
 # PAYONE for Oxid
 ![license LGPL](https://img.shields.io/badge/license-LGPL-blue.svg)
-[![GitHub issues](https://img.shields.io/github/issues/PAYONE-GmbH/oxid-6.svg)](https://github.com/PAYONE-GmbH/oxid-6/issues)
+[![GitHub issues](https://img.shields.io/github/issues/PAYONE-GmbH/oxid-7.svg)](https://github.com/PAYONE-GmbH/oxid-7/issues)
 
 # PAYMENT FOR YOUR OXID-SHOP 
 The Payone-FinanceGate-Module is already certified by OXID to guarantee faultless code quality and correct operation, but we are willing to do an even better job. The community here on Github is a great help for that and we are happy about your participation. Take a look at our released version and send us commits or other feedback to take care for the best possible solution.
@@ -27,12 +27,12 @@ The Payone-FinanceGate-Module is already certified by OXID to guarantee faultles
 More information about OXID on https://www.payone.com/oxid or https://www.fatchip.de/Plugins/OXID-eShop/OXID-PAYONE-Connector.html 
 
 ## Requirements
-Installed OXID eShop >= v6.0.0
+Installed OXID eShop >= v7.0.0
 
 ## Installation
 Just go to the directory of your Oxid `composer.json` file and perform the following command:
 ```
-composer require payone-gmbh/oxid-6
+composer require payone-gmbh/oxid-7
 ```
 
 After that, just activate the module in the Oxid backend.

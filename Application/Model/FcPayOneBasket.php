@@ -105,7 +105,7 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      */
     public function fcpoCalcDeliveryCost()
     {
-        $myConfig = $this->getConfig();
+        $myConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $oDeliveryPrice = oxNew('oxprice');
         if ($this->getConfig()->getConfigParam('blDeliveryVatOnTop')) {
             $oDeliveryPrice->setNettoPriceMode();

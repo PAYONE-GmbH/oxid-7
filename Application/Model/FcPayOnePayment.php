@@ -25,7 +25,7 @@ use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use stdClass;
 
-class FcPayOnePayment extends FcPayOnePayment_parent
+class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
 {
 
     /**

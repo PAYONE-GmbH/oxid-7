@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Tests\Application\Model;
 
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use stdClass;
 
 class MockResultErrorMapping
 {

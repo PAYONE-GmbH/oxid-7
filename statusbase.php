@@ -85,9 +85,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
             $mValue = filter_input(INPUT_POST, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
         }
         if ($mValue) {
-            if ($this->getConfig()->isUtf()) {
-                $mValue = utf8_encode($mValue);
-            }
+            $mValue = utf8_encode($mValue);
             $sReturn = $mValue;
         }
 

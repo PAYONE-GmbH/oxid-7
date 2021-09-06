@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Tests\Application\Controller\Admin;
 
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneMain;
+use stdClass;
 
 class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTestCase
 {

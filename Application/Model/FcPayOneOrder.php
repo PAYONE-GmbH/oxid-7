@@ -420,7 +420,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @return mixed
      * @see https://integrator.payone.de/jira/browse/OXID-263
      */
-    protected function _loadFromBasket(\OxidEsales\Eshop\Application\Model\Basket $oBasket)
+    protected function loadFromBasket(\OxidEsales\Eshop\Application\Model\Basket $oBasket)
     {
         $sSessionChallenge =
             $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
@@ -431,7 +431,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         );
 
         if (!$blTriggerLoadingFromSession) {
-            return parent::_loadFromBasket($oBasket);
+            return parent::loadFromBasket($oBasket);
         }
 
         return $this->load($sSessionChallenge);
@@ -481,20 +481,19 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         if ($mRet !== null) {
             return $mRet;
         }
-
         // copies user info
-        $this->_setUser($oUser);
+        $this->setUser($oUser);
 
         // copies basket info if no basket injection or presave order is inactive
         $this->_fcpoHandleBasket($blSaveAfterRedirect, $oBasket);
 
         // payment information
-        $oUserPayment = $this->_setPayment($oBasket->getPaymentId());
+        $oUserPayment = $this->setPayment($oBasket->getPaymentId());
 
         // set folder information, if order is new
         // #M575 in recalcualting order case folder must be the same as it was
         if (!$blRecalculatingOrder) {
-            $this->_setFolder();
+            $this->setFolder();
         }
 
         $mRet = $this->_fcpoExecutePayment($blSaveAfterRedirect, $oBasket, $oUserPayment, $blRecalculatingOrder);
@@ -577,14 +576,14 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
 
     /**
-     * Overriding _setUser for correcting email-address
+     * Overriding setUser for correcting email-address
      *
      * @param void
      * @return void
      */
-    protected function _setUser($oUser)
+    public function setUser($oUser)
     {
-        parent::_setUser($oUser);
+        parent::assignUserInformation($oUser);
 
         if ($this->_sFcpoPaymentId == 'fcpoamazonpay') {
             $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
@@ -614,7 +613,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $this->_fcpoProcessOrder($sTxid);
         } else {
             if (!$blRecalculatingOrder) {
-                $blRet = $this->_executePayment($oBasket, $oUserPayment);
+                $blRet = $this->executePayment($oBasket, $oUserPayment);
                 if ($blRet !== true) {
                     return $blRet;
                 }
@@ -730,10 +729,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     protected function _fcpoHandleBasket($blSaveAfterRedirect, $oBasket)
     {
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blFCPOPresaveOrder === false || $blSaveAfterRedirect === false) {
-            $this->_loadFromBasket($oBasket);
+            $this->loadFromBasket($oBasket);
         } else {
             $this->load($sGetChallenge);
         }
@@ -758,10 +757,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $sGetChallenge &&
             $oBasket &&
             $oUser &&
-            $this->_checkOrderExist($sGetChallenge)
+            $this->checkOrderExist($sGetChallenge)
         );
 
-        if ($blSaveAfterRedirect === false && $this->_checkOrderExist($sGetChallenge)) {
+        if ($blSaveAfterRedirect === false && $this->checkOrderExist($sGetChallenge)) {
             $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
             $oUtils->logger('BLOCKER');
             // we might use this later, this means that somebody klicked like mad on order button
@@ -1373,7 +1372,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     public function validateStock($oBasket)
     {
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
         $blCheckProduct = (
             $blReduceStockBefore &&

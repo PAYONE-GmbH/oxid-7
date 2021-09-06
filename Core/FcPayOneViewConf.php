@@ -27,13 +27,13 @@ use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 
 class FcPayOneViewConf extends FcPayOneViewConf_parent
 {
-
+    
     /**
      * Name of the module folder
      *
      * @var string
      */
-    protected $_sModuleFolder = "fc/fcpayone";
+    protected $_sModuleFolder = "../../modules/fc/fcpayone";
 
     /**
      * Helper object for dealing with different shop versions
@@ -199,7 +199,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetAbsModuleTemplateFrontendPath($sFile = "")
     {
         $sModulePath = $this->fcpoGetModulePath();
-        $sModulePath = $sModulePath . 'application/views/frontend/tpl/';
+        $sModulePath = $sModulePath . 'Application/views/frontend/tpl/';
         if ($sFile) {
             $sModulePath = $sModulePath . $sFile;
         }
@@ -296,7 +296,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetKlarnaCancelUrl()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopURL = $oConfig->getCurrentShopUrl();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sPaymentErrorTextParam =  "&payerrortext=".urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
@@ -582,7 +582,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoIsAmazonAsyncMode()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
         $blReturn = false;
         if ($sFCPOAmazonMode == 'alwaysasync') {
@@ -601,7 +601,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetAmzPopup()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAmazonLoginMode = (string) $oConfig->getConfigParam('sFCPOAmazonLoginMode');
         switch ($sFCPOAmazonLoginMode) {
             case 'popup':
@@ -699,9 +699,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetAjaxControllerUrl()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
-        $sPath = "modules/fc/fcpayone/application/models/fcpayone_ajax.php";
+        $sPath = "modules/fc/fcpayone/Application/Model/FcPayOneAjax.php";
         $sControllerPath = $sShopUrl.$sPath;
 
         return $sControllerPath;
@@ -715,7 +715,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetShopUrl()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
 
         return $sShopUrl;
@@ -729,8 +729,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoIsPayonePayment($sPaymentId)
     {
-        $blIsPayOne =
-            (bool) FcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
+        $blIsPayOne = (bool)FcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
 
         return $blIsPayOne;
     }
@@ -742,7 +741,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetAmazonConfirmErrorUrl()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
 
         $sShopUrl = $oConfig->getShopUrl();
@@ -784,9 +783,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetDelAddrInfo()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
-        $sAddressId = $oConfig->getRequestParameter('deladrid');
+        $sAddressId = $this->_oFcpoHelper->fcpoGetRequestParameter('deladrid');
         if (!$sAddressId) {
             $oSession = $this->_oFcpoHelper->fcpoGetSession();
             $sAddressId = $oSession->getVariable('deladrid');
@@ -807,8 +804,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetPaymentError()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $iPayError = $oConfig->getRequestParameter('payerror');
+        $iPayError = $this->_oFcpoHelper->fcpoGetRequestParameter('payerror');
 
         if (!$iPayError) {
             $oSession = $this->_oFcpoHelper->fcpoGetSession();
@@ -826,8 +822,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetPaymentErrorText()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sPayErrorText = $oConfig->getRequestParameter('payerrortext');
+        $sPayErrorText = $this->_oFcpoHelper->fcpoGetRequestParameter('payerrortext');
 
         if (!$sPayErrorText) {
             $oSession = $this->_oFcpoHelper->fcpoGetSession();

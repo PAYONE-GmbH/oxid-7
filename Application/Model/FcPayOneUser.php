@@ -612,7 +612,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     protected function _fcpoCalculateBoniFromScoreValue($sScoreValue)
     {
         $dScoreValue = (double)$sScoreValue;
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
 
         if ($sFCPOBonicheck == 'CE') {
@@ -630,7 +630,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoCheckUseFallbackBoniversum($aResponse)
     {
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $sScore = $aResponse['score'];
         $sAddresscheckType = $this->_fcpoGetAddressCheckType();
 
@@ -655,7 +655,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoGetAddressCheckType()
     {
-        $oConfig = $this->getConfig();
+        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
 

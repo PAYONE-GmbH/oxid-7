@@ -28,6 +28,17 @@ use OxidEsales\Eshop\Application\Model\BasketItem;
 
 class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
 {
+    /**
+     * oxconfig instance
+     * @var \OxidEsales\Eshop\Core\Config
+     */
+    protected static $_oConfig = null;
+
+    /**
+     * oxconfig instance
+     * @var \OxidEsales\Eshop\Core\Session
+     */
+    protected static $_oSession = null;
 
     /**
      * Flags if shop uses registry
@@ -42,6 +53,20 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /**
+     * oxSession instance getter
+     *
+     * @return \OxidEsales\Eshop\Core\Session
+     */
+    public function getSession()
+    {
+        if (self::$_oSession == null) {
+            self::$_oSession = \OxidEsales\Eshop\Core\Registry::getSession();
+        }
+
+        return self::$_oSession;
     }
 
     /**
@@ -182,14 +207,17 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
     }
 
     /**
-     * Getter for config instance
+     * oxConfig instance getter
      *
-     * @param void
      * @return \OxidEsales\Eshop\Core\Config
      */
     public function fcpoGetConfig()
     {
-        return $this->getConfig();
+        if (self::$_oConfig == null) {
+            self::$_oConfig = Registry::getConfig();
+        }
+
+        return self::$_oConfig;
     }
 
     /**
@@ -225,13 +253,8 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetRequestParameter($sParameter)
     {
-        $oConfig = $this->getConfig();
-
-        if ($this->_fcUseDeprecatedInstantiation()) {
-            $mReturn = $oConfig->getParameter($sParameter);
-        } else {
-            $mReturn = $oConfig->getRequestParameter($sParameter);
-        }
+        $oRequest = Registry::get(\OxidEsales\Eshop\Core\Request::class);
+        $mReturn = $oRequest->getRequestParameter($sParameter);
 
         return $mReturn;
     }
@@ -458,7 +481,7 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetIntegratorVersion()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->fcpoGetConfig();
         $sEdition = $oConfig->getActiveShop()->oxshops__oxedition->value;
         $sVersion = $oConfig->getActiveView()->getShopVersion();
         $sIntegratorVersion = $sEdition . $sVersion;
@@ -474,7 +497,7 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetIntShopVersion()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->fcpoGetConfig();
         $sVersion = $oConfig->getActiveShop()->oxshops__oxversion->value;
         $iVersion = (int) str_replace('.', '', $sVersion);
         // fix for ce/pe 4.10.0+
@@ -496,7 +519,7 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetShopName()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->fcpoGetConfig();
 
         return $oConfig->getActiveShop()->oxshops__oxname->value;
     }
@@ -555,7 +578,7 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetIntegratorId()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->fcpoGetConfig();
 
         $sEdition = $oConfig->getActiveShop()->oxshops__oxedition->value;
         if ($sEdition == 'CE') {
@@ -576,7 +599,7 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetCentPrice($mValue)
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->fcpoGetConfig();
         $dBruttoPrice = 0.00;
         if ($mValue instanceof BasketItem) {
             $oPrice = $mValue->getPrice();
@@ -594,6 +617,18 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
     }
 
     /**
+     * Returns shop version
+     *
+     * @return int
+     */
+    public function fcpoGetShopVersion()
+    {
+        $iVersion = oxNew(\OxidEsales\Eshop\Core\ShopVersion::class)->getVersion();
+        
+        return $iVersion;
+    }
+
+    /**
      * Returns if deprecated instation should be used
      *
      * @param  void
@@ -601,10 +636,11 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcUseDeprecatedInstantiation()
     {
-        $oConfig = $this->getConfig();
-        if ((version_compare($oConfig->getVersion(), "4.8.0") < 1 && $oConfig->getEdition() == "CE")
-            || (version_compare($oConfig->getVersion(), "4.8.0") < 1 && $oConfig->getEdition() == "PE")
-            || (version_compare($oConfig->getVersion(), "5.1.0") < 1 && $oConfig->getEdition() == "EE")
+        $iVersion = $this->fcpoGetShopVersion();
+        $oConfig = $this->fcpoGetConfig();
+        if ((version_compare($iVersion, "4.8.0") < 1 && $oConfig->getEdition() == "CE")
+            || (version_compare($iVersion, "4.8.0") < 1 && $oConfig->getEdition() == "PE")
+            || (version_compare($iVersion, "5.1.0") < 1 && $oConfig->getEdition() == "EE")
        ) {
             return true;
         } else {
@@ -630,5 +666,22 @@ class FcPoHelper extends \OxidEsales\Eshop\Core\Model\BaseModel
             }
         }
         return self::$_blUseRegistry;
+    }
+
+    /**
+     * Returns path to modules dir
+     *
+     * @param bool $absolute mode - absolute/relative path
+     *
+     * @return string
+     */
+    public function getModulesDir($absolute = true)
+    {
+        if ($absolute) {
+            $oConfig = $this->fcpoGetConfig();
+            return $oConfig->getConfigParam('sShopDir') . 'modules/';
+        } else {
+            return 'modules/';
+        }
     }
 }

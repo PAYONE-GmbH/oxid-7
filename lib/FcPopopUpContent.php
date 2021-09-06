@@ -135,11 +135,6 @@ class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcpoReturnErrorMessage($sMessage)
     {
-        $oConfig = $this->getConfig();
-        if (!$oConfig->isUtf()) {
-            $sMessage = utf8_encode($sMessage);
-        }
-        
         $sReturn  = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';

@@ -330,7 +330,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'fcPayOneOrder',
             array(
             'isPayOnePaymentType',
-            '_checkOrderExist',
+            'checkOrderExist',
             'validateOrder',
             '_loadFromBasket',
             '_setUser',
@@ -346,7 +346,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             '_markVouchers',
             '_sendOrderByEmail',
             'setId',
-            '_setFolder',
+            'setFolder',
             '_fcpoProcessOrder',
             '_executeTsProtection',
             'getTsProductId',
@@ -363,7 +363,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         );
         //        $oTestObject = $this->getMockBuilder('fcPayOneOrder')->disableOriginalConstructor()->getMock();
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(false));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_loadFromBasket')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_setUser')->will($this->returnValue(true));
@@ -379,7 +379,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_setFolder')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('setFolder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_executeTsProtection')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getTsProductId')->will($this->returnValue('someTsId'));
@@ -423,7 +423,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'fcPayOneOrder',
             array(
             'isPayOnePaymentType',
-            '_checkOrderExist',
+            'checkOrderExist',
             'validateOrder',
             '_loadFromBasket',
             '_setUser',
@@ -439,7 +439,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             '_markVouchers',
             '_sendOrderByEmail',
             'setId',
-            '_setFolder',
+            'setFolder',
             '_fcpoProcessOrder',
             '_executeTsProtection',
             'getTsProductId',
@@ -455,7 +455,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
                 )
         );
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_loadFromBasket')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_setUser')->will($this->returnValue(true));
@@ -471,7 +471,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_setFolder')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('setFolder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_executeTsProtection')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getTsProductId')->will($this->returnValue('someTsId'));
@@ -515,7 +515,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'fcPayOneOrder',
             array(
             'isPayOnePaymentType',
-            '_checkOrderExist',
+            'checkOrderExist',
             'validateOrder',
             '_loadFromBasket',
             '_setUser',
@@ -531,7 +531,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             '_markVouchers',
             '_sendOrderByEmail',
             'setId',
-            '_setFolder',
+            'setFolder',
             '_fcpoProcessOrder',
             '_executeTsProtection',
             'getTsProductId',
@@ -548,7 +548,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
                 )
         );
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_loadFromBasket')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_setUser')->will($this->returnValue(true));
@@ -564,7 +564,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_setFolder')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('setFolder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_executeTsProtection')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getTsProductId')->will($this->returnValue('someTsId'));
@@ -610,7 +610,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'fcPayOneOrder',
             array(
                 'isPayOnePaymentType',
-                '_checkOrderExist',
+                'checkOrderExist',
                 'validateOrder',
                 '_loadFromBasket',
                 '_setUser',
@@ -626,7 +626,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
                 '_markVouchers',
                 '_sendOrderByEmail',
                 'setId',
-                '_setFolder',
+                'setFolder',
                 '_fcpoProcessOrder',
                 '_executeTsProtection',
                 'getTsProductId',
@@ -643,7 +643,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             )
         );
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
         $oTestObject->expects($this->any())->method('_loadFromBasket')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_setUser')->will($this->returnValue(true));
@@ -659,7 +659,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_setFolder')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('setFolder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_executeTsProtection')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getTsProductId')->will($this->returnValue('someTsId'));
@@ -705,7 +705,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'fcPayOneOrder',
             array(
             'isPayOnePaymentType',
-            '_checkOrderExist',
+            'checkOrderExist',
             'validateOrder',
             '_loadFromBasket',
             '_setUser',
@@ -721,7 +721,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             '_markVouchers',
             '_sendOrderByEmail',
             'setId',
-            '_setFolder',
+            'setFolder',
             '_fcpoProcessOrder',
             '_executeTsProtection',
             'getTsProductId',
@@ -737,7 +737,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
                 )
         );
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('_loadFromBasket')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_setUser')->will($this->returnValue(true));
@@ -753,7 +753,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_setFolder')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('setFolder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessOrder')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_executeTsProtection')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getTsProductId')->will($this->returnValue('someTsId'));
@@ -928,8 +928,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('checkOrderExist', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
@@ -953,8 +953,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('checkOrderExist', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
@@ -978,8 +978,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('checkOrderExist', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('checkOrderExist')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
