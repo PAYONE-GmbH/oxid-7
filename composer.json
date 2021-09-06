@@ -11,10 +11,5 @@
     "oxideshop": {
       "target-directory": "fc/fcpayone"
     }
-  },
-  "autoload": {
-    "psr-4": {
-      "Fatchip\\PayOne\\": "../../../source/modules/fc/fcpayone"
-    }
   }
 }
