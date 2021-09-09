@@ -46,7 +46,7 @@ $aModule = [
         OxidEsales\Eshop\Application\Controller\UserController::class       => Fatchip\PayOne\Application\Controller\FcPayOneUserView::class,
         OxidEsales\Eshop\Application\Controller\OrderController::class      => Fatchip\PayOne\Application\Controller\FcPayOneOrderView::class,
         OxidEsales\Eshop\Application\Controller\PaymentController::class    => Fatchip\PayOne\Application\Controller\FcPayOnePaymentView::class,
-        OxidEsales\Eshop\Application\Controller\ThankyouController::class   => Fatchip\PayOne\Application\Controller\FcPayOneThankyouView::class,
+        OxidEsales\Eshop\Application\Controller\ThankYouController::class   => Fatchip\PayOne\Application\Controller\FcPayOneThankyouView::class,
         // models
         OxidEsales\Eshop\Application\Model\Basket::class                    => Fatchip\PayOne\Application\Model\FcPayOneBasket::class,
         OxidEsales\Eshop\Application\Model\BasketItem::class                => Fatchip\PayOne\Application\Model\FcPayOneBasketItem::class,
