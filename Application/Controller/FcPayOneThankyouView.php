@@ -24,7 +24,7 @@ use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 
-class FcPayOneThankyouView extends FcPayOneThankyouView_parent
+class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
     
     

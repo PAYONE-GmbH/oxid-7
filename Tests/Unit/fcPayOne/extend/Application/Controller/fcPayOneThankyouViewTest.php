@@ -20,10 +20,10 @@
 
 namespace Fatchip\PayOne\Tests\Application\Controller;
 
-use Fatchip\PayOne\Application\Controller\FcPayOneThankyouView;
+use Fatchip\PayOne\Application\Controller\FcPayOneThankYouView;
 use stdClass;
 
-class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends OxidTestCase
+class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends OxidTestCase
 {
     
     /**
@@ -84,7 +84,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
         $oMockUser->oxuser__oxpassword = new oxField(false);
 
         $oTestObject = $this->getMock(
-            'fcPayOneThankyouView',
+            'fcPayOneThankYouView',
             array(
                 'getConfig',
                 'getOrder',
@@ -154,7 +154,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
         $oMockUser->oxuser__oxpassword = new oxField(false);
 
         $oTestObject = $this->getMock(
-            'fcPayOneThankyouView',
+            'fcPayOneThankYouView',
             array(
                 'getConfig',
                 'getOrder',
@@ -219,7 +219,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
         $oMockOrder->oxorder__oxfolder      = new oxField('ORDERFOLDER_PROBLEMS');
         $oMockOrder->oxorder__oxtransstatus = new oxField('ERROR');
         
-        $oTestObject = $this->getMock('fcPayOneThankyouView', array('getOrder'));
+        $oTestObject = $this->getMock('fcPayOneThankYouView', array('getOrder'));
         $oTestObject->expects($this->any())->method('getOrder')->will($this->returnValue($oMockOrder));
         
         $this->assertEquals(true, $oTestObject->fcpoIsAppointedError());
@@ -240,7 +240,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
         $oMockBasket = $this->getMock('oxBasket', array('getProductsCount'));
         $oMockBasket->expects($this->any())->method('getProductsCount')->will($this->returnValue(5));
         
-        $oTestObject = $this->getMock('fcPayOneThankyouView', array(
+        $oTestObject = $this->getMock('fcPayOneThankYouView', array(
             'getUser',
             '_fcpoHandleAmazonThankyou',
             '_fcpoDeleteSessionVariablesOnOrderFinish',
@@ -267,7 +267,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
      */
     public function test__fcpoDeleteSessionVariablesOnOrderFinish_Coverage()
     {
-        $oTestObject = oxNew(FcPayOneThankyouView::class);
+        $oTestObject = oxNew(FcPayOneThankYouView::class);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoDeleteSessionVariable')->will($this->returnValue(null));
@@ -284,7 +284,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
      */
     public function test_fcpoIsAmazonOrder_Coverage()
     {
-        $oTestObject = oxNew(FcPayOneThankyouView::class);
+        $oTestObject = oxNew(FcPayOneThankYouView::class);
         $this->invokeSetAttribute($oTestObject, '_blIsAmazonOrder', true);
 
         $this->assertEquals(true, $oTestObject->fcpoIsAmazonOrder());
@@ -298,7 +298,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
      */
     public function test__fcpoHandleAmazonThankyou_Coverage()
     {
-        $oTestObject = $this->getMock('fcPayOneThankyouView', array(
+        $oTestObject = $this->getMock('fcPayOneThankYouView', array(
             '_fcpoDetermineAmazonOrder',
         ));
         $oTestObject->expects($this->any())->method('_fcpoDetermineAmazonOrder')->will($this->returnValue(true));
@@ -318,7 +318,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
      */
     public function test__fcpoDetermineAmazonOrder_Coverage()
     {
-        $oTestObject = oxNew(FcPayOneThankyouView::class);
+        $oTestObject = oxNew(FcPayOneThankYouView::class);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someToken'));
@@ -335,7 +335,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
      */
     public function test_fcpoGetBarzahlenHtml_Coverage()
     {
-        $oTestObject = oxNew(FcPayOneThankyouView::class);
+        $oTestObject = oxNew(FcPayOneThankYouView::class);
         $this->invokeSetAttribute($oTestObject, '_sBarzahlenHtml', null);
         
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
