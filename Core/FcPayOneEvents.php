@@ -33,13 +33,6 @@ class FcPayOneEvents
 {
 
     /**
-     * Database object
-     *
-     * @var FcPoHelper
-     */
-    protected static $_oFcpoHelper = null;
-
-    /**
      * Paymnts that were once used but now deprecated and marked for removal
      *
      * @var array
@@ -432,7 +425,6 @@ class FcPayOneEvents
     public static function onActivate()
     {
         $sMessage = "";
-        self::$_oFcpoHelper = FcPoHelper::class;
         self::addDatabaseStructure();
         $sMessage .= "Datenbankstruktur angepasst...<br>";
         self::addPayonePayments();
@@ -445,7 +437,7 @@ class FcPayOneEvents
         self::clearTmp();
         $sMessage .= "Tmp geleert...<br>";
         $sMessage .= "Installation erfolgreich!<br>";
-        // self::$_oFcpoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        // FcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
     }
 
     /**
@@ -455,12 +447,11 @@ class FcPayOneEvents
      */
     public static function onDeactivate()
     {
-        self::$_oFcpoHelper = FcPoHelper::class;
         self::deactivatePaymethods();
         $sMessage = "Payone-Zahlarten deaktiviert!<br>";
         self::clearTmp();
         $sMessage .= "Tmp geleert...<br>";
-        //self::$_oFcpoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        //FcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
     }
 
     /**
@@ -501,7 +492,7 @@ class FcPayOneEvents
     {
         $oDb = DatabaseProvider::getDb();
 
-        $sShopId = self::$_oFcpoHelper::fcpoGetConfig()->getShopId();
+        $sShopId = FcPoHelper::fcpoGetConfig()->getShopId();
 
         foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
             //INSERT PAYMENT METHOD
@@ -857,7 +848,7 @@ class FcPayOneEvents
      */
     public static function getCurrentVersion()
     {
-        return self::$_oFcpoHelper::fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
+        return FcPoHelper::fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
     }
 
     /**
@@ -965,7 +956,7 @@ class FcPayOneEvents
      */
     public static function setDefaultConfigValues()
     {
-        $oConfig = self::$_oFcpoHelper::fcpoGetConfig();
+        $oConfig = FcPoHelper::fcpoGetConfig();
         $blIsUpdate = self::isUpdate();
         $blHashMethodSet = (bool) $oConfig->getConfigParam('sFCPOHashMethod');
 
@@ -989,7 +980,7 @@ class FcPayOneEvents
      */
     public static function isUpdate()
     {
-        $oConfig = self::$_oFcpoHelper::fcpoGetConfig();
+        $oConfig = FcPoHelper::fcpoGetConfig();
 
         return (bool) ($oConfig->getConfigParam('sFCPOMerchantID'));
     }
