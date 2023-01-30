@@ -1,0 +1,26 @@
+{
+  "name": "payone-gmbh/oxid-7",
+  "description": "The PAYONE module for Oxid 7",
+  "type": "oxideshop-module",
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "payment",
+    "creditcard"
+  ],
+  "homepage": "https://www.payone.com/",
+  "license": [
+    "LGPL-3.0-only"
+  ],
+  "extra": {
+    "oxideshop": {
+      "target-directory": "fc/fcpayone"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Fatchip\\PayOne\\": "./"
+    }
+  }
+}

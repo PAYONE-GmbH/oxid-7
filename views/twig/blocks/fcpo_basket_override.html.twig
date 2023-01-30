@@ -1,0 +1,5 @@
+{% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
+{% set sFcPoTemplatePath = sFcPoTemplatePath|cat('/fcpo_basket_errormessage.html.twig') %}
+{% include $oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) %}
+
+{{ parent() }}

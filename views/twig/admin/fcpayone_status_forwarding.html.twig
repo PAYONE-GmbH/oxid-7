@@ -1,0 +1,59 @@
+{% include "headitem.html.twig" with {title: "fcpo_admin_config_status_forwarding"|translate} %}
+
+<form autocomplete="off" method="post" action="{{ shop.selflink }}">
+    {{ oViewConf.getHiddenSid() }}
+    <input type="hidden" name="cl" value="FcPayOneStatusForwarding"/>
+    <input type="hidden" name="fnc" value="save"/>
+
+    <h2>{{ translate({ ident: "fcpo_admin_config_status_forwarding" }) }}</h2>
+
+    {% set oForwardings = oView.getForwardings() %}
+    {% if oForwardings|length > 0 %}
+        <br>
+        <table>
+            <tr>
+                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status" }) }}</th>
+                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_url" }) }}</th>
+                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_timeout" }) }}</th>
+                <th></th>
+            </tr>
+            {% for oForwarding in oForwardings %}
+                <tr>
+                    <td>
+                        <select name="editval[{{ oForwarding.sOxid }}][sPayoneStatus]" style="width:325px;">
+                            {% if oForwarding.sOxid == 'new' %}
+                                <option value="">---</option>
+                            {% endif %}
+                            {% for oStatus in oView.getPayoneStatusList() %}
+                                <option value="{{ oStatus.sId }}"
+                                        {% if oForwarding.sPayoneStatusId == oStatus.sId %}selected{% endif %}>{{ oStatus.sTitle }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input autocomplete="off" type="text" size="55"
+                               name="editval[{{ oForwarding.sOxid }}][sForwardingUrl]"
+                               value="{{ oForwarding.sForwardingUrl }}">
+                    </td>
+                    <td>
+                        <input autocomplete="off" type="text" size="5"
+                               name="editval[{{ oForwarding.sOxid }}][iForwardingTimeout]"
+                               value="{{ oForwarding.iForwardingTimeout }}">
+                    </td>
+                    <td>
+                        <input value="X {{ translate({ ident: "fcpo_admin_config_delete" }) }}"
+                               name="editval[{{ oForwarding.sOxid }}][delete]"
+                               onclick="if(!confirm('{{ translate({ ident: "fcpo_admin_config_delete_confirm" }) }}')) {return false;}"
+                               type="submit">
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"/>
+    {% endif %}
+    <input type="submit" name="add" value="{{ translate({ ident: "fcpo_admin_config_add" }) }}"/>
+</form>
+
+{% include "bottomnaviitem.html.twig" %}
+{% include "bottomitem.html.twig" %}
