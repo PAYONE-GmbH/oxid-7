@@ -8,8 +8,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
 {
@@ -50,7 +50,7 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
      * List of blocked paymentids
      * @var array
      */
-    protected $_aBlockedPaymentIds = array();
+    protected $_aBlockedPaymentIds = [];
 
     /**
      * ID of n:m table assigned to this flag
@@ -101,7 +101,6 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns if userflag is in active use
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetIsActive()
@@ -150,7 +149,6 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns saved message
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetMessageFromDb()
@@ -163,8 +161,7 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
           WHERE OXID=".$oDb->quote($this->_sAssignId);
         }
 
-        $sMessage = (string) $oDb->getOne($sQuery);
-        return $sMessage;
+        return (string) $oDb->getOne($sQuery);
     }
 
     /**
@@ -224,19 +221,18 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
                 WHERE OXID=".$oDb->quote($this->_sAssignId)."
                 LIMIT 1
             ";
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
     }
 
     /**
      * Returns an array of paymentids which are currently
      *
-     * @param void
      * @return array
      */
     public function fcpoGetBlockedPaymentIds()
     {
-        $aReturn = array();
+        $aReturn = [];
         $blFlagActive = $this->_fcpoFlagIsActive();
 
         if ($blFlagActive) {
@@ -250,7 +246,6 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
      * Checks if this userflag is active related to timestamp of flag assigment
      * and its set duration. Setting a duration of 0 means infinite active state
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoFlagIsActive()
@@ -258,15 +253,12 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
         $iDurationHours =  $this->fcpouserflags__fcpoflagduration->value;
         $iTimeStampActiveUntil = $this->_fcpoGetTimeStampActiveUntil();
         $iTimeStampNow = time();
-        $blReturn = ($iTimeStampActiveUntil >= $iTimeStampNow || $iDurationHours === 0);
-
-        return $blReturn;
+        return ($iTimeStampActiveUntil >= $iTimeStampNow || $iDurationHours === 0);
     }
 
     /**
      * Returns the time until flag is active
      *
-     * @param void
      * @return int
      */
     protected function _fcpoGetTimeStampActiveUntil()
@@ -275,15 +267,12 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
         $iTimeStampFlagAssigned = strtotime($this->_sTimeStamp);
         $sTimeStringDuration = '+ '.$iDurationHours.' hours';
         $iTimeStampActiveUntil = strtotime($sTimeStringDuration, $iTimeStampFlagAssigned);
-        $iTimeStampActiveUntil = (int) $iTimeStampActiveUntil;
-
-        return $iTimeStampActiveUntil;
+        return (int) $iTimeStampActiveUntil;
     }
 
     /**
      * Sets effects by effect-code
      *
-     * @param void
      * @return void
      */
     protected function _fcpoSetEffects()
@@ -294,7 +283,6 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Set blocked payments
      *
-     * @param void
      * @return void
      */
     protected function _fcpoSetPaymentsBlocked()

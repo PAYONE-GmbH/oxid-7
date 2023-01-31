@@ -32,39 +32,37 @@ class FcPayOneStatusForwarding extends FcPayOneAdminDetails
   *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_status_forwarding.tpl';
-    
-    
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_status_forwarding';
+
+
     /**
      * Returns list fo configured forwardings
      *
-     * @param  void
      * @return array
      */
     public function getForwardings()
     {
         $aForwardings = $this->fcpoGetExistingForwardings();
         $aForwardings = $this->_fcpoGetNewForwarding($aForwardings);
-        
+
         return $aForwardings;
     }
-    
-    
+
+
     /**
      * Returns an array of currently existing forwardings as an array with standard objects
      *
-     * @param  void
      * @return array
      */
     protected function fcpoGetExistingForwardings()
     {
         $oForwarding = oxNew(FcPoForwarding::class);
         $aForwardings = $oForwarding->fcpoGetExistingForwardings();
-        
+
         return $aForwardings;
     }
-    
-    
+
+
     /**
      * Parses existing forwardings and add a new one if param has been set to
      *
@@ -81,37 +79,35 @@ class FcPayOneStatusForwarding extends FcPayOneAdminDetails
             $oForwarding->iForwardingTimeout = '';
             $aForwardings[] = $oForwarding;
         }
-        
+
         return $aForwardings;
     }
 
-    
+
     /**
      * Returns payone status list
      *
-     * @param  void
      * @return array
      */
     public function getPayoneStatusList()
     {
         $aPayoneStatusList = $this->_oFcpoHelper->fcpoGetPayoneStatusList();
-        
-        $aNewList = array();
+
+        $aNewList = [];
         foreach ($aPayoneStatusList as $sStatusId) {
             $oStatus = new stdClass();
             $oStatus->sId = $sStatusId;
             $oStatus->sTitle = $this->_oFcpoHelper->fcpoGetLang()->translateString('fcpo_status_'.$sStatusId, null, true);
             $aNewList[] = $oStatus;
         }
-        
+
         return $aNewList;
     }
-    
-    
+
+
     /**
      * Save current configured forwardings
      *
-     * @param  void
      * @return void
      */
     public function save()

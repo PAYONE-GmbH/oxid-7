@@ -20,8 +20,9 @@
 
 namespace Fatchip\PayOne\Tests\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
 
 class MockResultExportConfig
 {
@@ -58,7 +59,7 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -152,7 +153,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Tests _getChecksumErrors returning result is valid
      *
-     * @param  void
      * @return void
      */
     public function test__getChecksumErrors_Valid()
@@ -171,7 +171,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Tests _getChecksumErrors returning result is invalid
      *
-     * @param  void
      * @return void
      */
     public function test__getChecksumErrors_Invalid()
@@ -192,7 +191,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Tests _getChecksumErrors if class not exists
      *
-     * @param  void
      * @return void
      */
     public function test__getChecksumErrors_ClassNotExists()
@@ -332,7 +330,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _fcpoGetShopXmlClearingTypes for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetShopXmlClearingTypes_Coverage()
@@ -352,7 +349,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _fcpoGetShopXmlProtect for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetShopXmlProtect_Coverage()
@@ -365,7 +361,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _fcpoGetShopXmlMisc for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetShopXmlMisc_Coverage()
@@ -380,7 +375,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _fcpoGetShopXmlChecksums for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetShopXmlChecksums_Coverage()
@@ -410,7 +404,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getPaymentTypes for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getPaymentTypes_Coverage()
@@ -423,7 +416,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getRedPayments for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getRedPayments_Coverage()
@@ -436,7 +428,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getYellowPayments for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getYellowPayments_Coverage()
@@ -451,7 +442,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getPaymentCountries for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getPaymentCountries_Coverage()
@@ -461,7 +451,7 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
         $aMockCountries = array('a7c40f631fc920687.20179984');
 
         foreach ($aMockCountries as $sCountryId) {
-            $oCountry = oxNew('oxcountry');
+            $oCountry = oxNew(Country::class);
             if ($oCountry->load($sCountryId)) {
                 $sCountries .= $oCountry->oxcountry__oxisoalpha2->value . ',';
             }
@@ -478,7 +468,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getForwardings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getForwardings_Coverage()
@@ -493,7 +482,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getForwardings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getMappings_Coverage()
@@ -508,7 +496,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getModuleInfo for older versions
      *
-     * @param  void
      * @return void
      */
     public function test__getModuleInfo_OlderShopVersion()
@@ -535,15 +522,14 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _getModuleInfo for newer versions
      *
-     * @param  void
      * @return void
      */
     public function test__getModuleInfo_NewerShopVersion()
     {
         $oTestObject = oxNew(FcPoConfigExport::class);
 
-        $oModuleList = oxNew("oxModuleList");
-        $sModulesDir = oxRegistry::getConfig()->getModulesDir();
+        $oModuleList = oxNew(ModuleList::class);
+        $sModulesDir = Registry::getConfig()->getModulesDir();
         $aOxidModules = $oModuleList->getModulesFromDir($sModulesDir);
         foreach ($aOxidModules as $oModule) {
             $aModules[$oModule->getId()] = $oModule->getInfo('version');
@@ -551,7 +537,7 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetIntShopVersion')->will($this->returnValue(4700));
-        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue(oxRegistry::getConfig()));
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue(Registry::getConfig()));
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oModuleList));
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
@@ -563,7 +549,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Testing _fcpoGetMultilangConfStrVarName for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetMultilangConfStrVarName_Coverage()
@@ -576,7 +561,6 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
     /**
      * Lil' paypalexpresslogo database helper
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoPreparePaypalExpressLogos()
@@ -588,13 +572,12 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             (2, 1, 1, 'btn_xpressCheckout_en.gif', 0)
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Creates some entries in fcpoklarnastoreids table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoPrepareKlarnaStoreIdTable()
@@ -604,7 +587,7 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             INSERT INTO `fcpoklarnastoreids` (`OXID`, `FCPO_STOREID`) VALUES ('1', 'samplestoreid')
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
@@ -651,13 +634,12 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             )
 ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Adds a sample forwarding
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoAddSampleForwarding()
@@ -668,13 +650,12 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             (6, 'paid', 'http://paid.sample', 10);
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Adds a sample statusmapping
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoAddSampleStatusmapping()
@@ -685,7 +666,7 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             (1, 'fcpopaypal', 'capture', 'ORDERFOLDER_FINISHED');
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
@@ -700,19 +681,18 @@ class Unit_fcPayOne_Application_Models_fcpoexportconfig extends OxidTestCase
             DELETE FROM oxpayments WHERE OXID = 'fcpounittest'
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Truncates table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTruncateTable($sTableName)
     {
         $sQuery = "DELETE FROM `{$sTableName}` WHERE true ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 }

@@ -46,7 +46,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_apilog_main extends O
     /**
      * Testing getViewId for getting coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getViewId_Coverage()
@@ -59,7 +58,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_apilog_main extends O
     /**
      * Testing respond fcGetAdminSeperator on older shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_OlderShopVersion()
@@ -80,7 +78,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_apilog_main extends O
     /**
      * Testing respond fcGetAdminSeperator on newer shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_NewerShopVersion()

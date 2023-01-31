@@ -21,11 +21,12 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
-class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
+class FcPayOnePayment extends Payment
 {
 
     /**
@@ -47,7 +48,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      *
      * @var array
      */
-    protected static $_aPaymentTypes = array(
+    protected static $_aPaymentTypes = [
         'fcpoinvoice',
         'fcpopayadvance',
         'fcpodebitnote',
@@ -80,9 +81,9 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpo_alipay',
         'fcpo_trustly',
         'fcpo_wechatpay',
-    );
+    ];
 
-    protected static $_aRedirectPayments = array(
+    protected static $_aRedirectPayments = [
         'fcpopaypal',
         'fcpopaypal_express',
         'fcpoklarna',
@@ -100,13 +101,13 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpo_bancontact',
         'fcpo_alipay',
         'fcpo_wechatpay',
-    );
+    ];
 
     /**
      * Array of online payments
      * @var string[]
      */
-    protected static $_aOnlinePayments = array(
+    protected static $_aOnlinePayments = [
         'fcpo_sofort',
         'fcpo_giropay',
         'fcpo_eps',
@@ -116,20 +117,18 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpo_p24',
         'fcpo_bancontact',
         'fcpo_trustly',
-    );
-    
-    protected static $_aIframePaymentTypes = array(
-    );
-    protected static $_aFrontendApiPaymentTypes = array(
-    );
-    
-    protected $_aPaymentsNoAuthorize = array(
+    ];
+
+    protected static $_aIframePaymentTypes = [];
+    protected static $_aFrontendApiPaymentTypes = [];
+
+    protected $_aPaymentsNoAuthorize = [
         'fcpobarzahlen',
         'fcpopo_bill',
         'fcpopo_debitnote',
         'fcporp_bill',
         'fcporp_debitnote',
-    );
+    ];
 
     /**
      * List of payments that are not foreseen to be shown as regular payment
@@ -137,11 +136,11 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      *
      * @var array
      */
-    protected $_aExpressPayments = array(
+    protected $_aExpressPayments = [
         'fcpomasterpass',
         'fcpoamazonpay',
         'fcpopaydirekt_express'
-    );
+    ];
 
 
     /**
@@ -167,7 +166,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         $blReturn = (array_search($sPaymentId, self::$_aPaymentTypes) !== false) ? true : false;
         return $blReturn;
     }
-    
+
     public static function fcIsPayOneRedirectType($sPaymentId)
     {
         $blReturn = (in_array($sPaymentId, self::$_aRedirectPayments) !== false) ? true : false;
@@ -301,7 +300,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         $sMandateIdentification = DatabaseProvider::getDb()->quote(basename($sMandateIdentification . '.pdf'));
 
         $sQuery = "INSERT INTO fcpopdfmandates (OXORDERID, FCPO_FILENAME) VALUES (" . $sOrderId . ", " . $sMandateIdentification . ")";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcpoDb->execute($sQuery);
     }
 
     /**
@@ -381,7 +380,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         if ((bool) $oConfig->getConfigParam('sFCPOSaveBankdata') === true) {
             if ($this->getId() == 'fcpodebitnote') {
                 if (!is_array($aDynValues)) {
-                    $aDynValues = array();
+                    $aDynValues = [];
                 }
                 $oDynValue = new stdClass();
                 $oDynValue->name = 'fcpo_elv_blz';
@@ -412,8 +411,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcBoniCheckNeeded()
     {
-        $blReturn = ($this->oxpayments__oxfromboni->value > 0) ? true : false;
-        return $blReturn;
+        return $this->oxpayments__oxfromboni->value > 0;
     }
 
     /**
@@ -448,7 +446,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     protected function _fcGetCountries($sCampaignId)
     {
-        $aCountries = array();
+        $aCountries = [];
 
         $sQuery = "SELECT fcpo_countryid FROM fcpopayment2country WHERE fcpo_paymentid = 'KLR_{$sCampaignId}'";
         $aRows = $this->_oFcpoDb->getAll($sQuery);
@@ -467,7 +465,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoGetKlarnaCampaigns($blGetAll = false)
     {
-        $aStoreIds = array();
+        $aStoreIds = [];
 
         $sQuery = "
             SELECT 
@@ -535,9 +533,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         $aConnectedCountries = $this->_fcGetCountries($sCountryOxid);
         $blAdd = $this->_fcpoCheckAddCampaign($blAdd, $sCurrCountry, $aConnectedCountries);
         $blAdd = $this->_fcpoCheckAddCampaign($blAdd, $sCurrLanguage, $aCampaign['language']);
-        $blAdd = $this->_fcpoCheckAddCampaign($blAdd, $sCurrCurrency, $aCampaign['currency']);
-
-        return $blAdd;
+        return $this->_fcpoCheckAddCampaign($blAdd, $sCurrCurrency, $aCampaign['currency']);
     }
 
     /**
@@ -567,7 +563,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     protected function _fcpoSetArrayDefault($aCampaign, $sIndex)
     {
         if (!is_array($aCampaign[$sIndex])) {
-            $aCampaign[$sIndex] = array();
+            $aCampaign[$sIndex] = [];
         }
 
         return $aCampaign;
@@ -601,12 +597,11 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     /**
      * Returns a list of payment types
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetPayonePaymentTypes()
     {
-        $aPaymentTypes = array();
+        $aPaymentTypes = [];
 
         $sQuery = "SELECT oxid, oxdesc FROM oxpayments WHERE fcpoispayone = 1";
         $aRows = $this->_oFcpoDb->getAll($sQuery);
@@ -626,7 +621,6 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     /**
      * Returning red payments
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetRedPayments()
@@ -646,8 +640,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     /**
      * Returning yellow payments
      *
-     * @param  void
-     * @return void
+     * @return string
      */
     public function fcpoGetYellowPayments()
     {
@@ -658,23 +651,18 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
             $sPayment = (isset($aRow[0])) ? $aRow[0] : $aRow['oxid'];
             $sPayments .= $sPayment . ',';
         }
-        $sPayments = rtrim($sPayments, ',');
-
-        return $sPayments;
+        return rtrim($sPayments, ',');
     }
-    
+
     /**
      * Public getter for checking if current payment is allowed for authorization
      *
-     * @param  void
      * @return bool
      */
     public function fcpoAuthorizeAllowed()
     {
         $sPaymentId = $this->oxpayments__oxid->value;
         $blCurrentPaymentAffected = in_array($sPaymentId, $this->_aPaymentsNoAuthorize);
-        $blAllowed = ($blCurrentPaymentAffected) ? false : true;
-        
-        return $blAllowed;
+        return ($blCurrentPaymentAffected) ? false : true;
     }
 }

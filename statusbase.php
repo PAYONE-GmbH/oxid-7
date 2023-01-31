@@ -20,7 +20,9 @@
 
 namespace Fatchip\PayOne;
 
+use Exception;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\UtilsObject;
 
 class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseModel
 {
@@ -37,7 +39,6 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     /**
      * Returns instance of oxUtilsObject
      *
-     * @param void
      * @return |null
      * @throws Exception
      */
@@ -45,7 +46,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     {
         if ($this->_oUtilsObject === null) {
             try {
-                $this->_oUtilsObject = oxNew('oxUtilsObject');
+                $this->_oUtilsObject = oxNew(UtilsObject::class);
             } catch (Exception $e) {
                 throw $e;
             }
@@ -57,7 +58,6 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     /**
      * Check if logging is activated by configuration
      *
-     * @param void
      * @return bool
      */
     protected function _fcCheckLoggingAllowed()
@@ -95,7 +95,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     protected function _getShopList()
     {
         if ($this->_aShopList === null) {
-            $aShops = array();
+            $aShops = [];
 
             $sQuery = "SELECT oxid FROM oxshops";
             $aRows = DatabaseProvider::getDb()->getAll($sQuery);
@@ -112,7 +112,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     protected function _getConfigParams($sParam)
     {
         $aShops = $this->_getShopList();
-        $aParams = array();
+        $aParams = [];
         foreach ($aShops as $sShop) {
             $mValue = $this->getConfig()->getShopConfVar($sParam, $sShop);
             if ($mValue) {
@@ -126,7 +126,6 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     /**
      * Check if key is available and valid. Throw exception if not
      *
-     * @param void
      * @return void
      * @throws Exception
      */
@@ -303,7 +302,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
                 )
             ";
 
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }

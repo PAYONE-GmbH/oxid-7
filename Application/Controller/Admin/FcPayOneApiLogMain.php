@@ -29,5 +29,5 @@ class FcPayOneApiLogMain extends FcPayoneAdminView
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_apilog_main.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog_main';
 }

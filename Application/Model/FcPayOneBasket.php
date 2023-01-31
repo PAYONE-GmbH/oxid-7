@@ -18,21 +18,25 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Price;
+use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneBasket extends FcPayOneBasket_parent
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
      * @var object
      */
     protected $_oFcpoHelper = null;
-    
+
 
     /**
      * init object construction
@@ -44,8 +48,8 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
-    
-    
+
+
     /**
      * Returns wether paypal express is active or not
      *
@@ -57,12 +61,11 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         $sQuery = "SELECT oxactive FROM oxpayments WHERE oxid = 'fcpopaypal_express'";
         return (bool)$oDb->GetOne($sQuery);
     }
-    
-    
+
+
     /**
      * Returns pic that is configured in database
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetPayPalExpressPic()
@@ -72,26 +75,25 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         $iLangId = $oLang->getBaseLanguage();
         $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '{$iLangId}' ORDER BY fcpo_default DESC";
         $sPic   = $oDb->GetOne($sQuery);
-        
+
         return $sPic;
     }
 
     /**
      * Returns matching paydirekt express picture by config
      *
-     * @param void
      * @return string
      */
     public function fcpoGetPaydirektExpressPic()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sButtonType = $oConfig->getConfigParam('sPaydirektExpressButtonType');
-        $aAssignMap = array(
+        $aAssignMap = [
             'green' => 'paydirekt-express-gruen.png',
             'green2' => 'paydirekt-express-gruen2.png',
             'white' => 'paydirekt-express-weiss.png',
             'white2' => 'paydirekt-express-weiss2.png',
-        );
+        ];
         $blAvailable = in_array($sButtonType, array_keys($aAssignMap));
         $sPic = ($blAvailable) ? $aAssignMap[$sButtonType] : $aAssignMap['green'];
 
@@ -101,31 +103,31 @@ class FcPayOneBasket extends FcPayOneBasket_parent
     /**
      * Iterates through basket items and calculates its delivery costs
      *
-     * @return oxPrice
+     * @return Price
      */
     public function fcpoCalcDeliveryCost()
     {
-        $myConfig =$this->_oFcpoHelper->fcpoGetConfig();
-        $oDeliveryPrice = oxNew('oxprice');
-        if ($this->getConfig()->getConfigParam('blDeliveryVatOnTop')) {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oDeliveryPrice = oxNew(Price::class);
+        if ($oConfig->getConfigParam('blDeliveryVatOnTop')) {
             $oDeliveryPrice->setNettoPriceMode();
         } else {
             $oDeliveryPrice->setBruttoPriceMode();
         }
-        $oUser = oxNew('oxUser');
-        $oUser->oxuser__oxcountryid = new oxField('a7c40f631fc920687.20179984');
+        $oUser = oxNew(User::class);
+        $oUser->oxuser__oxcountryid = new Field('a7c40f631fc920687.20179984');
         $fDelVATPercent = $this->getAdditionalServicesVatPercent();
         $oDeliveryPrice->setVat($fDelVATPercent);
-        $aDeliveryList = oxRegistry::get("oxDeliveryList")->getDeliveryList(
+        $aDeliveryList = Registry::get("oxDeliveryList")->getDeliveryList(
             $this,
             $oUser,
-            $this->_findDelivCountry(),
+            $this->findDelivCountry(),
             $this->getShippingId()
         );
         if (count($aDeliveryList) > 0) {
             foreach ($aDeliveryList as $oDelivery) {
                 //debug trace
-                if ($myConfig->getConfigParam('iDebug') == 5) {
+                if ($oConfig->getConfigParam('iDebug') == 5) {
                     echo("DelCost : " . $oDelivery->oxdelivery__oxtitle->value . "<br>");
                 }
                 $oDeliveryPrice->addPrice($oDelivery->getDeliveryPrice($fDelVATPercent));

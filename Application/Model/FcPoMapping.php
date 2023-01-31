@@ -20,8 +20,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
 class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
@@ -54,12 +54,11 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Requests database for existing mappings and returns an array of mapping objects
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetExistingMappings()
     {
-        $aMappings = array();
+        $aMappings = [];
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_paymentid, fcpo_payonestatus, fcpo_folder FROM fcpostatusmapping ORDER BY oxid ASC";
@@ -95,7 +94,7 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
         // iterate through mappings
         foreach ($aMappings as $sMappingId => $aData) {
             $sQuery = $this->_fcpoGetQuery($sMappingId, $aData);
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
     }
 

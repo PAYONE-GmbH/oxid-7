@@ -18,11 +18,11 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
 class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
@@ -123,7 +123,7 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getCardtype()
     {
-        $aMatchMap = array(
+        $aMatchMap = [
             'V' => 'Visa',
             'M' => 'Mastercard',
             'A' => 'Amex',
@@ -132,12 +132,10 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             'O' => 'Maestro International',
             'U' => 'Maestro UK',
             'B' => 'Carte Bleue',
-        );
+        ];
 
         $sCardType = $this->fcpotransactionstatus__fcpo_cardtype->value;
-        $sReturn = (isset($aMatchMap[$sCardType])) ? $aMatchMap[$sCardType] : $sCardType;
-
-        return $sReturn;
+        return (isset($aMatchMap[$sCardType])) ? $aMatchMap[$sCardType] : $sCardType;
     }
 
     /**
@@ -154,14 +152,14 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sLangReminder = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_reminder', '');
         $sLangDebit = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_debit1', 'fcpo_receivable_debit2');
 
-        $aMatchMap = array(
+        $aMatchMap = [
             'cancelation' => 'fcpo_receivable_cancelation',
             'appointed' => $sLangAppointed,
             'capture' => 'fcpo_receivable_capture',
             'refund' => $sLangDebit,
             'debit' => $sLangDebit,
             'reminder' => $sLangReminder,
-        );
+        ];
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'FCPO_RECEIVABLE');
@@ -186,7 +184,7 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sLangUnderpaid = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_underpaid1', 'fcpo_payment_underpaid2');
         $sLangDebit = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_debit1', 'fcpo_payment_debit2');
 
-        $aMatchMap = array(
+        $aMatchMap = [
             'capture' => $sLangCapture,
             'cancelation' => $sLangPaid,
             'paid' => $sLangPaid,
@@ -194,7 +192,7 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             'refund' => $sLangDebit,
             'debit' => $sLangDebit,
             'transfer' => 'fcpo_payment_transfer',
-        );
+        ];
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'fcpo_payment');
@@ -206,7 +204,6 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Template getter for returning forward redirects
      *
-     * @param void
      * @return array|false
      */
     public function fcpoGetForwardRedirects()
@@ -226,12 +223,12 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             WHERE sfq.FCSTATUSMESSAGEID='{$sStatusmessageId}'  
         ";
 
-        $aRows = $this->_oFcpoDb->GetAll($sQuery);
+        $aRows = $this->_oFcpoDb->getAll($sQuery);
 
         if (!is_array($aRows) || count($aRows) == 0) {
             return false;
         }
-        $aForwardRedirects = array();
+        $aForwardRedirects = [];
         foreach ($aRows as $aRow) {
             $oForwardRedirect = new stdClass();
             $oForwardRedirect->targetUrl = $aRow['FCPO_URL'];

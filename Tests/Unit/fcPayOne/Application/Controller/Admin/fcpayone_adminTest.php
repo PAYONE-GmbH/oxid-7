@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminTest extends Oxi
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -65,7 +65,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminTest extends Oxi
     /**
      * Call method for getting coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getViewId_Coverage()
@@ -78,7 +77,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminTest extends Oxi
     /**
      * Testing the return of an old shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_OldShopVersion()
@@ -99,7 +97,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminTest extends Oxi
     /**
      * Testing the return of an old shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_NewerShopVersion()

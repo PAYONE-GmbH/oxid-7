@@ -1,0 +1,19 @@
+{% capture append = "oxidBlock_content" %}
+    {# ordering steps #}
+    {% include "page/checkout/inc/steps.html.twig" with {active: 4} %}
+
+    {% if oView.getIframeHeader() %}<h3 class="blockHead"
+                                        id="paymentHeader">{{ oView.getIframeHeader() }}</h3>{% endif %}
+
+    {% if oView.getIframeText() %}{{ oView.getIframeText() }}{% endif %}
+    <div style="clear:both;"></div>
+    <iframe
+            src="{{ oView.getIframeUrl() }}"
+            {% if oView.getIframeHeight() %}height="{{ oView.getIframeHeight() }}"{% endif %}
+            {% if oView.getIframeWidth() %}width="{{ oView.getIframeWidth() }}"{% endif %}
+            {% if oView.getIframeStyle() %}style="{{ oView.getIframeStyle() }}"{% endif %}
+    >
+    </iframe>
+
+{% endcapture %}
+{% include "layout/page.html.twig" %}

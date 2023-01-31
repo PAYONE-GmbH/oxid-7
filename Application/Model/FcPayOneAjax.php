@@ -21,9 +21,11 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\Field;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Model\BaseModel;
 
 /*
  * load OXID Framework
@@ -44,7 +46,7 @@ if (file_exists(getShopBasePath() . "bootstrap.php")) {
     $_SERVER['HTTP_ACCEPT_LANGUAGE'] = '';
     $_SERVER['HTTP_REFERER'] = '';
     $_SERVER['QUERY_STRING'] = '';
-    
+
     include getShopBasePath() . 'modules/functions.php';
     include_once getShopBasePath() . 'core/oxfunctions.php';
     include_once getShopBasePath() . 'views/oxubase.php';
@@ -60,16 +62,16 @@ $sParamsJson = filter_input(INPUT_POST, 'params');
  *
  * @author andre
  */
-class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPayOneAjax extends BaseModel
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
      * @var FcPoHelper
      */
     protected $_oFcpoHelper = null;
-    
+
     /**
      * init object construction
      *
@@ -146,7 +148,7 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
-        /** @var oxUser $oUser value */
+        /** @var User $oUser value */
         if ($aParams['birthday'] !== 'undefined') {
             $oUser->oxuser__oxbirthdate = new Field($aParams['birthday']);
         }
@@ -300,7 +302,7 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Performs a precheck for payolution installment
      *
-     * @param  type $sPaymentId
+     * @param  string $sPaymentId
      * @return bool
      */
     public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson)
@@ -309,7 +311,7 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult =  $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
         $sReturn = ($mPreCheckResult === true) ? 'SUCCESS': $mPreCheckResult;
-        
+
         return $sReturn;
     }
 
@@ -325,12 +327,12 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
 
         $oPaymentController->fcpoPerformInstallmentCalculation($sPaymentId);
         $mResult = $oPaymentController->fcpoGetInstallments();
-        
+
         $mReturn = (is_array($mResult) && count($mResult) > 0) ? $mResult : false;
-        
+
         return $mReturn;
     }
-    
+
     /**
      * Parse result of calculation to html for returning html code
      *
@@ -340,10 +342,10 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
     public function fcpoParseCalculation2Html($aCalculation)
     {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        
+
         $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
         $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
-        
+
         $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
         $sHtml = '
             <div class="content">
@@ -375,11 +377,10 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
 
         return $sHtml;
     }
-    
+
     /**
      * Returns lightview part for download
      *
-     * @param  void
      * @return string
      */
     protected function _fcpoGetLightView()
@@ -387,11 +388,11 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sContent = 'class="lightview" data-lightview-type="iframe" data-lightview-options="';
         $sContent .= "width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'";
         $sContent .= '"';
-        
+
         return $sContent;
     }
-    
-    
+
+
     /**
      * Formats error message to be displayed in a error box
      *
@@ -403,11 +404,11 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sReturn  = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';
-        
+
         return $sReturn;
     }
-    
-    
+
+
     /**
      * Set hidden fields for beeing able to set needed values
      *
@@ -425,7 +426,7 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
 
         return $sHtml;
     }
-    
+
     /**
      * Returns a caption for a certain month
      *
@@ -440,12 +441,12 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sDueCaption = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_DUE_AT'));
         $sDue = date('d.m.Y', strtotime($aRatesDetails['Due']));
         $sRate = str_replace('.', ',', $aRatesDetails['Amount']);
-        
+
         $sMonthDetailsCaption = $sMonth.'. '.$sRateCaption.': '. $sRate.' '.$aRatesDetails['Currency'].' ('.$sDueCaption.' '.$sDue.')';
-        
+
         return $sMonthDetailsCaption;
     }
-    
+
     /**
      * Returns a html radio button for current installment offer
      *
@@ -456,10 +457,10 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
     protected function _fcpoGetInsterestRadio($sKey, $aCurrentInstallment)
     {
         $sHtml = '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
-        
+
         return $sHtml;
     }
-    
+
     /**
      * Returns a html label for current installment offer radiobutton
      *
@@ -489,10 +490,10 @@ class FcPayOneAjax extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sMonthlyAmount = str_replace('.', ',', $aCurrentInstallment['Amount']);
         $sDuration = $aCurrentInstallment['Duration'];
         $sCurrency = $aCurrentInstallment['Currency'];
-        
+
         // put all together to final caption
         $sCaption = $sMonthlyAmount." ".$sCurrency." ".$sPerMonth." - ".$sDuration." ".$sRates;
-        
+
         return $sCaption;
     }
 }
@@ -508,7 +509,7 @@ if ($sPaymentId) {
             echo $oPayoneAjax->fcpoReturnErrorMessage($sResult);
         }
     }
-    
+
     if ($sAction == 'calculation') {
         $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
         if (is_array($mResult) && count($mResult) > 0) {

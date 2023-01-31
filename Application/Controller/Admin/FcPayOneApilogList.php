@@ -18,10 +18,8 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
-namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use Fatchip\PayOne\Application\Model\FcPoRequestLog;
+namespace Fatchip\PayOne\Application\Controller\Admin;
 
 class FcPayOneApilogList extends FcPayoneAdminList
 {
@@ -38,20 +36,19 @@ class FcPayOneApilogList extends FcPayoneAdminList
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_apilog_list.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog_list';
 
     /**
      * Get config parameter PAYONE portal ID
      *
-     * @return $string
+     * @return string
      */
-    public function getPortalId()
+    public function getPortalId(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sReturn = $oConfig->getConfigParam('sFCPOPortalID');
-        return $sReturn;
+        return $oConfig->getConfigParam('sFCPOPortalID');
     }
-    
+
 
     /**
      * Get config parameter PAYONE sub-account ID
@@ -64,7 +61,7 @@ class FcPayOneApilogList extends FcPayoneAdminList
         $sReturn = $oConfig->getConfigParam('sFCPOSubAccountID');
         return $sReturn;
     }
-    
+
 
     /**
      * Filter log entries, show only log entries of configured PAYONE account
@@ -74,15 +71,15 @@ class FcPayOneApilogList extends FcPayoneAdminList
      *
      * @return string
      */
-    protected function _prepareWhereQuery($aWhere, $sQ)
+    protected function prepareWhereQuery($aWhere, $sQ)
     {
-        $sQ = parent::_prepareWhereQuery($aWhere, $sQ);
+        $sQ = parent::prepareWhereQuery($aWhere, $sQ);
         $sPortalId = $this->getPortalId();
         $sAid = $this->getSubAccountId();
         return $sQ." AND fcporequestlog.fcpo_portalid = '{$sPortalId}' AND fcporequestlog.fcpo_aid = '{$sAid}' ";
     }
-    
-    
+
+
     /**
      * Returns list filter array
      *
@@ -96,8 +93,8 @@ class FcPayOneApilogList extends FcPayoneAdminList
 
         return $this->_aListFilter;
     }
-    
-    
+
+
     /**
      * Returns sorting fields array
      *
@@ -109,14 +106,14 @@ class FcPayOneApilogList extends FcPayoneAdminList
             $this->_aCurrSorting = $this->_oFcpoHelper->fcpoGetRequestParameter('sort');
 
             if (!$this->_aCurrSorting && $this->_sDefSortField && ($oBaseObject = $this->getItemListBaseObject())) {
-                $this->_aCurrSorting[$oBaseObject->getCoreTableName()] = array( $this->_sDefSortField => "asc" );
+                $this->_aCurrSorting[$oBaseObject->getCoreTableName()] = [$this->_sDefSortField => "asc"];
             }
         }
 
         return $this->_aCurrSorting;
     }
-    
-    
+
+
     /**
      * Return input name for searchfields in list by shop-version
      *
@@ -130,7 +127,7 @@ class FcPayOneApilogList extends FcPayoneAdminList
         return "where[{$sTable}.{$sField}]";
     }
 
-    
+
     /**
      * Return input form value for searchfields in list by shop-version
      *
@@ -144,8 +141,8 @@ class FcPayOneApilogList extends FcPayoneAdminList
         }
         return $aWhere[$sTable.'.'.$sField];
     }
-    
-    
+
+
     /**
      * Return needed javascript for sorting in list by shop-version
      *

@@ -21,11 +21,12 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
 class FcPayOnePaymentView extends FcPayOnePaymentView_parent
@@ -64,7 +65,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aCheckedSubPayments = array();
+    protected $_aCheckedSubPayments = [];
 
     /**
      * Array of isoalpha2-countries for which birthday is needed
@@ -78,7 +79,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aPaymentCCMetaData = array();
+    protected $_aPaymentCCMetaData = [];
 
     /**
      * Base link for payolution agreement overlay
@@ -99,7 +100,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aInstallmentCalculation = array();
+    protected $_aInstallmentCalculation = [];
 
     /**
      * Flag which indicates, that functionality is called from outside via ajax
@@ -113,7 +114,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aAjaxPayolutionParams = array();
+    protected $_aAjaxPayolutionParams = [];
 
     /**
      * Contains profile which matched for ratepay payment
@@ -214,7 +215,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Method checks if user should log into shop for merging
      *
-     * @param void
      * @return void
      */
     public function fcpoAmazonUserLogin()
@@ -242,7 +242,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns matching notiication string if sofo is configured to show iban
      *
-     * @param  void
      * @return bool
      */
     public function fcpoGetSofoShowIban()
@@ -256,7 +255,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns matching notiication string if sofo is configured to show iban
      *
-     * @param  void
      * @return bool
      */
     public function fcpoGetTrustlyShowIban()
@@ -271,7 +269,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method checks if deprecated bankdata should be requested instead of
      * IBAN/BIC
      *
-     * @param void
      * @return bool
      */
     public function fcpoForceDeprecatedBankData()
@@ -450,8 +447,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function hasPaymentMethodAvailableSubTypes($sType)
     {
-        $aSubtypes = array(
-            'cc' => array(
+        $aSubtypes = [
+            'cc' => [
                 $this->getVisa(),
                 $this->getMastercard(),
                 $this->getAmex(),
@@ -460,8 +457,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $this->getMaestroInternational(),
                 $this->getMaestroUK(),
                 $this->getCarteBleue(),
-            ),
-            'sb' => array(
+            ],
+            'sb' => [
                 $this->getSofortUeberweisung(),
                 $this->getGiropay(),
                 $this->getPostFinanceEFinance(),
@@ -469,8 +466,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $this->getIdeal(),
                 $this->getP24(),
                 $this->getBancontact(),
-            ),
-        );
+            ],
+        ];
 
         $blReturn = in_array(true, $aSubtypes[$sType]);
 
@@ -722,15 +719,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for delivering all meta information to build input fields in foreach loop
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetCCPaymentMetaData()
     {
-        $this->_aPaymentCCMetaData = array();
+        $this->_aPaymentCCMetaData = [];
         $sPaymentId = 'fcpocreditcard';
 
-        $oPayment = oxNew('oxpayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load($sPaymentId);
 
         $this->_fcpoSetCCMetaData($oPayment, 'V', 'Visa');
@@ -748,12 +744,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for delivering payment meta data of online payments
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetOnlinePaymentMetaData()
     {
-        $aPaymentMetaData = array();
+        $aPaymentMetaData = [];
 
         if ($this->getSofortUeberweisung()) {
             $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('PNT');
@@ -787,7 +782,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method returns active theme path by checking current theme and its parent
      * If theme is not assignable, 'azure' will be the fallback
      *
-     * @param void
      * @return string
      */
     public function fcpoGetActiveThemePath()
@@ -874,7 +868,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns if CVC
      *
-     * @param  void
      * @return bool
      */
     public function fcpoUseCVC()
@@ -888,7 +881,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns if option for BIC is set mandatory as string to handle it with javascript checks
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetBICMandatory()
@@ -904,7 +896,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns creditcard type
      *
-     * @param  void
      * @return mixed
      */
     public function fcpoGetCreditcardType()
@@ -917,7 +908,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method will be triggered by amazon checkout. Will make sure that paymentid is set to
      * amazon payment
      *
-     * @param void
      * @return void
      */
     public function validateAmazonPayment()
@@ -962,7 +952,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for previously calculated installments
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetInstallments()
@@ -1003,12 +992,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for current userflag messages
      *
-     * @param void
      * @return array
      */
     public function fcpoGetUserFlagMessages()
     {
-        $aMessages = array();
+        $aMessages = [];
         $oUser = $this->getUser();
         $aUserFlags = $oUser->fcpoGetFlagsOfUser();
         foreach ($aUserFlags as $oUserFlag) {
@@ -1034,7 +1022,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _getOperationModeCC($sType = '')
     {
-        $oPayment = oxNew('oxpayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load('fcpocreditcard');
         return $oPayment->fcpoGetOperationMode($sType);
     }
@@ -1049,7 +1037,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoGetMatchingProfile($sPaymentId)
     {
         $aRatePayProfiles = $this->_fcpoFetchRatePayProfilesByPaymentType($sPaymentId);
-        $aReturn = array();
+        $aReturn = [];
 
         foreach ($aRatePayProfiles as $aCurrentRatePayProfile) {
             $sPaymentStringAddition = $this->_fcpoGetRatePayStringAdditionByPaymentId($sPaymentId);
@@ -1188,7 +1176,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _filterDynData()
     {
         if ($this->_hasFilterDynDataMethod() === true) {
-            parent::_filterDynData();
+            parent::filterDynData();
         }
 
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
@@ -1275,7 +1263,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (array_key_exists($sSubPaymentId . '_' . $sType, $this->_aCheckedSubPayments) === false) {
             $sUserBillCountryId = $this->getUserBillCountryId();
             $sUserDelCountryId = $this->getUserDelCountryId();
-            $oPayment = oxNew('oxPayment');
+            $oPayment = oxNew(Payment::class);
             $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType] = $oPayment->isPaymentMethodAvailableToUser($sSubPaymentId, $sType, $sUserBillCountryId, $sUserDelCountryId);
         }
         return $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType];
@@ -1284,7 +1272,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets cc meta payment data
      *
-     * @param oxPayment $oPayment
+     * @param Payment $oPayment
      * @param string    $sBrandShortcut
      * @param string    $sBrandName
      */
@@ -1380,7 +1368,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checking if paypal express should be removed from payment list
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoCheckPaypalExpressRemoval()
@@ -1392,7 +1379,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Removes payments that are forbidden by user
      *
-     * @param void
      * @return void
      */
     protected function _fcpoRemoveForbiddenPaymentsByUser()
@@ -1420,7 +1406,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Update klarna user
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoKlarnaUpdateUser()
@@ -1442,7 +1427,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             if ($sDeliveryAddressId) {
                 $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
                 if ($oAddress->load($sDeliveryAddressId)) {
-                    $oAddress->oxaddress__oxaddinfo = new oxField($aDynValue['fcpo_' . $sType . '_del_addinfo'], oxField::T_RAW);
+                    $oAddress->oxaddress__oxaddinfo = new Field($aDynValue['fcpo_' . $sType . '_del_addinfo'], Field::T_RAW);
                     $oAddress->save();
                 }
             }
@@ -1472,7 +1457,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (array_key_exists($sCompleteDynValueName, $aDynValue) !== false) {
             $sObjAttribute = 'oxuser__' . $sDbField;
 
-            $oUser->$sObjAttribute = new oxField($aDynValue[$sCompleteDynValueName], oxField::T_RAW);
+            $oUser->$sObjAttribute = new Field($aDynValue[$sCompleteDynValueName], Field::T_RAW);
             $blUserChanged = true;
         }
 
@@ -1488,7 +1473,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Set payment type and process special case of klarna
      *
-     * @param  void
      * @return string
      */
     protected function _fcpoGetType($sPaymentId)
@@ -1591,7 +1575,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns if user is an adult
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoUserIsAdult()
@@ -1654,7 +1637,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns the sum of basket
      *
-     * @param  void
      * @return decimal
      */
     public function fcpoGetBasketSum()
@@ -1672,7 +1654,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting ustid is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoRatePayShowUstid()
@@ -1680,7 +1661,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oUser = $this->getUser();
         $blB2b2Mode = ($oConfig->getConfigParam('blFCPORatePayB2BMode') && $oUser->oxuser__oxcompany->value != '');
-        
+
         $blReturn = ($oUser->oxuser__oxustid->value == '' && $blB2b2Mode) ? true : false;
 
         return $blReturn;
@@ -1689,7 +1670,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting birthdate is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoRatePayShowBirthdate()
@@ -1706,7 +1686,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting telephone number is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoRatePayShowFon()
@@ -1757,7 +1736,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $aRequestedValues = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
 
         $this->_fcpoRatePaySaveRequestedValues($sPaymentId);
-        
+
         $blB2b2Mode = $oConfig->getConfigParam('blFCPORatePayB2BMode');
 
         if ($blB2b2Mode) {
@@ -1805,7 +1784,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns link for displaying legal terms for Ratepay
      *
-     * @param void
      * @return string
      */
     public function fcpoGetRatepayAgreementLink()
@@ -1818,7 +1796,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns link for displaying data privacy statement for Ratepay
      *
-     * @param void
      * @return string
      */
     public function fcpoGetRatepayPrivacyLink()
@@ -2057,7 +2034,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method checks if user has valid ustid and if its mandatory anyway
      * Will return true if check is not mandatory due to circumstances
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoValidatePayolutionBillHasUstid()
@@ -2086,7 +2062,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method checks if user has telephone number and if its needed anyway
      * Will return true if field is not mandatory
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoValidatePayolutionBillHasTelephone()
@@ -2141,13 +2116,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Reutrns possible given Bankdata
      *
-     * @param  void
      * @return mixed
      */
     protected function _fcpoGetPayolutionBankData($sPaymentId)
     {
         $aParams = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
-        $aBankData = array();
+        $aBankData = [];
 
         if (is_array($aParams) && count($aParams) > 0) {
             foreach ($aParams as $sKey => $sParam) {
@@ -2190,7 +2164,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if user confirmed agreement of data usage
      *
-     * @param  void
      * @return bool
      */
     protected function _fcpoCheckAgreedDataUsage($sPaymentId = 'fcpopo_bill')
@@ -2255,21 +2228,21 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         $blRefreshBirthdate = ($sCurrentBirthdate != $sRequestBirthdate && $sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
         if ($blRefreshBirthdate) {
-            $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
+            $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
             $blSaveUser = true;
         }
 
         $blRefreshFon = (isset($aRequestedValues[$sPaymentId . '_fon']) && strlen($aRequestedValues[$sPaymentId . '_fon']) > 0);
 
         if ($blRefreshFon) {
-            $oUser->oxuser__oxfon = new oxField($aRequestedValues[$sPaymentId . '_fon'], oxField::T_RAW);
+            $oUser->oxuser__oxfon = new Field($aRequestedValues[$sPaymentId . '_fon'], Field::T_RAW);
             $blSaveUser = true;
         }
-        
+
         $blRefreshUstid = (isset($aRequestedValues[$sPaymentId . '_ustid']) && strlen($aRequestedValues[$sPaymentId . '_ustid']) > 0);
 
         if ($blRefreshUstid) {
-            $oUser->oxuser__oxustid = new oxField($aRequestedValues[$sPaymentId . '_ustid'], oxField::T_RAW);
+            $oUser->oxuser__oxustid = new Field($aRequestedValues[$sPaymentId . '_ustid'], Field::T_RAW);
             $blSaveUser = true;
         }
 
@@ -2302,7 +2275,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Returning requested form data values wether via ajax or
      * direct
      *
-     * @param void
      * @return array
      */
     protected function _fcpoGetRequestedValues()
@@ -2400,7 +2372,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $sRequestBirthdate = $this->_fcpoExtractBirthdateFromRequest($aRequestedValues, $sPaymentId);
             $blRefreshBirthdate = ($sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
             if ($blRefreshBirthdate) {
-                $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
+                $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
                 $blSavedData = (bool) $oUser->save();
             }
         } elseif ($blBirthdayRequired) {
@@ -2428,7 +2400,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blResult = false;
 
         if ($blValidBirthdateData) {
-            $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
+            $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
             $oUser->save();
             $blResult = true;
         } else {
@@ -2648,7 +2620,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Ajax interface for triggering installment caclulation
      *
-     * @param  void
      * @return void
      */
     public function fcpoPerformInstallmentCalculation()
@@ -2689,7 +2660,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoSetInstallmentOptionsByResponse($aResponse)
     {
         // cleanup before atempt
-        $this->_aInstallmentCalculation = array();
+        $this->_aInstallmentCalculation = [];
         foreach ($aResponse as $sKey => $sValue) {
             $iInstallmentIndex = $this->_fcpoFetchCurrentRatepayInstallmentIndex($sKey);
             if ($iInstallmentIndex === false) {
@@ -3020,7 +2991,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets needed session values if there is corresponding data
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoSetKlarnaCampaigns()
@@ -3035,7 +3005,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns paymentid wether from request parameter or session
      *
-     * @param  void
      * @return mixed
      */
     protected function _fcpoGetPaymentId()
@@ -3065,7 +3034,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns dynvalues wether from request or session
      *
-     * @param  void
      * @return mixed
      */
     protected function _fcpoGetDynValues()
@@ -3092,7 +3060,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns the cn
      *
-     * @param  void
      * @return mixed
      */
     public function fcGetApprovalText()
@@ -3105,7 +3072,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Check if approval message should be displayed
      *
-     * @param  void
      * @return bool
      */
     public function fcShowApprovalMessage()
@@ -3118,7 +3084,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Loads shop version and formats it in a certain way
      *
-     * @param  void
      * @return string
      */
     public function getIntegratorid()
@@ -3129,7 +3094,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Loads shop edition and shop version and formats it in a certain way
      *
-     * @param  void
      * @return string
      */
     public function getIntegratorver()
@@ -3140,7 +3104,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * get PAYONE module version
      *
-     * @param  void
      * @return string
      */
     public function getIntegratorextver()
@@ -3151,7 +3114,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns the Klarna confirmation text for the current bill country
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetConfirmationText()
@@ -3169,7 +3131,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if telephone number
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaIsTelephoneNumberNeeded()
@@ -3184,7 +3145,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if birthday neeeded for klarna
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaIsBirthdayNeeded()
@@ -3202,7 +3162,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if address addition is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaIsAddressAdditionNeeded()
@@ -3217,7 +3176,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if delivery address addition is needed
      *
-     * @param  void
      * @return boolean
      */
     public function fcpoKlarnaIsDelAddressAdditionNeeded()
@@ -3243,7 +3201,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if gender is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaIsGenderNeeded()
@@ -3261,7 +3218,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if personal id is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaIsPersonalIdNeeded()
@@ -3279,7 +3235,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if info is needed
      *
-     * @param  void
      * @return bool
      */
     public function fcpoKlarnaInfoNeeded()
@@ -3299,12 +3254,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of configured debit countries
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetDebitCountries()
     {
-        $aCountries = array();
+        $aCountries = [];
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aFCPODebitCountries = $oConfig->getConfigParam('aFCPODebitCountries');
 
@@ -3404,7 +3358,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Get user payment by payment id with oxid bugfix for getting last payment
      *
-     * @param oxUser $oUser        user object
+     * @param User $oUser        user object
      * @param string $sPaymentType payment type
      *
      * @return bool
@@ -3430,12 +3384,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Assign debit note payment values to view data. Loads user debit note payment
      * if available and assigns payment data to $this->_aDynValue
      *
-     * @param  void
      * @return null
      */
     protected function _assignDebitNoteParams()
     {
-        parent::_assignDebitNoteParams();
+        parent::assignDebitNoteParams();
         if ((bool) $this->getConfigParam('sFCPOSaveBankdata') === true) {
             //such info available ?
             if ($oUserPayment = $this->_fcGetPaymentByPaymentType($this->getUser(), 'fcpodebitnote')) {
@@ -3454,7 +3407,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template variable getter. Returns dyn values
      *
-     * @param  void
      * @return array
      */
     public function getDynValue()
@@ -3472,7 +3424,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Return ISO2 code of bill country
      *
-     * @param  void
      * @return string
      */
     public function fcGetBillCountry()
@@ -3487,7 +3438,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Return ISO2 code of shipping country
      *
-     * @param void
      * @return string
      */
     public function fcGetShippingCountry()
@@ -3506,13 +3456,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Calculate payment cost for each payment. Sould be removed later
      *
      * @param array    &$aPaymentList payments array
-     * @param oxBasket $oBasket       basket object
+     * @param Basket $oBasket       basket object
      *
      * @return null
      */
     protected function _setValues(& $aPaymentList, $oBasket = null)
     {
-        parent::_setValues($aPaymentList, $oBasket);
+        parent::setValues($aPaymentList, $oBasket);
 
         if (is_array($aPaymentList)) {
             foreach ($aPaymentList as $index => $oPayment) {
@@ -3542,14 +3492,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Calculate payment cost for each payment. Sould be removed later
      *
      * @param array    &$aPaymentList payments array
-     * @param oxBasket $oBasket       basket object
+     * @param Basket $oBasket       basket object
      *
      * @return null
      */
     protected function _setDeprecatedValues(& $aPaymentList, $oBasket = null)
     {
         if ($this->_fcGetCurrentVersion() <= 4700) {
-            parent::_setDeprecatedValues($aPaymentList, $oBasket);
+            parent::setDeprecatedValues($aPaymentList, $oBasket);
             if (is_array($aPaymentList)) {
                 $oLang = $this->_oFcpoHelper->fcpoGetLang();
                 foreach ($aPaymentList as $oPayment) {
@@ -3642,7 +3592,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Generic method for determine if order is b2c
      *
-     * @param void
      * @return bool
      */
     public function fcpoIsB2C()
@@ -3656,7 +3605,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for checking which kind of field should be shown
      *
-     * @param void
      * @return bool
      */
     public function fcpoShowPayolutionB2B()
@@ -3676,7 +3624,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for checking which kind of field should be shown
      *
-     * @param void
      * @return bool
      */
     public function fcpoShowPayolutionB2C()
@@ -3691,7 +3638,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Template getter for checking if a telephone number is required and need to be requested
      * from user
      *
-     * @param void
      * @return bool
      */
     public function fcpoPayolutionBillTelephoneRequired()
@@ -3710,7 +3656,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns shipping country if set or billing country if not as ISO 2 string
      *
-     * @param void
      * @return void
      */
     public function fcpoGetTargetCountry()
@@ -3779,7 +3724,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sUserField = 'oxuser__' . $sField;
 
         if (isset($oUser->$sUserField)) {
-            $oUser->$sUserField = new oxField($sValue, oxField::T_RAW);
+            $oUser->$sUserField = new Field($sValue, Field::T_RAW);
             $oUser->save();
         }
     }
@@ -3787,7 +3732,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns prepared link for displaying agreement as
      *
-     * @param void
      * @return string
      */
     public function fcpoGetPayolutionAgreementLink()
@@ -3834,7 +3778,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
-        $aRange = ($blChooseString) ? array($sChooseString) : array();
+        $aRange = ($blChooseString) ? array($sChooseString) : [];
 
         for ($iCurrentNumber = $iFrom; $iCurrentNumber <= $iTo; $iCurrentNumber++) {
             $aRange[] = str_pad($iCurrentNumber, $iPositions, '0', STR_PAD_LEFT);
@@ -3846,7 +3790,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for returning an array with last hundred years
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetYearRange()
@@ -3869,7 +3812,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of available months
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetMonthRange()
@@ -3881,7 +3823,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of available days
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetDayRange()
@@ -3893,7 +3834,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Fetches current user from session and returns user object or false
      *
-     * @param void
      * @return mixed object/bool
      */
     protected function _fcpoGetUserFromSession()

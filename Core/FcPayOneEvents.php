@@ -23,8 +23,10 @@
 
  namespace Fatchip\PayOne\Core;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 
 /**
  * Eventhandler for module activation and deactivation.
@@ -389,7 +391,7 @@ class FcPayOneEvents
     public static $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
     public static $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
 
-    public static $aPaymentMethods = array(
+    public static $aPaymentMethods = [
         'fcpoinvoice' => 'Rechnung',
         'fcpopayadvance' => 'Vorauskasse',
         'fcpodebitnote' => 'Bankeinzug/Lastschrift',
@@ -422,7 +424,7 @@ class FcPayOneEvents
         'fcpo_alipay' => 'Alipay',
         'fcpo_trustly' => 'Trustly',
         'fcpo_wechatpay'=> 'WeChat Pay',
-    );
+    ];
 
     /**
      * Execute action on activate event.
@@ -470,7 +472,7 @@ class FcPayOneEvents
      */
     public static function regenerateViews()
     {
-        $oShop = oxNew('oxShop');
+        $oShop = oxNew(Shop::class);
         $oShop->generateViews();
     }
 
@@ -496,12 +498,13 @@ class FcPayOneEvents
      * Adding payone payments.
      *
      * @return void
+     * @throws DatabaseErrorException|\OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public static function addPayonePayments()
+    public static function addPayonePayments(): void
     {
         $oDb = DatabaseProvider::getDb();
 
-        $sShopId = self::$_oFcpoHelper::fcpoGetConfig()->getShopId();
+        $sShopId = self::$_oFcpoHelper->fcpoGetConfig()->getShopId();
 
         foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
             //INSERT PAYMENT METHOD
@@ -510,19 +513,19 @@ class FcPayOneEvents
             //INSERT PAYMENT METHOD CONFIGURATION
             $blInserted = self::insertRowIfNotExists('oxobject2group', array('OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid), "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
             if ($blInserted === true) {
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidforeigncustomer');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidgoodcust');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidmiddlecust');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewcustomer');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewsletter');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnotyetordered');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpowershopper');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricea');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpriceb');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricec');");
-                $oDb->Execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidsmallcust');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidforeigncustomer');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidgoodcust');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidmiddlecust');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewcustomer');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewsletter');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnotyetordered');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpowershopper');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricea');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpriceb');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricec');");
+                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidsmallcust');");
             }
 
             self::insertRowIfNotExists('oxobject2payment', array('OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'), "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (REPLACE(UUID(),'-',''), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
@@ -668,7 +671,7 @@ class FcPayOneEvents
     {
         $aTables = DatabaseProvider::getDb()->getAll("SHOW TABLES LIKE '{$sTableName}'");
         if (!$aTables || count($aTables) == 0) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             return true;
         }
         return false;
@@ -689,7 +692,7 @@ class FcPayOneEvents
 
         if (!$aColumns || count($aColumns) === 0) {
             try {
-                DatabaseProvider::getDb()->Execute($sQuery);
+                DatabaseProvider::getDb()->execute($sQuery);
             } catch (Exception $e) {
             }
             return true;
@@ -711,7 +714,7 @@ class FcPayOneEvents
         if (DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$oldColumnName}'") &&
             DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$newColumnName}'")
         ) {
-            DatabaseProvider::getDb()->Execute($copyDataQuery);
+            DatabaseProvider::getDb()->execute($copyDataQuery);
             return true;
         }
         return false;
@@ -736,7 +739,7 @@ class FcPayOneEvents
         $sExisting = DatabaseProvider::getDb()->getOne($sCheckQuery);
 
         if (!$sExisting) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             return true;
         }
         return false;
@@ -761,7 +764,7 @@ class FcPayOneEvents
             AND TYPE = '{$sExpectedType}'
         ";
         if (!DatabaseProvider::getDb()->getOne($sCheckQuery)) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             return true;
         }
         return false;
@@ -780,7 +783,7 @@ class FcPayOneEvents
     {
         $checkQuery = "SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$sColumnName}'";
         if (DatabaseProvider::getDb()->getOne($checkQuery)) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             return true;
         }
         return false;
@@ -797,7 +800,7 @@ class FcPayOneEvents
     public static function dropIndexIfExists($sTable, $sIndex)
     {
         if (DatabaseProvider::getDb()->getOne("SHOW KEYS FROM {$sTable} WHERE Key_name = '{$sIndex}'")) {
-            DatabaseProvider::getDb()->Execute("ALTER TABLE {$sTable} DROP INDEX {$sIndex}");
+            DatabaseProvider::getDb()->execute("ALTER TABLE {$sTable} DROP INDEX {$sIndex}");
             // echo "In Tabelle {$sTable} den Index {$sIndex} entfernt.<br>";
             return true;
         }
@@ -818,7 +821,7 @@ class FcPayOneEvents
         if (DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTable} WHERE FIELD = '{$oldColumn}'") &&
             DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTable} WHERE FIELD = '{$replacementColumn}'")
         ) {
-            DatabaseProvider::getDb()->Execute("ALTER TABLE {$sTable} DROP COLUMN {$oldColumn}");
+            DatabaseProvider::getDb()->execute("ALTER TABLE {$sTable} DROP COLUMN {$oldColumn}");
             // echo "In Tabelle {$sTable} die Spalte {$sColumn} entfernt.<br>";
             return true;
         }
@@ -833,6 +836,7 @@ class FcPayOneEvents
      * @param string $sQuery     sql-query to execute
      *
      * @return boolean
+     * @throws DatabaseErrorException
      */
     public static function dropRowIfExists($sTableName, $aKeyValue, $sQuery)
     {
@@ -843,7 +847,7 @@ class FcPayOneEvents
             $sWhere .= " AND $key = '$value'";
         }
         if (DatabaseProvider::getDb()->getOne("SELECT * FROM {$sTableName} WHERE 1" . $sWhere)) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             $blReturn = true;
         }
 
@@ -857,7 +861,7 @@ class FcPayOneEvents
      */
     public static function getCurrentVersion()
     {
-        return self::$_oFcpoHelper::fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
+        return self::$_oFcpoHelper->fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
     }
 
     /**
@@ -901,12 +905,12 @@ class FcPayOneEvents
      *
      * @return boolean true or false
      */
-    public static function isBetweenVersions($sMinVersion, $sMaxVersion)
+    public static function isBetweenVersions($sMinVersion, $sMaxVersion): bool
     {
-        if (!isOverVersion($sMinVersion, true)) {
+        if (!self::isOverVersion($sMinVersion, true)) {
             return false;
         }
-        if (!isUnderVersion($sMaxVersion)) {
+        if (!self::isUnderVersion($sMaxVersion)) {
             return false;
         }
         return true;
@@ -950,12 +954,13 @@ class FcPayOneEvents
      * Deactivates payone paymethods on module deactivation.
      *
      * @return void
+     * @throws DatabaseErrorException|\OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
      */
-    public static function deactivatePaymethods()
+    public static function deactivatePaymethods(): void
     {
         $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
         $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
-        DatabaseProvider::getDB()->Execute($sQ);
+        DatabaseProvider::getDB()->execute($sQ);
     }
 
     /**
@@ -965,7 +970,7 @@ class FcPayOneEvents
      */
     public static function setDefaultConfigValues()
     {
-        $oConfig = self::$_oFcpoHelper::fcpoGetConfig();
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
         $blIsUpdate = self::isUpdate();
         $blHashMethodSet = (bool) $oConfig->getConfigParam('sFCPOHashMethod');
 
@@ -984,12 +989,11 @@ class FcPayOneEvents
      * If there is an existing merchant id we assume, that current activation
      * is an update
      *
-     * @param void
      * @return bool
      */
-    public static function isUpdate()
+    public static function isUpdate(): bool
     {
-        $oConfig = self::$_oFcpoHelper::fcpoGetConfig();
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
 
         return (bool) ($oConfig->getConfigParam('sFCPOMerchantID'));
     }

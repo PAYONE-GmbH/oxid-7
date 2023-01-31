@@ -31,23 +31,23 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_boni_main.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_boni_main';
 
     /**
      * Definitions of multilang files
      *
      * @var array
      */
-    protected $_aMultiLangFields = array(
+    protected $_aMultiLangFields = [
         'sFCPOApprovalText',
         'sFCPODenialText',
-    );
+    ];
 
     /**
      * Boni default values
      * @var array
      */
-    protected $_aDefaultValues = array(
+    protected $_aDefaultValues = [
         'sFCPOMalusPPB' => '0',
         'sFCPOMalusPHB' => '150',
         'sFCPOMalusPAB' => '300',
@@ -55,20 +55,20 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
         'sFCPOMalusPNZ' => '400',
         'sFCPOMalusPPV' => '500',
         'sFCPOMalusPPF' => '400',
-    );
+    ];
 
     /**
      * Assignment of validation messages
      * @var array
      */
-    protected $_aValidateCode2Message = array(
+    protected $_aValidateCode2Message = [
         '1' => 'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON',
         '2' => 'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK',
         '3' => 'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET',
         '4' => 'FCPO_BONI_ERROR_DEACTIVATED_BONI_ADDRESSCHECK',
         '5' => 'FCPO_BONI_ERROR_SET_TO_BASIC',
         '6' => 'FCPO_BONI_ERROR_SET_TO_PERSON'
-    );
+    ];
 
     /**
      * Collection of validation codes processed via saving
@@ -95,7 +95,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
 
         $this->_aViewData["subjlang"] = $iLang;
 
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopId = $oConfig->getShopId();
 
         $aConfigs = $this->_oFcpoConfigExport->fcpoGetConfig($sShopId, $iLang);
@@ -146,6 +146,9 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
             }
         }
 
+        /**
+         * @TODO _fcpoValidateAddresscheckType not exist
+         */
         $iValidateCode = $this->_fcpoValidateAddresscheckType();
         $this->_fcpoDisplayMessage($iValidateCode);
     }
@@ -154,7 +157,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Method decides if regular addresscheck can be used. Depends on bonicheck
      * is inactive/not in use
      *
-     * @param void
      * @return bool
      */
     public function fcpoShowRegularAddresscheck()
@@ -172,7 +174,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
     /**
      * Method returns if boni check is in active use
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoCheckBonicheckIsActive()
@@ -208,8 +209,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
     /**
      * Checks if there is a value set for boni addresscheck
      *
-     * @param void
-     * @return void
+     * @return bool
      */
     protected function _fcpoBoniAddresscheckActive()
     {
@@ -217,15 +217,12 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
         $sFCPOConsumerAddresscheck =
             $oConfig->getConfigParam('sFCPOConsumerAddresscheck');
 
-        $blIsActive = (bool) $sFCPOConsumerAddresscheck;
-
-        return $blIsActive;
+        return (bool) $sFCPOConsumerAddresscheck;
     }
 
     /**
      * Deactivates bonicheck addresscheck type
      *
-     * @param void
      * @return void
      */
     protected function _fcpoDeactivateBoniAdresscheck()
@@ -237,7 +234,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
     /**
      * Deactivates regular address check setting to 'no addresscheck'
      *
-     * @param void
      * @return void
      */
     protected function _fcpoDeactivateRegularAddressCheck()
@@ -250,12 +246,11 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validating addresstype. Fix setting if needed and respond with message
      * of changes
      *
-     * @param void
      * @return void
      */
     protected function _fcpoValidateAddresscheckType()
     {
-        $this->_aValidationCodes = array();
+        $this->_aValidationCodes = [];
         $this->_fcpoCheckIssetBoniAddresscheck();
         $this->_fcpoValidateDuplicateAddresscheck();
         $this->_fcpoValidateAddresscheckBasic();
@@ -268,15 +263,14 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validate settings and check if this must be switched to basic addresscheck depending on
      * selected bonicheck
      *
-     * @param void
      * @return int
      */
     protected function _fcpoValidateAddresscheckBasic()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
-        $aMatchingAddressChecks = array('BB');
+        $aMatchingBoniChecks = ['IH', 'IA', 'IB'];
+        $aMatchingAddressChecks = ['BB'];
         $blSwitchToBasic = (
             isset($aConfStrs['sFCPOBonicheck']) &&
             isset($aConfStrs['sFCPOConsumerAddresscheck']) &&
@@ -293,15 +287,14 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validate settings and check if this must be switched to person addresscheck depending on
      * selected bonicheck
      *
-     * @param void
      * @return int
      */
-    protected function _fcpoValidateAddresscheckPerson()
+    protected function _fcpoValidateAddresscheckPerson(): int
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
-        $aMatchingAddressChecks = array('PB');
+        $aMatchingBoniChecks = ['IH', 'IA', 'IB'];
+        $aMatchingAddressChecks = ['PB'];
 
         $blSwitchToPerson = (
             isset($aConfStrs['sFCPOBonicheck']) &&
@@ -320,7 +313,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Checks if mandatory boniaddresscheck is set on active bonicheck
      * (only both or nothing is allowed)
      *
-     * @param void
      * @return void
      */
     protected function _fcpoCheckIssetBoniAddresscheck()
@@ -344,7 +336,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Check if bonicheck and regular adresscheck is set to active
      * simultanously and fix setting if needed
      *
-     * @param void
      * @return void
      */
     protected function _fcpoValidateDuplicateAddresscheck()
@@ -379,7 +370,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validates addresscheck related to boniversum. Correct settings and return error
      * code for notifying user
      *
-     * @param void
      */
     protected function _fcpoValidateAddresscheckBoniversum()
     {
@@ -410,7 +400,6 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * If there have been validation adjustments, cumulate and
      * present them
      *
-     * @param void
      * @return void
      */
     protected function _fcpoDisplayValidationMessages()

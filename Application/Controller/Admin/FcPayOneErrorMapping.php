@@ -31,70 +31,59 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_error_mapping.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_error_mapping';
 
     /**
      * Returns list of former configured errors
      *
-     * @param  void
      * @return array
      */
-    public function getMappings()
+    public function getMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingMappings();
-        $aMappings = $this->_fcpoAddNewMapping($aMappings);
-
-        return $aMappings;
+        return $this->_fcpoAddNewMapping($aMappings);
     }
-    
+
     /**
      * Returns list of former configured iframe errors
      *
-     * @param  void
      * @return array
      */
-    public function getIframeMappings()
+    public function getIframeMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingIframeMappings();
-        $aMappings = $this->_fcpoAddNewIframeMapping($aMappings);
-
-        return $aMappings;
+        return $this->_fcpoAddNewIframeMapping($aMappings);
     }
-    
+
     /**
      * Requests xml base file to fetch all existing error codes and default-messages
      *
-     * @param  void
      * @return array
+     * @throws \Exception
      */
     public function fcpoGetPayoneErrorMessages($sType='general')
     {
-        $aErrorCodes = $this->_oFcpoErrorMapping->fcpoGetAvailableErrorCodes($sType);
-
-        return $aErrorCodes;
+        return $this->_oFcpoErrorMapping->fcpoGetAvailableErrorCodes($sType);
     }
-    
+
     /**
      * Returns list of language objects
      *
-     * @param  void
      * @return array
      */
-    public function getLanguages()
+    public function getLanguages(): array
     {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $aLanguages = $oLang->getLanguageArray(null, true, true);
-        
-        return $aLanguages;
+        return $oLang->getLanguageArray(null, true, true);
     }
-    
+
     /**
      * Adds a new entry if flag has been set
      *
-     * @param  array $aMappings
+     * @param array $aMappings
      * @return array
      */
-    protected function _fcpoAddNewMapping($aMappings)
+    protected function _fcpoAddNewMapping(array $aMappings): array
     {
         if ($this->_oFcpoHelper->fcpoGetRequestParameter('add')) {
             $oMapping = new stdClass();
@@ -107,14 +96,14 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
 
         return $aMappings;
     }
-    
+
     /**
      * Adds a new entry if flag has been set
      *
-     * @param  array $aMappings
+     * @param array $aMappings
      * @return array
      */
-    protected function _fcpoAddNewIframeMapping($aMappings)
+    protected function _fcpoAddNewIframeMapping(array $aMappings): array
     {
         if ($this->_oFcpoHelper->fcpoGetRequestParameter('addIframe')) {
             $oMapping = new stdClass();
@@ -131,36 +120,29 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
     /**
      * Returns list of all mappings
      *
-     * @param  void
      * @return array
      */
-    protected function _fcpoGetExistingMappings()
+    protected function _fcpoGetExistingMappings(): array
     {
-        $aExistingIframeMappings = $this->_oFcpoErrorMapping->fcpoGetExistingMappings();
-
-        return $aExistingIframeMappings;
+        return $this->_oFcpoErrorMapping->fcpoGetExistingMappings();
     }
-    
+
     /**
      * Returns list of all mappings
      *
-     * @param  void
      * @return array
      */
-    protected function _fcpoGetExistingIframeMappings()
+    protected function _fcpoGetExistingIframeMappings(): array
     {
-        $aExistingErrorMappings = $this->_oFcpoErrorMapping->fcpoGetExistingMappings('iframe');
-
-        return $aExistingErrorMappings;
+        return $this->_oFcpoErrorMapping->fcpoGetExistingMappings('iframe');
     }
 
     /**
      * Updating settings into database
      *
-     * @param  void
      * @return void
      */
-    public function save()
+    public function save(): void
     {
         $oMapping = $this->fcpoGetInstance(FcPoErrorMapping::class);
         $aGeneralMappings = $this->_oFcpoHelper->fcpoGetRequestParameter("editval");
@@ -168,14 +150,13 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
             $oMapping->fcpoUpdateMappings($aGeneralMappings, 'general');
         }
     }
-    
+
     /**
      * Updating iFrame messages
      *
-     * @param  void
      * @return void
      */
-    public function saveIframe()
+    public function saveIframe(): void
     {
         $oMapping = $this->fcpoGetInstance(FcPoErrorMapping::class);
         $aIframeMappings = $this->_oFcpoHelper->fcpoGetRequestParameter("editval2");

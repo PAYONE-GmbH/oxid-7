@@ -34,7 +34,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -64,7 +64,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoLogMeIn for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -93,7 +92,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing fcpoSetAmazonOrderReferenceDetailsResponse for coverage
      *
-     * @param void
      * @return void
      */
     public function test_fcpoSetAmazonOrderReferenceDetailsResponse_Coverage()
@@ -119,7 +117,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAmazonEmailEncode for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -140,7 +137,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAmazonEmailDecode for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -161,7 +157,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddOrUpdateAmazonUser for case user exists
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -188,7 +183,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddOrUpdateAmazonUser for case user new
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -232,7 +226,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddAmazonUser for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -282,7 +275,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddAmazonUser for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -333,7 +325,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddDeliveryAddress for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -388,7 +379,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoAddDeliveryAddress for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -443,7 +433,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoCheckAddressExists for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -463,7 +452,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoSplitStreetAndStreetNr for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoSplitStreetAndStreetNr_Coverage()
@@ -477,7 +465,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoGetCountryIdByIso2 for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -498,13 +485,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoUserExists with option password
      *
-     * @param void
      * @return void
      */
     public function test__fcpoUserExists_WithPassword()
     {
-        $oMockUser = oxNew('oxUser');
-        $oMockUser->oxuser__oxpassword = new oxField('somePassword');
+        $oMockUser = oxNew(User::class);
+        $oMockUser->oxuser__oxpassword = new Field('somePassword');
 
         $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
         $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
@@ -516,13 +502,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testing _fcpoUserExists with option no password
      *
-     * @param void
      * @return void
      */
     public function test__fcpoUserExists_NoPassword()
     {
-        $oMockUser = oxNew('oxUser');
-        $oMockUser->oxuser__oxpassword = new oxField('somePassword');
+        $oMockUser = oxNew(User::class);
+        $oMockUser->oxuser__oxpassword = new Field('somePassword');
 
         $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
         $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
@@ -534,7 +519,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     /**
      * Testiong _fcpoGetUserOxidByEmail for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -568,8 +552,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
             ->expects($this->any())
             ->method('save')
             ->will($this->returnValue(true));
-        $oTestObject->oxuser__oxboni = new oxField('');
-        $oTestObject->oxuser__fcpobonicheckdate = new oxField('');
+        $oTestObject->oxuser__oxboni = new Field('');
+        $oTestObject->oxuser__fcpobonicheckdate = new Field('');
 
         $this->assertEquals(null, $oTestObject->fcpoSetBoni($aMockResponse));
     }
@@ -588,8 +572,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
             ->expects($this->any())
             ->method('save')
             ->will($this->returnValue(true));
-        $oTestObject->oxuser__oxboni = new oxField('');
-        $oTestObject->oxuser__fcpobonicheckdate = new oxField('');
+        $oTestObject->oxuser__oxboni = new Field('');
+        $oTestObject->oxuser__fcpobonicheckdate = new Field('');
 
         $this->assertEquals(null, $oTestObject->fcpoSetBoni($aMockResponse));
     }
@@ -600,7 +584,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     public function test_isNewBonicheckNeeded_Coverage()
     {
         $oTestObject = oxNew(FcPayOneUser::class);
-        $oTestObject->oxuser__fcpobonicheckdate = new oxField('2016-05-01');
+        $oTestObject->oxuser__fcpobonicheckdate = new Field('2016-05-01');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(7));

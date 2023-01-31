@@ -35,7 +35,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_protocol extends Oxid
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -66,7 +66,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_protocol extends Oxid
     /**
      * Testing getting view id for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getViewId_Coverage()
@@ -79,7 +78,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_protocol extends Oxid
     /**
      * Testing the return of an old shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_OldShopVersion()
@@ -100,7 +98,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_protocol extends Oxid
     /**
      * Testing the return of an old shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetAdminSeperator_NewerShopVersion()

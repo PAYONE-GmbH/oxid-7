@@ -35,7 +35,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -67,7 +67,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing fcpoGetMandatePdfUrl active status
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetMandatePdfUrl_Active()
@@ -78,10 +77,10 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
         
         $oMockOrder = $this->getMock('oxOrder', array('getId'));
         $oMockOrder->expects($this->any())->method('getId')->will($this->returnValue('someId'));
-        $oMockOrder->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oMockOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
         
         $oMockUser = new stdClass();
-        $oMockUser->oxuser__oxpassword = new oxField(false);
+        $oMockUser->oxuser__oxpassword = new Field(false);
 
         $oTestObject = $this->getMock(
             'fcPayOneThankYouView',
@@ -119,7 +118,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing fcpoGetMandatePdfUrl inactive status
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetMandatePdfUrl_Inactive()
@@ -148,10 +146,10 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
         
         $oMockOrder = $this->getMock('oxOrder', array('getId'));
         $oMockOrder->expects($this->any())->method('getId')->will($this->returnValue('someId'));
-        $oMockOrder->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oMockOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
         
         $oMockUser = new stdClass();
-        $oMockUser->oxuser__oxpassword = new oxField(false);
+        $oMockUser->oxuser__oxpassword = new Field(false);
 
         $oTestObject = $this->getMock(
             'fcPayOneThankYouView',
@@ -209,15 +207,14 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing fcpoIsAppointedError for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoIsAppointedError_Coverage()
     {
         $oMockOrder = $this->getMock('oxOrder', array('isPayOnePaymentType'));
         $oMockOrder->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        $oMockOrder->oxorder__oxfolder      = new oxField('ORDERFOLDER_PROBLEMS');
-        $oMockOrder->oxorder__oxtransstatus = new oxField('ERROR');
+        $oMockOrder->oxorder__oxfolder      = new Field('ORDERFOLDER_PROBLEMS');
+        $oMockOrder->oxorder__oxtransstatus = new Field('ERROR');
         
         $oTestObject = $this->getMock('fcPayOneThankYouView', array('getOrder'));
         $oTestObject->expects($this->any())->method('getOrder')->will($this->returnValue($oMockOrder));
@@ -229,7 +226,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
      * Testing render method for coverage
      *
      * @doesNotPerformAssertions
-     * @param  void
      * @return void
      */
     public function test_Render_Coverage()
@@ -262,7 +258,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing _fcpoDeleteSessionVariablesOnOrderFinish for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoDeleteSessionVariablesOnOrderFinish_Coverage()
@@ -279,7 +274,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing fcpoIsAmazonOrder for coverage
      *
-     * @param void
      * @return void
      */
     public function test_fcpoIsAmazonOrder_Coverage()
@@ -293,7 +287,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing _fcpoHandleAmazonThankyou for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoHandleAmazonThankyou_Coverage()
@@ -313,7 +306,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing _fcpoDetermineAmazonOrder for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoDetermineAmazonOrder_Coverage()
@@ -330,7 +322,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankYouView extends 
     /**
      * Testing fcpoGetBarzahlenHtml for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetBarzahlenHtml_Coverage()

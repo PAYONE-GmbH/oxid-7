@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -65,7 +65,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing getPortalId for getting coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getPortalId_Coverage()
@@ -87,7 +86,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing getSubAccountId for getting coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getSubAccountId_Coverage()
@@ -109,7 +107,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing _prepareWhereQuery for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__prepareWhereQuery_Coverage()
@@ -120,14 +117,13 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
         
         $sExpectString = " AND fcpotransactionstatus.fcpo_portalid = 'myportalid' AND fcpotransactionstatus.fcpo_aid = 'mysubaccountid' ";
         
-        $this->assertEquals($sExpectString, $this->invokeMethod($oTestObject, '_prepareWhereQuery', array(array(),'')));
+        $this->assertEquals($sExpectString, $this->invokeMethod($oTestObject, '_prepareWhereQuery', array([],'')));
     }
     
     
     /**
      * Testing getListFilter for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getListFilter_Coverage()
@@ -149,7 +145,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing getListSorting for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getListSorting_Coverage()
@@ -177,7 +172,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetInputName for coverage on newer shop
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetInputName_NewerShopVersion()
@@ -198,7 +192,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetInputName for coverage on newer shop
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetInputName_OlderShopVersion()
@@ -219,12 +212,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetWhereValue on newer shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetWhereValue_NewerShopVersion()
     {
-        $aWhere = array();
+        $aWhere = [];
         $aWhere['Table']['Field'] = 'someValue';
         $oTestObject = $this->getMock('fcpayone_log_list', array('getListFilter'));
         $oTestObject->method('getListFilter')->will($this->returnValue($aWhere));
@@ -243,12 +235,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetWhereValue on older shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetWhereValue_OlderShopVersion()
     {
-        $aWhere = array();
+        $aWhere = [];
         $aWhere['Table.Field'] = 'someValue';
         $oTestObject = $this->getMock('fcpayone_log_list', array('getListFilter'));
         $oTestObject->method('getListFilter')->will($this->returnValue($aWhere));
@@ -267,7 +258,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetSortingJavascript on newer shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetSortingJavascript_NewerShopVersion()
@@ -288,7 +278,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log_list extends Oxid
     /**
      * Testing fcGetSortingJavascript on older shop version
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetSortingJavascript_OlderShopVersion()

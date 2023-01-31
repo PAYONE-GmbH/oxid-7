@@ -21,8 +21,8 @@
 
 namespace Fatchip\PayOne\Tests\Application\Controller;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Controller\FcPayOneBasketView;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends OxidTestCase
 {
@@ -36,7 +36,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -121,7 +121,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing _fcpoCheckForAmazonLogoff for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoCheckForAmazonLogoff_Coverage()
@@ -145,7 +144,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing _fcpoIsPayPalExpressActive for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoIsPayPalExpressActive_Coverage()
@@ -165,7 +163,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing fcpoGetPayPalExpressPic for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetPayPalExpressPic_Coverage()
@@ -183,7 +180,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing _fcpoGetPayPalExpressPic for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetPayPalExpressPic_Coverage()
@@ -213,7 +209,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing fcpoUsePayPalExpress for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoUsePayPalExpress_Error()
@@ -238,7 +233,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Testing fcpoUsePayPalExpress for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoUsePayPalExpress_Redirect()
@@ -264,7 +258,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     /**
      * Lil' paypalexpresslogo database helper
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoPreparePaypalExpressLogos()
@@ -276,19 +269,18 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
             (2, 1, 1, 'btn_xpressCheckout_en.gif', 0)
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Truncates table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTruncateTable($sTableName)
     {
         $sQuery = "DELETE FROM `{$sTableName}` ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 }

@@ -49,7 +49,7 @@ class Unit_fcPayOne_Application_Models_fcpopaypal extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -196,7 +196,6 @@ class Unit_fcPayOne_Application_Models_fcpopaypal extends OxidTestCase
     /**
      * Testing _handleUploadPaypalExpressLogo for current shop versions
      *
-     * @param  void
      * @return void
      */
     public function test__handleUploadPaypalExpressLogo_NewerShopVersion()

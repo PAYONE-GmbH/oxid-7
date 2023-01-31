@@ -70,6 +70,7 @@ include_once dirname(__FILE__) . "/../../../bootstrap.php";
 include_once dirname(__FILE__) . "/statusbase.php";
 
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Language;
 
 class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
 {
@@ -217,7 +218,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             )";
 
         try {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }
@@ -253,7 +254,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
     /**
      * Method directly redirects to statusforwardcontroller
      *
-     * @param void
      * @return void
      */
     protected function _directRedirect($sStatusmessageId)
@@ -295,7 +295,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      * Handles shop order status folder by configured mapping
      * (e. g. PENDING to NEW)
      *
-     * @param void
      * @return void
      * @throws
      */
@@ -332,7 +331,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                 SET oxfolder = '{$sFolder}' 
                 WHERE oxid = '{$oOrder->getId()}'
             ";
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }
@@ -341,7 +340,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
     /**
      * Central point for handling an incoming status message call
      *
-     * @param void
      * @return void
      */
     public function handle()
@@ -380,7 +378,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = '".$sTxid."'";
             $sOrderId = $oDb->GetOne($sQuery);
 
-            $oOrder = oxNew('oxorder');
+            $oOrder = oxNew(Order::class);
             $oOrder->load($sOrderId);
 
             $this->_oFcOrder = $oOrder;
@@ -393,7 +391,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      * OXID-337
      * Check if appointed signal has been posted and handles it
      *
-     * @param void
      * @return void
      * @throws Exception
      */
@@ -406,7 +403,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         try {
             $oOrder = $this->_getOrder();
             $sOrderId = $oOrder->getId();
-            $oLang = oxNew('oxLang');
+            $oLang = oxNew(Language::class);
 
             $sReplacement = $oLang->translateString('FCPO_REMARK_APPOINTED_MISSING');
 
@@ -423,7 +420,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }
@@ -432,7 +429,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
     /**
      * Check if paid signal has been posted and handle it
      *
-     * @param void
      * @return void
      * @throws
      */
@@ -445,7 +441,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         try {
             $oOrder = $this->_getOrder();
             $sOrderId = $oOrder->getId();
-            $oLang = oxNew('oxLang');
+            $oLang = oxNew(Language::class);
 
             $sReplacement = $oLang->translateString('FCPO_REMARK_APPOINTED_MISSING');
 
@@ -462,7 +458,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }
@@ -472,7 +468,6 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      * Checks based on the transaction status received by PAYONE whether
      * the debit request is available for this order at the moment.
      *
-     * @param  void
      * @return void
      * @throws
      */
@@ -481,11 +476,11 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $sTxid = $this->fcGetPostParam('txid');
 
         $blReturn = false;
-        $sAuthMode = DatabaseProvider::getDb()->GetOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '".$sTxid."'");
+        $sAuthMode = DatabaseProvider::getDb()->getOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '".$sTxid."'");
         if ($sAuthMode == 'authorization') {
             $blReturn = true;
         } else {
-            $iCount = DatabaseProvider::getDb()->GetOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '{$sTxid}' AND fcpo_txaction = 'capture'");
+            $iCount = DatabaseProvider::getDb()->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '{$sTxid}' AND fcpo_txaction = 'capture'");
             if ($iCount > 0) {
                 $blReturn = true;
             }
@@ -499,7 +494,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $sOrderId = $oOrder->getId();
         $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = '{$sOrderId}'";
         try {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         } catch (Exception $e) {
             throw $e;
         }

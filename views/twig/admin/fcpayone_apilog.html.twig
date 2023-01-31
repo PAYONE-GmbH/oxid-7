@@ -1,0 +1,74 @@
+{% include "headitem.html.twig" with {title: "SYSREQ_MAIN_TITLE"|translate} %}
+
+{% if readonly %}
+    {% set readonly = "readonly disabled" %}
+{% else %}
+    {% set readonly = "" %}
+{% endif %}
+
+<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+    {{ oViewConf.getHiddenSid()|raw }}
+    <input type="hidden" name="oxid" value="{{ oxid }}">
+    <input type="hidden" name="cl" value="FcPayOneApiLog">
+</form>
+
+{% if oxid == ' - 1' %}
+
+    {{ translate({ ident: "FCPO_NO_APILOG" }) }}
+
+{% else %}
+
+    <table style="width: 100%;">
+        <tr>
+            <td style="vertical-align: top;width: 50%;">
+                REQUEST:<br>
+                {% if edit.getRequestArray() != false %}
+                    <table style="border: 1px solid #C8C8C8;">
+                        {% set blWhite = "" %}
+                        {% for key, entry in edit.getRequestArray() %}
+                            {% set listclass = listitem~blWhite %}
+                            <tr>
+                                <td class="{{ listclass }}">{{ key }}</td>
+                                <td class="{{ listclass }}">{{ entry }}</td>
+                            </tr>
+                            {% if blWhite == "2" %}
+                                {% set blWhite = "" %}
+                            {% else %}
+                                {% set blWhite = "2" %}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <pre>{{ edit.fcporequestlog__fcpo_request.value }}</pre>
+                {% endif %}
+            </td>
+            <td style="vertical-align: top;">
+                RESPONSE:<br>
+                {% if edit.getResponseArray() != false %}
+                    <table style="border: 1px solid #C8C8C8;">
+                        {% set blWhite = "" %}
+                        {% for key, entry in edit.getResponseArray() %}
+                            {% set listclass = listitem~blWhite %}
+                            <tr>
+                                <td class="{{ listclass }}">{{ key }}</td>
+                                <td class="{{ listclass }}">{{ entry }}</td>
+                            </tr>
+                            {% if blWhite == "2" %}
+                                {% set blWhite = "" %}
+                            {% else %}
+                                {% set blWhite = "2" %}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <pre>{{ edit.fcporequestlog__fcpo_response.value }}</pre>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+{% endif %}
+
+{% include "bottomnaviitem.html.twig" %}
+
+{% include "bottomitem.html.twig" %}

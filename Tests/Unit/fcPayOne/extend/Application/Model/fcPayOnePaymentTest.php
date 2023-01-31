@@ -60,7 +60,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -104,7 +104,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
     public function test_fcpoGetOperationMode_Coverage()
     {
         $oTestObject = oxNew(FcPayOnePayment::class);
-        $oTestObject->oxpayments__fcpolivemode = new oxField(true);
+        $oTestObject->oxpayments__fcpolivemode = new Field(true);
         
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
@@ -182,7 +182,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
     /**
      * Testing _fcpoGetKlarnaStoreId for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetKlarnaStoreId_Coverage()
@@ -310,9 +309,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
         $oMockConfig = $this->getMock('oxConfig', array('getActShopCurrencyObject'));
         $oMockConfig->expects($this->any())->method('getActShopCurrencyObject')->will($this->returnValue($oMockCurrency));
         
-        $aMockCountries                 = array();
+        $aMockCountries                 = [];
         $oMockUser                      = new stdClass();
-        $oMockUser->oxuser__oxcountryid = new oxField('someCountryId');
+        $oMockUser->oxuser__oxcountryid = new Field('someCountryId');
         
         $oTestObject = $this->getMock('fcPayOnePayment', array('_fcGetCountries', 'getUser'));
         $oTestObject->expects($this->any())->method('_fcGetCountries')->will($this->returnValue($aMockCountries));
@@ -352,9 +351,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
         $oMockConfig = $this->getMock('oxConfig', array('getActShopCurrencyObject'));
         $oMockConfig->expects($this->any())->method('getActShopCurrencyObject')->will($this->returnValue($oMockCurrency));
         
-        $aMockCountries                 = array();
+        $aMockCountries                 = [];
         $oMockUser                      = new stdClass();
-        $oMockUser->oxuser__oxcountryid = new oxField('someCountryId');
+        $oMockUser->oxuser__oxcountryid = new Field('someCountryId');
         
         $oTestObject = $this->getMock('fcPayOnePayment', array('_fcGetCountries', 'getUser'));
         $oTestObject->expects($this->any())->method('_fcGetCountries')->will($this->returnValue($aMockCountries));

@@ -49,7 +49,7 @@ class Unit_fcPayOne_Application_Models_fcporatepay extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -242,6 +242,6 @@ class Unit_fcPayOne_Application_Models_fcporatepay extends OxidTestCase
         $oMockDb->expects($this->any())->method('quote')->will($this->returnValue(null));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDb);
 
-        $this->assertEquals(null, $oTestObject->_fcpoUpdateRatePayProfileByResponse('someId', array()));
+        $this->assertEquals(null, $oTestObject->_fcpoUpdateRatePayProfileByResponse('someId', []));
     }
 }

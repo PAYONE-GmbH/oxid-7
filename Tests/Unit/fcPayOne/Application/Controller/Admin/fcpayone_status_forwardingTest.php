@@ -20,8 +20,8 @@
 
 namespace Fatchip\PayOne\Tests\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneStatusForwarding;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding extends OxidTestCase
 {
@@ -35,7 +35,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -66,7 +66,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Testing getting forwardings on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getForwardings_Coverage()
@@ -91,7 +90,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Testing getPayoneStatusList on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getPayoneStatusList_Coverage()
@@ -105,7 +103,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Testing save method on deleting an entry
      *
-     * @param  void
      * @return void
      */
     public function test_save_Delete()
@@ -125,7 +122,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue($aForwardings));
-        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(oxRegistry::get('oxUtilsObject')));
+        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(Registry::get('oxUtilsObject')));
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
@@ -137,7 +134,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Testing save method on adding an entry
      *
-     * @param  void
      * @return void
      */
     public function test_save_NewEntry()
@@ -156,7 +152,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue($aForwardings));
-        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(oxRegistry::get('oxUtilsObject')));
+        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(Registry::get('oxUtilsObject')));
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
@@ -168,7 +164,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Testing save method on adding an entry
      *
-     * @param  void
      * @return void
      */
     public function test_save_UpdateEntry()
@@ -187,7 +182,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue($aForwardings));
-        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(oxRegistry::get('oxUtilsObject')));
+        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue(Registry::get('oxUtilsObject')));
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
@@ -199,7 +194,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
     /**
      * Adds a sample forwarding
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoAddSampleForwarding()
@@ -210,20 +204,19 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_forwarding ext
             (6, 'paid', 'http://paid.sample', 10);
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
 
     /**
      * Truncates table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTruncateTable($sTableName)
     {
         $sQuery = "DELETE FROM `{$sTableName}` ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 }

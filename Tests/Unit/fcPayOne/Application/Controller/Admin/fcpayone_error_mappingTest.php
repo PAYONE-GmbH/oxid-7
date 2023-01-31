@@ -23,7 +23,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -54,7 +54,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing getMappings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getMappings_Coverage()
@@ -73,7 +72,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing getIframeMappings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getIframeMappings_Coverage()
@@ -92,7 +90,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing fcpoGetPayoneErrorMessages for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetPayoneErrorMessages_Coverage()
@@ -113,7 +110,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing getLanguages for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getLanguages_Coverage()
@@ -137,12 +133,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing _fcpoAddNewMapping for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoAddNewMapping_Coverage()
     {
-        $aMockDataMappings = array();
+        $aMockDataMappings = [];
         $oTestObject = oxNew(FcPayOneErrorMapping::class);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
@@ -156,12 +151,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing _fcpoAddNewIframeMapping for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoAddNewIframeMapping_Coverage()
     {
-        $aMockDataMappings = array();
+        $aMockDataMappings = [];
         $oTestObject = oxNew(FcPayOneErrorMapping::class);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
@@ -175,7 +169,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing _fcpoGetExistingMappings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetExistingMappings_Coverage()
@@ -196,7 +189,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing _fcpoGetExistingIframeMappings^for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetExistingIframeMappings_Coverage()
@@ -217,7 +209,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing save for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_save_Coverage()
@@ -243,7 +234,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mappingTest ext
     /**
      * Testing saveIframe for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_saveIframe_Coverage()

@@ -21,13 +21,15 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-class FcPayOneBoniList extends \OxidEsales\Eshop\Application\Controller\Admin\AdminListController
+use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
+
+class FcPayOneBoniList extends AdminListController
 {
-    
+
     /**
      * Current class template name.
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_boni_list.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_boni_list';
 }

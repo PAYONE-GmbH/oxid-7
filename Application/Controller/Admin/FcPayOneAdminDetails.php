@@ -17,37 +17,45 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Application\Model as PayOneModel;
+use Fatchip\PayOne\Application\Model\FcPoConfigExport;
+use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use Fatchip\PayOne\Application\Model\FcPoForwarding;
+use Fatchip\PayOne\Application\Model\FcPoKlarna;
+use Fatchip\PayOne\Application\Model\FcPoMapping;
+use Fatchip\PayOne\Application\Model\FcPoPaypal;
+use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
-class FcPayOneAdminDetails extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController
+class FcPayOneAdminDetails extends AdminDetailsController
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
      * @var FcPoHelper
      */
     protected $_oFcpoHelper = null;
-    
+
     /**
      * Centralized Database instance
      *
      * @var DatabaseProvider
      */
     protected $_oFcpoDb = null;
-    
+
     /**
      * FcPoConfigExport instance
      *
      * @var FcPoConfigExport
      */
     protected $_oFcpoConfigExport = null;
-    
+
     /**
      * FcPoPaypal instance
      *
@@ -90,7 +98,7 @@ class FcPayOneAdminDetails extends \OxidEsales\Eshop\Application\Controller\Admi
      * @var null|FcPoErrorMapping
      */
     protected $_oFcpoErrorMapping = null;
-    
+
 
     /**
      * Init needed data
@@ -108,7 +116,7 @@ class FcPayOneAdminDetails extends \OxidEsales\Eshop\Application\Controller\Admi
         $this->_oFcpoForwarding = oxNew(PayOneModel\FcPoForwarding::class);
         $this->_oFcpoRatePay = oxNew(PayOneModel\FcPoRatePay::class);
     }
-    
+
     /**
      * Returns factory instance of given classname
      *

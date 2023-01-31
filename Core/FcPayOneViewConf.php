@@ -21,13 +21,13 @@
 
 namespace Fatchip\PayOne\Core;
 
-use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use Fatchip\PayOne\Lib\FcPoHelper;
 
 class FcPayOneViewConf extends FcPayOneViewConf_parent
 {
-    
+
     /**
      * Name of the module folder
      *
@@ -53,21 +53,23 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * List of handled themes and their belonging pathes
      * @var array
      */
-    protected $_aSupportedThemes = array(
+    protected $_aSupportedThemes = [
         'flow' => 'flow',
         'azure' => 'azure',
         'wave' => 'wave',
-    );
+        'twig' => 'twig'
+    ];
 
     /**
      * List of themes and their
      * @var array
      */
-    protected $_aTheme2CssPayButtonSelector = array(
+    protected $_aTheme2CssPayButtonSelector = [
         'flow' => 'nextStep',
         'azure' => 'nextStep',
         'wave' => 'nextStep',
-    );
+        'twig' => 'nextStep'
+    ];
 
     /**
      * Counts the amount of widgets have been included by call
@@ -95,7 +97,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the path to module
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetModulePath()
@@ -106,7 +107,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the url to module
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetModuleUrl()
@@ -117,7 +117,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns url to module img folder (admin)
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetAdminModuleImgUrl()
@@ -165,7 +164,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns integer of shop version
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetIntShopVersion()
@@ -216,21 +214,18 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         return $this->_sFcPoHostedJsUrl;
     }
-    
+
     /**
      * Returns Iframe mappings
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetIframeMappings()
     {
         $oErrorMapping = $this->_oFcpoHelper->getFactoryObject(FcPoErrorMapping::class);
-        $aExistingErrorMappings = $oErrorMapping->fcpoGetExistingMappings('iframe');
-
-        return $aExistingErrorMappings;
+        return $oErrorMapping->fcpoGetExistingMappings('iframe');
     }
-    
+
     /**
      * Returns abbroviation by given id
      *
@@ -246,7 +241,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns if a complete set of salutations is available
      *
-     * @param void
      * @return bool
      */
     public function fcpoUserHasSalutation()
@@ -258,18 +252,15 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $sSalutation = $oUser->oxuser__oxsal->value;
         $sSalutationDelAddress = is_null($oAddress) ? $sSalutation : $oAddress->oxaddress__oxsal->value;
 
-        $blHasSalutation = (
+        return (
             $sSalutation &&
             $sSalutationDelAddress
         );
-
-        return $blHasSalutation;
     }
 
     /**
      * Returns session variable
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetClientToken()
@@ -280,7 +271,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns session variable
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetKlarnaAuthToken()
@@ -291,7 +281,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns cancel url for klarna payments
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetKlarnaCancelUrl()
@@ -301,8 +290,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sPaymentErrorTextParam =  "&payerrortext=".urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
         $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
-        $sErrorUrl = $sShopURL . 'index.php?type=error&cl=payment' . $sPaymentErrorParam . $sPaymentErrorTextParam;
-        return  $sErrorUrl;
+        return $sShopURL . 'index.php?type=error&cl=payment' . $sPaymentErrorParam . $sPaymentErrorTextParam;
     }
 
     /**
@@ -313,7 +301,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoIsKlarnaPaynow()
     {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        /** @var oxBasket $oBasket */
+        /** @var Basket $oBasket */
         $oBasket = $oSession->getBasket();
         return ($oBasket->getPaymentId() === 'fcpoklarna_directdebit');
     }
@@ -321,7 +309,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns if amazonpay is active and though button can be displayed
      *
-     * @param void
      * @return bool
      */
     public function fcpoCanDisplayAmazonPayButton()
@@ -334,7 +321,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns if paydirekt express button can be shown
      *
-     * @param void
      * @return bool
      */
     public function fcpoCanDisplayPaydirektExpressButton()
@@ -391,7 +377,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns amazon seller id
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmazonPaySellerId()
@@ -405,7 +390,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Method returns css selector matching to used (parent-)theme
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmazonBuyNowButtonCssSelector()
@@ -428,7 +412,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Method returns previously saved reference id
      *
-     * @param void
      * @return mixed
      */
     public function fcpoGetAmazonPayReferenceId()
@@ -442,7 +425,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns config value for button type
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmazonPayButtonType()
@@ -456,7 +438,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns config value for button color
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmazonPayButtonColor()
@@ -470,7 +451,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns if address widget should be displayed readonly
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetAmazonPayAddressWidgetIsReadOnly()
@@ -483,7 +463,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns url that will be send to amazon for redirect after login
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmazonRedirectUrl()
@@ -494,15 +473,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         if (strpos($sShopUrl, 'http://') !== false) {
             $sShopUrl = str_replace('http://', 'https://', $sShopUrl);
         }
-        $sRedirectUrl = $sShopUrl . "index.php?cl=user&fnc=fcpoamazonloginreturn";
-
-        return $sRedirectUrl;
+        return $sShopUrl . "index.php?cl=user&fnc=fcpoamazonloginreturn";
     }
 
     /**
      * Method returns if there is an active amazon session
      *
-     * @param void
      * @return bool
      */
     public function fcpoAmazonLoginSessionActive()
@@ -510,16 +486,13 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $sAmazonLoginAccessToken =
             $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
 
-        $blLoggedIn = ($sAmazonLoginAccessToken) ? true : false;
-
-        return $blLoggedIn;
+        return ($sAmazonLoginAccessToken) ? true : false;
     }
 
     /**
      * Method returns active theme path by checking current theme and its parent
      * If theme is not assignable, 'azure' will be the fallback
      *
-     * @param void
      * @return string
      */
     public function fcpoGetActiveThemePath()
@@ -553,9 +526,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoAmazonEmailEncode($sEmail)
     {
-        $sAmazonEmail = "fcpoamz_" . $sEmail;
-
-        return $sAmazonEmail;
+        return "fcpoamz_" . $sEmail;
     }
 
     /**
@@ -577,7 +548,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns if amazon runs in async mode
      *
-     * @param void
      * @return bool
      */
     public function fcpoIsAmazonAsyncMode()
@@ -596,7 +566,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * Checks if popup method should be used. Depends on setting and/or
      * ssl state
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAmzPopup()
@@ -647,7 +616,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * Decides if the JS widgets url source should be included
      * Makes sure it will be included after the last amazon button
      *
-     * @param void
      * @return bool
      */
     public function fcpoGetAllowIncludeAmazonWidgetUrl()
@@ -670,10 +638,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the expected amount of amazon buttons on current page
      *
-     * @param void
-     * @return void
+     * @return int
      */
-    protected function _fcpoGetExpectedButtonAmount()
+    protected function _fcpoGetExpectedButtonAmount(): int
     {
         $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
         $aController2Amount = array(
@@ -694,7 +661,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Template getter for returning ajax controller url
      *
-     * @param void
      * @return string
      */
     public function fcpoGetAjaxControllerUrl()
@@ -702,23 +668,18 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sPath = "modules/fc/fcpayone/Application/Model/FcPayOneAjax.php";
-        $sControllerPath = $sShopUrl.$sPath;
-
-        return $sControllerPath;
+        return $sShopUrl.$sPath;
     }
 
     /**
      * Template getter for returning shopurl
      *
-     * @param void
      * @return string
      */
     public function fcpoGetShopUrl()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sShopUrl = $oConfig->getShopUrl();
-
-        return $sShopUrl;
+        return $oConfig->getShopUrl();
     }
 
     /**
@@ -729,9 +690,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoIsPayonePayment($sPaymentId)
     {
-        $blIsPayOne = (bool)FcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
-
-        return $blIsPayOne;
+        return FcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
     }
 
     /**
@@ -749,9 +708,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
         $sTranslation = $oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false);
         $sPaymentErrorTextParam =  "&fcpoerror=".urlencode($sTranslation);
-        $sErrorUrl = $sShopUrl.$sPaymentErrorTextParam."&fcpoamzaction=logoff";
-
-        return $sErrorUrl;
+        return $sShopUrl.$sPaymentErrorTextParam."&fcpoamzaction=logoff";
     }
 
     /**
@@ -778,7 +735,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns MD5 hash of current selected deliveryaddress
      *
-     * @param void
      * @return string
      */
     public function fcpoGetDelAddrInfo()
@@ -799,7 +755,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns payment error wether from param or session
      *
-     * @param void
      * @return mixed
      */
     public function fcpoGetPaymentError()
@@ -817,7 +772,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns payment error text wether from param or session
      *
-     * @param void
      * @return mixed
      */
     public function fcpoGetPaymentErrorText()

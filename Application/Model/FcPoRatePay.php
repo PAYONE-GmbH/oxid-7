@@ -21,11 +21,12 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Model\BaseModel;
 
-class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPoRatepay extends BaseModel
 {
     /**
      * Helper object for dealing with different shop versions
@@ -61,7 +62,7 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (array_key_exists('delete', $aRatePayData) !== false) {
             $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcpoDb->execute($sQuery);
         } else {
             $sQuery = " UPDATE
                             fcporatepay
@@ -71,11 +72,11 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
                             oxpaymentid = " . DatabaseProvider::getDb()->quote($aRatePayData['paymentid']) . "
                         WHERE
                             oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcpoDb->execute($sQuery);
             $this->_fcpoUpdateRatePayProfile($sOxid);
         }
     }
-    
+
     /**
      * Returns an array with Ratepay profiles
      *
@@ -85,13 +86,13 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
     public function fcpoGetRatePayProfiles($sPaymentId = null)
     {
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $aReturn = array();
-        
+        $aReturn = [];
+
         $sFilterPaymentId = "";
         if (is_string($sPaymentId)) {
             $sFilterPaymentId = "WHERE OXPAYMENTID=".$oDb->quote($sPaymentId);
         }
-        
+
         $sQuery = "SELECT * FROM fcporatepay {$sFilterPaymentId}";
         $aRatePayProfiles = $oDb->getAll($sQuery);
 
@@ -102,12 +103,11 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
 
         return $aReturn;
     }
-    
-    
+
+
     /**
      * Add Ratepay shop
      *
-     * @param  void
      * @return void
      */
     public function fcpoAddRatePayProfile()
@@ -185,9 +185,9 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
             )
         ";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcpoDb->execute($sQuery);
     }
-    
+
     /**
      * Returns profiledata by id
      *
@@ -213,18 +213,17 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=".$this->_oFcpoDb->quote($sPaymentId)." LIMIT 1";
         $sOxid = $this->_oFcpoDb->GetOne($sQuery);
-        $aProfile = array();
+        $aProfile = [];
         if ($sOxid) {
             $aProfile = $this->fcpoGetProfileData($sOxid);
         }
 
         return $aProfile;
     }
-    
+
     /**
      * Helper method that returns field-names of ratepay-table
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetFields()
@@ -232,14 +231,14 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sQuery = "SHOW FIELDS FROM fcporatepay";
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
         $aRow = $oDb->getRow($sQuery);
-        $aReturn = array();
-        
+        $aReturn = [];
+
         if (count($aRow)) {
             $aReturn = $aRow;
         }
         return $aReturn;
     }
-    
+
     /**
      * Requests and updates payment information for given shop_id
      *
@@ -255,13 +254,14 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
             $this->_fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse);
         }
     }
-    
+
     /**
      * Collects profile information and save it into profile
      *
-     * @param  string $sOxid
-     * @param  array  $aResponse
+     * @param string $sOxid
+     * @param array  $aResponse
      * @return void
+     * @throws DatabaseErrorException
      */
     protected function _fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse)
     {
@@ -326,7 +326,7 @@ class FcPoRatepay extends \OxidEsales\Eshop\Core\Model\BaseModel
             WHERE 
                 OXID=".$this->_oFcpoDb->quote($sOxid)."
         ";
-        
-        $this->_oFcpoDb->Execute($sQuery);
+
+        $this->_oFcpoDb->execute($sQuery);
     }
 }

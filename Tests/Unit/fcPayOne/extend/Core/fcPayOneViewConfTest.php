@@ -34,7 +34,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -205,7 +205,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Returns if amazonpay is active and though button can be displayed
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -214,7 +213,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
         $oTestObject = oxNew(FcPayOneViewConf::class);
         $oMockPayment = $this->getMock('oxPayment', array('load'));
         $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockPayment->oxpayments__oxactive = new oxField('1');
+        $oMockPayment->oxpayments__oxactive = new Field('1');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockPayment));
@@ -226,7 +225,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonWidgetsUrl for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -235,7 +233,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
         $oTestObject = oxNew(FcPayOneViewConf::class);
         $oMockPayment = $this->getMock('oxPayment', array('load'));
         $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockPayment->oxpayments__fcpolivemode = new oxField('1');
+        $oMockPayment->oxpayments__fcpolivemode = new Field('1');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockPayment));
@@ -249,7 +247,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPayClientId for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -269,7 +266,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPaySellerId for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -289,7 +285,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPayReferenceId or coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -306,7 +301,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPayButtonType for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -326,7 +320,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPayButtonColor for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -346,7 +339,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonPayAddressWidgetIsReadOnly for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -364,7 +356,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmazonRedirectUrl for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -386,7 +377,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoAmazonLoginSessionActive for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -404,7 +394,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetActiveThemePath for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -426,7 +415,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoAmazonEmailEncode for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -442,7 +430,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoAmazonEmailDecode for coverage
      *
-     * @param void
      * @return void
      * @throw exception
      */
@@ -458,7 +445,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoIsAmazonAsyncMode for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -476,7 +462,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmzPopup for setting popup
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -495,7 +480,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmzPopup for setting redirect
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -514,7 +498,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAmzPopup for setting auto
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -533,7 +516,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetCurrentAmzWidgetCount for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -561,15 +543,15 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     public function test_fcpoUserHasSalutation_Coverage()
     {
         $oTestObject = oxNew(FcPayOneViewConf::class);
-        $oMockAddress = oxNew('oxAddress');
-        $oMockAddress->oxaddress__oxsal = new oxField('MR');
+        $oMockAddress = oxNew(Address::class);
+        $oMockAddress->oxaddress__oxsal = new Field('MR');
 
         $oMockUser = $this->getMock('oxUser', array('getSelectedAddress'));
         $oMockUser
             ->expects($this->any())
             ->method('getSelectedAddress')
             ->will($this->returnValue($oMockAddress));
-        $oMockUser->oxuser__oxsal = new oxField('MR');
+        $oMockUser->oxuser__oxsal = new Field('MR');
 
         $oMockBasket = $this->getMock('oxBasket', array('getBasketUser'));
         $oMockBasket
@@ -601,7 +583,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing fcpoGetAllowIncludeAmazonWidgetUrl for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -621,7 +602,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
     /**
      * Testing _fcpoGetExpectedButtonAmount for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */

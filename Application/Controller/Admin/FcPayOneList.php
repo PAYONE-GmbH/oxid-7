@@ -23,11 +23,11 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 
 class FcPayOneList extends \OxidEsales\Eshop\Application\Controller\Admin\AdminListController
 {
-    
+
     /**
      * Current class template name.
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_list.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_list';
 }

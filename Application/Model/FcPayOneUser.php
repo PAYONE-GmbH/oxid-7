@@ -22,7 +22,7 @@ namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
-use Fatchip\PayOne\Application\Model\FcPouserflag;
+use OxidEsales\Eshop\Core\Field;
 use stdClass;
 
 class FcPayOneUser extends FcPayOneUser_parent
@@ -45,13 +45,13 @@ class FcPayOneUser extends FcPayOneUser_parent
      * Blocked payments for user (unvalidated)
      * @var array
      */
-    protected $_aBlockedPaymentIds = array();
+    protected $_aBlockedPaymentIds = [];
 
     /**
      * Forbidden payments for user (validated)
      * @var array
      */
-    protected $_aForbiddenPaymentIds = array();
+    protected $_aForbiddenPaymentIds = [];
 
     /**
      * init object construction
@@ -70,7 +70,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      * @param $sOXID
      * @return mixed
      */
-    public function load($sOXID)
+    public function load($sOXID): mixed
     {
         $mReturn = parent::load($sOXID);
         if ($mReturn !== false) {
@@ -110,7 +110,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns an array of forbidden paymentids
      *
-     * @param void
      * @return array
      */
     public function fcpoGetForbiddenPaymentIds()
@@ -151,7 +150,7 @@ class FcPayOneUser extends FcPayOneUser_parent
           )
         ";
 
-        $oDb->Execute($sQuery);
+        $oDb->execute($sQuery);
     }
 
     /**
@@ -172,12 +171,11 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Sets current flags of user
      *
-     * @param void
      * @return array
      */
     protected function _fcpoSetUserFlags()
     {
-        $this->_aUserFlags = array();
+        $this->_aUserFlags = [];
         $aUserFlagInfos = $this->_fcpoGetUserFlagInfos();
         foreach ($aUserFlagInfos as $oUserFlagInfo) {
             $sOxid = $oUserFlagInfo->sOxid;
@@ -199,12 +197,11 @@ class FcPayOneUser extends FcPayOneUser_parent
      * Returns an array of userflag infos mandatory for
      * determing effects
      *
-     * @param void
      * @return array
      */
     protected function _fcpoGetUserFlagInfos()
     {
-        $aUserFlagInfos = array();
+        $aUserFlagInfos = [];
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
         $sUserId = $this->getId();
         $sQuery = "
@@ -235,7 +232,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Logs user into session
      *
-     * @param void
      * @return void
      */
     protected function _fcpoLogMeIn($sUserId=null)
@@ -349,15 +345,15 @@ class FcPayOneUser extends FcPayOneUser_parent
 
         $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
         $sUserOxid = $oUser->getId();
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[billing_firstname]']);
-        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[billing_lastname]']);
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+        $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxstreet = new Field($aStreetParts['street']);
+        $oUser->oxuser__oxstreetnr = new Field($aStreetParts['streetnr']);
+        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[billing_zip]']);
+        $oUser->oxuser__oxfon = new Field($aResponse['add_paydata[billing_telephonenumber]']);
+        $oUser->oxuser__oxfname = new Field($aResponse['add_paydata[billing_firstname]']);
+        $oUser->oxuser__oxlname = new Field($aResponse['add_paydata[billing_lastname]']);
+        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[billing_city]']);
+        $oUser->oxuser__oxcountryid = new Field($sCountryId);
         $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
@@ -386,15 +382,15 @@ class FcPayOneUser extends FcPayOneUser_parent
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
 
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField(trim($aResponse['add_paydata[billing_firstname]']));
-        $oUser->oxuser__oxlname = new oxField(trim($aResponse['add_paydata[billing_lastname]']));
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+        $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxstreet = new Field($aStreetParts['street']);
+        $oUser->oxuser__oxstreetnr = new Field($aStreetParts['streetnr']);
+        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[billing_zip]']);
+        $oUser->oxuser__oxfon = new Field($aResponse['add_paydata[billing_telephonenumber]']);
+        $oUser->oxuser__oxfname = new Field(trim($aResponse['add_paydata[billing_firstname]']));
+        $oUser->oxuser__oxlname = new Field(trim($aResponse['add_paydata[billing_lastname]']));
+        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[billing_city]']);
+        $oUser->oxuser__oxcountryid = new Field($sCountryId);
         $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
@@ -429,18 +425,18 @@ class FcPayOneUser extends FcPayOneUser_parent
         }
 
         $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
-        $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxfname = new oxField($sFirstName);
-        $oAddress->oxaddress__oxlname = new oxField($sLastName);
-        $oAddress->oxaddress__oxstreet = new oxField($aStreetParts['street']);
-        $oAddress->oxaddress__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oAddress->oxaddress__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
-        $oAddress->oxaddress__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
-        $oAddress->oxaddress__oxcountry = new oxField($aResponse['add_paydata[shipping_country]']);
-        $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
-        $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oAddress->oxaddress__oxaddinfo = new oxField($aResponse['add_paydata[shipping_addressaddition]']);
+        $oAddress->oxaddress__oxuserid = new Field($sUserOxid);
+        $oAddress->oxaddress__oxaddressuserid = new Field($sUserOxid);
+        $oAddress->oxaddress__oxfname = new Field($sFirstName);
+        $oAddress->oxaddress__oxlname = new Field($sLastName);
+        $oAddress->oxaddress__oxstreet = new Field($aStreetParts['street']);
+        $oAddress->oxaddress__oxstreetnr = new Field($aStreetParts['streetnr']);
+        $oAddress->oxaddress__oxfon = new Field($aResponse['add_paydata[shipping_telephonenumber]']);
+        $oAddress->oxaddress__oxcity = new Field($aResponse['add_paydata[shipping_city]']);
+        $oAddress->oxaddress__oxcountry = new Field($aResponse['add_paydata[shipping_country]']);
+        $oAddress->oxaddress__oxcountryid = new Field($sCountryId);
+        $oAddress->oxaddress__oxzip = new Field($aResponse['add_paydata[shipping_zip]']);
+        $oAddress->oxaddress__oxaddinfo = new Field($aResponse['add_paydata[shipping_addressaddition]']);
 
         // check if address exists
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
@@ -596,7 +592,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         $blValidResponse = ($aResponse && is_array($aResponse) && array_key_exists('fcWrongCountry', $aResponse) === false);
 
         if ($blValidResponse) {
-            $this->oxuser__fcpobonicheckdate = new oxField(date('Y-m-d H:i:s'));
+            $this->oxuser__fcpobonicheckdate = new Field(date('Y-m-d H:i:s'));
         }
 
         $this->save();
@@ -650,7 +646,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Check, correct and return addresschecktype
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetAddressCheckType()
@@ -745,15 +740,12 @@ class FcPayOneUser extends FcPayOneUser_parent
         }
 
         // merge results
-        $blChecksValid = ($blBoniChecked && $blAddressValid);
-
-        return $blChecksValid;
+        return ($blBoniChecked && $blAddressValid);
     }
 
     /**
      * Performing address check
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoPerformAddressCheck()
@@ -771,33 +763,27 @@ class FcPayOneUser extends FcPayOneUser_parent
 
         // perform validations
         $blIsValidAddress = $this->_fcpoValidateAddress($blFCPOCorrectAddress);
-        $blIsValidAddress = $this->_fcpoValidateDelAddress($blIsValidAddress, $blFCPOCheckDelAddress);
-
-        return $blIsValidAddress;
+        return $this->_fcpoValidateDelAddress($blIsValidAddress, $blFCPOCheckDelAddress);
     }
 
     /**
      * Returns addresscheck setting or false if inactive
      *
-     * @param void
      * @return mixed bool/string
      */
     protected function _fcpoGetAddresscheckSetting()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
-        $mFCPOAddresscheck = ($sFCPOAddresscheck == 'NO') ? false : $sFCPOAddresscheck;
-
-        return $mFCPOAddresscheck;
+        return ($sFCPOAddresscheck == 'NO') ? false : $sFCPOAddresscheck;
     }
 
     /**
      * Performing boni check on user
      *
-     * @param void
-     * @return void
+     * @return bool|null
      */
-    protected function _fcpoPerformBoniCheck()
+    protected function _fcpoPerformBoniCheck(): ?bool
     {
         $sFCPOBonicheck = $this->_fcpoGetBoniSetting();
         $blBoniCheckNeeded = $this->isBonicheckNeeded();
@@ -813,7 +799,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns boni setting or false if inactive
      *
-     * @param void
      * @return mixed bool/string
      */
     protected function _fcpoGetBoniSetting()
@@ -885,8 +870,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Requesting for boni of user if conditions are alright
      *
-     * @param void
-     * @return void
+     * @return true
      */
     protected function _fcpoValidateBoni()
     {
@@ -935,9 +919,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         }
 
         // dig deeper, do corrections if configured
-        $blReturn = $this->_fcpoValidateResponse($aResponse, $blCorrectUserAddress);
-
-        return $blReturn;
+        return $this->_fcpoValidateResponse($aResponse, $blCorrectUserAddress);
     }
 
     /**
@@ -987,22 +969,22 @@ class FcPayOneUser extends FcPayOneUser_parent
         } else {
             if ($blCorrectUserAddress) {
                 if ($aResponse['firstname']) {
-                    $this->oxuser__oxfname = new oxField($aResponse['firstname']);
+                    $this->oxuser__oxfname = new Field($aResponse['firstname']);
                 }
                 if ($aResponse['lastname']) {
-                    $this->oxuser__oxlname = new oxField($aResponse['lastname']);
+                    $this->oxuser__oxlname = new Field($aResponse['lastname']);
                 }
                 if ($aResponse['streetname']) {
-                    $this->oxuser__oxstreet = new oxField($aResponse['streetname']);
+                    $this->oxuser__oxstreet = new Field($aResponse['streetname']);
                 }
                 if ($aResponse['streetnumber']) {
-                    $this->oxuser__oxstreetnr = new oxField($aResponse['streetnumber']);
+                    $this->oxuser__oxstreetnr = new Field($aResponse['streetnumber']);
                 }
                 if ($aResponse['zip']) {
-                    $this->oxuser__oxzip = new oxField($aResponse['zip']);
+                    $this->oxuser__oxzip = new Field($aResponse['zip']);
                 }
                 if ($aResponse['city']) {
-                    $this->oxuser__oxcity = new oxField($aResponse['city']);
+                    $this->oxuser__oxcity = new Field($aResponse['city']);
                 }
                 $this->save();
             }
@@ -1015,7 +997,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Unsetting groups
      *
-     * @param  void
      * @return void
      */
     public function fcpoUnsetGroups()

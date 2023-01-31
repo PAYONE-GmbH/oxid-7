@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -69,9 +69,9 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
     public function test_getAction_Coverage()
     {
         $oTestObject = oxNew(FcPoTransactionStatus::class);
-        $oTestObject->fcpotransactionstatus__fcpo_txaction = new oxField('paid');
-        $oTestObject->fcpotransactionstatus__fcpo_txreceivable = new oxField(10);
-        $oTestObject->fcpotransactionstatus__fcpo_balance = new oxField(-20);
+        $oTestObject->fcpotransactionstatus__fcpo_txaction = new Field('paid');
+        $oTestObject->fcpotransactionstatus__fcpo_txreceivable = new Field(10);
+        $oTestObject->fcpotransactionstatus__fcpo_balance = new Field(-20);
 
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslation'));
@@ -89,13 +89,13 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
      */
     public function test_getClearingtype_Coverage()
     {
-        $oMockOrder = oxNew('oxOrder');
-        $oMockOrder->oxorder__oxpaymenttype = new oxField('somePaymentType');
+        $oMockOrder = oxNew(Order::class);
+        $oMockOrder->oxorder__oxpaymenttype = new Field('somePaymentType');
 
         $oTestObject = $this->getMock('fcpotransactionstatus', array('_fcpoGetOrderByTxid'));
         $oTestObject->expects($this->any())->method('_fcpoGetOrderByTxid')->will($this->returnValue($oMockOrder));
-        $oTestObject->fcpotransactionstatus__fcpo_txid = new oxField('someTxid');
-        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new oxField('fnc');
+        $oTestObject->fcpotransactionstatus__fcpo_txid = new Field('someTxid');
+        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new Field('fnc');
 
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslation'));
@@ -136,11 +136,11 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
     {
         $oMockOrder = $this->getMock('oxOrder', array('load'));
         $oMockOrder->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockOrder->oxorder__oxtotalordersum = new oxField(100);
+        $oMockOrder->oxorder__oxtotalordersum = new Field(100);
 
         $oTestObject = $this->getMock('fcpotransactionstatus', array('_fcpoGetOrderByTxid'));
         $oTestObject->expects($this->any())->method('_fcpoGetOrderByTxid')->will($this->returnValue($oMockOrder));
-        $oTestObject->fcpotransactionstatus__fcpo_txid = new oxField('someTxid');
+        $oTestObject->fcpotransactionstatus__fcpo_txid = new Field('someTxid');
 
         $this->assertEquals($oMockOrder->oxorder__oxtotalordersum, $oTestObject->getCaptureAmount());
     }
@@ -151,7 +151,7 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
     public function test_getCardtype_Coverage()
     {
         $oTestObject = oxNew(FcPoTransactionStatus::class);
-        $oTestObject->fcpotransactionstatus__fcpo_cardtype = new oxField('B');
+        $oTestObject->fcpotransactionstatus__fcpo_cardtype = new Field('B');
 
         $this->assertEquals('Carte Bleue', $oTestObject->getCardtype());
     }
@@ -172,8 +172,8 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
         $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oTestObject->fcpotransactionstatus__fcpo_txid = new oxField('someTxid');
-        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new oxField('fnc');
+        $oTestObject->fcpotransactionstatus__fcpo_txid = new Field('someTxid');
+        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new Field('fnc');
 
         $this->assertEquals('someTranslation', $oTestObject->getDisplayNameReceivable(100));
     }
@@ -194,8 +194,8 @@ class Unit_fcPayOne_Application_Models_fcpotransactionstatus extends OxidTestCas
         $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oTestObject->fcpotransactionstatus__fcpo_txid = new oxField('someTxid');
-        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new oxField('fnc');
+        $oTestObject->fcpotransactionstatus__fcpo_txid = new Field('someTxid');
+        $oTestObject->fcpotransactionstatus__fcpo_clearingtype = new Field('fnc');
 
         $this->assertEquals('someTranslation', $oTestObject->getDisplayNamePayment(100));
     }

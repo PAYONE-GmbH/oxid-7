@@ -3,8 +3,8 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
+use Fatchip\PayOne\Lib\FcPoHelper;
 
 class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
 {
@@ -20,7 +20,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
      *
      * @var array
      */
-    protected $_aConfBools = array();
+    protected $_aConfBools = [];
 
     /**
      * fcpoconfigexport instance
@@ -48,7 +48,6 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * Template getter for boolean config values
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetConfBools()
@@ -59,7 +58,6 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * Save Method overwriting
      *
-     * @param void
      * @return void
      */
     public function save()
@@ -82,7 +80,6 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * Loads configurations of payone and make them accessable
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoLoadConfigs($sShopId)

@@ -10,12 +10,12 @@ class FcCheckChecksum
     protected $_blGotModuleInfo = null;
     protected $_sShopSystem = null;
     protected $_sVersionCheckUrl = 'http://version.fatchip.de/fcVerifyChecksum.php';
-    
+
     protected function _getBasePath()
     {
         return dirname(__FILE__).'/';
     }
-    
+
     protected function _getShopBasePath()
     {
         if ($this->_sShopSystem == 'oxid') {
@@ -44,7 +44,7 @@ class FcCheckChecksum
             $this->_blGotModuleInfo = true;
         }
     }
-    
+
     protected function _handleComposerJson($sFilePath)
     {
         $sFile = file_get_contents($sFilePath);
@@ -69,10 +69,10 @@ class FcCheckChecksum
             $this->_blGotModuleInfo = true;
         }
     }
-    
+
     protected function _getFilesToCheck()
     {
-        $aFiles = array();
+        $aFiles = [];
         if (file_exists($this->_getBasePath().'metadata.php')) {
             $this->_handleMetadata($this->_getBasePath().'metadata.php');
         }
@@ -88,10 +88,10 @@ class FcCheckChecksum
         }
         return $aFiles;
     }
-    
+
     protected function _checkFiles($aFiles)
     {
-        $aChecksums = array();
+        $aChecksums = [];
         foreach ($aFiles as $sFilePath) {
             $sFullFilePath = $this->_getShopBasePath().$sFilePath;
             if (file_exists($sFullFilePath)) {
@@ -100,7 +100,7 @@ class FcCheckChecksum
         }
         return $aChecksums;
     }
-    
+
     protected function _getCheckResults($aChecksums)
     {
         $oCurl = curl_init();
@@ -111,18 +111,18 @@ class FcCheckChecksum
         curl_setopt(
             $oCurl,
             CURLOPT_POSTFIELDS,
-            array(
+            [
             'checkdata' => json_encode($aChecksums),    // you'll have to change the name, here, I suppose
             'module' => $this->_sModuleId,
             'version' => $this->_sModuleVersion,
-            )
+            ]
         );
         $sResult = curl_exec($oCurl);
         curl_close($oCurl);
-        
+
         return $sResult;
     }
-    
+
     public function checkChecksumXml($blOutput = false)
     {
         if (ini_get('allow_url_fopen') == 0) {

@@ -58,7 +58,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -88,13 +88,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing isPayOnePaymentType for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_isPayOnePaymentType_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $this->assertEquals(true, $oTestObject->isPayOnePaymentType());
     }
@@ -102,13 +101,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing isPayOneIframePayment for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_isPayOneIframePayment_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $this->assertEquals(false, $oTestObject->isPayOneIframePayment());
     }
@@ -116,7 +114,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoDoesUserAlreadyExist for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoDoesUserAlreadyExist_Coverage()
@@ -134,7 +131,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetIdByUserName for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetIdByUserName_Coverage()
@@ -159,7 +155,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetIdByCode for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetIdByCode_Coverage()
@@ -176,7 +171,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetSalByFirstName for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetSalByFirstName_Coverage()
@@ -193,7 +187,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAddressIdByResponse for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetAddressIdByResponse_Coverage()
@@ -207,7 +200,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $aMockResponse = array();
+        $aMockResponse = [];
         $aMockResponse['add_paydata[shipping_firstname]'] = 'someFirstname';
         $aMockResponse['add_paydata[shipping_lastname]'] = 'someLastname';
         $aMockResponse['add_paydata[shipping_city]'] = 'someCity';
@@ -220,7 +213,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcProcessUserAgentInfo for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcProcessUserAgentInfo_Coverage()
@@ -232,7 +224,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoCheckUserAgent for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoCheckUserAgent_Coverage()
@@ -262,7 +253,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoValidateToken for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoValidateToken_Coverage()
@@ -274,7 +264,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcGetCurrentVersion for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcGetCurrentVersion_Coverage()
@@ -292,7 +281,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _isRedirectAfterSave for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__isRedirectAfterSave_Coverage()
@@ -312,7 +300,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing finalizeOrder for case order is not payone
      *
-     * @param  void
      * @return void
      */
     public function test_finalizeOrder_NoPayone()
@@ -405,7 +392,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing finalizeOrder for case order is payone
      *
-     * @param  void
      * @return void
      */
     public function test_finalizeOrder_IsPayone()
@@ -497,7 +483,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing finalizeOrder for case order is payone and order exists
      *
-     * @param  void
      * @return void
      */
     public function test_finalizeOrder_IsPayone_OrderExists()
@@ -592,7 +577,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing finalizeOrder for case order is payone and order to be recalculated and having orderstate
      *
-     * @param  void
      * @return void
      */
     public function test_finalizeOrder_IsPayone_RecalcOrderHasOrderState()
@@ -686,7 +670,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing finalizeOrder for case order is payone and order to be recalculated and having no orderstate
      *
-     * @param  void
      * @return void
      */
     public function test_finalizeOrder_IsPayone_RecalcOrderNoOrderState()
@@ -779,7 +762,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoProcessOrder for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoProcessOrder_Coverage()
@@ -816,8 +798,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $this->assertEquals('someValue', $oTestObject->_fcpoExecutePayment(true, $oMockBasket, $oMockUserPayment, true));
     }
@@ -836,8 +818,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $this->assertEquals(null, $oTestObject->_fcpoExecutePayment(true, $oMockBasket, $oMockUserPayment, true));
     }
@@ -856,8 +838,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $this->assertEquals(false, $oTestObject->_fcpoExecutePayment(false, $oMockBasket, $oMockUserPayment, false));
     }
@@ -876,8 +858,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $this->assertEquals(null, $oTestObject->_fcpoExecutePayment(false, $oMockBasket, $oMockUserPayment, true));
     }
@@ -896,7 +878,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
+        $oMockBasket = oxNew(Basket::class);
 
         $this->assertEquals(null, $oTestObject->_fcpoHandleBasket(true, $oMockBasket));
     }
@@ -915,7 +897,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someSessionValue'));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
+        $oMockBasket = oxNew(Basket::class);
 
         $this->assertEquals(null, $oTestObject->_fcpoHandleBasket(false, $oMockBasket));
     }
@@ -939,8 +921,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
 
         $this->assertEquals(true, $oTestObject->_fcpoEarlyValidation(false, $oMockBasket, $oMockUser, false));
     }
@@ -964,8 +946,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
 
         $this->assertEquals(true, $oTestObject->_fcpoEarlyValidation(true, $oMockBasket, $oMockUser, false));
     }
@@ -989,8 +971,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
 
         $this->assertEquals(null, $oTestObject->_fcpoEarlyValidation(true, $oMockBasket, $oMockUser, true));
     }
@@ -1000,9 +982,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      */
     public function test__fcpoFinishOrder_SendMail()
     {
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $oTestObject = $this->getMock('fcPayOneOrder', array('_sendOrderByEmail'));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(1));
@@ -1015,9 +997,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      */
     public function test__fcpoFinishOrder_StateOK()
     {
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
-        $oMockUserPayment = oxNew('oxUserPayment');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
+        $oMockUserPayment = oxNew(UserPayment::class);
 
         $oTestObject = $this->getMock('fcPayOneOrder', array('_sendOrderByEmail'));
         $oTestObject->expects($this->any())->method('_sendOrderByEmail')->will($this->returnValue(1));
@@ -1065,8 +1047,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
     public function test__fcpoMarkVouchers_Coverage()
     {
-        $oMockBasket = oxNew('oxBasket');
-        $oMockUser = oxNew('oxUser');
+        $oMockBasket = oxNew(Basket::class);
+        $oMockUser = oxNew(User::class);
 
         $oTestObject = $this->getMock('fcPayOneOrder', array('_markVouchers'));
         $oTestObject->expects($this->any())->method('_markVouchers')->will($this->returnValue(true));
@@ -1116,7 +1098,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoSaveOrderValues for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoSaveOrderValues_Coverage()
@@ -1143,13 +1124,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoCheckTxid for case txid is in session
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoCheckTxid_TxidInSession()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxremark = new oxField('');
+        $oTestObject->oxorder__oxremark = new Field('');
 
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslatedString'));
@@ -1172,13 +1152,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoCheckTxid for case txid is not in session
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoCheckTxid_TxidNotInSession()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxremark = new oxField('');
+        $oTestObject->oxorder__oxremark = new Field('');
 
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslatedString'));
@@ -1201,19 +1180,18 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoCheckRefNr for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoCheckRefNr_Coverage()
     {
         $oMockRequest = $this->getMock('fcporequest', array('getRefNr', 'sendRequestAuthorization'));
         $oMockRequest->expects($this->any())->method('getRefNr')->will($this->returnValue('someRefValue'));
-        $oMockRequest->expects($this->any())->method('sendRequestAuthorization')->will($this->returnValue(array()));
+        $oMockRequest->expects($this->any())->method('sendRequestAuthorization')->will($this->returnValue([]));
 
         $oMockPayment = $this->getMock('oxPayment', array('load', 'fcpoGetMode'));
         $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockPayment->expects($this->any())->method('fcpoGetMode')->will($this->returnValue('test'));
-        $oMockPayment->oxpayments__fcpoauthmode = new oxField('someAuthMode');
+        $oMockPayment->oxpayments__fcpoauthmode = new Field('someAuthMode');
 
         $oTestObject = oxNew(FcPayOneOrder::class);
 
@@ -1233,7 +1211,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _insert for older versions
      *
-     * @param  void
      * @return void
      */
     public function test__insert_OldVersion()
@@ -1245,7 +1222,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject = $this->getMock('fcPayOneOrder', array('_fcGetCurrentVersion', '_setNumber', '_getCounterIdent'));
         $oTestObject->expects($this->any())->method('_setNumber')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_getCounterIdent')->will($this->returnValue('someCounterIdent'));
-        $oTestObject->oxorder__oxordernr = new oxField('');
+        $oTestObject->oxorder__oxordernr = new Field('');
 
         $oMockUtilsDate = $this->getMock('oxUtilsDate', array('getTime', 'formatDBDate'));
         $oMockUtilsDate->expects($this->any())->method('getTime')->will($this->returnValue(time()));
@@ -1268,7 +1245,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _insert for newer versions with ordernr set
      *
-     * @param  void
      * @return void
      */
     public function test__insert_NewVersion_OrderNrSet()
@@ -1280,7 +1256,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcGetCurrentVersion')->will($this->returnValue(4800));
         $oTestObject->expects($this->any())->method('_setNumber')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_getCounterIdent')->will($this->returnValue('someCounterIdent'));
-        $oTestObject->oxorder__oxordernr = new oxField('1234');
+        $oTestObject->oxorder__oxordernr = new Field('1234');
 
         $oMockUtilsDate = $this->getMock('oxUtilsDate', array('getTime', 'formatDBDate'));
         $oMockUtilsDate->expects($this->any())->method('getTime')->will($this->returnValue(time()));
@@ -1303,7 +1279,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _insert for newer versions without ordernr set
      *
-     * @param  void
      * @return void
      */
     public function test__insert_NewVersion_OrderNrNotSet()
@@ -1315,7 +1290,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcGetCurrentVersion')->will($this->returnValue(4800));
         $oTestObject->expects($this->any())->method('_setNumber')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_getCounterIdent')->will($this->returnValue('someCounterIdent'));
-        $oTestObject->oxorder__oxordernr = new oxField('');
+        $oTestObject->oxorder__oxordernr = new Field('');
 
         $oMockUtilsDate = $this->getMock('oxUtilsDate', array('getTime', 'formatDBDate'));
         $oMockUtilsDate->expects($this->any())->method('getTime')->will($this->returnValue(time()));
@@ -1338,7 +1313,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _insert for newer versions with orderdate set
      *
-     * @param  void
      * @return void
      */
     public function test__insert_NewVersion_OrderDateSet()
@@ -1350,8 +1324,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcGetCurrentVersion')->will($this->returnValue(4800));
         $oTestObject->expects($this->any())->method('_setNumber')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_getCounterIdent')->will($this->returnValue('someCounterIdent'));
-        $oTestObject->oxorder__oxordernr = new oxField('');
-        $oTestObject->oxorder__oxorderdate = new oxField('2016-05-09');
+        $oTestObject->oxorder__oxordernr = new Field('');
+        $oTestObject->oxorder__oxorderdate = new Field('2016-05-09');
 
         $oMockUtilsDate = $this->getMock('oxUtilsDate', array('getTime', 'formatDBDate'));
         $oMockUtilsDate->expects($this->any())->method('getTime')->will($this->returnValue(time()));
@@ -1374,7 +1348,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing save with presave
      *
-     * @param  void
      * @return void
      */
     public function test_save_Presave()
@@ -1390,7 +1363,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockOrderArticle = $this->getMock('oxOrderArticle', array('save'));
         $oMockOrderArticle->expects($this->any())->method('save')->will($this->returnValue(true));
 
-        $aOrderArticles = array();
+        $aOrderArticles = [];
         $aOrderArticles[] = $oMockOrderArticle;
 
         $oMockUtilsDate = $this->getMock('oxUtilsDate', array('getTime', 'formatDBDate'));
@@ -1402,7 +1375,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('_isRedirectAfterSave')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getShopId')->will($this->returnValue('oxbaseshop'));
-        $oTestObject->oxorder__oxshopid = new oxField(false);
+        $oTestObject->oxorder__oxshopid = new Field(false);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
@@ -1417,7 +1390,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing save without presave
      *
-     * @param  void
      * @return void
      */
     public function test_save_NoPresave()
@@ -1437,7 +1409,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtilsDate->expects($this->any())->method('getTime')->will($this->returnValue(time()));
         $oMockUtilsDate->expects($this->any())->method('formatDBDate')->will($this->returnValue('someFormattedTime'));
 
-        $aOrderArticles = array();
+        $aOrderArticles = [];
         $aOrderArticles[] = $oMockOrderArticle;
 
         $oTestObject = $this->getMock('fcPayOneOrder', array('getOrderArticles', 'isPayOnePaymentType', '_isRedirectAfterSave', 'getShopId'));
@@ -1445,7 +1417,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_isRedirectAfterSave')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getShopId')->will($this->returnValue('oxbaseshop'));
-        $oTestObject->oxorder__oxshopid = new oxField(false);
+        $oTestObject->oxorder__oxshopid = new Field(false);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
@@ -1460,13 +1432,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing allowCapture with authorization
      *
-     * @param  void
      * @return void
      */
     public function test_allowCapture_Authorization()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__fcpoauthmode = new oxField('authorization');
+        $oTestObject->oxorder__fcpoauthmode = new Field('authorization');
 
         $oMockDatabase = $this->getMock('oxDb', array('GetOne'));
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
@@ -1478,13 +1449,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing allowCapture without authorization
      *
-     * @param  void
      * @return void
      */
     public function test_allowCapture_Preauthorization()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__fcpoauthmode = new oxField('preauthorization');
+        $oTestObject->oxorder__fcpoauthmode = new Field('preauthorization');
 
         $oMockDatabase = $this->getMock('oxDb', array('GetOne'));
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
@@ -1496,14 +1466,13 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing allowDebit set to authorization
      *
-     * @param  void
      * @return void
      */
     public function test_allowDebit_Authorization()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__fcpoauthmode = new oxField('authorization');
-        $oTestObject->oxorder__fcpotxid = new oxField('123456789');
+        $oTestObject->oxorder__fcpoauthmode = new Field('authorization');
+        $oTestObject->oxorder__fcpotxid = new Field('123456789');
 
         $oMockDatabase = $this->getMock('oxDb', array('GetOne'));
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
@@ -1515,14 +1484,13 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing allowDebit set to authorization
      *
-     * @param  void
      * @return void
      */
     public function test_allowDebit_Preauthorization()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__fcpoauthmode = new oxField('preauthorization');
-        $oTestObject->oxorder__fcpotxid = new oxField('123456789');
+        $oTestObject->oxorder__fcpoauthmode = new Field('preauthorization');
+        $oTestObject->oxorder__fcpotxid = new Field('123456789');
 
         $oMockDatabase = $this->getMock('oxDb', array('GetOne'));
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
@@ -1534,7 +1502,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing allowAccountSettlement for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_allowAccountSettlement_Coverage()
@@ -1547,7 +1514,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing debitNeedsBankData for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_debitNeedsBankData_Coverage()
@@ -1560,13 +1526,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing isDetailedProductInfoNeeded for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_isDetailedProductInfoNeeded_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentNotOnExceptionList');
+        $oTestObject->oxorder__oxpaymenttype = new Field('somePaymentNotOnExceptionList');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig
@@ -1584,13 +1549,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getSequenceNumber for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getSequenceNumber_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__fcpotxid = new oxField('someTxid');
+        $oTestObject->oxorder__fcpotxid = new Field('someTxid');
 
         $oMockDatabase = $this->getMock('oxDb', array('GetOne'));
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(1));
@@ -1602,7 +1566,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getLastStatus for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getLastStatus_Coverage()
@@ -1626,7 +1589,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getResponse for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getResponse_Coverage()
@@ -1654,7 +1616,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getResponseParameter for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getResponseParameter_Coverage()
@@ -1669,7 +1630,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoBankaccountholder for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoBankaccountholder_Coverage()
@@ -1683,7 +1643,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoBankname for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoBankname_Coverage()
@@ -1697,7 +1656,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoBankcode for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoBankcode_Coverage()
@@ -1711,7 +1669,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoBanknumber for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoBanknumber_Coverage()
@@ -1725,7 +1682,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoBiccode for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoBiccode_Coverage()
@@ -1739,7 +1695,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoIbannumber for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoIbannumber_Coverage()
@@ -1753,15 +1708,14 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing getFcpoCapturableAmount for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getFcpoCapturableAmount_Coverage()
     {
         $oMockTransaction = oxNew(FcPoTransactionStatus::class);
-        $oMockTransaction->fcpotransactionstatus__fcpo_receivable = new oxField(50);
+        $oMockTransaction->fcpotransactionstatus__fcpo_receivable = new Field(50);
         $oTestObject = $this->getMock('fcPayOneOrder', array('getLastStatus'));
-        $oTestObject->oxorder__oxtotalordersum = new oxField(100);
+        $oTestObject->oxorder__oxtotalordersum = new Field(100);
 
         $this->assertEquals(100, $oTestObject->getFcpoCapturableAmount());
     }
@@ -1769,7 +1723,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing validateStock on older shop version
      *
-     * @param  void
      * @return void
      */
     public function test_validateStock_OldShopVersion()
@@ -1781,7 +1734,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockProduct = $this->getMock('oxArticle', array('getId', 'checkForStock'));
         $oMockProduct->expects($this->any())->method('getId')->will($this->returnValue('someId'));
         $oMockProduct->expects($this->any())->method('checkForStock')->will($this->returnValue(false));
-        $oMockProduct->oxarticles__oxartnum = new oxField('someArtNum');
+        $oMockProduct->oxarticles__oxartnum = new Field('someArtNum');
 
         $oMockBasketItem = $this->getMock('oxBasketItem', array('getArticle'));
         $oMockBasketItem->expects($this->any())->method('getArticle')->will($this->returnValue($oMockProduct));
@@ -1802,7 +1755,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing validateStock on newer shop version
      *
-     * @param  void
      * @return void
      */
     public function test_validateStock_NewerShopVersion()
@@ -1814,7 +1766,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockProduct = $this->getMock('oxArticle', array('getId', 'checkForStock'));
         $oMockProduct->expects($this->any())->method('getId')->will($this->returnValue('someId'));
         $oMockProduct->expects($this->any())->method('checkForStock')->will($this->returnValue(false));
-        $oMockProduct->oxarticles__oxartnum = new oxField('someArtNum');
+        $oMockProduct->oxarticles__oxartnum = new Field('someArtNum');
 
         $oMockBasketItem = $this->getMock('oxBasketItem', array('getArticle'));
         $oMockBasketItem->expects($this->any())->method('getArticle')->will($this->returnValue($oMockProduct));
@@ -1835,7 +1787,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing validateStock on oxNoArticleException
      *
-     * @param  void
      * @return void
      */
     public function test_validateStock_ExceptionNoArticle()
@@ -1847,7 +1798,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockProduct = $this->getMock('oxArticle', array('getId', 'checkForStock'));
         $oMockProduct->expects($this->any())->method('getId')->will($this->returnValue('someId'));
         $oMockProduct->expects($this->any())->method('checkForStock')->will($this->returnValue(false));
-        $oMockProduct->oxarticles__oxartnum = new oxField('someArtNum');
+        $oMockProduct->oxarticles__oxartnum = new Field('someArtNum');
 
         $oMockException = new oxNoArticleException;
 
@@ -1870,7 +1821,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing validateStock on oxArticleInputException
      *
-     * @param  void
      * @return void
      */
     public function test_validateStock_ExceptionInput()
@@ -1882,7 +1832,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockProduct = $this->getMock('oxArticle', array('getId', 'checkForStock'));
         $oMockProduct->expects($this->any())->method('getId')->will($this->returnValue('someId'));
         $oMockProduct->expects($this->any())->method('checkForStock')->will($this->returnValue(false));
-        $oMockProduct->oxarticles__oxartnum = new oxField('someArtNum');
+        $oMockProduct->oxarticles__oxartnum = new Field('someArtNum');
 
         $oMockException = new oxArticleInputException;
 
@@ -1905,7 +1855,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcGetArtStockInBasket for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcGetArtStockInBasket_Coverage()
@@ -1930,13 +1879,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcIsPayPalOrder for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcIsPayPalOrder_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpopaypal_express');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpopaypal_express');
 
         $this->assertEquals(true, $oTestObject->fcIsPayPalOrder());
     }
@@ -1944,12 +1892,11 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcHandleAuthorization for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_fcHandleAuthorization_Coverage()
     {
-        $aMockResponse = array();
+        $aMockResponse = [];
         $oMockRequest = $this->getMock('fcporequest', array('getRefNr', 'sendRequestAuthorization'));
         $oMockRequest->expects($this->any())->method('getRefNr')->will($this->returnValue('someRefValue'));
         $oMockRequest->expects($this->any())->method('sendRequestAuthorization')->will($this->returnValue($aMockResponse));
@@ -1957,7 +1904,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockPayment = $this->getMock('oxPayment', array('load', 'fcpoGetMode'));
         $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockPayment->expects($this->any())->method('fcpoGetMode')->will($this->returnValue('test'));
-        $oMockPayment->oxpayments__fcpoauthmode = new oxField('someAuthMode');
+        $oMockPayment->oxpayments__fcpoauthmode = new Field('someAuthMode');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
@@ -1966,11 +1913,11 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcpoHandleAuthorizationResponse')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getOrderUser')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoGetNextOrderNr')->will($this->returnValue('someOrderId'));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentType');
+        $oTestObject->oxorder__oxpaymenttype = new Field('somePaymentType');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->onConsecutiveCalls($oMockRequest, $oMockPayment));
-        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(array()));
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue([]));
         $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(true));
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
@@ -2033,7 +1980,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoGetOrderNotChecked for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoGetOrderNotChecked_Coverage()
@@ -2049,7 +1995,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationResponse in case of error response
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationResponse_Error()
@@ -2060,7 +2005,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcpoHandleAutrhorizationRedirect')->will($this->returnValue(true));
 
         $aMockResponse['status'] = 'ERROR';
-        $oMockPaymentGateway = oxNew('oxPaymentGateway');
+        $oMockPaymentGateway = oxNew(PaymentGateway::class);
         $sMockRefNr = $sMockMode = $sMockAuthorizationType = 'someValue';
         $blMockReturnRedirectUrl = false;
 
@@ -2070,7 +2015,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationResponse in case of approved response
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationResponse_Approved()
@@ -2081,7 +2025,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcpoHandleAutrhorizationRedirect')->will($this->returnValue(true));
 
         $aMockResponse['status'] = 'APPROVED';
-        $oMockPaymentGateway = oxNew('oxPaymentGateway');
+        $oMockPaymentGateway = oxNew(PaymentGateway::class);
         $sMockRefNr = $sMockMode = $sMockAuthorizationType = 'someValue';
         $blMockReturnRedirectUrl = false;
 
@@ -2091,7 +2035,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationRedirect for case that redirect url is in response and shall be returned
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationRedirect_ReturnRedirect()
@@ -2102,7 +2045,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject->expects($this->any())->method('_fcpoHandleAutrhorizationRedirect')->will($this->returnValue(true));
 
         $aMockResponse['status'] = 'REDIRECT';
-        $oMockPaymentGateway = oxNew('oxPaymentGateway');
+        $oMockPaymentGateway = oxNew(PaymentGateway::class);
         $sMockRefNr = $sMockMode = $sMockAuthorizationType = 'someValue';
         $blMockReturnRedirectUrl = true;
 
@@ -2112,7 +2055,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationRedirect for case that redirect url is in response and shall be redirected without using the iframe
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationRedirect_NoReturnNoIframe()
@@ -2145,7 +2087,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationRedirect for case that redirect url is in response and shall be redirected using the iframe
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationRedirect_NoReturnIframe()
@@ -2186,7 +2127,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $oTestObject = $this->getMock('fcPayOneOrder', array('getOrderArticles'));
         $oTestObject->expects($this->any())->method('getOrderArticles')->will($this->returnValue($aMockOrderArticles));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpopaypal');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpopaypal');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
@@ -2200,14 +2141,13 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationApproved for Barzahlen
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationApproved_Barzahlen()
     {
         $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoGetOrderNotChecked'));
         $oTestObject->expects($this->any())->method('_fcpoGetOrderNotChecked')->will($this->returnValue(1));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpobarzahlen');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpobarzahlen');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
@@ -2230,14 +2170,13 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationApproved for payolution payments
      *
-     * @param  void
      * @return void
      */
     public function test__fcpoHandleAuthorizationApproved_Payolution()
     {
         $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoGetOrderNotChecked'));
         $oTestObject->expects($this->any())->method('_fcpoGetOrderNotChecked')->will($this->returnValue(1));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpopo_bill');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpopo_bill');
 
         $oMockConfig = $this->getMock('OxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
@@ -2263,7 +2202,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationError for standard payment
      *
-     * @param void
      * @return void
      */
     public function test__fcpoHandleAuthorizationError_Standard()
@@ -2280,7 +2218,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             ->expects($this->any())
             ->method('_fcpoGetAmazonSuccessCode')
             ->will($this->returnValue('someAmazonSuccessCode'));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentId');
+        $oTestObject->oxorder__oxpaymenttype = new Field('somePaymentId');
 
         $oMockPayGate = $this->getMock('oxPaymentGate', array(
             'fcSetLastErrorNr',
@@ -2306,7 +2244,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoHandleAuthorizationError for amazon payment
      *
-     * @param void
      * @return void
      */
     public function test__fcpoHandleAuthorizationError_Amazon()
@@ -2314,7 +2251,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject = $this->getMock('fcPayOneOrder', array('fcpoGetAmazonErrorMessage','_fcpoGetAmazonSuccessCode'));
         $oTestObject->expects($this->any())->method('fcpoGetAmazonErrorMessage')->will($this->returnValue('someAmazonErrorMessage'));
         $oTestObject->expects($this->any())->method('_fcpoGetAmazonSuccessCode')->will($this->returnValue('someAmazonSuccessCode'));
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpoamazonpay');
+        $oTestObject->oxorder__oxpaymenttype = new Field('fcpoamazonpay');
 
         $oMockPayGate = $this->getMock('oxPaymentGate', array('fcSetLastErrorNr', 'fcSetLastError'));
         $oMockPayGate->expects($this->any())->method('fcSetLastErrorNr')->will($this->returnValue(true));
@@ -2328,7 +2265,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoSaveWorkorderId for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoSaveWorkorderId_Coverage()
@@ -2349,7 +2285,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoSaveClearingReference for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoSaveClearingReference_Coverage()
@@ -2367,7 +2302,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoSaveProfileIdent for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoSaveProfileIdent_Coverage()
@@ -2385,7 +2319,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorMessage for coverage
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorMessage_Coverage()
@@ -2409,7 +2342,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoGetAmazonSuccessCode for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoGetAmazonSuccessCode_Coverage()
@@ -2421,7 +2353,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of invalid payment method
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_InvalidPaymentMethod()
@@ -2436,7 +2367,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of amazon rejected
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_AmazonRejected()
@@ -2454,7 +2384,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of processing error
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_ProcessingError()
@@ -2469,7 +2398,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of buyer equals seller
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_BuyerEqualsSeller()
@@ -2484,7 +2412,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of payment not allowed
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_PaymentNotAllowed()
@@ -2499,7 +2426,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of payment plan not set
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_PlanNotSet()
@@ -2514,7 +2440,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of shipping not set
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_ShippingNotSet()
@@ -2530,7 +2455,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * Testing fcpoGetAmazonErrorTranslationString in case of transaction
      * timed out
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_TimedOut()
@@ -2545,7 +2469,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing fcpoGetAmazonErrorTranslationString in case of non listed problem
      *
-     * @param void
      * @return void
      */
     public function test_fcpoGetAmazonErrorTranslationString_Default()
@@ -2560,7 +2483,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     /**
      * Testing _fcpoIsPayonePaymentType with positive check on standard
      *
-     * @param void
      * @return void
      */
     public function test__fcpoIsPayonePaymentType_Standard()

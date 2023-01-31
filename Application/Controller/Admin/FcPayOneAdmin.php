@@ -29,5 +29,5 @@ class FcPayOneAdmin extends FcPayOneAdminView
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone';
 }

@@ -17,24 +17,24 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
-    
-    
+
+
     /**
      * Helper object for dealing with different shop versions
      *
      * @var object
      */
     protected $_oFcpoHelper = null;
-    
+
     /**
      * Instance of DatabaseProvider
      *
@@ -48,7 +48,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      * @var string
      */
     protected $_sMandatePdfUrl = null;
-    
+
     /**
      * Html for Barzahlen
      *
@@ -62,7 +62,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      */
     protected $_blIsAmazonOrder = false;
 
-    
+
     /**
      * init object construction
      *
@@ -79,13 +79,12 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     /**
      * Returns generated mandate pdf url and deletes it from session afterwards
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetMandatePdfUrl()
     {
         $sPdfUrl    = false;
-        $oConfig    = $this->getConfig();
+        $oConfig    = $this->_oFcpoHelper->fcpoGetConfig();
         $oOrder     = $this->getOrder();
 
 
@@ -117,15 +116,14 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         }
         $this->_sMandatePdfUrl = $sPdfUrl;
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoMandate');
-        
+
         return $this->_sMandatePdfUrl;
     }
-    
-    
+
+
     /**
      * Method checks for an appointment error
      *
-     * @param  void
      * @return bool
      */
     public function fcpoIsAppointedError()
@@ -138,15 +136,14 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
                 $blReturn = true;
             }
         }
-        
+
         return $blReturn;
     }
-    
-    
+
+
     /**
      * Sets userid into session berfore triggering the parent method
      *
-     * @param  void
      * @return string
      */
     public function render()
@@ -160,14 +157,13 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         $this->_fcpoDeleteSessionVariablesOnOrderFinish();
 
         $sReturn = parent::render();
-        
+
         return $sReturn;
     }
 
     /**
      * Deletes session variables that should not last after finishing order
      *
-     * @param void
      * @return void
      */
     protected function _fcpoDeleteSessionVariablesOnOrderFinish()
@@ -180,7 +176,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     /**
      * Returns if current order is of type amazon
      *
-     * @param void
      * @return bool
      */
     public function fcpoIsAmazonOrder()
@@ -191,7 +186,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     /**
      * Loggs off Amazon if this is an Amazon order
      *
-     * @param void
      * @return void
      */
     protected function _fcpoHandleAmazonThankyou()
@@ -212,7 +206,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     /**
      * Checks if current order is of type amazon
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoDetermineAmazonOrder()
@@ -226,11 +219,10 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         return $blReturn;
     }
 
-    
+
     /**
      * Returns the html of barzahlen instructions
      *
-     * @param  void
      * @return mixed
      */
     public function fcpoGetBarzahlenHtml()
@@ -240,14 +232,13 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
             // delete this from session after we have the result for one time displaying
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
         }
-        
+
         return $this->_sBarzahlenHtml;
     }
 
     /**
      * View controller getter for deciding if clearing data should be shown
      *
-     * @param void
      * @return bool
      */
     public function fcpoShowClearingData()

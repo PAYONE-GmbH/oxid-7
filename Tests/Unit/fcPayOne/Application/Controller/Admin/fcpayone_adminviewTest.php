@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
      * @throws exception
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -64,7 +64,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
     /**
      * Testing fcGetAdminSeperator for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -83,7 +82,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
     /**
      * Testing getViewId for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -96,7 +94,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
     /**
      * Testing fcpoGetVersion for coverage
      *
-     * @param void
      * @return void
      * @throws
      */
@@ -116,7 +113,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
     /**
      * Testing fcpoGetMerchantId for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */
@@ -139,7 +135,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends Oxi
     /**
      * Testing fcpoGetIntegratorId for coverage
      *
-     * @param void
      * @return void
      * @throws exception
      */

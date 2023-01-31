@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_apilog extends OxidTe
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -65,7 +65,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_apilog extends OxidTe
     /**
      * Run render method just for getting the coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Render_Coverage()

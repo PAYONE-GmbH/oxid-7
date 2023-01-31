@@ -32,7 +32,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_order.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_order';
 
     /**
      * Array with existing status of order
@@ -139,16 +139,15 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Get all transaction status for the given order
      *
-     * @param  void
      * @return array
      */
     public function getStatus()
     {
         if (!$this->_aStatus) {
-            $this->_aStatus = array();
+            $this->_aStatus = [];
             $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
             if ($sOxid != "-1" && isset($sOxid)) {
-                $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+                $oOrder = $this->_oFcpoHelper->getFactoryObject('Order');
                 $oOrder->load($sOxid);
             }
 
@@ -162,7 +161,6 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Triggers capture request to PAYONE API and displays the result
      *
-     * @param  void
      * @return null
      */
     public function capture()
@@ -203,7 +201,6 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Triggers debit request to PAYONE API and displays the result
      *
-     * @param  void
      * @return null
      */
     public function debit()
@@ -251,7 +248,6 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Gets the url of mandate pdf
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetMandatePdfUrl()
@@ -341,10 +337,9 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Returns request message if there is a relevant one
      *
-     * @param  void
      * @return string
      */
-    public function fcpoGetRequestMessage()
+    public function fcpoGetRequestMessage(): string
     {
         $sReturn = "";
 

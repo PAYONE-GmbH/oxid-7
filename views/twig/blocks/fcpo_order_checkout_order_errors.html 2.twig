@@ -1,0 +1,4 @@
+{{ parent() }}
+{% if oView.fcpoIsMandateError() %}
+    {% include "message/error.html.twig" with {statusMessage: "FCPO_ORDER_MANDATE_ERROR"|translate} %}
+{% endif %}

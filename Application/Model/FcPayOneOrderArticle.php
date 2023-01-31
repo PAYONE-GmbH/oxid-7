@@ -22,6 +22,8 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Base;
 
 class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
 {
@@ -104,7 +106,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         }
 
         // ordered articles
-        if (($blSave = oxBase::save()) && $this->isNewOrderItem() || $blBefore === false) {
+        if (($blSave = Base::save()) && $this->isNewOrderItem() || $blBefore === false) {
             if ($oConfig->getConfigParam('blUseStock')) {
                 if ($oConfig->getConfigParam('blPsBasketReservationEnabled')) {
                     $this->getSession()
@@ -116,7 +118,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
                 }
             }
 
-            $this->_setOrderFiles();
+            $this->setOrderFiles();
 
             // marking object as "non new" disable further stock changes
             $this->setIsNewOrderItem(false);
@@ -129,7 +131,6 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      * Method checks conditions for reducing stock after using a redirect payment
      * It depends on settings and payment method
      *
-     * @param  void
      * @return boolean
      */
     protected function _fcCheckReduceStockAfterRedirect()
@@ -202,7 +203,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         if ($sPaymentId) {
-            $oPayment = oxNew('oxpayment');
+            $oPayment = oxNew(Payment::class);
             $oPayment->load($sPaymentId);
             if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) === false) {
                 return parent::delete($sOXID);
@@ -228,13 +229,12 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      */
     protected function _fcpoProcessBaseDelete($sOXID)
     {
-        return oxBase::delete($sOXID);
+        return Base::delete($sOXID);
     }
 
     /**
      * Returns wether payone order should be pre-saved
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoGetBefore()

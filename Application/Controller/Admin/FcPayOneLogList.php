@@ -36,8 +36,8 @@ class FcPayOneLogList extends FcPayoneAdminList
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_log_list.tpl';
-    
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_log_list';
+
 
     /**
      * Get config parameter PAYONE portal ID
@@ -51,7 +51,7 @@ class FcPayOneLogList extends FcPayoneAdminList
         return $sReturn;
     }
 
-    
+
     /**
      * Get config parameter PAYONE sub-account ID
      *
@@ -63,7 +63,7 @@ class FcPayOneLogList extends FcPayoneAdminList
         $sReturn = $oConfig->getConfigParam('sFCPOSubAccountID');
         return $sReturn;
     }
-    
+
 
     /**
      * Filter log entries, show only log entries of configured PAYONE account
@@ -73,15 +73,15 @@ class FcPayOneLogList extends FcPayoneAdminList
      *
      * @return string
      */
-    protected function _prepareWhereQuery($aWhere, $sQ)
+    protected function prepareWhereQuery($aWhere, $sQ)
     {
-        $sQ = parent::_prepareWhereQuery($aWhere, $sQ);
+        $sQ = parent::prepareWhereQuery($aWhere, $sQ);
         $sPortalId = $this->getPortalId();
         $sAid = $this->getSubAccountId();
         return $sQ." AND fcpotransactionstatus.fcpo_portalid = '{$sPortalId}' AND fcpotransactionstatus.fcpo_aid = '{$sAid}' ";
     }
-    
-    
+
+
     /**
      * Returns list filter array
      *
@@ -95,8 +95,8 @@ class FcPayOneLogList extends FcPayoneAdminList
 
         return $this->_aListFilter;
     }
-    
-    
+
+
     /**
      * Returns sorting fields array
      *
@@ -114,8 +114,8 @@ class FcPayOneLogList extends FcPayoneAdminList
 
         return $this->_aCurrSorting;
     }
-    
-    
+
+
     /**
      * Return input name for searchfields in list by shop-version
      *
@@ -128,7 +128,7 @@ class FcPayOneLogList extends FcPayoneAdminList
         }
         return "where[{$sTable}.{$sField}]";
     }
-    
+
 
     /**
      * Return input form value for searchfields in list by shop-version
@@ -143,8 +143,8 @@ class FcPayOneLogList extends FcPayoneAdminList
         }
         return $aWhere[$sTable.'.'.$sField];
     }
-    
-    
+
+
     /**
      * Return needed javascript for sorting in list by shop-version
      *

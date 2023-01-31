@@ -34,7 +34,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -93,7 +93,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
     /**
      * Testing fcpoAmazonLoginReturn with needed data
      *
-     * @param void
      * @return void
      */
     public function test_fcpoAmazonLoginReturn_NeededDataAvailable()
@@ -126,7 +125,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
     /**
      * Testing fcpoAmazonLoginReturn without needed data
      *
-     * @param void
      * @return void
      */
     public function test_fcpoAmazonLoginReturn_NeededDataUnavailable()
@@ -159,7 +157,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
     /**
      * Testing _fcpoHandleAmazonNoTokenFound for case that double redirect is allowed
      *
-     * @param void
      * @return void
      */
     public function test__fcpoHandleAmazonNoTokenFound_Allowed()
@@ -188,7 +185,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
     /**
      * Testing _fcpoHandleAmazonNoTokenFound for case that double redirect is not allowed
      *
-     * @param void
      * @return void
      */
     public function test__fcpoHandleAmazonNoTokenFound_NotAllowed()

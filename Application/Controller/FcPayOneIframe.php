@@ -18,7 +18,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -38,16 +38,16 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayoneiframe.tpl';
-    
+    protected $_sThisTemplate = '@fcpayone/frontend/fcpayoneiframe';
+
     /**
      * Order object
      *
      * @var object
      */
     protected $_oOrder = null;
-    
-    
+
+
     /**
      * Class constructor, sets all required parameters for requests.
      */
@@ -56,13 +56,12 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
-    
-    
-    
+
+
+
     /**
      * The conbtroller renderer
      *
-     * @param  void
      * @return string
      */
     public function render()
@@ -73,8 +72,8 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return parent::render();
     }
-    
-    
+
+
     /**
      * Returns a factory instance of given object
      *
@@ -85,12 +84,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
     {
         return oxNew($sName);
     }
-    
-    
+
+
     /**
      * Returns the order object
      *
-     * @param  void
      * @return object
      */
     public function getOrder()
@@ -106,12 +104,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $this->_oOrder;
     }
-    
-    
+
+
     /**
      * Returns iframe url or redirects directly to it
      *
-     * @param  void
      * @return mixed
      */
     public function getIframeUrl()
@@ -126,17 +123,16 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
                 return $oOrder->fcHandleAuthorization(true);
             }
             */
-            $oConfig    = $this->getConfig();
+            $oConfig    = $this->_oFcpoHelper->fcpoGetConfig();
             $oUtils     = $this->_oFcpoHelper->fcpoGetUtils();
             $oUtils->redirect($oConfig->getShopCurrentURL().'&cl=payment');
         }
     }
-    
-    
+
+
     /**
      * Get the height of the iframe
      *
-     * @param  void
      * @return string
      */
     public function getIframeHeight()
@@ -149,12 +145,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $sHeight;
     }
-    
+
 
     /**
      * Get the width of the iframe
      *
-     * @param  void
      * @return string
      */
     public function getIframeWidth()
@@ -167,12 +162,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $sWidth;
     }
-    
-    
+
+
     /**
      * Get the style of the iframe
      *
-     * @param  void
      * @return string
      */
     public function getIframeStyle()
@@ -185,12 +179,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $sStyle;
     }
-    
-    
+
+
     /**
      * Get the header of iframe
      *
-     * @param  void
      * @return string
      */
     public function getIframeHeader()
@@ -203,12 +196,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $sHeader;
     }
-    
-    
+
+
     /**
      * Get text of iframe
      *
-     * @param  void
      * @return mixed
      */
     public function getIframeText()
@@ -221,12 +213,11 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         }
         return $sText;
     }
-    
-    
+
+
     /**
      * Get payment type
      *
-     * @param  void
      * @return string
      */
     public function getPaymentType()

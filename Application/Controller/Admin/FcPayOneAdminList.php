@@ -13,26 +13,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
-class FcPayOneAdminList extends \OxidEsales\Eshop\Application\Controller\Admin\AdminListController
+class FcPayOneAdminList extends AdminListController
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var null|FcPoHelper
      */
-    protected $_oFcpoHelper = null;
-    
+    protected null|FcPoHelper $_oFcpoHelper = null;
+
     /**
      * Centralized Database instance
      *
@@ -43,11 +45,13 @@ class FcPayOneAdminList extends \OxidEsales\Eshop\Application\Controller\Admin\A
 
     /**
      * Init needed data
+     *
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb     = DatabaseProvider::getDb();
+        $this->_oFcpoDb = DatabaseProvider::getDb();
     }
 }

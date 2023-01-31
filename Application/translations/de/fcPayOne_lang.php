@@ -22,7 +22,7 @@ $sLangName = "Deutsch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset'                                             => 'UTF-8',
     'FCPO_IBAN_INVALID'                                   => 'Bitte geben Sie eine korrekte IBAN ein.',
     'FCPO_BIC_INVALID'                                    => 'Bitte geben Sie eine korrekte BIC ein.',
@@ -210,7 +210,7 @@ $aLang = array(
     'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'                 => 'Ich stimme zu, dass meine persönlichen Daten zur Durchführung der Zahlung der Klarna GmbH gesendet werden dürfen.',
     'FCPO_KLARNA_NOT_AGREED'                              => 'Sie müssen der Übermittlung ihrer Daten zustimmen, um mit Klarna zu bezahlen.',
     'FCPO_KLARNA_NO_AUTHORIZATION'                        => 'Es ist ein unerwarteter Fehler aufgetreten.',
-);
+];
 
 /*
 [{oxmultilang ident="GENERAL_YOUWANTTODELETE"}]

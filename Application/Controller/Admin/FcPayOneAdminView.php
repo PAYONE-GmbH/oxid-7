@@ -14,26 +14,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
-class FcPayOneAdminView extends \OxidEsales\Eshop\Application\Controller\Admin\AdminController
+class FcPayOneAdminView extends AdminController
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper|null
      */
-    protected $_oFcpoHelper = null;
-    
+    protected ?FcPoHelper $_oFcpoHelper = null;
+
     /**
      * Centralized Database instance
      *
@@ -49,10 +50,10 @@ class FcPayOneAdminView extends \OxidEsales\Eshop\Application\Controller\Admin\A
     {
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb     = DatabaseProvider::getDb();
+        $this->_oFcpoDb = DatabaseProvider::getDb();
     }
-    
-    
+
+
     /**
      * Return admin template seperator sign by shop-version
      *
@@ -60,14 +61,9 @@ class FcPayOneAdminView extends \OxidEsales\Eshop\Application\Controller\Admin\A
      */
     public function fcGetAdminSeperator()
     {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iVersion < 4300) {
-            return '?';
-        } else {
-            return '&';
-        }
+        return '&';
     }
-    
+
     /**
      * Returns current view identifier
      *
@@ -77,24 +73,22 @@ class FcPayOneAdminView extends \OxidEsales\Eshop\Application\Controller\Admin\A
     {
         return 'dyn_fcpayone';
     }
-    
-    
+
+
     /**
      * Template getter for integrator ID
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetIntegratorId()
     {
         return $this->_oFcpoHelper->fcpoGetIntegratorId();
     }
-    
-    
+
+
     /**
      * Template getter returns payone connector version
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetVersion()
@@ -105,7 +99,6 @@ class FcPayOneAdminView extends \OxidEsales\Eshop\Application\Controller\Admin\A
     /**
      * Template getter for Merchant ID
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetMerchantId()

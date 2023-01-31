@@ -49,7 +49,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajax extends OxidTestCase
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -505,7 +505,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajax extends OxidTestCase
     {
         $oTestObject = oxNew(FcPayOneAjax::class);
 
-        $sResponse = $sExpect = $oTestObject->_fcpoGetInsterestRadio('someKey', array());
+        $sResponse = $sExpect = $oTestObject->_fcpoGetInsterestRadio('someKey', []);
         $this->assertEquals($sExpect, $sResponse);
     }
 
@@ -517,7 +517,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajax extends OxidTestCase
         $oTestObject = $this->getMock('fcpayone_ajax', array('_fcpoGetInsterestCaption'));
         $oTestObject->expects($this->any())->method('_fcpoGetInsterestCaption')->will($this->returnValue('someCaption'));
 
-        $sResponse = $sExpect = $oTestObject->_fcpoGetInsterestLabel('someKey', array());
+        $sResponse = $sExpect = $oTestObject->_fcpoGetInsterestLabel('someKey', []);
         $this->assertEquals($sExpect, $sResponse);
     }
 

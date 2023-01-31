@@ -9,8 +9,9 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneUserView extends FcPayOneUserView_parent
 {
@@ -43,21 +44,20 @@ class FcPayOneUserView extends FcPayOneUserView_parent
     /**
      * Method will be called when returning from amazonlogin
      *
-     * @param void
      * @return void
      */
     public function fcpoAmazonLoginReturn()
     {
         $oSession = $this->getSession();
-        $oUtilsServer = oxRegistry::get('oxUtilsServer');
+        $oUtilsServer = Registry::get('oxUtilsServer');
         $sPaymentId = 'fcpoamazonpay';
 
         // OXID-233 : if the user is logged in, we save the id in session for later
         // AmazonPay process uses a new user, created on the fly
         // Then we need the original Id to link back the order to the initial user
-        $user = oxRegistry::getSession()->getUser();
+        $user = Registry::getSession()->getUser();
         if ($user) {
-            oxRegistry::getSession()->setVariable('sOxidPreAmzUser', $user->getId());
+            Registry::getSession()->setVariable('sOxidPreAmzUser', $user->getId());
         }
 
         // delete possible old data
@@ -87,12 +87,11 @@ class FcPayOneUserView extends FcPayOneUserView_parent
     /**
      * Handles the case that there is no access token available/accessable
      *
-     * @param void
      * @return void
      */
     protected function _fcpoHandleAmazonNoTokenFound()
     {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aAllowedDoubleRedirectModes = array('redirect', 'auto');
         $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
         $blAllowedForDoubleRedirect = (in_array($sFCPOAmazonLoginMode, $aAllowedDoubleRedirectModes));
@@ -112,7 +111,6 @@ class FcPayOneUserView extends FcPayOneUserView_parent
     /**
      * Returns user error message if there is some. false if none
      *
-     * @param void
      * @return mixed string|bool
      */
     public function fcpoGetUserErrorMessage()

@@ -23,6 +23,10 @@ namespace Fatchip\PayOne\Lib;
 /*
  * load OXID Framework
  */
+
+use Exception;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
 function getShopBasePath()
 {
     return dirname(__FILE__).'/../../../../';
@@ -41,36 +45,41 @@ $sUseLogin = filter_input(INPUT_GET, 'login');
  *
  * @author andre
  */
-class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPopopUpContent extends BaseModel
 {
-    
+
     /**
      * url to be fetched
      *
      * @var string
      */
     protected $_sUrl = null;
-    
+
     /**
      * Flag that indicates, that login should be used
      *
      * @var bool
      */
     protected $_blUseLogin = null;
-    
+
     /**
      * Flag if fetched content should be returned with pdf header
      *
      * @var bool
      */
     protected $_blPdfHeader = null;
-    
+
     /**
      * Duration for installment
      *
      * @var string
      */
     protected $_sDuration = null;
+
+    /**
+     * @var FcPoHelper
+     */
+    protected $_oFcpoHelper;
 
     /**
      * Initialization
@@ -84,28 +93,28 @@ class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
         $this->_blUseLogin = $blUseLogin;
         $this->_blPdfHeader = $blPdfHeader;
         $this->_sDuration = $sDuration;
+        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
      * Fetch and return content
      *
-     * @param  void
      * @return string
      */
     public function fcpo_fetch_content()
     {
         $resCurl = curl_init();
         $sUrl = $this->_sUrl."&duration=".$this->_sDuration;
-        
+
         curl_setopt($resCurl, CURLOPT_URL, $sUrl);
         curl_setopt($resCurl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($resCurl, CURLOPT_FOLLOWLOCATION, true);
-         
+
         if ($this->_blUseLogin) {
             $aCredentials = $this->_fcpoGetPayolutionCredentials();
             curl_setopt($resCurl, CURLOPT_USERPWD, $aCredentials['user'].':'.$aCredentials['pass']);
         }
-        
+
         $blCurlError = false;
         try {
             $sContent = curl_exec($resCurl);
@@ -114,7 +123,7 @@ class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
                 $blCurlError = true;
                 $sContent = $this->_fcpoReturnErrorMessage('Authentication failure! Please check your credentials in payolution settings.');
             }
-        } catch (oxException $oEx) {
+        } catch (Exception $oEx) {
             $blCurlError = true;
             $sContent = $this->_fcpoReturnErrorMessage($oEx->getMessage());
         }
@@ -123,10 +132,10 @@ class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
         if ($this->_blPdfHeader && !$blCurlError) {
             header('Content-Type: application/pdf');
         }
-        
+
         return $sContent;
     }
-    
+
     /**
      * Formats error message to be displayed in a error box
      *
@@ -138,24 +147,24 @@ class FcPopopUpContent extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sReturn  = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';
-        
+
         return $sReturn;
     }
-    
-    
+
+
     /**
      * Returns configured credentials
      *
-     * @param  void
-     * @return void
+     * @return array
      */
-    protected function _fcpoGetPayolutionCredentials()
+    protected function _fcpoGetPayolutionCredentials(): array
     {
-        $oConfig = $this->getConfig();
-        $aCredentials = array();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
+        $aCredentials = [];
         $aCredentials['user'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthUser');
         $aCredentials['pass'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthSecret');
-        
+
         return $aCredentials;
     }
 }

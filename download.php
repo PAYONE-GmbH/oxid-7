@@ -17,7 +17,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne;
 
 set_time_limit(0);
@@ -27,9 +27,10 @@ ini_set('error_log', 'error.log');
 
 include_once dirname(__FILE__) . "/../../../bootstrap.php";
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 /**
  * Description of FcPayOneMandateDownload
@@ -57,7 +58,6 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     /**
      * Render overloading
      *
-     * @param void
      * @return void
      */
     public function render()
@@ -77,7 +77,7 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     protected function _redownloadMandate($sMandateFilename, $sOrderId, $sPaymentId)
     {
         $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
-        $oPayment = oxNew('oxPayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load($sPaymentId);
         $sMode = $oPayment->fcpoGetOperationMode();
 
@@ -89,7 +89,6 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
      * Returns user id which has been sent directly as param
      * or fetch userid from other sources
      *
-     * @param void
      * @return mixed
      */
     protected function _fcpoGetUserId()
@@ -106,7 +105,6 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     /**
      * Return query for fetching mandate mandatory information
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetMandateQuery()
@@ -148,7 +146,6 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     /**
      * Triggers download action for mandate
      *
-     * @param void
      * @return void
      */
     protected function _fcpoMandateDownloadAction()

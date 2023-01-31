@@ -21,10 +21,16 @@
 
 namespace Fatchip\PayOne\Lib;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\BasketItem;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\OrderArticle;
+use OxidEsales\Eshop\Application\Model\OrderArticleList;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 {
@@ -41,14 +47,14 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      *
      * @var array
      */
-    protected $_aParameters = array();
+    protected $_aParameters = [];
 
     /*
      * Array of valid countries for addresscheck basic
      *
      * @var array
      */
-    protected $_aValidCountrys = array(
+    protected $_aValidCountrys = [
         'BE',
         'DK',
         'DE',
@@ -69,8 +75,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         'CZ',
         'HU',
         'US',
-    );
-    protected $_aStateNeededCountries = array(
+    ];
+
+    protected $_aStateNeededCountries = [
         'US',
         'CA',
         'CN',
@@ -81,7 +88,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         'ID',
         'TH',
         'IN',
-    );
+    ];
 
     /*
      * URL of PAYONE Server API
@@ -96,7 +103,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * @var string
      */
     protected $_sFrontendApiUrl = 'https://secure.pay1.de/frontend/';
-    protected $_aFrontendUnsetParams = array(
+    protected $_aFrontendUnsetParams = [
         'mid',
         'integrator_name',
         'integrator_version',
@@ -106,8 +113,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         'errorurl',
         'salutation',
         'pseudocardpan',
-    );
-    protected $_aFrontendHashParams = array(
+    ];
+
+    protected $_aFrontendHashParams = [
         'aid',
         'amount',
         'backurl',
@@ -127,7 +135,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         'targetwindow',
         'va',
         'key'
-    );
+    ];
 
     /**
      * Used api version
@@ -140,10 +148,10 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      *
      * @var array
      */
-    protected $_aRatePayPayments = array(
+    protected $_aRatePayPayments = [
         'fcporp_bill',
         'fcporp_debitnote',
-    );
+    ];
 
     /**
      * Class constructor, sets all required parameters for requests.
@@ -230,7 +238,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function getOperationMode($sPaymentType, $sType = '')
     {
-        $oPayment = oxNew('oxpayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load($sPaymentType);
         return $oPayment->fcpoGetOperationMode($sType);
     }
@@ -281,7 +289,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         );
 
         if ($oOrder->oxorder__oxdellname->value != '') {
-            $oDelCountry = oxNew('oxcountry');
+            $oDelCountry = oxNew(Country::class);
             $oDelCountry->load($oOrder->oxorder__oxdelcountryid->value);
 
             $this->addParameter('shipping_firstname', $oOrder->oxorder__oxdelfname->value);
@@ -300,7 +308,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxdelstateid->value));
             }
         } elseif ($blIsWalletTypePaymentWithDelAddress) {
-            $oDelCountry = oxNew('oxcountry');
+            $oDelCountry = oxNew(Country::class);
             $oDelCountry->load($oOrder->oxorder__oxbillcountryid->value);
 
             $this->addParameter('shipping_firstname', $oOrder->oxorder__oxbillfname->value);
@@ -654,7 +662,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
         }
 
-        $oBillCountry = oxNew('oxcountry');
+        $oBillCountry = oxNew(Country::class);
         $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
         $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
     }
@@ -769,7 +777,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
         }
 
-        $oBillCountry = oxNew('oxcountry');
+        $oBillCountry = oxNew(Country::class);
         $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
         $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
     }
@@ -806,7 +814,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Add parameters needed for post finance financing
      *
-     * @param void
      * @return void
      */
     protected function addParametersOnlinePostFinance()
@@ -819,7 +826,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Add parameters needed for post finance card
      *
-     * @param void
      * @return void
      */
     protected function addParametersOnlinePostFinanceCard()
@@ -846,7 +852,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Add parameters needed for P24
      *
-     * @param void
      * @return void
      */
     protected function addParametersOnlineP24()
@@ -866,7 +871,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $this->addParameter('clearingtype', 'sb'); //Payment method
         $this->addParameter('onlinebanktransfertype', 'BCT');
-        $oBillCountry = oxNew('oxcountry');
+        $oBillCountry = oxNew(Country::class);
         $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
         $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
     }
@@ -896,11 +901,11 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $dAmount = 0;
 
-        /** @var oxorderarticlelist $aOrderArticleListe */
+        /** @var OrderArticleList $aOrderArticleListe */
         $aOrderArticleListe = $oOrder->getOrderArticles();
         $i = 1;
 
-        /** @var oxorderarticle $oOrderarticle */
+        /** @var OrderArticle $oOrderarticle */
         foreach ($aOrderArticleListe->getArray() as $oOrderarticle) {
             if ($aPositions === false || array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
@@ -920,7 +925,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sQuery = "SELECT IF(SUM(fcpocapturedamount) = 0, 1, 0) AS b FROM oxorderarticles WHERE oxorderid = '{$oOrder->getId()}' GROUP BY oxorderid";
-        $blFirstCapture = (bool) DatabaseProvider::getDb()->GetOne($sQuery);
+        $blFirstCapture = (bool) DatabaseProvider::getDb()->getOne($sQuery);
 
         if ($aPositions === false || $blFirstCapture === true || $blDebit === true) {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
@@ -1170,7 +1175,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $this->_aParameters['targetwindow'] = 'parent';
 
-        $aHashParams = array();
+        $aHashParams = [];
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (array_search($sKey, $this->_aFrontendUnsetParams) !== false) {
                 unset($this->_aParameters[$sKey]);
@@ -1210,7 +1215,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Template getter for checking which kind of field should be shown
      *
-     * @param  oxuser $oUser
+     * @param  User $oUser
      * @return bool
      */
     public function fcpoIsB2B($oUser)
@@ -1235,7 +1240,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Method that determines if order is B2B
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoIsOrderB2B($oOrder)
@@ -1246,7 +1250,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Method adds all bunch of ratepay-params
      *
-     * @param  oxOrder $oOrder
+     * @param Order $oOrder
      * @param array $aDynvalue
      * @return false => no redirect params
      */
@@ -1265,11 +1269,11 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $sFinancignType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
         $oCur = $oConfig->getActShopCurrencyObject();
         $sCountry = '';
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         if ($oCountry->load($oUser->oxuser__oxcountryid->value)) {
             $sCountry = $oCountry->oxcountry__oxisoalpha2->value;
         }
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         $sShippingCountry = '';
         if ($oCountry->load($oOrder->oxuser__oxdelcountryid->value)) {
             $sShippingCountry = $oCountry->oxcountry__oxisoalpha2->value;
@@ -1330,7 +1334,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * Adding products from basket session into call
      *
      *
-     * @param void
      * @param string $sDeliverySetId
      * @return void
      * @return object
@@ -1478,14 +1481,14 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Item price in smallest available unit
      *
-     * @param  oxBasketItem/double $mValue
+     * @param  BasketItem/double $mValue
      * @return int
      */
     protected function _fcpoGetCentPrice($mValue)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $dBruttoPrice = 0.00;
-        if ($mValue instanceof oxBasketItem) {
+        if ($mValue instanceof BasketItem) {
             $oPrice = $mValue->getPrice();
             $dBruttoPricePosSum = $oPrice->getBruttoPrice();
             $dAmount = $mValue->getAmount();
@@ -1564,7 +1567,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adds needed parameters for payolution
      *
-     * @param  oxOrder $oOrder
+     * @param  Order $oOrder
      * @return bool
      */
     protected function _fcpoAddPayolutionParameters($oOrder)
@@ -1628,7 +1631,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Performs a refund_anouncement call
      *
-     * @param  oxOrder $oOrder
+     * @param  Order $oOrder
      * @return array
      */
     public function sendRequestPayolutionRefundAnnouncement($oOrder)
@@ -1656,7 +1659,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      *
      * @param string $sPaymentId
-     * @param oxUser $oUser
+     * @param User $oUser
      * @param array  $aBankData
      * @param string $sAction
      * @param string $sWorkorderId
@@ -1719,9 +1722,10 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Sends a payolution precheck request to
      *
-     * @param  string $sType
-     * @param  object $oUser
-     * @param  string $sWorkorderId
+     * @param        $sPaymentId
+     * @param object $oUser
+     * @param        $aBankData
+     * @param null   $sWorkorderId
      * @return array
      */
     public function sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkorderId = null)
@@ -1809,7 +1813,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sCountry = '';
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         if ($oCountry->load($oUser->oxuser__oxcountryid->value)) {
             $sCountry = $oCountry->oxcountry__oxisoalpha2->value;
         }
@@ -1819,7 +1823,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns if company data should be added to call deepending on settings and payment type
      *
-     * @param  oxUser $oUser
+     * @param  User $oUser
      * @param  string $sPaymentId
      * @return bool
      */
@@ -1918,7 +1922,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Requests amazon configuration
      *
-     * @param void
      * @return array
      */
     public function sendRequestGetAmazonPayConfiguration()
@@ -2020,7 +2023,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      *
      * @param $sAmazonReferenceId
      * @param $sToken
-     * @return void
+     * @return array|string
      */
     public function sendRequestGetConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5)
     {
@@ -2138,7 +2141,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns url to shipping terms url
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetPaydirektShippingTermsUrl()
@@ -2152,7 +2154,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns checkout type of paydirekt express initial call
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetPaydirektCheckoutType()
@@ -2225,53 +2226,53 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $sKey = 'bill';
         }
 
-        $aMap = array(
-            'countryid' => array(
+        $aMap = [
+            'countryid' => [
                 'bill' => 'oxuser__oxcountryid',
                 'shipping' => 'oxaddress__oxcountryid',
-            ),
-            'shipping_firstname' =>  array(
+            ],
+            'shipping_firstname' =>  [
                 'bill' => 'oxuser__oxfname',
                 'shipping' => 'oxaddress__oxfname',
-            ),
-            'shipping_lastname' =>  array(
+            ],
+            'shipping_lastname' =>  [
                 'bill' => 'oxuser__oxlname',
                 'shipping' => 'oxaddress__oxlname',
-            ),
-            'shipping_company' =>  array(
+            ],
+            'shipping_company' =>  [
                 'bill' => 'oxuser__oxcompany',
                 'shipping' => 'oxaddress__oxcompany',
-            ),
-            'shipping_street' =>  array(
+            ],
+            'shipping_street' =>  [
                 'bill' => 'oxuser__oxstreet',
                 'shipping' => 'oxaddress__oxstreet',
-            ),
-            'shipping_streetnr' =>  array(
+            ],
+            'shipping_streetnr' =>  [
                 'bill' => 'oxuser__oxstreetnr',
                 'shipping' => 'oxaddress__oxstreetnr',
-            ),
-            'shipping_zip' =>  array(
+            ],
+            'shipping_zip' =>  [
                 'bill' => 'oxuser__oxzip',
                 'shipping' => 'oxaddress__oxzip',
-            ),
-            'shipping_city' =>  array(
+            ],
+            'shipping_city' =>  [
                 'bill' => 'oxuser__oxcity',
                 'shipping' => 'oxaddress__oxcity',
-            ),
-            'stateid' =>  array(
+            ],
+            'stateid' =>  [
                 'bill' => 'oxuser__oxstateid',
                 'shipping' => 'oxaddress__oxstateid',
-            ),
-            'shipping_title' =>  array(
+            ],
+            'shipping_title' =>  [
                 'bill' => 'oxuser__oxsal',
                 'shipping' => 'oxaddress__oxsal',
-            ),
-            'shipping_telephonenumber' =>  array(
+            ],
+            'shipping_telephonenumber' =>  [
                 'bill' => 'oxuser__oxfon',
                 'shipping' => 'oxaddress__oxfon',
-            ),
+            ],
 
-        );
+        ];
 
         $oDelCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
         $oDelCountry->load($oAddress->{$aMap['countryid'][$sKey]}->value);
@@ -2399,7 +2400,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 $sQuery = "UPDATE oxorderarticles SET fcpocapturedamount = fcpocapturedamount + {$aPos['amount']} WHERE oxid = '{$sOrderArtId}'";
-                DatabaseProvider::getDb()->Execute($sQuery);
+                DatabaseProvider::getDb()->execute($sQuery);
             }
         }
 
@@ -2540,7 +2541,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                         $sQuery = "UPDATE oxorderarticles SET fcpodebitedamount = fcpodebitedamount + {$aPos['amount']} WHERE oxid = '{$sOrderArtId}'";
                         break;
                 }
-                DatabaseProvider::getDb()->Execute($sQuery);
+                DatabaseProvider::getDb()->execute($sQuery);
             }
         }
 
@@ -2564,7 +2565,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function addAddressParamsByAddress($oAddress)
     {
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         $oCountry->load($oAddress->oxaddress__oxcountryid->value);
 
         $this->addParameter('firstname', $oAddress->oxaddress__oxfname->value);
@@ -2605,7 +2606,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function addAddressParamsByUser($oUser)
     {
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         $oCountry->load($oUser->oxuser__oxcountryid->value);
 
         $this->addParameter('firstname', $oUser->oxuser__oxfname->value);
@@ -2635,7 +2636,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns title param for klarna widget
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetKlarnaTitleParam()
@@ -2677,7 +2677,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function getCountryIso2($sCountryId)
     {
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         $oCountry->load($sCountryId);
         return $oCountry->oxcountry__oxisoalpha2->value;
     }
@@ -2733,7 +2733,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
                 // setting it somehow is not saved, so save it this way
                 $sQuery = "UPDATE oxuser SET oxboni = '{$iNewBoni}' WHERE oxid = '{$oUser->getId()}'";
-                DatabaseProvider::getDb()->Execute($sQuery);
+                DatabaseProvider::getDb()->execute($sQuery);
             }
         }
     }
@@ -2748,9 +2748,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * @param object $oUser                  user object
      * @param bool   $blCheckDeliveryAddress check delivery address? Default is false
      *
-     * @return array
+     * @return array|bool|string
      */
-    public function sendStandardRequestAddresscheck($oUser, $blCheckDeliveryAddress = false)
+    public function sendStandardRequestAddresscheck($oUser, $blCheckDeliveryAddress = false): array|bool|string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $this->addParameter('request', 'addresscheck');
@@ -2762,13 +2762,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         if ($sAddresschecktype == 'PE' && $this->getCountryIso2($oUser->oxuser__oxcountryid->value) != 'DE') {
             //AddressCheck Person nur in Deutschland
             //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
+            return ['fcWrongCountry' => true];
         } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) === false) {
             //AddressCheck Basic nur in bestimmten L?ndern
             //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
+            return ['fcWrongCountry' => true];
         } else {
-            $oAddress = oxNew('oxaddress');
+            $oAddress = oxNew(Address::class);
             if ($blCheckDeliveryAddress === true) {
                 $sDeliveryAddressId = $oUser->getSelectedAddressId();
                 if ($sDeliveryAddressId) {
@@ -2827,21 +2827,17 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Check, correct and return addresschecktype
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetAddressCheckType()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
-
-        return $sAddressCheckType;
+        return $oConfig->getConfigParam('sFCPOAddresscheck');
     }
 
     /**
      * Check, correct and return addresschecktype
      *
-     * @param void
      * @return string
      */
     protected function _fcpoGetBoniAddresscheckType()
@@ -2887,7 +2883,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
         $sResponsePersonstatus = $aResponse['personstatus'];
 
-        $aBlockingPersonStatus = array();
+        $aBlockingPersonStatus = [];
         $aPersonStatusToCheck = array('PPF', 'UKN', 'PUG', 'PNZ', 'PNP');
 
         foreach ($aPersonStatusToCheck as $sPersonstatusToCheck) {
@@ -2942,9 +2938,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $sAddress .= $sParamValue;
             }
         }
-        $sHash = md5($sAddress);
-
-        return $sHash;
+        return md5($sAddress);
     }
 
     /**
@@ -2975,7 +2969,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $sCheckHash = $this->_getAddressHash();
         $sQuery = "SELECT oxtimestamp FROM fcpocheckedaddresses WHERE fcpo_address_hash = '{$sCheckHash}'";
-        $sDate = DatabaseProvider::getDb()->GetOne($sQuery);
+        $sDate = DatabaseProvider::getDb()->getOne($sQuery);
         if ($sDate != false) {
             return true;
         }
@@ -2991,7 +2985,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $sCheckHash = $this->_getAddressHash($aResponse);
         $sQuery = "REPLACE INTO fcpocheckedaddresses ( fcpo_address_hash ) VALUES ( '{$sCheckHash}' )";
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
@@ -3034,12 +3028,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Checks available methods for contacting request target and triggers request with found method
      *
-     * @param  type $aUrlArray
+     * @param  array $aUrlArray
      * @return array $aResponse
      */
     protected function _getResponseForParsedRequest($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         if (function_exists("curl_init")) {
             // php native curl exists so we gonna use it for requesting
@@ -3059,12 +3053,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Tries to fetch a response via network socket
      *
-     * @param  type $aUrlArray
+     * @param  array $aUrlArray
      * @return array $aResponse
      */
     protected function _getSocketResponse($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         switch ($aUrlArray['scheme']) {
             case 'https':
@@ -3115,7 +3109,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _getCurlCliResponse($aUrlArray, $sCurlPath)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         $sPostUrl = $aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path'];
         $sPostData = $aUrlArray['query'];
@@ -3133,12 +3127,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Using native php curl to perform request
      *
-     * @param  type $aUrlArray
+     * @param  array $aUrlArray
      * @return array $aResponse
      */
     protected function _getCurlPhpResponse($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         $oCurl = curl_init($aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path']);
         curl_setopt($oCurl, CURLOPT_POST, 1);
@@ -3241,7 +3235,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _getResponseOutput($aResponse)
     {
-        $aOutput = array();
+        $aOutput = [];
         foreach ($aResponse as $iLinenum => $sLine) {
             $iPos = strpos($sLine, "=");
             if ($iPos > 0) {
@@ -3270,7 +3264,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                         '{$oConfig->getConfigParam('sFCPOPortalID')}', 
                         '{$oConfig->getConfigParam('sFCPOSubAccountID')}'
                     )";
-        $oDb->Execute($sQuery);
+        $oDb->execute($sQuery);
     }
 
     protected function _getPayoneUserIdByCustNr($sCustNr)
@@ -3284,7 +3278,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                     ORDER BY 
                         oxtimestamp DESC 
                     LIMIT 1";
-        $sPayOneUserId = DatabaseProvider::getDb()->GetOne($sQuery);
+        $sPayOneUserId = DatabaseProvider::getDb()->getOne($sQuery);
         return $sPayOneUserId;
     }
 
@@ -3299,7 +3293,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      */
     protected function _addUserDataParameters($oOrder, $oUser, $blIsUpdateUser = false)
     {
-        $oCountry = oxNew('oxcountry');
+        $oCountry = oxNew(Country::class);
         $oCountry->load($oOrder->oxorder__oxbillcountryid->value);
 
         $this->addParameter('salutation', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'Herr' : 'Frau'), $blIsUpdateUser);
@@ -3449,7 +3443,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $sExists = $oDb->GetOne("SELECT oxorderid FROM fcpopdfmandates WHERE oxorderid = " . $oDb->quote($sOrderId) . " LIMIT 1");
                 if (!$sExists) {
                     $sQuery = "INSERT INTO fcpopdfmandates (OXORDERID, FCPO_FILENAME) VALUES (" . $oDb->quote($sOrderId) . ", " . $oDb->quote(basename($sDestinationFile)) . ")";
-                    $oDb->Execute($sQuery);
+                    $oDb->execute($sQuery);
                 }
                 $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
                 $sReturn = $oConfig->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
@@ -3496,7 +3490,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $sRefNr = (int) $iMaxRefNr + 1;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES ('{$sRefNr}', '', {$sPrefix})";
 
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
 
         $sRefNrComplete = $sRawPrefix . $sRefNr;

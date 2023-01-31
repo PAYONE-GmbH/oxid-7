@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,12 +17,12 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 $sLangName  = "Deutsch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
 'charset'                                       => 'ISO-8859-15',
 'FCPO_IBAN_INVALID'                             => 'Please enter a valid IBAN.',
 'FCPO_BIC_INVALID'                              => 'Please enter a valid BIC.',
@@ -64,7 +64,7 @@ $aLang = array(
 'FCPO_DEDUCTION'                                => 'Deduction',
 'FCPO_PAYMENTTYPE'                              => "Type of Payment:",
 'FCPO_SHIPPINGCOST'                             => "Shipping cost",
-    
+
 'FCPO_BANK_COUNTRY'                             => 'Bank country',
 'FCPO_BANK_IBAN'                                => 'IBAN',
 'FCPO_BANK_BIC'                                 => 'BIC',
@@ -122,12 +122,12 @@ $aLang = array(
 
 'FCPO_THANKYOU_PDF_LINK'                        => 'Your SEPA-mandate as PDF',
 'FCPO_MANAGEMANDATE_ERROR'                      => 'A problem occurred. Please check the data you entered or choose another payment-type.',
-    
+
 'FCPO_PAYPALEXPRESS_USER_SECURITY_ERROR'        => 'Please log in to your shop account and go through the PayPal Express checkout again. The PayPal-deliveryaddress did not match the address of your shop-account.',
 
 'FCPO_YAPITAL_HEADER'                           => 'Payment with Yapital',
 'FCPO_YAPITAL_TEXT'                             => 'There are 2 possibilities to pay with Yapital. Either you open the Yapital-app, select payment from the app-menu and scan the QR-code or you click the orange LOG IN button and log in on the next site, using your Yapital-login-data. After a successful transaction you will be redirected back to the shop.<br><br>Every transaction is handled in realtime with your Yapital-account. Your bankdata is not transmitted by Yapital, only the necessary transactiondata.<br><br>If you pay with the QR-code please <b>DON\'T</b> click on the links in the window! You will be redirected automatically.',
-    
+
 'FCPO_CC_IFRAME_HEADER'                         => 'Payment with creditcard',
 'FCPO_OR'                                       => 'or',
 'FCPO_PAYOLUTION_USTID'                         => 'Tax Identification Number',
@@ -218,7 +218,7 @@ $aLang = array(
 'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'           => 'I agree, sending my personal data to Klarna GmbH for the purpose of processing the payment.',
 'FCPO_KLARNA_NOT_AGREED'                        => 'You have to agree to submit your data to pay with klarna.',
 'FCPO_KLARNA_NO_AUTHORIZATION'                  => 'An unexpected error occurred.',
-);
+];
 
 /*
 [{oxmultilang ident="GENERAL_YOUWANTTODELETE"}]

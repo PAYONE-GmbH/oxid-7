@@ -21,8 +21,9 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
+use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
 /**
@@ -65,10 +66,10 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoGetExistingMappings($sType = 'general')
     {
-        $aMappings = array();
-        
+        $aMappings = [];
+
         $sWhere = $this->_fcpoGetMappingWhere($sType);
-        
+
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_error_code, fcpo_lang_id, fcpo_mapped_message FROM fcpoerrormapping {$sWhere} ORDER BY oxid ASC";
@@ -109,18 +110,18 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
             $sErrorXmlPath = getShopBasePath() . "/modules/fc/fcpayone/iframeerrors.xml";
             $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
         }
-        
+
         if (file_exists($sErrorXmlPath)) {
             try {
                 $oXml = simplexml_load_file($sErrorXmlPath);
                 $aReturn = $this->_fcpoParseXml($oXml);
                 $mReturn = (is_array($aReturn)) ? $aReturn : false;
-            } catch (oxException $ex) {
+            } catch (Exception $ex) {
                 $mReturn = false;
                 throw $ex;
             }
         }
-        
+
         return $mReturn;
     }
 
@@ -137,10 +138,10 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
         // iterate through mappings
         foreach ($aMappings as $sMappingId => $aData) {
             $sQuery = $this->_fcpoGetQuery($sMappingId, $aData, $sType);
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
     }
-    
+
     /**
      * Fetches mapped error message by error code
      *
@@ -159,16 +160,16 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
                 $sLangId = $oLanguage->id;
             }
         }
-        
+
         $sMappedMessage = '';
         if ($sLangId) {
             $sQuery = $this->_fcpoGetSearchQuery($sErrorCode, $sLangId);
             $sMappedMessage = $this->_oFcpoDb->GetOne($sQuery);
         }
-        
+
         return $sMappedMessage;
     }
-    
+
     /**
      * Returns where part of requesting error mappings from errormapping table
      *
@@ -177,20 +178,20 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcpoGetMappingWhere($sType)
     {
-        $aValidTypes = array(
+        $aValidTypes = [
             'general',
             'iframe',
-        );
-        
+        ];
+
         $blValid = in_array($sType, $aValidTypes);
         $sWhere = '';
         if ($blValid) {
             $sWhere = "WHERE fcpo_error_type=".$this->_oFcpoDb->quote($sType);
         }
-        
+
         return $sWhere;
     }
-    
+
     /**
      * Parses and formats essential information so it can be passed into frontend
      *
@@ -202,22 +203,22 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
         $oUBase = $this->_oFcpoHelper->getFactoryObject('oxUBase');
         $sAbbr = $oUBase->getActiveLangAbbr();
         $sMessageEntry = "error_message_".$sAbbr;
-        $aEntries = array();
-        
+        $aEntries = [];
+
         foreach ($oXml->entry as $oXmlEntry) {
             $sErrorCode = (string)$oXmlEntry->error_code;
             $sErrorMessage = (string)$oXmlEntry->$sMessageEntry;
             if (!$sErrorCode || empty($sErrorCode)) {
                 continue;
             }
-            
+
             $oEntry = new stdClass();
             $oEntry->sErrorCode = $sErrorCode;
             $oEntry->sErrorMessage = $sErrorMessage;
-            
+
             $aEntries[] = $oEntry;
         }
-        
+
         return $aEntries;
     }
 
@@ -228,7 +229,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      * @param array  $aOut
      * @return array
      */
-    protected function _fcpoXml2Array($oXml, $aOut = array())
+    protected function _fcpoXml2Array($oXml, $aOut = [])
     {
         foreach ((array) $oXml as $iIndex => $node) {
             $aOut[$iIndex] = (is_object($node)) ? $this->_fcpoXml2Array($node) : $node;
@@ -294,7 +295,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
 
         return $sQuery;
     }
-    
+
     /**
      * Returns Query for searching a certain mapping
      *
@@ -306,7 +307,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         $sErrorCode = $this->_oFcpoDb->quote($sErrorCode);
         $sLangId = $this->_oFcpoDb->quote($sLangId);
-        
+
         $sQuery = "
             SELECT fcpo_mapped_message FROM fcpoerrormapping 
             WHERE 
@@ -314,7 +315,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
             fcpo_lang_id = {$sLangId}
             LIMIT 1
         ";
-            
+
         return $sQuery;
     }
 

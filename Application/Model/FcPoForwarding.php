@@ -17,12 +17,12 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
 class FcPoForwarding extends \OxidEsales\Eshop\Core\Model\BaseModel
@@ -55,12 +55,11 @@ class FcPoForwarding extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns an array of currently existing forwardings as an array with standard objects
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetExistingForwardings()
     {
-        $aForwardings = array();
+        $aForwardings = [];
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_payonestatus, fcpo_url, fcpo_timeout FROM fcpostatusforwarding ORDER BY oxid ASC";
@@ -96,7 +95,7 @@ class FcPoForwarding extends \OxidEsales\Eshop\Core\Model\BaseModel
         // iterate through forwardings
         foreach ($aForwardings as $sForwardingId => $aData) {
             $sQuery = $this->_fcpoGetQuery($sForwardingId, $aData);
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
     }
 
@@ -138,7 +137,7 @@ class FcPoForwarding extends \OxidEsales\Eshop\Core\Model\BaseModel
     protected function _fcpoGetUpdateQuery($sForwardingId, $sPayoneStatus, $sUrl, $iTimeout)
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sForwardingId, $sPayoneStatus, $sUrl);
-        
+
         if ($blValidNewEntry) {
             $oUtilsObject = $this->_oFcpoHelper->fcpoGetUtilsObject();
             $sOxid = $oUtilsObject->generateUID();

@@ -1,0 +1,19 @@
+<div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">{{ translate({ ident: "FCPO_AMAZON_PROBLEM" }) }}</h3></div>
+    <div class="panel-body">
+        <div>
+            {{ translate({ ident: "FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY" }) }}
+        </div>
+        <hr>
+        <a href="index.php?cl=basket&fcpoamzaction=logoff">{{ translate({ ident: "FCPO_AMAZON_LOGOFF" }) }}</a>
+    </div>
+</div>
+
+{% block checkout_payment_nextstep %}
+    <div class="well well-sm">
+        <a href="{{ seo_url({ ident: oViewConf.getOrderLink() }) }}"
+           class="btn btn-default pull-left prevStep submitButton largeButton" id="paymentBackStepBottom"><i
+                    class="fa fa-caret-left"></i> {{ translate({ ident: "PREVIOUS_STEP" }) }}</a>
+        <div class="clearfix"></div>
+    </div>
+{% endblock %}

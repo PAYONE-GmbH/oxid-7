@@ -21,8 +21,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
 {
@@ -54,12 +54,11 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns stored store ids
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetStoreIds()
     {
-        $aStoreIds = array();
+        $aStoreIds = [];
         $sQuery = "SELECT oxid, fcpo_storeid FROM fcpoklarnastoreids ORDER BY oxid ASC";
         $aRows = $this->_oFcpoDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
@@ -92,7 +91,7 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
                                 WHERE
                                     oxid = " . DatabaseProvider::getDb()->quote($iId);
                 }
-                $this->_oFcpoDb->Execute($sQuery);
+                $this->_oFcpoDb->execute($sQuery);
             }
         }
     }
@@ -109,12 +108,12 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
             foreach ($aStoreIds as $iId => $aStoreIdData) {
                 if (array_key_exists('delete', $aStoreIdData) !== false) {
                     $sQuery = "DELETE FROM fcpopayment2country WHERE fcpo_paymentid = 'KLV' AND fcpo_type = " . DatabaseProvider::getDb()->quote($iId);
-                    $this->_oFcpoDb->Execute($sQuery);
+                    $this->_oFcpoDb->execute($sQuery);
                     $sQuery = "DELETE FROM fcpoklarnastoreids WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
                 } else {
                     $sQuery = "UPDATE fcpoklarnastoreids SET fcpo_storeid = " . DatabaseProvider::getDb()->quote($aStoreIdData['id']) . " WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
                 }
-                $this->_oFcpoDb->Execute($sQuery);
+                $this->_oFcpoDb->execute($sQuery);
             }
         }
     }
@@ -122,24 +121,22 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Add Klarna store id
      *
-     * @param  void
      * @return void
      */
     public function fcpoAddKlarnaStoreId()
     {
         $sQuery = "INSERT INTO fcpoklarnastoreids (fcpo_storeid) VALUES ('')";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcpoDb->execute($sQuery);
     }
 
     /**
      * Add Klarna campaign id
      *
-     * @param  void
      * @return void
      */
     public function fcpoAddKlarnaCampaign()
     {
         $sQuery = "INSERT INTO fcpoklarnacampaigns (fcpo_campaign_code, fcpo_campaign_title) VALUES ('', '')";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcpoDb->execute($sQuery);
     }
 }

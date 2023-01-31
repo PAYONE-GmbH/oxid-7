@@ -31,7 +31,7 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_apilog.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog';
 
     /**
      * Array with existing status of order
@@ -39,8 +39,8 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
      * @var array
      */
     protected $_aStatus = null;
-    
-    
+
+
     /**
      * Loads transaction log entry with given oxid, passes
      * it's data to Smarty engine and returns name of template file

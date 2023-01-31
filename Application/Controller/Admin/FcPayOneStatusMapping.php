@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Application\Model\FcPoMapping;
+use OxidEsales\Eshop\Application\Model\Payment;
 use stdClass;
 
 class FcPayOneStatusMapping extends FcPayOneAdminDetails
@@ -31,12 +32,11 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_status_mapping.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_status_mapping';
 
     /**
      * Returns list of former configured mappings
      *
-     * @param  void
      * @return array
      */
     public function getMappings()
@@ -70,7 +70,6 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Requests database for existing mappings and returns an array of mapping objects
      *
-     * @param  void
      * @return array
      */
     protected function _fcpoGetExistingMappings()
@@ -83,12 +82,11 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Returns a list of payment types
      *
-     * @param  void
      * @return array
      */
     public function getPaymentTypeList()
     {
-        $oPayment = oxNew('oxPayment');
+        $oPayment = oxNew(Payment::class);
         $aPaymentTypes = $oPayment->fcpoGetPayonePaymentTypes();
 
         return $aPaymentTypes;
@@ -97,14 +95,13 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Returns a list of payone status list
      *
-     * @param  void
      * @return array
      */
     public function getPayoneStatusList()
     {
         $aPayoneStatusList = $this->_oFcpoHelper->fcpoGetPayoneStatusList();
 
-        $aNewList = array();
+        $aNewList = [];
         foreach ($aPayoneStatusList as $sStatusId) {
             $oStatus = new stdClass();
             $oStatus->sId = $sStatusId;
@@ -118,19 +115,17 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Returns a list of shop states
      *
-     * @param  void
      * @return array
      */
     public function getShopStatusList()
     {
-        $aFolders = $this->getConfig()->getConfigParam('aOrderfolder');
+        $aFolders = $this->_oFcpoHelper->fcpoGetConfig()->getConfigParam('aOrderfolder');
         return $aFolders;
     }
 
     /**
      * Updating settings into database
      *
-     * @param  void
      * @return void
      */
     public function save()

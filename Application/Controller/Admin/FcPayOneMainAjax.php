@@ -4,7 +4,7 @@
 /**
  * Handles the complete communication with the PAYONE API
  */
- 
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,18 +27,20 @@
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Base;
+use OxidEsales\Eshop\Core\Field;
 
 class FcPayOneMainAjax extends \OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
      * @var object
      */
     protected $_oFcpoHelper = null;
-    
-    
+
+
     /**
      * Class constructor, sets all required parameters for requests.
      *
@@ -49,28 +51,28 @@ class FcPayOneMainAjax extends \OxidEsales\Eshop\Application\Controller\Admin\Li
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
-    
+
     /**
      * Columns array
      *
      * @var array
      */
-    protected $_aColumns = array( 'container1' => array(    // field , table,         visible, multilanguage, ident
-                                        array( 'oxtitle',     'oxcountry', 1, 1, 0 ),
-                                        array( 'oxisoalpha2', 'oxcountry', 1, 0, 0 ),
-                                        array( 'oxisoalpha3', 'oxcountry', 0, 0, 0 ),
-                                        array( 'oxunnum3',    'oxcountry', 0, 0, 0 ),
-                                        array( 'oxid',        'oxcountry', 0, 0, 1 )
-                                        ),
-                     'container2' => array(
-                                        array( 'oxtitle',     'oxcountry', 1, 1, 0 ),
-                                        array( 'oxisoalpha2', 'oxcountry', 1, 0, 0 ),
-                                        array( 'oxisoalpha3', 'oxcountry', 0, 0, 0 ),
-                                        array( 'oxunnum3',    'oxcountry', 0, 0, 0 ),
-                                        array( 'oxid', 'fcpopayment2country', 0, 0, 1 )
-                                        )
-                    );
-    
+    protected $_aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
+                                        ['oxtitle',     'oxcountry', 1, 1, 0],
+                                        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+                                        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+                                        ['oxunnum3',    'oxcountry', 0, 0, 0],
+                                        ['oxid',        'oxcountry', 0, 0, 1]
+    ],
+                     'container2' => [
+                                        ['oxtitle',     'oxcountry', 1, 1, 0],
+                                        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+                                        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+                                        ['oxunnum3',    'oxcountry', 0, 0, 0],
+                                        ['oxid', 'fcpopayment2country', 0, 0, 1]
+                     ]
+    ];
+
     /**
      * Returns SQL query for data to fetch
      *
@@ -118,11 +120,11 @@ class FcPayOneMainAjax extends \OxidEsales\Eshop\Application\Controller\Admin\Li
         }
         if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {
             foreach ($aChosenCntr as $sChosenCntr) {
-                $oObject2Payment = oxNew('oxbase');
+                $oObject2Payment = oxNew(Base::class);
                 $oObject2Payment->init('fcpopayment2country');
-                $oObject2Payment->fcpopayment2country__fcpo_paymentid  = new oxField($soxId);
-                $oObject2Payment->fcpopayment2country__fcpo_countryid  = new oxField($sChosenCntr);
-                $oObject2Payment->fcpopayment2country__fcpo_type       = new oxField($sType);
+                $oObject2Payment->fcpopayment2country__fcpo_paymentid  = new Field($soxId);
+                $oObject2Payment->fcpopayment2country__fcpo_countryid  = new Field($sChosenCntr);
+                $oObject2Payment->fcpopayment2country__fcpo_type       = new Field($sType);
                 $oObject2Payment->save();
             }
         }
@@ -139,10 +141,10 @@ class FcPayOneMainAjax extends \OxidEsales\Eshop\Application\Controller\Admin\Li
         $aChosenCntr = $this->_getActionIds('fcpopayment2country.oxid');
         if ($this->_oFcpoHelper->fcpoGetRequestParameter('all')) {
             $sQ = $this->_addFilter("delete fcpopayment2country.* ".$this->_getQuery());
-            $oDb->Execute($sQ);
+            $oDb->execute($sQ);
         } elseif (is_array($aChosenCntr)) {
             $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", $oDb->quoteArray($aChosenCntr)) . ") ";
-            $oDb->Execute($sQ);
+            $oDb->execute($sQ);
         }
     }
 }

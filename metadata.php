@@ -102,29 +102,6 @@ $aModule = [
         // Core
         'FcPayOneEvents'                    => Fatchip\PayOne\Core\FcPayOneEvents::class,
     ],
-    'templates' => [
-        // frontend
-        'fcpayoneiframe.tpl'                => '/Application/views/frontend/tpl/fcpayoneiframe.tpl',
-        // admin
-        'fcpayone_popup_main.tpl'           => '/Application/views/admin/tpl/popups/fcpayone_popup_main.tpl',
-        'fcpayone.tpl'                      => '/Application/views/admin/tpl/fcpayone.tpl',
-        'fcpayone_apilog.tpl'               => '/Application/views/admin/tpl/fcpayone_apilog.tpl',
-        'fcpayone_apilog_list.tpl'          => '/Application/views/admin/tpl/fcpayone_apilog_list.tpl',
-        'fcpayone_apilog_main.tpl'          => '/Application/views/admin/tpl/fcpayone_apilog_main.tpl',
-        'fcpayone_boni.tpl'                 => '/Application/views/admin/tpl/fcpayone_boni.tpl',
-        'fcpayone_boni_list.tpl'            => '/Application/views/admin/tpl/fcpayone_boni_list.tpl',
-        'fcpayone_boni_main.tpl'            => '/Application/views/admin/tpl/fcpayone_boni_main.tpl',
-        'fcpayone_cc_preview.tpl'           => '/Application/views/admin/tpl/fcpayone_cc_preview.tpl',
-        'fcpayone_list.tpl'                 => '/Application/views/admin/tpl/fcpayone_list.tpl',
-        'fcpayone_log.tpl'                  => '/Application/views/admin/tpl/fcpayone_log.tpl',
-        'fcpayone_log_list.tpl'             => '/Application/views/admin/tpl/fcpayone_log_list.tpl',
-        'fcpayone_main.tpl'                 => '/Application/views/admin/tpl/fcpayone_main.tpl',
-        'fcpayone_order.tpl'                => '/Application/views/admin/tpl/fcpayone_order.tpl',
-        'fcpayone_protocol.tpl'             => '/Application/views/admin/tpl/fcpayone_protocol.tpl',
-        'fcpayone_status_forwarding.tpl'    => '/Application/views/admin/tpl/fcpayone_status_forwarding.tpl',
-        'fcpayone_status_mapping.tpl'       => '/Application/views/admin/tpl/fcpayone_status_mapping.tpl',
-        'fcpayone_error_mapping.tpl'        => '/Application/views/admin/tpl/fcpayone_error_mapping.tpl',
-    ],
     'events'        => [
         'onActivate'                        => Fatchip\PayOne\Core\FcPayOneEvents::class.'::onActivate',
         'onDeactivate'                      => Fatchip\PayOne\Core\FcPayOneEvents::class.'::onDeactivate',

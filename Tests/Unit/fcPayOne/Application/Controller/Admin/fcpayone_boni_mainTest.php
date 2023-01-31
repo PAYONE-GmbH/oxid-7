@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -64,13 +64,12 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing render method for code coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Render_Coverage()
     {
         $oTestObject = oxNew(FcPayOneBoniMain::class);
-        $oMockLang = oxNew('oxLang');
+        $oMockLang = oxNew(Language::class);
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(''));
@@ -85,7 +84,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing render method for code coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Save_Coverage()
@@ -101,7 +99,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
         $oMockConfig = $this->getMockBuilder('oxConfig')->disableOriginalConstructor()->getMock();
         $oMockConfig->expects($this->any())->method('saveShopConfVar')->will($this->returnValue(true));
 
-        $aConfVars = array();
+        $aConfVars = [];
         $aConfVars['sFCPOApprovalText'] = 'VarValue';
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
@@ -116,7 +114,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing fcpoShowRegularAddresscheck for coverafge
      *
-     * @param void
      * @return void
      */
     public function test_fcpoShowRegularAddresscheck_Coverage()
@@ -140,7 +137,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoCheckBonicheckIsActive for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoCheckBonicheckIsActive_Coverage()
@@ -168,7 +164,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoCheckRegularAddressCheckActive for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoCheckRegularAddressCheckActive_Coverage()
@@ -199,7 +194,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoBoniAddresscheckActive for coverage
      *
-     * @param void
      * @return void
      * @throws
      */
@@ -228,12 +222,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoBoniAddresscheckActive for coverage
      *
-     * @param void
      * @return void
      */
     protected function _fcpoValidateAddresscheckType()
     {
-        $this->_aValidationCodes = array();
+        $this->_aValidationCodes = [];
         $this->_fcpoCheckIssetBoniAddresscheck();
         $this->_fcpoValidateDuplicateAddresscheck();
         $this->_fcpoValidateAddresscheckBasic();
@@ -245,7 +238,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoDeactivateRegularAddressCheck for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoDeactivateRegularAddressCheck_Coverage()
@@ -272,7 +264,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoValidateAddresscheckType for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoValidateAddresscheckType_Coverage()
@@ -319,7 +310,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoValidateAddresscheckBasic for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoValidateAddresscheckBasic_Coverage()
@@ -354,7 +344,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoValidateAddresscheckPerson for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoValidateAddresscheckPerson_Coverage()
@@ -389,7 +378,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoCheckIssetBoniAddresscheck for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoCheckIssetBoniAddresscheck_Coverage()
@@ -433,7 +421,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoValidateDuplicateAddresscheck for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoValidateDuplicateAddresscheck_Coverage()
@@ -460,7 +447,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoValidateAddresscheckBoniversum for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoValidateAddresscheckBoniversum_Coverage()
@@ -498,7 +484,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
     /**
      * Testing _fcpoDisplayValidationMessages for coverage
      *
-     * @param void
      * @return void
      */
     public function test__fcpoDisplayValidationMessages_Coverage()

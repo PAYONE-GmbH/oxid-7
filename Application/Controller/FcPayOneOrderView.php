@@ -21,9 +21,12 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
+use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Field;
 
 class FcPayOneOrderView extends FcPayOneOrderView_parent
 {
@@ -37,7 +40,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     const FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET = 987;
     const FCPO_AMAZON_ERROR_900 = 900;
 
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
@@ -58,8 +61,8 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      * @var bool
      */
     protected $_blFcpoConfirmMandateError = null;
-    
-    
+
+
     /**
      * init object construction
      *
@@ -71,8 +74,8 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
         $this->_oFcpoDb     = DatabaseProvider::getDb();
     }
-    
-    
+
+
     /**
      * Extends oxid standard method execute()
      * Check if debitnote mandate was accepted
@@ -91,7 +94,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $sFcpoMandateCheckbox =
             $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
-        
+
         $blConfirmMandateError = (
             (
                 !$sFcpoMandateCheckbox ||
@@ -99,27 +102,26 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             ) &&
             $this->_fcpoMandateAcceptanceNeeded()
         );
-        
+
         if ($blConfirmMandateError) {
             $this->_blFcpoConfirmMandateError = 1;
             return;
         }
-        
+
         return parent::execute();
     }
-    
-    
+
+
     /**
      * Handles paypal express
      *
-     * @param  void
      * @return string
      */
     public function fcpoHandlePayPalExpress()
     {
         try {
             $this->_handlePayPalExpressCall();
-        } catch (oxException $oExcp) {
+        } catch (Exception $oExcp) {
             $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
             $oUtilsView->addErrorToDisplay($oExcp);
             return "basket";
@@ -129,14 +131,13 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     /**
      * Handling of paydirekt express
      *
-     * @param void
      * @return string
      */
     public function fcpoHandlePaydirektExpress()
     {
         try {
             $this->_handlePaydirektExpressCall();
-        } catch (oxException $oExcp) {
+        } catch (Exception $oExcp) {
             $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
             $oUtilsView->addErrorToDisplay($oExcp);
             return "basket";
@@ -210,7 +211,6 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      * Returns target controller if user hits the edit button
      * of billing or shipping address
      *
-     * @param void
      * @return string
      */
     public function fcpoGetEditAddressTargetController()
@@ -222,18 +222,15 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             'fcpopaydirekt_express'=>'basket',
         );
 
-        $sReturn = (isset($aMap[$sPaymentId])) ?
+        return (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :
             'user';
-
-        return $sReturn;
     }
 
     /**
      * Returns target controller action if user hits the edit
      * button of billing or shipping address
      *
-     * @param void
      * @return string
      */
     public function fcpoGetEditAddressTargetAction()
@@ -245,26 +242,24 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             'fcpopaydirekt_express'=>'fcpoUsePaydirektExpress'
         );
 
-        $sReturn = (isset($aMap[$sPaymentId])) ?
+        return (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :
             '';
-
-        return $sReturn;
     }
 
     /**
      * Get CountryID by countrycode
      *
-     * @param  string $sCode
+     * @param string $sCode
      * @return string
      */
-    protected function _fcpoGetIdByCode($sCode)
+    protected function _fcpoGetIdByCode(string $sCode): string
     {
         $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
         return (string)$oOrder->fcpoGetIdByCode($sCode);
     }
-    
-    
+
+
     /**
      * Returns salutation of customer in the expected form
      *
@@ -276,24 +271,24 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
         $sSal = $oOrder->fcpoGetSalByFirstName($sFirstname);
         $sSal = (!$sSal) ? 'MR' : $sSal;
-        
+
         if ($sSal == 'Herr') {
             $sSal = 'MR';
         } elseif ($sSal == 'Frau') {
             $sSal = 'MRS';
         }
-        
+
         return $sSal;
     }
-    
-    
+
+
     /**
      * Create paypal user by API response
      *
-     * @param  array $aResponse
+     * @param array $aResponse
      * @return object
      */
-    protected function _fcpoCreatePayPalUser($aResponse)
+    protected function _fcpoCreatePayPalUser(array $aResponse): object
     {
         $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
 
@@ -307,21 +302,21 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         if (array_key_exists('add_paydata[shipping_addressaddition]', $aResponse)) {
             $sAddInfo = $aResponse['add_paydata[shipping_addressaddition]'];
         }
-        
-        $oUser->oxuser__oxactive = new oxField(1);
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
-        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
-        $oUser->oxuser__oxfon = new oxField('');
-        $oUser->oxuser__oxsal = new oxField($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
-        $oUser->oxuser__oxcompany = new oxField('');
-        $oUser->oxuser__oxstreet = new oxField($sStreet);
-        $oUser->oxuser__oxstreetnr = new oxField($sStreetNr);
-        $oUser->oxuser__oxaddinfo = new oxField($sAddInfo);
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oUser->oxuser__oxcountryid = new oxField($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
-        $oUser->oxuser__oxstateid = new oxField('');
+
+        $oUser->oxuser__oxactive = new Field(1);
+        $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxfname = new Field($aResponse['add_paydata[shipping_firstname]']);
+        $oUser->oxuser__oxlname = new Field($aResponse['add_paydata[shipping_lastname]']);
+        $oUser->oxuser__oxfon = new Field('');
+        $oUser->oxuser__oxsal = new Field($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
+        $oUser->oxuser__oxcompany = new Field('');
+        $oUser->oxuser__oxstreet = new Field($sStreet);
+        $oUser->oxuser__oxstreetnr = new Field($sStreetNr);
+        $oUser->oxuser__oxaddinfo = new Field($sAddInfo);
+        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[shipping_zip]']);
+        $oUser->oxuser__oxcountryid = new Field($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
+        $oUser->oxuser__oxstateid = new Field('');
 
         if ($oUser->save()) {
             $oUser->addToGroup("oxidnotyetordered");
@@ -329,8 +324,8 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         }
         return $oUser;
     }
-    
-    
+
+
     /**
      * Compares user object and api response for validating user is the same
      *
@@ -346,7 +341,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             $oUser->oxuser__oxcity->value == $aResponse['add_paydata[shipping_city]'] ||
             stripos($aResponse['add_paydata[shipping_street]'], $oUser->oxuser__oxstreet->value) !== false
         );
-        
+
         return $blIsSamePayPalUser;
     }
 
@@ -369,7 +364,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         if ($sUserId) {
             try {
                 $oUser = $this->_fcpoValidateAndGetExpressUser($sUserId, $aResponse);
-            } catch (oxException $oEx) {
+            } catch (Exception $oEx) {
                 throw $oEx;
             }
         } else {
@@ -414,21 +409,21 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             (isset($aResponse['add_paydata[telephonenumber]'])) ?
                 $aResponse['add_paydata[telephonenumber]'] : '';
 
-        $oUser->oxuser__oxactive = new oxField(1);
-        $oUser->oxuser__oxusername = new oxField($aResponse[$sEmailIdent]);
-        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
-        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
-        $oUser->oxuser__oxfon = new oxField('');
-        $oUser->oxuser__oxsal = new oxField($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
-        $oUser->oxuser__oxcompany = new oxField('');
-        $oUser->oxuser__oxstreet = new oxField($sStreet);
-        $oUser->oxuser__oxstreetnr = new oxField($sStreetNr);
-        $oUser->oxuser__oxaddinfo = new oxField($sAddInfo);
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oUser->oxuser__oxcountryid = new oxField($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
-        $oUser->oxuser__oxstateid = new oxField('');
-        $oUser->oxuser__oxfon = new oxField($sTelephone);
+        $oUser->oxuser__oxactive = new Field(1);
+        $oUser->oxuser__oxusername = new Field($aResponse[$sEmailIdent]);
+        $oUser->oxuser__oxfname = new Field($aResponse['add_paydata[shipping_firstname]']);
+        $oUser->oxuser__oxlname = new Field($aResponse['add_paydata[shipping_lastname]']);
+        $oUser->oxuser__oxfon = new Field('');
+        $oUser->oxuser__oxsal = new Field($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
+        $oUser->oxuser__oxcompany = new Field('');
+        $oUser->oxuser__oxstreet = new Field($sStreet);
+        $oUser->oxuser__oxstreetnr = new Field($sStreetNr);
+        $oUser->oxuser__oxaddinfo = new Field($sAddInfo);
+        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[shipping_zip]']);
+        $oUser->oxuser__oxcountryid = new Field($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
+        $oUser->oxuser__oxstateid = new Field('');
+        $oUser->oxuser__oxfon = new Field($sTelephone);
 
         if ($oUser->save()) {
             $oUser->addToGroup("oxidnotyetordered");
@@ -451,6 +446,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
 
         $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
         $oUser->load($sUserId);
+        /**
+         * @TODO _fcpoIsSameExpressUser not exist
+         */
         $blSameUser = $this->_fcpoIsSameExpressUser($oUser, $aResponse);
         $blNoUserException = (!$oCurrentUser && !$blSameUser);
 
@@ -486,19 +484,19 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
                 $sAddInfo = $aResponse['add_paydata[shipping_addressaddition]'];
             }
 
-            $oAddress = oxNew("oxAddress");
-            $oAddress->oxaddress__oxuserid = new oxField($sUserId);
-            $oAddress->oxaddress__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
-            $oAddress->oxaddress__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
-            $oAddress->oxaddress__oxstreet = new oxField($sStreet);
-            $oAddress->oxaddress__oxstreetnr = new oxField($sStreetNr);
-            $oAddress->oxaddress__oxaddinfo = new oxField($sAddInfo);
-            $oAddress->oxaddress__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
-            $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-            $oAddress->oxaddress__oxcountryid = new oxField($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
-            $oAddress->oxaddress__oxstateid = new oxField('');
-            $oAddress->oxaddress__oxfon = new oxField('');
-            $oAddress->oxaddress__oxsal = new oxField($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
+            $oAddress = oxNew(Address::class);
+            $oAddress->oxaddress__oxuserid = new Field($sUserId);
+            $oAddress->oxaddress__oxfname = new Field($aResponse['add_paydata[shipping_firstname]']);
+            $oAddress->oxaddress__oxlname = new Field($aResponse['add_paydata[shipping_lastname]']);
+            $oAddress->oxaddress__oxstreet = new Field($sStreet);
+            $oAddress->oxaddress__oxstreetnr = new Field($sStreetNr);
+            $oAddress->oxaddress__oxaddinfo = new Field($sAddInfo);
+            $oAddress->oxaddress__oxcity = new Field($aResponse['add_paydata[shipping_city]']);
+            $oAddress->oxaddress__oxzip = new Field($aResponse['add_paydata[shipping_zip]']);
+            $oAddress->oxaddress__oxcountryid = new Field($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));
+            $oAddress->oxaddress__oxstateid = new Field('');
+            $oAddress->oxaddress__oxfon = new Field('');
+            $oAddress->oxaddress__oxsal = new Field($this->_fcpoGetSal($aResponse['add_paydata[shipping_firstname]']));
             $oAddress->save();
 
             $this->_oFcpoHelper->fcpoSetSessionVariable("deladrid", $oAddress->getId());
@@ -542,7 +540,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     protected function _fcpoThrowException($sMessage)
     {
         // user is not logged in and the address is different
-        $oEx = oxNew('oxException');
+        $oEx = new Exception();
         $oEx->setMessage($sMessage);
         throw $oEx;
     }
@@ -550,7 +548,6 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     /**
      * Handles the paypal express call
      *
-     * @param void
      * @return void
      */
     protected function _handlePayPalExpressCall()
@@ -571,7 +568,6 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     /**
      * Handles Paydirekt Express Call
      *
-     * @param void
      * @return void
      */
     protected function _handlePaydirektExpressCall()
@@ -631,7 +627,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _getNextStep($iSuccess)
     {
-        $sNextStep = parent::_getNextStep($iSuccess);
+        $sNextStep = parent::getNextStep($iSuccess);
 
         $sCustomStep =$this->_fcpoGetRedirectAction($iSuccess);
         if ($sCustomStep) {
@@ -644,7 +640,6 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     /**
      * Logs out amazon user
      *
-     * @param void
      * @return void
      */
     protected function _fcpoAmazonLogout()
@@ -701,7 +696,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         return $mReturn;
     }
 
-    
+
     /**
      * Check if mandate acceptance is needed
      *
@@ -717,8 +712,8 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         }
         return false;
     }
-    
-    
+
+
     /**
      * Template variable getter. Return if the debitnote mandate was not accepted and thus an error has to be shown.
      *
@@ -728,7 +723,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         return $this->_blFcpoConfirmMandateError;
     }
-    
+
     /**
      * Extends oxid standard method _validateTermsAndConditions()
      * Validates whether necessary terms and conditions checkboxes were checked.
@@ -740,7 +735,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         if (parent::_validateTermsAndConditions() === true) {
             return true;
         }
-        
+
         $blValid = true;
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
@@ -784,7 +779,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         return array($sPayPalStreet, $sStreetNr);
     }
 
-    
+
     /**
      * Searches an existing addressid by extracting response of payone
      *

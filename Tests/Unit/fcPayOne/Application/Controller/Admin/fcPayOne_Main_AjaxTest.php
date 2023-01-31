@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -65,7 +65,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
     /**
      * Testing _getQuery for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getQuery_Coverage_1()
@@ -86,7 +85,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
     /**
      * Testing _getQuery for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__getQuery_Coverage_2()
@@ -107,7 +105,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
     /**
      * Testing addpaycountry for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_addpaycountry_Coverage()
@@ -129,7 +126,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
     /**
      * Testing removepaycountry for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_removepaycountry_Coverage_1()
@@ -156,7 +152,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcPayOne_Main_Ajax extends Oxi
     /**
      * Testing removepaycountry for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_removepaycountry_Coverage_2()

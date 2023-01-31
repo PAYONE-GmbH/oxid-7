@@ -20,8 +20,8 @@
 
 namespace Fatchip\PayOne\Tests\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneLog;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestCase
 {
@@ -35,7 +35,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -66,7 +66,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Testing render method for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Render_Coverage()
@@ -86,15 +85,14 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Testing render method for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getStatus_Coverage()
     {
         $oTestObject = oxNew(FcPayOneLog::class);
 
-        $oOrder = oxNew('oxOrder');
-        $oOrder->oxorder__fcpotxid = new oxField('156452317');
+        $oOrder = oxNew(Order::class);
+        $oOrder->oxorder__fcpotxid = new Field('156452317');
 
         $this->_fcpoPrepareTransactionTable();
         $aReturn = $oTestObject->getStatus($oOrder);
@@ -108,7 +106,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Testing capture method for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Capture_Coverage()
@@ -131,7 +128,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Testing getCaptureMessage method for APPROVED state
      *
-     * @param  void
      * @return void
      */
     public function test_GetCaptureMessage_Approved()
@@ -152,7 +148,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Testing getCaptureMessage method for ERROR state
      *
-     * @param  void
      * @return void
      */
     public function test_GetCaptureMessage_Error()
@@ -173,7 +168,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
     /**
      * Creates some entries in fcpotransactionstatus table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoPrepareTransactionTable()
@@ -185,20 +179,19 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_log extends OxidTestC
             (3,	'2015-03-05 14:12:11',	0,	'f053795653c9c136ae16c400104705fc',	'paid',	2017762,	17102,	'wlt',	'2015-03-05 14:04:27',	'EUR',	'10262077',	'',	'',	'',	'test',	53.8,	'157116888',	0,	0,	'PAYONE',	'Robert',	'Müller',	'Helmholtzstr. 2-9',	'10587',	'Berlin',	'robert.mueller@fatchip.de',	'DE',	'',	'Test',	'Buyer',	'ESpachstr. 1',	'79111',	'Freiburg',	'DE',	'',	'',	'',	'',	'',	'',	'',	13,	-53.8,	0,	'',	'',	'',	'',	'',	'',	'',	'',	'',	'');            
         ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
 
     /**
      * Truncates fcpotransactionstatus table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTruncateTransactionTable()
     {
         $sQuery = "DELETE FROM `fcpotransactionstatus` ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 }

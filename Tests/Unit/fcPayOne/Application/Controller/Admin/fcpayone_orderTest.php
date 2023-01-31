@@ -20,8 +20,8 @@
 
 namespace Fatchip\PayOne\Tests\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneOrder;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTestCase
 {
@@ -35,7 +35,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -65,7 +65,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing render method on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Render_Coverage()
@@ -87,7 +86,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetStatusOxid on false status
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetStatusOxid_HasFalseStatus()
@@ -106,7 +104,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetStatusOxid on false status
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetStatusOxid_HasStatus()
@@ -125,18 +122,17 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetCurrentStatus for having a transaction status
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetCurrentStatus_HasTransaction()
     {
         $oMockOxOrder = $this->getMock('oxOrder', array('load'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpotxid = new oxField('1234');
+        $oMockOxOrder->oxorder__fcpotxid = new Field('1234');
 
         $oMockTransactionStatus = $this->getMock('fcpotransactionstatus', array('load'));
         $oMockTransactionStatus->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new oxField('1234');
+        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new Field('1234');
 
         $oTestObject = $this->getMock('fcpayone_order', array('fcpoGetStatusOxid', 'fcpoGetInstance'));
         $oTestObject->expects($this->any())->method('fcpoGetStatusOxid')->will($this->returnValue('someId'));
@@ -152,18 +148,17 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetCurrentStatus for having no transaction status
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetCurrentStatus_NoTransaction()
     {
         $oMockOxOrder = $this->getMock('oxOrder', array('load'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpotxid = new oxField('1234');
+        $oMockOxOrder->oxorder__fcpotxid = new Field('1234');
 
         $oMockTransactionStatus = $this->getMock('fcpotransactionstatus', array('load'));
         $oMockTransactionStatus->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new oxField('4321');
+        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new Field('4321');
 
         $oTestObject = $this->getMock('fcpayone_order', array('fcpoGetStatusOxid', 'fcpoGetInstance'));
         $oTestObject->expects($this->any())->method('fcpoGetStatusOxid')->will($this->returnValue('someId'));
@@ -179,7 +174,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing getStatus for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getStatus_Coverage()
@@ -192,11 +186,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder = $this->getMock('oxOrder', array('load','fcpoGetStatus'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('fcpoGetStatus')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpotxid = new oxField('156452317');
+        $oMockOxOrder->oxorder__fcpotxid = new Field('156452317');
 
         $oMockTransactionStatus = $this->getMock('fcpotransactionstatus', array('load'));
         $oMockTransactionStatus->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new oxField('4321');
+        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new Field('4321');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('1'));
@@ -215,7 +209,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing getStatus for returning value
      *
-     * @param  void
      * @return void
      */
     public function test_getStatus_ReturnValue()
@@ -228,11 +221,11 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder = $this->getMock('oxOrder', array('load','fcpoGetStatus'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('fcpoGetStatus')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpotxid = new oxField('156452317');
+        $oMockOxOrder->oxorder__fcpotxid = new Field('156452317');
 
         $oMockTransactionStatus = $this->getMock('fcpotransactionstatus', array('load'));
         $oMockTransactionStatus->expects($this->any())->method('load')->will($this->returnValue(true));
-        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new oxField('4321');
+        $oMockTransactionStatus->fcpotransactionstatus__fcpo_txid = new Field('4321');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('1'));
@@ -252,7 +245,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing capture method on having a certain amount
      *
-     * @param  void
      * @return void
      */
     public function test_Capture_AmountAvailable()
@@ -280,7 +272,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing capture method on certain positions
      *
-     * @param  void
      * @return void
      */
     public function test_Capture_PositionsAvailable()
@@ -308,7 +299,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing debit method on having a certain amount
      *
-     * @param  void
      * @return void
      */
     public function test_Debit_AmountAvailable()
@@ -336,7 +326,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing debit method on certain positions
      *
-     * @param  void
      * @return void
      */
     public function test_Debit_PositionsAvailable()
@@ -364,7 +353,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing method fcpoGetMandatePdfUrl when param exists
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetMandatePdfUrl_ParamExists()
@@ -374,7 +362,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder = $this->getMock('oxOrder', array('load', 'fcpoGetMandateFilename'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('fcpoGetMandateFilename')->will($this->returnValue('someFilename'));
-        $oMockOxOrder->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oMockOxOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
@@ -398,7 +386,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing method fcpoGetMandatePdfUrl when param does not exist
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetMandatePdfUrl_ParamNotExists()
@@ -408,7 +395,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder = $this->getMock('oxOrder', array('load', 'fcpoGetMandateFilename'));
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('fcpoGetMandateFilename')->will($this->returnValue('someFilename'));
-        $oMockOxOrder->oxorder__oxpaymenttype = new oxField('fcpodebitnote');
+        $oMockOxOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
@@ -432,7 +419,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing method _redownloadMandate for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__redownloadMandate_Coverage()
@@ -443,7 +429,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('getId')->will($this->returnValue('1'));
         $oMockOxOrder->expects($this->any())->method('sendRequestGetFile')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpomode = new oxField('test');
+        $oMockOxOrder->oxorder__fcpomode = new Field('test');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('1'));
@@ -457,7 +443,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing method _redownloadMandate for coverage
      *
-     * @param  void
      * @return void
      */
     public function test__redownloadMandate_Skip()
@@ -468,7 +453,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
         $oMockOxOrder->expects($this->any())->method('load')->will($this->returnValue(true));
         $oMockOxOrder->expects($this->any())->method('getId')->will($this->returnValue('1'));
         $oMockOxOrder->expects($this->any())->method('sendRequestGetFile')->will($this->returnValue(true));
-        $oMockOxOrder->oxorder__fcpomode = new oxField('test');
+        $oMockOxOrder->oxorder__fcpomode = new Field('test');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('-1'));
@@ -482,7 +467,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing download method for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_Download_Coverage()
@@ -515,7 +499,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing download method with existing file
      *
-     * @param  void
      * @return void
      */
     public function test_Download_FileExists()
@@ -548,7 +531,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing download method when having no filename
      *
-     * @param  void
      * @return void
      */
     public function test_Download_NoFile()
@@ -576,7 +558,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetRequestMessage for approved state
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetRequestMessage_Approved()
@@ -595,7 +576,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
     /**
      * Testing fcpoGetRequestMessage for approved state
      *
-     * @param  void
      * @return void
      */
     public function test_fcpoGetRequestMessage_Error()
@@ -623,19 +603,18 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_order extends OxidTes
             (2,	'2015-03-05 14:06:05',	0,	'f053795653c9c136ae16c400104705fc',	'appointed',	2017762,	17102,	'wlt',	'2015-03-05 14:04:27',	'EUR',	'10262077',	'',	'',	'',	'test',	53.8,	'157116888',	0,	0,	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	'',	13,	0,	0,	'',	'',	'',	'',	'',	'',	'',	'',	'',	''),
             (3,	'2015-03-05 14:12:11',	0,	'f053795653c9c136ae16c400104705fc',	'paid',	2017762,	17102,	'wlt',	'2015-03-05 14:04:27',	'EUR',	'10262077',	'',	'',	'',	'test',	53.8,	'157116888',	0,	0,	'PAYONE',	'Robert',	'Müller',	'Helmholtzstr. 2-9',	'10587',	'Berlin',	'robert.mueller@fatchip.de',	'DE',	'',	'Test',	'Buyer',	'ESpachstr. 1',	'79111',	'Freiburg',	'DE',	'',	'',	'',	'',	'',	'',	'',	13,	-53.8,	0,	'',	'',	'',	'',	'',	'',	'',	'',	'',	'');            
         ";
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 
     /**
      * Truncates table
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTruncateTable($sTableName)
     {
         $sQuery = "DELETE FROM `{$sTableName}` ";
 
-        DatabaseProvider::getDb()->Execute($sQuery);
+        DatabaseProvider::getDb()->execute($sQuery);
     }
 }

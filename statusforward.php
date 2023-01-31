@@ -28,6 +28,7 @@ ini_set('error_log', '../../../log/fcpoErrors.log');
 include_once dirname(__FILE__) . "/../../../bootstrap.php";
 include_once dirname(__FILE__) . "/statusbase.php";
 
+use Exception;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
@@ -39,7 +40,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      * Map for translating database fields to call params
      * @var array
      */
-    protected $_aDbFields2Params = array(
+    protected $_aDbFields2Params = [
         'FCPO_KEY'=>'key',
         'FCPO_TXACTION'=>'txaction',
         'FCPO_PORTALID'=>'portalid',
@@ -91,12 +92,11 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
         'FCPO_CLEARING_DUEDATE'=>'clearing_duedate',
         'FCPO_CLEARING_REFERENCE'=>'clearing_reference',
         'FCPO_CLEARING_INSTRUCTIONNOTE'=>'clearing_instructionnote',
-    );
+    ];
 
     /**
      * Central handling of forward request
      *
-     * @param void
      * @return void
      */
     public function handleForwarding()
@@ -147,7 +147,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     /**
      * Checks if a forward job is currently running
      *
-     * @param void
      * @return void
      * @throws Exception
      */
@@ -171,7 +170,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      * Killing processes is explicitely not done here due this should be
      * handled by OS
      *
-     * @param void
      * @return void
      * @throws Exception
      */
@@ -202,7 +200,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     /**
      * Checking if process file exists
      *
-     * @param void
      * @return bool
      */
     protected function _checkProcessFileExists()
@@ -214,7 +211,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     /**
      * Returns path to processfile
      *
-     * @param void
      * @return string
      */
     protected function _getProcessFilePath()
@@ -228,7 +224,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     /**
      * Get requests to forward to and trigger forwarding
      *
-     * @param void
      * @return void
      * @throws
      */
@@ -395,10 +390,10 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
                 $sParams .= $this->_addParam($sKey, $mValue);
             }
 
-            return array(
+            return [
                 'string' => $sParams,
                 'array' => $aRequestParams,
-            );
+            ];
         } catch (Exception $e) {
             throw $e;
         }
@@ -413,7 +408,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      */
     protected function _cleanParams($aParams)
     {
-        $aCleanedParams = array();
+        $aCleanedParams = [];
         foreach ($aParams as $sKey => $sValue) {
             $blValid = (
                 isset($this->_aDbFields2Params[$sKey]) &&
@@ -454,10 +449,10 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             throw new Exception('Could not find forward data for ID '.$sForwardId.'!');
         }
 
-        return array(
+        return [
             'url' => $aRow['FCPO_URL'],
             'timeout' => $aRow['FCPO_TIMEOUT'],
-        );
+        ];
     }
 
     /**

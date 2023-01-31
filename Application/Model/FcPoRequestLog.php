@@ -18,7 +18,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Model;
 
 class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
@@ -37,7 +37,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
      * @var string
      */
     protected $_sClassName = FcPoRequestLog::class;
-    
+
 
     /**
      * Class constructor
@@ -48,7 +48,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
         $this->init(FcPoRequestLog::class);
     }
 
-    
+
     /**
      * Get request as array
      *
@@ -58,7 +58,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         return $this->getArray($this->fcporequestlog__fcpo_request->rawValue);
     }
-    
+
 
     /**
      * Get response as array
@@ -69,7 +69,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         return $this->getArray($this->fcporequestlog__fcpo_response->rawValue);
     }
-    
+
 
     /**
      * Get a array from a serialized array or false if not unserializable
@@ -79,8 +79,6 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
     protected function getArray($sParam)
     {
         $aArray     = unserialize($sParam);
-        $mReturn    = (is_array($aArray)) ? $aArray : false;
-        
-        return $mReturn;
+        return (is_array($aArray)) ? $aArray : false;
     }
 }

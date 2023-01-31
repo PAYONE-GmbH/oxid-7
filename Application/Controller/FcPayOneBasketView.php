@@ -69,7 +69,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Overloading render method for checking on amazon logoff
      *
-     * @param void
      * @return string
      */
     public function render()
@@ -81,7 +80,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Returns basket error message if there is some. false if none
      *
-     * @param void
      * @return mixed string|bool
      */
     public function fcpoGetBasketErrorMessage()
@@ -104,7 +102,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      * Method checks for param fcpoamzaction and logoff from Amazon Session if
      * value is set to logoff
      *
-     * @param void
      * @return void
      */
     protected function _fcpoCheckForAmazonLogoff()
@@ -123,7 +120,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Returns wether paypal express is active or not
      *
-     * @param  void
      * @return boolean
      */
     protected function _fcpoIsPayPalExpressActive()
@@ -135,7 +131,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Public getter for paypal express picture
      *
-     * @param  void
      * @return string
      */
     public function fcpoGetPayPalExpressPic()
@@ -149,11 +144,10 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
 
         return $this->_sPayPalExpressPic;
     }
-    
+
     /**
      * Finally fetches needed values and set attribute value
      *
-     * @param  void
      * @return mixed
      */
     protected function _fcpoGetPayPalExpressPic()
@@ -166,18 +160,17 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
         $blLogoPathExists = $this->_oFcpoHelper->fcpoFileExists($sPaypalExpressLogoPath);
 
         if ($blLogoPathExists) {
-            $oConfig = $this->getConfig();
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
             $sShopURL = $oConfig->getCurrentShopUrl(false);
             $sPayPalExpressPic = $sShopURL . $this->_sPayPalExpressLogoPath . $sPic;
         }
-        
+
         return $sPayPalExpressPic;
     }
 
     /**
      * Method will return false or redirect to paypal express if used
      *
-     * @param  void
      * @return boolean
      */
     public function fcpoUsePayPalExpress()
@@ -199,7 +192,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Public getter for paydirekt express picture
      *
-     * @param void
      * @return mixed
      */
     public function fcpoGetPaydirektExpressPic()
@@ -216,7 +208,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Returns if paydirekt express is set active
      *
-     * @param void
      * @return bool
      */
     protected function _fcpoIsPaydirektExpressActive()
@@ -230,7 +221,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      * Returns actual Paydirekt picture. Using paypal express path due its
      * actually the same
      *
-     * @param void
      * @return mixed
      */
     protected function _fcpoGetPaydirektExpressPic()
@@ -245,7 +235,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
         $blLogoPathExists =
             $this->_oFcpoHelper->fcpoFileExists($sPaydirektExpressLogoPath);
         if ($blLogoPathExists) {
-            $oConfig = $this->getConfig();
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
             $sShopURL = $oConfig->getCurrentShopUrl(false);
             $sPaydirektExpressPic =
                 $sShopURL . $this->_sPayPalExpressLogoPath . $sPic;
@@ -255,7 +245,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Calling paydirekt express and deliver REDIRECT or false if not available
      *
-     * @param void
      * @return boolean|void
      */
     public function fcpoUsePaydirektExpress()
@@ -282,7 +271,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Logout user
      *
-     * @param void
      * @return void
      */
     public function fcpoLogoutUser()

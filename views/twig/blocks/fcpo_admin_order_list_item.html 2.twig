@@ -1,0 +1,29 @@
+<!-- FCPAYONE BEGIN -->
+{% if listitem.oxorder__oxstorno.value == 1 %}
+    {% set listclass = 'listitem3' %}
+{% else %}
+    {% if listitem.blacklist == 1 %}
+        {% set listclass = 'listitem3' %}
+    {% else %}
+        {% set listclass = listitem~blWhite %}
+    {% endif %}
+{% endif %}
+{% if listitem.getId() == oxid %}
+    {% set listclass = 'listitem4' %}
+{% endif %}
+
+<td valign="top" class="{{ listclass }}" height="15">
+    <div class="listitemfloating">
+        <a href="Javascript:top.oxid.admin.editThis('{{ listitem.oxorder__oxid.value }}');" class="{{ listclass }}">
+            {{ listitem.oxorder__fcporefnr.value }}
+        </a>
+    </div>
+</td>
+
+{{ parent() }}
+
+<script type="text/javascript">
+    top.oxid.admin.getDeleteMessage = function () {
+        return '{{ translate({ ident: "FCPO_ORDER_LIST_YOUWANTTODELETE" }) }}';
+    }
+</script>

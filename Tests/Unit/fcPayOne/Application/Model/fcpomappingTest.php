@@ -20,8 +20,8 @@
 
 namespace Fatchip\PayOne\Tests\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Application\Model\FcPoMapping;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class MockResultMapping
 {
@@ -58,7 +58,7 @@ class Unit_fcPayOne_Application_Models_fcpomapping extends \OxidEsales\TestingLi
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);

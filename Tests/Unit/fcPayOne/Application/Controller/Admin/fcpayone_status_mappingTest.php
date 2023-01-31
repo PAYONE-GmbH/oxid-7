@@ -34,7 +34,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
@@ -64,7 +64,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
     /**
      * Testings getMappings for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getMappings_Coverage()
@@ -91,7 +90,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(true));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $aResponse = $aExpect = $oTestObject->_fcpoAddNewMapping(array());
+        $aResponse = $aExpect = $oTestObject->_fcpoAddNewMapping([]);
         $this->assertEquals($aExpect, $aResponse);
     }
 
@@ -113,7 +112,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
     /**
      * Testing getPaymentTypeList on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getPaymentTypeList_Coverage()
@@ -126,7 +124,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
     /**
      * Testing getPayoneStatusList on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getPayoneStatusList_Coverage()
@@ -139,7 +136,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
     /**
      * Testing getShopStatusList on coverage
      *
-     * @param  void
      * @return void
      */
     public function test_getShopStatusList_Coverage()
@@ -152,7 +148,6 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_status_mapping extend
     /**
      * Testing save method for coverage
      *
-     * @param  void
      * @return void
      */
     public function test_save_Coverage()

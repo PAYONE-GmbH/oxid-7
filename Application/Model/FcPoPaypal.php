@@ -17,11 +17,11 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
 {
@@ -31,7 +31,7 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @var array
      */
-    protected $_aAdminMessages = array();
+    protected $_aAdminMessages = [];
 
     /**
      * Helper object for dealing with different shop versions
@@ -67,7 +67,6 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Method returns collected messages back to controller
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetMessages()
@@ -78,7 +77,6 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Method requests database for fetching paypal logos and return this data in an array
      *
-     * @param  void
      * @return array
      */
     public function fcpoGetPayPalLogos()
@@ -86,7 +84,7 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sQuery = "SELECT oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default FROM fcpopayoneexpresslogos";
         $oDb = $this->_oFcpoHelper->fcpoGetDb();
         $aRows = $oDb->getAll($sQuery);
-        $aLogos = array();
+        $aLogos = [];
 
         foreach ($aRows as $aRow) {
             $sOxid = $aRow[0];
@@ -95,7 +93,7 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
             $sPoLogo = $aRow[3];
             $sPoDefault = $aRow[4];
 
-            $aLogo = array();
+            $aLogo = [];
             $aLogo['oxid'] = $sOxid;
             $aLogo['active'] = (bool) $sPoActive;
             $aLogo['langid'] = $sPoLangId;
@@ -149,7 +147,7 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
                             WHERE
                                 oxid = " . DatabaseProvider::getDb()->quote($iId);
 
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
             $this->_fcpoTriggerUpdateLogos();
         }
     }
@@ -157,7 +155,6 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Do the update on database
      *
-     * @param  void
      * @return void
      */
     protected function _fcpoTriggerUpdateLogos()
@@ -165,23 +162,22 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
         $iDefault = $this->_oFcpoHelper->fcpoGetRequestParameter('defaultlogo');
         if ($iDefault) {
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 0";
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcpoDb->execute($sQuery);
 
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 1 WHERE oxid = " . DatabaseProvider::getDb()->quote($iDefault);
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcpoDb->execute($sQuery);
         }
     }
 
     /**
      * Add a new empty paypal-logo entry into database
      *
-     * @param  void
      * @return void
      */
     public function fcpoAddPaypalExpressLogo()
     {
         $sQuery = "INSERT INTO fcpopayoneexpresslogos (FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES (0, 0, '', 0)";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcpoDb->execute($sQuery);
     }
 
     /**

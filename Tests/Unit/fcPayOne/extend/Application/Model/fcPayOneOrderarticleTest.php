@@ -34,7 +34,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
      *
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
+    public function invokeMethod(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
         $method     = $reflection->getMethod($methodName);
@@ -176,7 +176,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         
         $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoIsPayonePaymentType'));
         $oTestObject->expects($this->any())->method('_fcpoIsPayonePaymentType')->will($this->returnValue(false));
-        $oTestObject->oxorderarticles__oxstorno = new oxField(0);
+        $oTestObject->oxorderarticles__oxstorno = new Field(0);
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
 
@@ -205,7 +205,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoIsPayonePaymentType', '_fcpoProcessBaseDelete'));
         $oTestObject->expects($this->any())->method('_fcpoIsPayonePaymentType')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoProcessBaseDelete')->will($this->returnValue(true));
-        $oTestObject->oxorderarticles__oxstorno = new oxField(0);
+        $oTestObject->oxorderarticles__oxstorno = new Field(0);
 
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
@@ -231,7 +231,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         
         $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoIsPayonePaymentType'));
         $oTestObject->expects($this->any())->method('_fcpoIsPayonePaymentType')->will($this->returnValue(true));
-        $oTestObject->oxorderarticles__oxstorno = new oxField(0);
+        $oTestObject->oxorderarticles__oxstorno = new Field(0);
         
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));

@@ -22,10 +22,11 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Exception\ArticleException;
 
 class FcPayOneBasketItem extends FcPayOneBasketItem_parent
 {
-    
+
     /**
      * Helper object for dealing with different shop versions
      *
@@ -43,7 +44,7 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
-    
+
 
     /**
      * Overrides standard oxid getArticle method
@@ -55,7 +56,7 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      * @param string $sProductId           product id
      * @param bool   $blDisableLazyLoading disable lazy loading
      *
-     * @throws oxArticleException $exc
+     * @throws ArticleException $exc
      *
      * @return mixed
      */
@@ -76,14 +77,14 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
 
         try {
             $mReturn = $this->_fcpoParentGetArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);//
-        } catch (oxArticleException $exc) {
+        } catch (ArticleException $exc) {
             throw $exc;
         }
 
         return $mReturn;
     }
-    
-    
+
+
     protected function _fcpoParentGetArticle($blCheckProduct, $sProductId, $blDisableLazyLoading)
     {
         return parent::getArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);

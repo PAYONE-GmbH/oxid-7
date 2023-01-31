@@ -29,5 +29,5 @@ class FcPayOneBoni extends FcPayoneAdminView
      *
      * @var string
      */
-    protected $_sThisTemplate = 'fcpayone_boni.tpl';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_boni';
 }
