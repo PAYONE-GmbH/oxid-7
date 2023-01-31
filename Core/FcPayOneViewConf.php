@@ -24,6 +24,10 @@ namespace Fatchip\PayOne\Core;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\FrontendController;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Theme;
 
 class FcPayOneViewConf extends FcPayOneViewConf_parent
 {
@@ -197,7 +201,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetAbsModuleTemplateFrontendPath($sFile = "")
     {
         $sModulePath = $this->fcpoGetModulePath();
-        $sModulePath = $sModulePath . 'Application/views/frontend/tpl/';
+        $sModulePath = $sModulePath . 'views/frontend/';
         if ($sFile) {
             $sModulePath = $sModulePath . $sFile;
         }
@@ -337,7 +341,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     protected function _fcpoPaymentIsActive($sPaymentId)
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
         $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
 
@@ -349,7 +353,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetAmazonWidgetsUrl()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpoamazonpay');
         $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
 
@@ -498,7 +502,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetActiveThemePath()
     {
         $sReturn = 'flow';
-        $oTheme = $this->_oFcpoHelper->getFactoryObject('oxTheme');
+        $oTheme = $this->_oFcpoHelper->getFactoryObject(Theme::class);
 
         $sCurrentActiveId = $oTheme->getActiveThemeId();
         $oTheme->load($sCurrentActiveId);
@@ -745,7 +749,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
             $sAddressId = $oSession->getVariable('deladrid');
         }
 
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxAddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
         $oAddress->load($sAddressId);
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
 

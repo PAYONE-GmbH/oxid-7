@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPayOneThankYouView extends FcPayOneThankYouView_parent
@@ -90,7 +91,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 
         if ($oOrder->oxorder__oxpaymenttype->value == 'fcpodebitnote' && $oConfig->getConfigParam('blFCPOMandateDownload')) {
             $sMandateIdentification = false;
-            $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+            $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
             $oPayment->load($oOrder->oxorder__oxpaymenttype->value);
             $sMode = $oPayment->fcpoGetOperationMode();
 

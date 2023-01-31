@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CEPYD
+ * @version       OXID eShop CEPYD
  */
 
 namespace Fatchip\PayOne\Lib;
@@ -24,11 +24,13 @@ namespace Fatchip\PayOne\Lib;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
 use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\BasketItem;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\OrderArticle;
 use OxidEsales\Eshop\Application\Model\OrderArticleList;
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
@@ -139,6 +141,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
     /**
      * Used api version
+     *
      * @var string
      */
     protected $_sApiVersion = '3.10';
@@ -232,7 +235,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * Get get PAYONE operation mode ( live or test ) for given order
      *
      * @param string $sPaymentType
-     * @param string $sType  subtype for the paymentmethod ( Visa, MC, etc. ) Default is ''
+     * @param string $sType subtype for the paymentmethod ( Visa, MC, etc. ) Default is ''
      *
      * @return string
      */
@@ -342,7 +345,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Set payment params for creditcard
      *
-     * @param  array $aDynvalue
+     * @param array $aDynvalue
      * @return boolean
      */
     protected function _setPaymentParamsCC($aDynvalue)
@@ -359,7 +362,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Set payment params for debitnote
      *
-     * @param  array $aDynvalue
+     * @param array $aDynvalue
      * @return boolean
      */
     protected function _setPaymentParamsDebitNote($aDynvalue)
@@ -399,8 +402,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Set payment params paypal
      *
-     * @param  object $oOrder
-     * @param  string $sRefNr
+     * @param object $oOrder
+     * @param string $sRefNr
      * @return boolean
      */
     protected function _setPaymentParamsPayPal($oOrder, $sRefNr)
@@ -466,13 +469,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Set payment parameters and return true if payment-method is known or false if payment-method is unknown
      *
-     * @param object $oOrder    order object
+     * @param Order $oOrder    order object
      * @param array  $aDynvalue form data
      * @param string $sRefNr    payone reference number
      *
      * @return bool
      */
-    protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr)
+    protected function setPaymentParameters(Order $oOrder, array $aDynvalue, string $sRefNr): bool
     {
         $blAddRedirectUrls = false;
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
@@ -564,7 +567,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 if ($sPaymentId == 'fcpopaydirekt_express') {
                     $sDate = date('Y-m-d');
                     $sTime = date('H:i:s');
-                    $sTimestamp = $sDate."T".$sTime."Z";
+                    $sTimestamp = $sDate . "T" . $sTime . "Z";
                     $this->addParameter('add_paydata[terms_accepted_timestamp]', $sTimestamp);
                     $oSession = $this->_oFcpoHelper->fcpoGetSession();
                     $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
@@ -670,12 +673,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adding redirect urls
      *
-     * @param $sAbortClass
-     * @param bool $sRefNr
+     * @param       $sAbortClass
+     * @param bool  $sRefNr
      * @param mixed $mRedirectFunction
-     * @param bool $sToken
-     * @param bool $sDeliveryMD5
-     * @param bool $blAddAmazonLogoff
+     * @param bool  $sToken
+     * @param bool  $sDeliveryMD5
+     * @param bool  $blAddAmazonLogoff
      * @return void
      */
     protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $mRedirectFunction = false, $sToken = false, $sDeliveryMD5 = false, $blAddAmazonLogoff = false)
@@ -701,7 +704,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         if (is_string($mRedirectFunction)) {
-            $sAddParams .= '&fnc='.$mRedirectFunction;
+            $sAddParams .= '&fnc=' . $mRedirectFunction;
         } else {
             $sAddParams .= '&fnc=execute';
         }
@@ -728,7 +731,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $sPaymentErrorTextParam =  "&payerrortext=".urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
+        $sPaymentErrorTextParam = "&payerrortext=" . urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
         $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
         $sSuccessUrl = $sShopURL . 'index.php?cl=order&fcposuccess=1&ord_agb=1&stoken=' . $sToken . $sSid . $sAddParams . $sRToken;
         $sErrorUrl = $sShopURL . 'index.php?type=error&cl=' . $sAbortClass . $sRToken . $sPaymentErrorParam . $sPaymentErrorTextParam;
@@ -891,9 +894,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Add product information for module invoicing
      *
-     * @param object $oOrder order object
+     * @param object     $oOrder order object
      * @param array|bool $aPositions
-     * @param bool $blDebit
+     * @param bool       $blDebit
      *
      * @return null
      */
@@ -925,7 +928,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sQuery = "SELECT IF(SUM(fcpocapturedamount) = 0, 1, 0) AS b FROM oxorderarticles WHERE oxorderid = '{$oOrder->getId()}' GROUP BY oxorderid";
-        $blFirstCapture = (bool) DatabaseProvider::getDb()->getOne($sQuery);
+        $blFirstCapture = (bool)DatabaseProvider::getDb()->getOne($sQuery);
 
         if ($aPositions === false || $blFirstCapture === true || $blDebit === true) {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
@@ -984,7 +987,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxgiftcardvat->value * 100, 0, '.', ''));
                 $i++;
             }
-            $oSession = $this->getSession();
+            $oSession = $this->_oFcpoHelper->getSession();
             $oBasket = $oSession->getBasket();
             if ($oBasket && count($oBasket->getVouchers()) > 0) {
                 foreach ($oBasket->getVouchers() as $oVoucher) {
@@ -1140,14 +1143,14 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * @param null $sCustomMessage
      * @return void
      */
-    protected function _fcpoReturnToBasket($blLogout=true)
+    protected function _fcpoReturnToBasket($blLogout = true)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         // @todo: Redirect to basket with message, currently redirect without comment
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $sShopUrl = $oConfig->getShopUrl();
-        $oUtils->redirect($sShopUrl."index.php?cl=basket?");
+        $oUtils->redirect($sShopUrl . "index.php?cl=basket?");
     }
 
     /**
@@ -1215,7 +1218,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Template getter for checking which kind of field should be shown
      *
-     * @param  User $oUser
+     * @param User $oUser
      * @return bool
      */
     public function fcpoIsB2B($oUser)
@@ -1284,7 +1287,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $sShippingFirstName = ($oOrder->oxorder__oxdelfname->value) ? $oOrder->oxorder__oxdelfname->value : $oUser->oxuser__oxfname->value;
         $sShippingLastName = ($oOrder->oxorder__oxdellname->value) ? $oOrder->oxorder__oxdellname->value : $oUser->oxuser__oxlname->value;
-        $sShippingStreet = ($oOrder->oxorder__oxdelstreet->value) ? $oOrder->oxorder__oxdelstreet->value." ".$oOrder->oxorder__oxdelstreetnr->value : $oUser->oxuser__oxstreet->value.' '.$oUser->oxuser__oxstreetnr->value;
+        $sShippingStreet = ($oOrder->oxorder__oxdelstreet->value) ? $oOrder->oxorder__oxdelstreet->value . " " . $oOrder->oxorder__oxdelstreetnr->value : $oUser->oxuser__oxstreet->value . ' ' . $oUser->oxuser__oxstreetnr->value;
         $sShippingZip = ($oOrder->oxorder__oxdelzip->value) ? $oOrder->oxorder__oxdelzip->value : $oUser->oxuser__oxzip->value;
         $sShippingCity = ($oOrder->oxorder__oxdelcity->value) ? $oOrder->oxorder__oxdelcity->value : $oUser->oxuser__oxcity->value;
 
@@ -1308,7 +1311,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $this->addParameter('email', $oUser->oxuser__oxusername->value);
         $this->addParameter('firstname', $oUser->oxuser__oxfname->value);
         $this->addParameter('lastname', $oUser->oxuser__oxlname->value);
-        $this->addParameter('street', $oUser->oxuser__oxstreet->value.' '.$oUser->oxuser__oxstreetnr->value);
+        $this->addParameter('street', $oUser->oxuser__oxstreet->value . ' ' . $oUser->oxuser__oxstreetnr->value);
         $this->addParameter('zip', $oUser->oxuser__oxzip->value);
         $this->addParameter('city', $oUser->oxuser__oxcity->value);
         $this->addParameter('company', $oUser->oxuser__oxcompany->value);
@@ -1334,13 +1337,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * Adding products from basket session into call
      *
      *
-     * @param string $sDeliverySetId
-     * @return void
-     * @return object
+     * @param bool|string $sDeliverySetId
+     * @return Basket
      */
-    protected function _fcpoAddBasketItemsFromSession($sDeliverySetId=false)
+    protected function _fcpoAddBasketItemsFromSession(bool|string $sDeliverySetId = false): Basket
     {
-        $oSession = $this->getSession();
+        $oSession = $this->_oFcpoHelper->getSession();
         $oBasket = $oSession->getBasket();
         $iIndex = 1;
         foreach ($oBasket->getContents() as $oBasketItem) {
@@ -1367,7 +1369,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
 
         $sDeliveryCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxdelivery');
-        $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
+        $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addParameter('it[' . $iIndex . ']', 'shipment');
             $this->addParameter('id[' . $iIndex . ']', 'delivery');
@@ -1379,7 +1381,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sWrappingCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxwrapping');
-        $sWrappingCosts = (double) str_replace(',', '.', $sWrappingCosts);
+        $sWrappingCosts = (double)str_replace(',', '.', $sWrappingCosts);
         if ($sWrappingCosts > 0) {
             $this->addParameter('it[' . $iIndex . ']', 'goods');
             $this->addParameter('id[' . $iIndex . ']', 'wrapping');
@@ -1391,7 +1393,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sWrappingCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxgiftcard');
-        $sWrappingCosts = (double) str_replace(',', '.', $sWrappingCosts);
+        $sWrappingCosts = (double)str_replace(',', '.', $sWrappingCosts);
         if ($sWrappingCosts > 0) {
             $this->addParameter('it[' . $iIndex . ']', 'goods');
             $this->addParameter('id[' . $iIndex . ']', 'giftcard');
@@ -1403,7 +1405,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $sPaymentCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxpayment');
-        $sPaymentCosts = (double) str_replace(',', '.', $sPaymentCosts);
+        $sPaymentCosts = (double)str_replace(',', '.', $sPaymentCosts);
         if ($sPaymentCosts != 0) {
             $sPayDesc = '';
             if ($sPaymentCosts > 0) {
@@ -1481,7 +1483,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Item price in smallest available unit
      *
-     * @param  BasketItem/double $mValue
+     * @param BasketItem/double $mValue
      * @return int
      */
     protected function _fcpoGetCentPrice($mValue)
@@ -1492,13 +1494,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $oPrice = $mValue->getPrice();
             $dBruttoPricePosSum = $oPrice->getBruttoPrice();
             $dAmount = $mValue->getAmount();
-            $dBruttoPrice = round($dBruttoPricePosSum/$dAmount, 2);
+            $dBruttoPrice = round($dBruttoPricePosSum / $dAmount, 2);
         } elseif (is_float($mValue)) {
             $dBruttoPrice = round($mValue, 2);
         }
         if (isset($dBruttoPrice)) {
             $oCur = $oConfig->getActShopCurrencyObject();
-            $dFactor = (double) pow(10, $oCur->decimal);
+            $dFactor = (double)pow(10, $oCur->decimal);
 
             $dReturnPrice = $dBruttoPrice * $dFactor;
         }
@@ -1567,7 +1569,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adds needed parameters for payolution
      *
-     * @param  Order $oOrder
+     * @param Order $oOrder
      * @return bool
      */
     protected function _fcpoAddPayolutionParameters($oOrder)
@@ -1631,7 +1633,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Performs a refund_anouncement call
      *
-     * @param  Order $oOrder
+     * @param Order $oOrder
      * @return array
      */
     public function sendRequestPayolutionRefundAnnouncement($oOrder)
@@ -1659,7 +1661,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      *
      * @param string $sPaymentId
-     * @param User $oUser
+     * @param User   $oUser
      * @param array  $aBankData
      * @param string $sAction
      * @param string $sWorkorderId
@@ -1788,8 +1790,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adds userdata by offering a user object
      *
-     * @param  object $oUser
-     * @param  string $sPaymentId
+     * @param User   $oUser
+     * @param string $sPaymentId
      * @return void
      */
     protected function _fcpoAddPayolutionUserData($oUser, $sPaymentId)
@@ -1823,8 +1825,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns if company data should be added to call deepending on settings and payment type
      *
-     * @param  User $oUser
-     * @param  string $sPaymentId
+     * @param User   $oUser
+     * @param string $sPaymentId
      * @return bool
      */
     protected function _fcpoCheckAddCompanyData($oUser, $sPaymentId)
@@ -1840,7 +1842,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Method returns matching financing type for a given payment id
      *
-     * @param  string $sPaymentId
+     * @param string $sPaymentId
      * @return string
      */
     protected function _fcpoGetFinancingTypeByPaymentId($sPaymentId)
@@ -1866,7 +1868,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Returns matching payolution payment type for given paymentid
      *
-     * @param  string $sPaymentId
+     * @param string $sPaymentId
      * @return string
      */
     protected function _fcpoGetPayolutionPaymentTypeById($sPaymentId)
@@ -1953,7 +1955,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oSession = $this->getSession();
+        $oSession = $this->_oFcpoHelper->getSession();
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
 
@@ -1992,7 +1994,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-        $oSession = $this->getSession();
+        $oSession = $this->_oFcpoHelper->getSession();
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
 
@@ -2118,7 +2120,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             // to session has been updated then
             $sDeliveryCosts =
                 $this->_fcpoFetchCostsFromBasket($oBasket, 'oxdelivery');
-            $dDelveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
+            $dDelveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
             $oPrice->add($dDelveryCosts);
         }
         $iAmount =
@@ -2147,7 +2149,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShippingTermUrl =
-            (string) $oConfig->getConfigParam('sPaydirektShippingTermsUrl');
+            (string)$oConfig->getConfigParam('sPaydirektShippingTermsUrl');
         return $sShippingTermUrl;
     }
 
@@ -2162,7 +2164,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $this->_oFcpoHelper->getFactoryObject('oxPayment');
         $oPayment->load('fcpopaydirekt_express');
         $sAuthorizationType = $oPayment->oxpayments__fcpoauthmode->value;
-        $blIsPreauthorization = ($sAuthorizationType == 'preauthorization') ;
+        $blIsPreauthorization = ($sAuthorizationType == 'preauthorization');
         $sType = ($blIsPreauthorization) ? 'order' : 'directsale';
         return $sType;
     }
@@ -2207,7 +2209,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * @param string $sPaymentId optional payment id
      * @return void
      */
-    public function addDeliveryAddressParams($blFallbackBillAddress=false)
+    public function addDeliveryAddressParams($blFallbackBillAddress = false)
     {
         $sDelAddressId = $this->_oFcpoHelper->fcpoGetSessionVariable('deladrid');
         $oAddress = $this->_oFcpoHelper->getFactoryObject('oxAddress');
@@ -2231,43 +2233,43 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 'bill' => 'oxuser__oxcountryid',
                 'shipping' => 'oxaddress__oxcountryid',
             ],
-            'shipping_firstname' =>  [
+            'shipping_firstname' => [
                 'bill' => 'oxuser__oxfname',
                 'shipping' => 'oxaddress__oxfname',
             ],
-            'shipping_lastname' =>  [
+            'shipping_lastname' => [
                 'bill' => 'oxuser__oxlname',
                 'shipping' => 'oxaddress__oxlname',
             ],
-            'shipping_company' =>  [
+            'shipping_company' => [
                 'bill' => 'oxuser__oxcompany',
                 'shipping' => 'oxaddress__oxcompany',
             ],
-            'shipping_street' =>  [
+            'shipping_street' => [
                 'bill' => 'oxuser__oxstreet',
                 'shipping' => 'oxaddress__oxstreet',
             ],
-            'shipping_streetnr' =>  [
+            'shipping_streetnr' => [
                 'bill' => 'oxuser__oxstreetnr',
                 'shipping' => 'oxaddress__oxstreetnr',
             ],
-            'shipping_zip' =>  [
+            'shipping_zip' => [
                 'bill' => 'oxuser__oxzip',
                 'shipping' => 'oxaddress__oxzip',
             ],
-            'shipping_city' =>  [
+            'shipping_city' => [
                 'bill' => 'oxuser__oxcity',
                 'shipping' => 'oxaddress__oxcity',
             ],
-            'stateid' =>  [
+            'stateid' => [
                 'bill' => 'oxuser__oxstateid',
                 'shipping' => 'oxaddress__oxstateid',
             ],
-            'shipping_title' =>  [
+            'shipping_title' => [
                 'bill' => 'oxuser__oxsal',
                 'shipping' => 'oxaddress__oxsal',
             ],
-            'shipping_telephonenumber' =>  [
+            'shipping_telephonenumber' => [
                 'bill' => 'oxuser__oxfon',
                 'shipping' => 'oxaddress__oxfon',
             ],
@@ -2304,10 +2306,10 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Send request to PAYONE Server-API with request-type "genericpayment"
      *
-     * @todo: This was historical foreseen for paypalexpress and is currently only
+     * @return array
+     * @todo  : This was historical foreseen for paypalexpress and is currently only
      *        used for this. We need to fetch identical params for genereic request and
      *        make this a generic part of each generic call dor deduplication of code
-     * @return array
      */
     public function sendRequestGenericPayment($sWorkorderId = false)
     {
@@ -2428,7 +2430,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoSetSecurePayPortal($oOrder)
     {
         $sPaymentId =
-            (string) $oOrder->oxorder__oxpaymenttype->value;
+            (string)$oOrder->oxorder__oxpaymenttype->value;
         $blPaymentMatches = ($sPaymentId === 'fcpo_secinvoice');
 
         if (!$blPaymentMatches) {
@@ -2448,7 +2450,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adds Ratepay specific parameters
      *
-     * @param  object $oOrder
+     * @param object $oOrder
      * @return void
      * @todo: currently only shop id will be fetched
      */
@@ -2503,7 +2505,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         if ($oOrder->isDetailedProductInfoNeeded()) {
             $dAmount = $this->addProductInfo($oOrder, $aPositions, true);
             // amount for credit entry has to be negative
-            $dAmount = (double) $dAmount * -1;
+            $dAmount = (double)$dAmount * -1;
             if ($aPositions !== false) {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
@@ -2685,8 +2687,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * This is the wrapper for address checks that has been called from the admin
      *
-     * @param  $oUser
-     * @param  bool  $blCheckDeliveryAddress
+     * @param      $oUser
+     * @param bool $blCheckDeliveryAddress
      * @return mixed
      */
     public function sendRequestAddresscheck($oUser, $blCheckDeliveryAddress = false)
@@ -2709,7 +2711,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     public function setPayoneMalus($oUser, $aResponse)
     {
         if (isset($aResponse['personstatus'])) {
-            $iNewMalus = $oUser->getConfig()->getConfigParam('sFCPOMalus'.strtoupper($aResponse['personstatus']));
+            $iNewMalus = $oUser->getConfig()->getConfigParam('sFCPOMalus' . strtoupper($aResponse['personstatus']));
             if ($iNewMalus !== null) {// null comes if personstatus is unkown
                 $iOldMalus = (int)$oUser->oxuser__fcpocurrmalus->value;
 
@@ -2854,7 +2856,6 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     }
 
 
-
     /**
      * Method checks if current address can be saved after call for address check
      *
@@ -2896,7 +2897,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $blReturn = true;
         if ($sFCPOAddresscheck == 'PE') {
             $blReturn = (
-                !in_array($sResponsePersonstatus, $aBlockingPersonStatus)
+            !in_array($sResponsePersonstatus, $aBlockingPersonStatus)
             );
         }
 
@@ -2906,7 +2907,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Create a unique hash of the valid address
      *
-     * @param  array $aResponse response from the address-check request
+     * @param array $aResponse response from the address-check request
      * @return string
      */
     protected function _getAddressHash($aResponse = false)
@@ -3028,7 +3029,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Checks available methods for contacting request target and triggers request with found method
      *
-     * @param  array $aUrlArray
+     * @param array $aUrlArray
      * @return array $aResponse
      */
     protected function _getResponseForParsedRequest($aUrlArray)
@@ -3053,7 +3054,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Tries to fetch a response via network socket
      *
-     * @param  array $aUrlArray
+     * @param array $aUrlArray
      * @return array $aResponse
      */
     protected function _getSocketResponse($aUrlArray)
@@ -3103,8 +3104,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Using installed CLI version of curl by building the command
      *
-     * @param  array  $aUrlArray
-     * @param  string $sCurlPath
+     * @param array  $aUrlArray
+     * @param string $sCurlPath
      * @return array
      */
     protected function _getCurlCliResponse($aUrlArray, $sCurlPath)
@@ -3127,7 +3128,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Using native php curl to perform request
      *
-     * @param  array $aUrlArray
+     * @param array $aUrlArray
      * @return array $aResponse
      */
     protected function _getCurlPhpResponse($aUrlArray)
@@ -3158,9 +3159,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Send the previously prepared request, log request and response into the database and return the response
      *
-     * @return array;
+     * @return array|string;
      */
-    protected function send($blOnlyGetUrl = false)
+    protected function send($blOnlyGetUrl = false): array|string
     {
         ksort($this->_aParameters);
 
@@ -3207,7 +3208,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Adds mapped error message to response if available
      *
-     * @param  array $aInput
+     * @param array $aInput
      * @return array
      */
     protected function _addMappedErrorIfAvailable($aInput)
@@ -3230,7 +3231,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     /**
      * Parses request respond and format it to needed form
      *
-     * @param  array $aResponse
+     * @param array $aResponse
      * @return array
      */
     protected function _getResponseOutput($aResponse)
@@ -3386,10 +3387,10 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoAddIban($aDynvalue)
     {
         $blAddIban = (
-            (
-                isset($aDynvalue['fcpo_elv_iban']) &&
+        (
+            isset($aDynvalue['fcpo_elv_iban']) &&
             $aDynvalue['fcpo_elv_iban'] != ''
-            )
+        )
         );
 
         return $blAddIban;
@@ -3464,13 +3465,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
      * Get the next reference number for the upcoming PAYONE transaction
      *
      * @param object $oOrder order object
-     * @param bool $blAddPrefixToSession
+     * @param bool   $blAddPrefixToSession
      * @return string
      */
     public function getRefNr($oOrder = false, $blAddPrefixToSession = false)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sRawPrefix = (string) $oConfig->getConfigParam('sFCPORefPrefix');
+        $sRawPrefix = (string)$oConfig->getConfigParam('sFCPORefPrefix');
         $sSessionRefNr = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
         $blUseSessionRefNr = ($sSessionRefNr && !$oOrder);
         if ($blUseSessionRefNr) {
@@ -3487,7 +3488,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         } else {
             $sQuery = "SELECT MAX(fcpo_refnr) FROM fcporefnr WHERE fcpo_refprefix = {$sPrefix}";
             $iMaxRefNr = $oDb->GetOne($sQuery);
-            $sRefNr = (int) $iMaxRefNr + 1;
+            $sRefNr = (int)$iMaxRefNr + 1;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES ('{$sRefNr}', '', {$sPrefix})";
 
             $oDb->execute($sQuery);

@@ -23,6 +23,8 @@ namespace Fatchip\PayOne\Application\Model;
 
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\FrontendController;
+use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
@@ -150,7 +152,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function fcpoFetchMappedErrorMessage($sErrorCode)
     {
-        $oUBase = $this->_oFcpoHelper->getFactoryObject('oxUBase');
+        $oUBase = $this->_oFcpoHelper->getFactoryObject(FrontendController::class);
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sAbbr = $oUBase->getActiveLangAbbr();
         $aLanguages = $oLang->getLanguageArray(null, true, true);
@@ -200,7 +202,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _fcpoParseXml($oXml)
     {
-        $oUBase = $this->_oFcpoHelper->getFactoryObject('oxUBase');
+        $oUBase = $this->_oFcpoHelper->getFactoryObject(FrontendController::class);
         $sAbbr = $oUBase->getActiveLangAbbr();
         $sMessageEntry = "error_message_".$sAbbr;
         $aEntries = [];

@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Country;
 
 class FcPayOneAddress extends FcPayOneAddress_parent
 {
@@ -50,7 +51,7 @@ class FcPayOneAddress extends FcPayOneAddress_parent
      */
     public function fcpoGetUserCountryIso($iVersion=2)
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         if (!$oCountry->load($this->oxaddress__oxcountryid->value)) {
             return '';
         }

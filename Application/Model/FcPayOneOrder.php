@@ -26,15 +26,19 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\PaymentGateway;
+use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Email;
 use OxidEsales\Eshop\Core\Exception\ArticleInputException;
 use OxidEsales\Eshop\Core\Exception\NoArticleException;
 use OxidEsales\Eshop\Core\Exception\OutOfStockException;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Language;
 use OxidEsales\Eshop\Core\Model\ListModel;
+use OxidEsales\Eshop\Core\ViewConfig;
 
 class FcPayOneOrder extends FcPayOneOrder_parent
 {
@@ -591,7 +595,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         parent::assignUserInformation($oUser);
 
         if ($this->_sFcpoPaymentId == 'fcpoamazonpay') {
-            $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+            $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
             $sPrefixEmail = $oUser->oxuser__oxusername->value;
             $sEmail = $oViewConf->fcpoAmazonEmailDecode($sPrefixEmail);
             $this->oxorder__oxbillemail = new Field($sEmail);
@@ -640,7 +644,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
         $sPaymenttype = $this->oxorder__oxpaymenttype->value;
         if ($sPaymenttype == 'fcpoamazonpay') {
-            $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+            $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
             $sPrefixEmail = $oUser->oxuser__oxusername->value;
             $sEmail = $oViewConf->fcpoAmazonEmailDecode($sPrefixEmail);
             $oUser->oxuser__oxusername = new Field($sEmail);
@@ -673,7 +677,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $sSubject = $this->_fcpoGetClearingDataEmailSubject();
         $sBody = $this->_fcpoGetClearingDataEmailBody();
 
-        $oEmail = $this->_oFcpoHelper->getFactoryObject('oxEmail');
+        $oEmail = $this->_oFcpoHelper->getFactoryObject(Email::class);
         $oEmail->sendEmail($sTo, $sSubject, $sBody);
     }
 
@@ -684,8 +688,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoGetClearingDataEmailSubject()
     {
-        $oLang = $this->_oFcpoHelper->getFactoryObject('oxLang');
-        $oShop = $this->_oFcpoHelper->getFactoryObject('oxShop');
+        $oLang = $this->_oFcpoHelper->getFactoryObject(Language::class);
+        $oShop = $this->_oFcpoHelper->getFactoryObject(Shop::class);
         $oShop->load($this->oxorder__oxshopid->value);
         $sSubject = $oShop->oxshops__oxname->value . " - ";
         $sSubject .= $oLang->translateString('FCPO_EMAIL_CLEARING_SUBJECT') . " ";
@@ -701,8 +705,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoGetClearingDataEmailBody()
     {
-        $oLang = $this->_oFcpoHelper->getFactoryObject('oxLang');
-        $oShop = $this->_oFcpoHelper->getFactoryObject('oxShop');
+        $oLang = $this->_oFcpoHelper->getFactoryObject(Language::class);
+        $oShop = $this->_oFcpoHelper->getFactoryObject(Shop::class);
         $oShop->load($this->oxorder__oxshopid->value);
         $sBody = $oLang->translateString('FCPO_EMAIL_CLEARING_BODY_WELCOME');
         $sBody = str_replace('%NAME%', $this->oxorder__oxbillfname->value, $sBody);
@@ -1187,7 +1191,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $sOxidRequest = $this->_oFcpoDb->GetOne($sSelect);
 
             if ($sOxidRequest) {
-                $oRequestLog = $this->_oFcpoHelper->getFactoryObject('fcporequestlog');
+                $oRequestLog = $this->_oFcpoHelper->getFactoryObject(FcPoRequestLog::class);
                 $oRequestLog->load($sOxidRequest);
                 $aRequest = $oRequestLog->getRequestArray();
                 if ($aRequest) {

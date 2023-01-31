@@ -21,7 +21,7 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    {% include $oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) %}
+                    {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) %}
                 </div>
             </div>
         </form>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="card-body">
                     {% set oDelAdress = oView.getDelAddress() %}
-                    {% include $oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) with {delivadr: oDelAdress} %}
+                    {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) with {delivadr: oDelAdress} %}
                 </div>
             </div>
         </form>

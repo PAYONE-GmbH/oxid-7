@@ -14,7 +14,7 @@
                 {{ translate({ ident: "EDIT" }) }}
             </button>
         </h3>
-        {% include $oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) %}
+        {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) %}
     </form>
 
     <form action="{{ oViewConf.getSslSelfLink() }}" method="post">
@@ -29,7 +29,7 @@
                 {{ translate({ ident: "EDIT" }) }}
             </button>
         </h3>
-        {% include $oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) with {delivadr: oDelAdress} %}
+        {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) with {delivadr: oDelAdress} %}
     </form>
 
     {% if oView.getOrderRemark() %}

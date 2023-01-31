@@ -1,0 +1,15 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block base_style %}
+    {{ parent() }}
+    {{ style({ include: oViewConf.fcpoGetModuleCssPath('fcpoamazon.css') }) }}
+{% endblock %}
+
+{% block base_js %}
+    {{ parent() }}
+    {% capture assign = "sPayoneBaseUrl" %}
+        var payoneAjaxControllerUrl = '{{ oViewConf.fcpoGetAjaxControllerUrl() }}';
+    {% endcapture %}
+    {{ script({ add: sPayoneBaseUrl, dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne.js'), dynamic: __oxid_include_dynamic }) }}
+{% endblock %}

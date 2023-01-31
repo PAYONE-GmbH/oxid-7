@@ -1,9 +1,0 @@
-{% set iPayError = oViewConf.fcpoGetPaymentError() %}
-{% if iPayError == -20 %}
-    {% if method_exists($oViewConf, 'getActiveTheme') and oViewConf.getActiveTheme() == 'flow' %}
-        <div class="alert alert-danger">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
-    {% else %}
-        <div class="status error">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
-    {% endif %}
-{% endif %}
-{{ parent() }}

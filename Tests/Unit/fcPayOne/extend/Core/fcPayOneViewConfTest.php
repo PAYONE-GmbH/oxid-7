@@ -153,7 +153,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase
         $oTestObject = $this->getMock('fcPayOneViewConf', array('fcpoGetModulePath'));
         $oTestObject->expects($this->any())->method('fcpoGetModulePath')->will($this->returnValue('someValue/'));
 
-        $this->assertEquals('someValue/application/views/frontend/tpl/someFile', $oTestObject->fcpoGetAbsModuleTemplateFrontendPath($sMockFile));
+        $this->assertEquals('someValue/views/frontend/someFile', $oTestObject->fcpoGetAbsModuleTemplateFrontendPath($sMockFile));
     }
     
     /**

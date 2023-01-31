@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Tests\Application\Model;
 
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Module\ModuleList;
 use OxidEsales\Eshop\Core\Registry;
 
 class MockResultExportConfig

@@ -22,6 +22,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Order;
 
 class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendController
 {
@@ -96,7 +97,7 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
         if ($this->_oOrder === null) {
             $sOrderId = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
             if ($sOrderId) {
-                $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+                $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
                 if ($oOrder->load($sOrderId)) {
                     $this->_oOrder = $oOrder;
                 }

@@ -1,0 +1,23 @@
+{{ parent() }}
+{% set payment = oView.getPayment() %}
+{% set sMandateText = payment.fcpoGetMandateText() %}
+{% if payment and method_exists(payment, 'fcpoGetMandateText') and payment.fcpoGetMandateText() %}
+    {{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne.js'), dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.fcpoGetModuleCssPath('fcpayone.css'), dynamic: __oxid_include_dynamic }) }}
+    <div id="fcpoSEPAMandate">
+        <h3 class="section">
+            <strong>SEPA-Lastschrift</strong>
+        </h3>
+        {{ translate({ ident: "FCPO_ORDER_MANDATE_INFOTEXT" }) }}
+        <div class="fcpoSEPAMandate">
+            {{ sMandateText }}
+        </div>
+
+        <div class="fcpoSEPAMandateCheckbox">
+            <label style="float:left; padding-right:10px;" for="mandate_status"
+                   class="control-label">{{ translate({ ident: "FCPO_ORDER_MANDATE_CHECKBOX" }) }}</label>
+            <input type="checkbox" onclick="fcpoHandleMandateCheckbox(this);">
+            <div class="clear"></div>
+        </div>
+    </div>
+{% endif %}

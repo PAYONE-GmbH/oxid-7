@@ -22,6 +22,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -248,7 +249,7 @@ class FcPoRatepay extends BaseModel
     protected function _fcpoUpdateRatePayProfile($sOxid)
     {
         $aRatePayData = $this->fcpoGetProfileData($sOxid);
-        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $oRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
         $aResponse = $oRequest->sendRequestRatePayProfile($aRatePayData);
         if (isset($aResponse['status']) && $aResponse['status'] == 'OK') {
             $this->_fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse);

@@ -25,6 +25,9 @@ use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\DeliverySetList;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
 
@@ -154,7 +157,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     protected function _fcpoDoesExpressUserAlreadyExist($sEmail)
     {
         $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
 
         $blIsExpressException = (
@@ -183,7 +186,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     protected function _fcpoDoesPaypalUserAlreadyExist($sEmail)
     {
         $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $blReturn = $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
         $blIsPaypalExpressException = ($blReturn !== false && $sPaymentId == 'fcpopaypal_express');
 
@@ -203,7 +206,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     public function _fcpoGetIdByUserName($sUserName)
     {
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         return $oOrder->fcpoGetIdByUserName($sUserName);
     }
 
@@ -255,7 +258,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _fcpoGetIdByCode(string $sCode): string
     {
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         return (string)$oOrder->fcpoGetIdByCode($sCode);
     }
 
@@ -268,7 +271,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _fcpoGetSal($sFirstname)
     {
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $sSal = $oOrder->fcpoGetSalByFirstName($sFirstname);
         $sSal = (!$sSal) ? 'MR' : $sSal;
 
@@ -290,7 +293,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _fcpoCreatePayPalUser(array $aResponse): object
     {
-        $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
 
         $sUserId = $this->_fcpoGetIdByUserName($aResponse['add_paydata[email]']);
         if ($sUserId) {
@@ -386,7 +389,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _fcpoCreateUserByResponse($aResponse)
     {
-        $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
         $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
 
         $sEmailIdent =
@@ -444,7 +447,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $oCurrentUser = $this->getUser();
 
-        $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
         $oUser->load($sUserId);
         /**
          * @TODO _fcpoIsSameExpressUser not exist
@@ -610,7 +613,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         }
 
         // load sets, active set, and active set payment list
-        $oDelSets = $this->_oFcpoHelper->getFactoryObject("oxdeliverysetlist");
+        $oDelSets = $this->_oFcpoHelper->getFactoryObject(DeliverySetList::class);
         list($aAllSets, $sActShipSet, $aPaymentList) =
             $oDelSets->getDeliverySetData($sActShipSet, $this->getUser(), $oBasket);
 
@@ -656,7 +659,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $sUserId = $this->_oFcpoHelper->fcpoGetSessionVariable('usr');
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
 
-        // $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        // $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
         // $oUser->load($sUserId);
         // $oUser->delete();
     }
@@ -672,7 +675,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $iSuccess = (int) $iSuccess;
         $mReturn = false;
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
 
         switch ($iSuccess) {
             case self::FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD:
@@ -790,7 +793,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         list($sStreet, $sStreetNr) = $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
 
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $sAddressId = $oOrder->fcpoGetAddressIdByResponse($aResponse, $sStreet, $sStreetNr);
 
         $mReturn = ($sAddressId) ? $sAddressId : false;

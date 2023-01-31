@@ -23,13 +23,13 @@ $sMetadataVersion = '2.1';
 
 $aModule = [
     'id'            => 'fcpayone',
-    'title'         => 'PAYONE Payment f&uuml;r OXID eShop',
-    'description'   => 'Sie suchen nach der optimalen Payment-L&ouml;sung f&uuml;r Ihren Online-Shop?<br><br>
-                        PAYONE bietet Unternehmensl&ouml;sungen zur automatisierten und ganzheitlichen Abwicklung aller Zahlungsprozesse im E-Commerce. 
-                        Der Payment Service Provider ist ein Unternehmen der Sparkassen-Finanzgruppe und von der Bundesanstalt f&uuml;r Finanzdienstleistungsaufsicht als Zahlungsinstitut zugelassen. 
+    'title'         => 'PAYONE Payment für OXID eShop',
+    'description'   => 'Sie suchen nach der optimalen Payment-Lösung für Ihren Online-Shop?<br><br>
+                        PAYONE bietet Unternehmenslösungen zur automatisierten und ganzheitlichen Abwicklung aller Zahlungsprozesse im E-Commerce. 
+                        Der Payment Service Provider ist ein Unternehmen der Sparkassen-Finanzgruppe und von der Bundesanstalt für Finanzdienstleistungsaufsicht als Zahlungsinstitut zugelassen. 
                         Das Leistungsspektrum umfasst die Akzeptanz und Abwicklung nationaler und internationaler Zahlungsarten sowie alle Zahlungsdienstleistungen. 
-                        Standardisierte Schnittstellen und Extensions erlauben eine einfache Integration in bestehende E-Commerce und IT-Systeme bei h&ouml;chsten Sicherheitsstandards.<br><br>
-                        Hier finden Sie weitere Informationen zum PAYONE Payment-Modul f&uuml;r OXID eShop: 
+                        Standardisierte Schnittstellen und Extensions erlauben eine einfache Integration in bestehende E-Commerce und IT-Systeme bei höchsten Sicherheitsstandards.<br><br>
+                        Hier finden Sie weitere Informationen zum PAYONE Payment-Modul für OXID eShop: 
                         <a href="https://www.payone.de/plattform-integration/extensions/oxid/" style="color:darkblue;text-decoration: underline;" title="PAYONE Homepage" target="_blank">
                             https://www.payone.de
                         </a>',
@@ -106,128 +106,128 @@ $aModule = [
         'onActivate'                        => Fatchip\PayOne\Core\FcPayOneEvents::class.'::onActivate',
         'onDeactivate'                      => Fatchip\PayOne\Core\FcPayOneEvents::class.'::onDeactivate',
     ],
-    'blocks'        => [
+   /* 'blocks'        => [
         [
             'template' => 'layout/base.tpl',
             'block' => 'base_js',
-            'file' => '/Application/views/blocks/fcpo_base_js_extend.tpl'
+            'file' => '/views/twig/blocks/fcpo_base_js_extend.html.twig'
         ],
         [
             'template' => 'layout/base.tpl',
             'block' => 'base_style',
-            'file' => '/Application/views/blocks/fcpo_base_css_extend.tpl'
+            'file' => '/views/twig/blocks/fcpo_base_css_extend.tpl'
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'checkout_basket_main',
-            'file' => '/Application/views/blocks/fcpo_basket_override.tpl'
+            'file' => '/views/twig/blocks/fcpo_basket_override.tpl'
         ],
         [
             'template' => 'widget/minibasket/minibasket.tpl',
             'block' => 'widget_minibasket_total',
-            'file' => '/Application/views/blocks/fcpo_minibasket_total_override.tpl',
+            'file' => '/views/twig/blocks/fcpo_minibasket_total_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'checkout_order_address',
-            'file' => '/Application/views/blocks/fcpo_order_override.tpl'
+            'file' => '/views/twig/blocks/fcpo_order_override.tpl'
         ],
         [
             'template' => 'page/checkout/user.tpl',
             'block' => 'checkout_user_main',
-            'file' => '/Application/views/blocks/fcpo_user_override.tpl'
+            'file' => '/views/twig/blocks/fcpo_user_override.tpl'
         ],
         [
             'template' => '_formparams.tpl',
             'block' => 'admin_formparams',
-            'file' => '/Application/views/blocks/fcpo_admin_formparams.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_formparams.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'change_payment',
-            'file' => '/Application/views/blocks/fcpo_payment_override.tpl',
+            'file' => '/views/twig/blocks/fcpo_payment_override.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'select_payment',
-            'file' => '/Application/views/blocks/fcpo_payment_select_override.tpl',
+            'file' => '/views/twig/blocks/fcpo_payment_select_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'order_basket',
-            'file' => '/Application/views/blocks/fcpo_order_basket_override.tpl',
+            'file' => '/views/twig/blocks/fcpo_order_basket_override.tpl',
         ],
         [
             'template' => 'page/checkout/order.tpl',
             'block' => 'checkout_order_errors',
-            'file' => '/Application/views/blocks/fcpo_order_checkout_order_errors.tpl'
+            'file' => '/views/twig/blocks/fcpo_order_checkout_order_errors.tpl'
         ],
         [
             'template' => 'page/checkout/thankyou.tpl',
             'block' => 'checkout_thankyou_proceed',
-            'file' => '/Application/views/blocks/fcpo_thankyou_checkout_thankyou.tpl',
+            'file' => '/views/twig/blocks/fcpo_thankyou_checkout_thankyou.tpl',
         ],
         [
             'template' => 'email/html/order_cust.tpl',
             'block' => 'email_html_order_cust_paymentinfo',
-            'file' => '/Application/views/blocks/fcpo_email_html_order_cust_paymentinfo.tpl',
+            'file' => '/views/twig/blocks/fcpo_email_html_order_cust_paymentinfo.tpl',
         ],
         [
             'template' => 'email/plain/order_cust.tpl',
             'block' => 'email_plain_order_cust_paymentinfo',
-            'file' => '/Application/views/blocks/fcpo_email_plain_order_cust_paymentinfo.tpl',
+            'file' => '/views/twig/blocks/fcpo_email_plain_order_cust_paymentinfo.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_colgroup',
-            'file' => '/Application/views/blocks/fcpo_admin_order_list_colgroup.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_order_list_colgroup.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_filter',
-            'file' => '/Application/views/blocks/fcpo_admin_order_list_filter.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_order_list_filter.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_sorting',
-            'file' => '/Application/views/blocks/fcpo_admin_order_list_sorting.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_order_list_sorting.tpl',
         ],
         [
             'template' => 'order_list.tpl',
             'block' => 'admin_order_list_item',
-            'file' => '/Application/views/blocks/fcpo_admin_order_list_item.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_order_list_item.tpl',
         ],
         [
             'template' => 'payment_list.tpl',
             'block' => 'admin_payment_list_filter',
-            'file' => '/Application/views/blocks/fcpo_admin_payment_list_filter.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_payment_list_filter.tpl',
         ],
         [
             'template' => 'payment_main.tpl',
             'block' => 'admin_payment_main_form',
-            'file' => '/Application/views/blocks/fcpo_admin_payment_main_form.tpl',
+            'file' => '/views/twig/blocks/fcpo_admin_payment_main_form.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_top',
-            'file' => '/Application/views/blocks/fcpo_basket_btn_next.tpl',
+            'file' => '/views/twig/blocks/fcpo_basket_btn_next.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_bottom',
-            'file' => '/Application/views/blocks/fcpo_basket_btn_next_bottom.tpl',
+            'file' => '/views/twig/blocks/fcpo_basket_btn_next_bottom.tpl',
         ],
         [
             'template' => 'page/checkout/payment.tpl',
             'block' => 'checkout_payment_errors',
-            'file' => '/Application/views/blocks/fcpo_payment_errors.tpl',
+            'file' => '/views/twig/blocks/fcpo_payment_errors.tpl',
         ],
         [
             'template' => 'page/checkout/basket.tpl',
             'block' => 'checkout_basket_main',
-            'file' => '/Application/views/blocks/fcpo_basket_errors.tpl',
+            'file' => '/views/twig/blocks/fcpo_basket_errors.tpl',
         ],
-    ],
+    ],*/
 ];
 
 if (class_exists('\OxidEsales\Facts\Facts')) {
@@ -237,7 +237,7 @@ if (class_exists('\OxidEsales\Facts\Facts')) {
         $aModule['blocks'][] = [
                 'template' => 'roles_bemain.tpl',
                 'block' => 'admin_roles_bemain_form',
-                'file' => '/Application/views/blocks/fcpo_admin_roles_bemain_form.tpl',
+                'file' => '/views/twig/blocks/fcpo_admin_roles_bemain_form.tpl',
         ];
         $aModule['extend'][OxidEsales\Eshop\Application\Controller\Admin\RolesBackendMain::class] = Fatchip\PayOne\Application\Controller\Admin\FcPayOneRolesBeMain::class;
     }

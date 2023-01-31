@@ -1,6 +1,0 @@
-{{ parent() }}
-{% capture assign = "sPayoneBaseUrl" %}
-    var payoneAjaxControllerUrl = '{{ oViewConf.fcpoGetAjaxControllerUrl() }}';
-{% endcapture %}
-{{ script({ add: sPayoneBaseUrl, dynamic: __oxid_include_dynamic }) }}
-{{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne.js'), dynamic: __oxid_include_dynamic }) }}

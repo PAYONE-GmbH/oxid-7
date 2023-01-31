@@ -22,7 +22,12 @@ namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\GenericImport\ImportObject\Country;
+use OxidEsales\Eshop\Core\UtilsObject;
+use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
 class FcPayOneUser extends FcPayOneUser_parent
@@ -128,7 +133,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     public function fcpoAddPayoneUserFlag($oUserFlag)
     {
         $oDb = $this->_oFcpoHelper->fcpoGetDb();
-        $oUtilsObject = $this->_oFcpoHelper->getFactoryObject('oxUtilsObject');
+        $oUtilsObject = $this->_oFcpoHelper->getFactoryObject(UtilsObject::class);
         $sUserFlagId = $oUserFlag->fcpouserflags__oxid->value;
         $sUserId = $this->getId();
         $sNewOxid = $oUtilsObject->generateUId();
@@ -276,7 +281,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     public function fcpoGetUserCountryIso($iVersion=2)
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         if (!$oCountry->load($this->oxuser__oxcountryid->value)) {
             return '';
         }
@@ -294,7 +299,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoAmazonEmailEncode($sEmail)
     {
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
 
         return $oViewConf->fcpoAmazonEmailEncode($sEmail);
     }
@@ -307,7 +312,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoAmazonEmailDecode($sEmail)
     {
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
 
         return $oViewConf->fcpoAmazonEmailDecode($sEmail);
     }
@@ -343,7 +348,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
 
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
         $sUserOxid = $oUser->getId();
         $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
         $oUser->oxuser__oxstreet = new Field($aStreetParts['street']);
@@ -376,7 +381,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
         $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
 
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
         $oUser->load($sUserOxid);
 
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
@@ -424,7 +429,7 @@ class FcPayOneUser extends FcPayOneUser_parent
             $sLastName = $aNameParts['lastname'];
         }
 
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
         $oAddress->oxaddress__oxuserid = new Field($sUserOxid);
         $oAddress->oxaddress__oxaddressuserid = new Field($sUserOxid);
         $oAddress->oxaddress__oxfname = new Field($sFirstName);
@@ -479,7 +484,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoCheckAddressExists($sEncodedDeliveryAddress)
     {
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
         $blReturn = false;
         if ($oAddress->load($sEncodedDeliveryAddress)) {
             $blReturn = true;
@@ -525,7 +530,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoGetCountryIdByIso2($sIso2Country)
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         $sOxid = $oCountry->getIdByCode($sIso2Country);
 
         return $sOxid;

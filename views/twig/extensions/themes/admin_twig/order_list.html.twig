@@ -1,0 +1,65 @@
+{% extends 'order_list.html.twig' %}
+
+{% block admin_order_list_colgroup %}
+    <col width="10%">
+
+    {{ parent() }}
+{% endblock %}
+
+{% block admin_order_list_filter %}
+    <td valign="top" class="listfilter first" height="20">
+        <div class="r1">
+            <div class="b1">
+                <input autocomplete="off" class="listedit" type="text" size="7" maxlength="128"
+                       name="where[oxorder][fcporefnr]" value="{{ where.oxorder.fcporefnr }}">
+            </div>
+        </div>
+    </td>
+
+    {{ parent() }}
+{% endblock %}
+
+{% block admin_order_list_item %}
+    <!-- FCPAYONE BEGIN -->
+    {% if listitem.oxorder__oxstorno.value == 1 %}
+        {% set listclass = "listitem3" %}
+    {% else %}
+        {% if listitem['blacklist'] is defined and listitem.blacklist == 1 %}
+            {% set listclass = "listitem3" %}
+        {% else %}
+            {% set listclass = 'listitem' ~ blWhite %}
+        {% endif %}
+    {% endif %}
+    {% if listitem.getId() == oxid %}
+        {% set listclass = "listitem4" %}
+    {% endif %}
+    <td valign="top" class="{{ listclass }}" height="15">
+        <div class="listitemfloating">
+            <a href="Javascript:top.oxid.admin.editThis('{{ listitem.oxorder__oxid.value }}');" class="{{ listclass }}">
+                {{ listitem.oxorder__fcporefnr.value }}
+            </a>
+        </div>
+    </td>
+
+    {{ parent() }}
+
+    <script type="text/javascript">
+        top.oxid.admin.getDeleteMessage = function () {
+            return '{{ translate({ ident: "FCPO_ORDER_LIST_YOUWANTTODELETE" }) }}';
+        }
+    </script>
+{% endblock %}
+
+{% block admin_order_list_sorting %}
+    <td class="listheader" height="15">
+        <a href="Javascript:top.oxid.admin.setSorting( document.search, 'oxorder',
+    'fcporefnr',
+    'asc');document.search.submit();"
+           class="listheader">
+            PAYONE Ref.Nr.
+        </a>
+    </td>
+
+    {{ parent() }}
+
+{% endblock %}

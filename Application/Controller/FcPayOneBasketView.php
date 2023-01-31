@@ -23,6 +23,8 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\Payment;
 
 class FcPayOneBasketView extends FcPayOneBasketView_parent
 {
@@ -124,7 +126,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      */
     protected function _fcpoIsPayPalExpressActive()
     {
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        $oBasket = $this->_oFcpoHelper->getFactoryObject(Basket::class);
         return $oBasket->fcpoIsPayPalExpressActive();
     }
 
@@ -153,7 +155,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     protected function _fcpoGetPayPalExpressPic()
     {
         $sPayPalExpressPic = false;
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        $oBasket = $this->_oFcpoHelper->getFactoryObject(Basket::class);
         $sPic = $oBasket->fcpoGetPayPalExpressPic();
 
         $sPaypalExpressLogoPath = getShopBasePath() . $this->_sPayPalExpressLogoPath . $sPic;
@@ -212,7 +214,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      */
     protected function _fcpoIsPaydirektExpressActive()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpopaydirekt_express');
         $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
         return $blIsActive;
@@ -226,7 +228,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     protected function _fcpoGetPaydirektExpressPic()
     {
         $sPaydirektExpressPic = false;
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        $oBasket = $this->_oFcpoHelper->getFactoryObject(Basket::class);
         $sPic = $oBasket->fcpoGetPaydirektExpressPic();
         $sPaydirektExpressLogoPath =
             getShopBasePath() .

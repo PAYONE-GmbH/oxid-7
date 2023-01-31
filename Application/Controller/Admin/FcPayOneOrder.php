@@ -23,6 +23,7 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Order;
 
 class FcPayOneOrder extends FcPayOneAdminDetails
 {
@@ -73,7 +74,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     {
         parent::render();
 
-        $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
 
         $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
@@ -147,7 +148,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             $this->_aStatus = [];
             $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
             if ($sOxid != "-1" && isset($sOxid)) {
-                $oOrder = $this->_oFcpoHelper->getFactoryObject('Order');
+                $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
                 $oOrder->load($sOxid);
             }
 
@@ -167,7 +168,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     {
         $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
 
             $blSettleAccount = $this->_oFcpoHelper->fcpoGetRequestParameter("capture_settleaccount");
@@ -207,7 +208,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     {
         $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
 
             $sBankCountry = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_bankcountry');
@@ -256,7 +257,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
         $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
 
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
             $oOrder->load($sOxid);
 
@@ -284,12 +285,12 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     {
         $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject("oxOrder");
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $blLoaded = $oOrder->load($sOxid);
             if ($blLoaded) {
                 $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
 
-                $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+                $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
                 $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $oOrder->oxorder__fcpomode->value);
             }
         }

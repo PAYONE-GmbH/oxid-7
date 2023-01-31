@@ -1,0 +1,63 @@
+{% extends 'page/checkout/basket.html.twig' %}
+
+{% block basket_btn_next_top %}
+    {{ parent() }}
+    {% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
+
+    {% if oView.fcpoGetPayPalExpressPic() %}
+        <form autocomplete="off" action="{{ oViewConf.getSslSelfLink() }}" method="post">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="basket">
+            <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
+            <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
+        </form>
+    {% endif %}
+
+    {% if oViewConf.fcpoCanDisplayPaydirektExpressButton() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_paydirekt_express_button.html.twig" %}
+    {% endif %}
+
+    {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonUp', sAmazonButtonClass: 'payone_basket_amazon_btn_flow'} %}
+    {% endif %}
+{% endblock %}
+
+{% block basket_btn_next_bottom %}
+    {{ parent() }}
+    {% if oView.fcpoGetPayPalExpressPic() %}
+        <form autocomplete="off" action="{{ oViewConf.getSslSelfLink() }}" method="post">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="basket">
+            <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
+            <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
+        </form>
+    {% endif %}
+
+    {% if oViewConf.fcpoCanDisplayPaydirektExpressButton() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_paydirekt_express_button.html.twig" %}
+    {% endif %}
+
+    {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonBottom', sAmazonButtonClass: 'payone_basket_amazon_btn_flow'} %}
+    {% endif %}
+{% endblock %}
+
+{% block checkout_order_errors %}
+    {% set iPayError = oViewConf.fcpoGetPaymentError() %}
+    {% if iPayError == -20 %}
+        {% if attribute(oViewConf, 'getActiveTheme') is defined and oViewConf.getActiveTheme() == 'flow' %}
+            <div class="alert alert-danger">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
+        {% else %}
+            <div class="status error">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
+        {% endif %}
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
+
+{% block checkout_basket_main %}
+    {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_basket_errormessage.html.twig" %}
+
+    {{ parent() }}
+{% endblock %}

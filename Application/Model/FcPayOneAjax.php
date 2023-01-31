@@ -22,7 +22,9 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoParamSparser;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -126,7 +128,7 @@ class FcPayOneAjax extends BaseModel
 
         $this->_fcpoSetKlarnaSessionParams($aResponse);
 
-        $oParamsParser = $this->_oFcpoHelper->getFactoryObject('fcpoparamsparser');
+        $oParamsParser = $this->_oFcpoHelper->getFactoryObject(FcPoParamSparser::class);
         $sKlarnaWidgetJS =
             $oParamsParser->fcpoGetKlarnaWidgetJS(
                 $aResponse['add_paydata[client_token]'],
@@ -263,7 +265,7 @@ class FcPayOneAjax extends BaseModel
         $aResponse = $oRequest->sendRequestSetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken, $sWorkorderId);
 
         if ($aResponse['status'] == 'OK') {
-            $oUser = $this->_oFcpoHelper->getFactoryObject('oxuser');
+            $oUser = $this->_oFcpoHelper->getFactoryObject(User::class);
             $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
         } else {
             $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
@@ -307,7 +309,7 @@ class FcPayOneAjax extends BaseModel
      */
     public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson)
     {
-        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult =  $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
         $sReturn = ($mPreCheckResult === true) ? 'SUCCESS': $mPreCheckResult;
@@ -323,7 +325,7 @@ class FcPayOneAjax extends BaseModel
      */
     public function fcpoTriggerInstallmentCalculation($sPaymentId)
     {
-        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject(Payment::class);
 
         $oPaymentController->fcpoPerformInstallmentCalculation($sPaymentId);
         $mResult = $oPaymentController->fcpoGetInstallments();

@@ -1,0 +1,12 @@
+{{ parent() }}
+
+{% set sAmazonButtonId = _prefix|cat("LoginWithAmazonMiniBasket") %}
+
+{% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
+    <p class="functions clear text-right">
+        {% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
+        {% set sFcPoTemplatePath = sFcPoTemplatePath|cat('/fcpayone_amazon_paybutton.html.twig') %}
+        {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) with {sAmazonButtonId: sAmazonButtonId, sAmazonButtonClass: "payone_basket_amazon_btn_flow_minibasket"} %}
+    </p>
+{% endif %}
+

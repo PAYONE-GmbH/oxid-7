@@ -25,8 +25,11 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Field;
 use stdClass;
 
 class FcPayOnePaymentView extends FcPayOnePaymentView_parent
@@ -1446,7 +1449,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param  array   $aDynValue
      * @param  string  $sDbField
      * @param  string  $sDynValueField
-     * @param  oxUser  $oUser
+     * @param  User  $oUser
      * @return boolean
      */
     protected function _fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, $sDbField, $sDynValueField, $oUser)
@@ -2954,7 +2957,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Compares user boni which could cause a denial on continuing process
      *
      * @param  boolean   $blContinue
-     * @param  oxPayment $oPayment
+     * @param  Payment $oPayment
      * @return boolean
      */
     protected function _fcpoCheckUserBoni($blContinue, $oPayment)

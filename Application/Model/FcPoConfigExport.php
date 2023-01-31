@@ -13,9 +13,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Model;
@@ -24,10 +24,14 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\Eshop\Core\Module\Module;
 use OxidEsales\Eshop\Core\Module\ModuleList;
 use OxidEsales\EshopCommunity\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
 
-class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPoConfigExport extends BaseModel
 {
 
     /**
@@ -117,8 +121,8 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns payone configuration
      *
-     * @param  string $sShopId
-     * @param  int    $iLang
+     * @param string $sShopId
+     * @param int    $iLang
      * @return array
      */
     public function fcpoGetConfig($sShopId, $iLang = 0)
@@ -149,7 +153,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
                 if ($sVarType == "arr") {
                     if (in_array($sVarName, $this->_aSkipMultiline)) {
                         $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
-                    } elseif(unserialize($sVarVal)) {
+                    } elseif (unserialize($sVarVal)) {
                         $this->_aConfArrs[$sVarName] = htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
                     }
                 }
@@ -225,8 +229,8 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns multilang varname if multilangfield
      *
-     * @param  string $sVarName
-     * @param  int    $iLang
+     * @param string $sVarName
+     * @param int    $iLang
      * @return string
      */
     public function fcpoGetMultilangConfStrVarName($sVarName, $iLang)
@@ -234,7 +238,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
         if (!$iLang) {
             $iLang = 0;
         }
-        $sLang = (string) $iLang;
+        $sLang = (string)$iLang;
 
         foreach ($this->_aMultiLangFields as $sMultiLangVar) {
             $sMultilangVarConcat = $sMultiLangVar . '_' . $sLang;
@@ -270,12 +274,12 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Sets needed shop values for later fetching from attribute
      *
-     * @param  array $aShopIds
+     * @param array $aShopIds
      * @return void
      */
     protected function _fcpoSetShopConfigVars($aShopIds)
     {
-        $oConf =$this->_oFcpoHelper->fcpoGetConfig();
+        $oConf = $this->_oFcpoHelper->fcpoGetConfig();
 
         foreach ($aShopIds as $sShopId) {
             $oShop = oxNew(Shop::class);
@@ -289,6 +293,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
                 $this->_aShopConfigs[$sShopId]['sShopName'] = $oShop->oxshops__oxname->value;
                 $this->_aShopConfigs[$sShopId]['sShopVersion'] = $oShop->oxshops__oxversion->value;
                 $this->_aShopConfigs[$sShopId]['sShopEdition'] = $oShop->oxshops__oxedition->value;
+                $this->_aShopConfigs[$sShopId]['sShopId'] = $sShopId;
             }
         }
     }
@@ -296,15 +301,12 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns the generic part of shop specific xml
      *
-     * @param  array $aShopConfVars
+     * @param array $aShopConfVars
      * @return string
      */
     protected function _fcpoGetShopXmlGeneric($aShopConfVars)
     {
-        /**
-         * @TODO $sShopId not initialed
-         */
-        $sXml = $this->_sT . $this->_sT . "<code>{$sShopId}</code>" . $this->_sN;
+        $sXml = $this->_sT . $this->_sT . "<code>{$aShopConfVars['sShopId']}</code>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . "<name><![CDATA[{$aShopConfVars['sShopName']}]]></name>" . $this->_sN;
 
         return $sXml;
@@ -313,7 +315,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns system block of shop specific xml
      *
-     * @param  array $aShopConfVars
+     * @param array $aShopConfVars
      * @return string
      */
     protected function _fcpoGetShopXmlSystem($aShopConfVars)
@@ -338,7 +340,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns shop specific global block
      *
-     * @param  array $aShopConfVars
+     * @param array $aShopConfVars
      * @return string
      */
     protected function _fcpoGetShopXmlGlobal($aShopConfVars)
@@ -357,7 +359,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
                 $subtype = $index;
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$subtype}>" . $this->_sN;
                 foreach ($aMappings[$subtype] as $aMap) {
-                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '" name="'. $aMap['name'] . '"/>' . $this->_sN;
+                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '" name="' . $aMap['name'] . '"/>' . $this->_sN;
                 }
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$subtype}>" . $this->_sN;
             }
@@ -372,7 +374,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns shop specific clearingtypes
      *
-     * @param  array $aShopConfVars
+     * @param array $aShopConfVars
      * @return string
      */
     protected function _fcpoGetShopXmlClearingTypes($aShopConfVars)
@@ -409,7 +411,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
         /**
          * @TODO $sShopId not initialed
          */
-        $oConf =$this->_oFcpoHelper->fcpoGetConfig();
+        $oConf = $this->_oFcpoHelper->fcpoGetConfig();
         $sXml = $this->_sT . $this->_sT . "<protect>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<consumerscore>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConf->getShopConfVar('sFCPOBonicheck', $sShopId) == '-1' ? '0' : '1') . "</active>" . $this->_sN;
@@ -419,7 +421,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<addresscheck></addresscheck>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<red>{$this->_getRedPayments()}</red>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<yellow>{$this->_getYellowPayments()}</yellow>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<duetime>" . ((int) $oConf->getShopConfVar('sFCPODurabilityBonicheck', $sShopId) * (60 * 60 * 24)) . "</duetime>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<duetime>" . ((int)$oConf->getShopConfVar('sFCPODurabilityBonicheck', $sShopId) * (60 * 60 * 24)) . "</duetime>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</consumerscore>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<addresscheck>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConf->getShopConfVar('sFCPOAddresscheck', $sShopId) == 'NO' ? '0' : '1') . "</active>" . $this->_sN;
@@ -511,7 +513,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns matching abbreviation for given payment id
      *
-     * @param  string $sPaymentId
+     * @param string $sPaymentId
      * @return string
      */
     protected function _getPaymentAbbreviation($sPaymentId)
@@ -622,7 +624,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _getRedPayments()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         return $oPayment->fcpoGetRedPayments();
     }
 
@@ -633,14 +635,14 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _getYellowPayments()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         return $oPayment->fcpoGetYellowPayments();
     }
 
     /**
      * Returns payment countries
      *
-     * @param  object $oPayment
+     * @param object $oPayment
      * @return string
      */
     protected function _getPaymentCountries($oPayment)
@@ -716,24 +718,17 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     protected function _getModuleInfo()
     {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iVersion < 4600) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $aModules = $oConfig->getConfigParam('aModules');
-            foreach ($aModules as $sKey => $sValue) {
-                $aModules[$sKey] = '<![CDATA[' . $sValue . ']]>';
-            }
-        } else {
-            $sModulesDir =$this->_oFcpoHelper->getModulesDir();
-            /** @var ModuleList $oModuleList */
-            $oModuleList = $this->_oFcpoHelper->getFactoryObject("oxModuleList");
-            $aOxidModules = $oModuleList->getModulesFromDir($sModulesDir);
-            $aModules = [];
-            foreach ($aOxidModules as $oModule) {
-                $aModules[$oModule->getId()] = $oModule->getInfo('version');
-            }
+        $container = ContainerFactory::getInstance()->getContainer();
+        $shopConfiguration = $container->get(ShopConfigurationDaoBridgeInterface::class)->get();
+
+        $modules = [];
+        foreach ($shopConfiguration->getModuleConfigurations() as $moduleConfiguration) {
+            $module = oxNew(Module::class);
+            $module->load($moduleConfiguration->getId());
+            $modules[$module->getId()] = $module->getInfo('version');
         }
-        return $aModules;
+
+        return $modules;
     }
 
     /**

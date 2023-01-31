@@ -25,6 +25,7 @@ use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Application\Model\FcPoPayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\CountryList;
 use OxidEsales\Eshop\Application\Model\Payment;
 
 class FcPayOneMain extends FcPayOneAdminDetails
@@ -430,7 +431,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     {
         // #251A passing country list
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $oCountryList = $this->_oFcpoHelper->getFactoryObject("oxCountryList");
+        $oCountryList = $this->_oFcpoHelper->getFactoryObject(CountryList::class);
         $oCountryList->loadActiveCountries($oLang->getTplLanguage());
 
         $blValidCountryData = (

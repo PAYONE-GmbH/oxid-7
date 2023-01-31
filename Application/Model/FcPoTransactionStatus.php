@@ -22,6 +22,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use stdClass;
 
@@ -289,7 +290,7 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
     protected function _fcpoGetOrderByTxid($sTxid)
     {
         $sOxid = $this->_oFcpoDb->GetOne("SELECT oxid FROM oxorder WHERE fcpotxid = '{$sTxid}'");
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $oOrder->load($sOxid);
 
         return $oOrder;

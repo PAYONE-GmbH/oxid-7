@@ -24,6 +24,7 @@
 namespace Fatchip\PayOne\Lib;
 
 use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Core\ViewConfig;
 
 class FcPoParamSparser
 {
@@ -451,7 +452,7 @@ class FcPoParamSparser
      */
     protected function _fcpoGetKlarnaWidgetPath()
     {
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxviewconfig');
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
         return $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
     }
 }

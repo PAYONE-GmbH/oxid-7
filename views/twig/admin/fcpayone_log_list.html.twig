@@ -198,7 +198,7 @@
                     {% if listitem.blacklist == 1 %}
                         {% set listclass = "listitem3" %}
                     {% else %}
-                        {% set listclass = listitem~blWhite %}
+                        {% set listclass = 'listitem' ~ blWhite %}
                     {% endif %}
                     {% if listitem.getId() == oxid %}
                         {% set listclass = "listitem4" %}

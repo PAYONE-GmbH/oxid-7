@@ -26,7 +26,7 @@
                     <table style="border: 1px solid #C8C8C8;">
                         {% set blWhite = "" %}
                         {% for key, entry in edit.getRequestArray() %}
-                            {% set listclass = listitem~blWhite %}
+                            {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
                                 <td class="{{ listclass }}">{{ key }}</td>
                                 <td class="{{ listclass }}">{{ entry }}</td>
@@ -48,7 +48,7 @@
                     <table style="border: 1px solid #C8C8C8;">
                         {% set blWhite = "" %}
                         {% for key, entry in edit.getResponseArray() %}
-                            {% set listclass = listitem~blWhite %}
+                            {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
                                 <td class="{{ listclass }}">{{ key }}</td>
                                 <td class="{{ listclass }}">{{ entry }}</td>
