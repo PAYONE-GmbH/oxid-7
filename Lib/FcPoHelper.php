@@ -30,6 +30,7 @@ use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Language;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Request;
 use OxidEsales\Eshop\Core\Session;
 use OxidEsales\Eshop\Core\ShopVersion;
 use OxidEsales\Eshop\Core\Utils;
@@ -187,23 +188,6 @@ class FcPoHelper extends BaseModel
     }
 
     /**
-     * static Getter for config instance
-     *
-     * @param mixed
-     * @return Config
-     */
-    public static function fcpoGetStaticConfig()
-    {
-        if (self::_useRegistry() === true) {
-            $oReturn = Registry::getConfig();
-        } else {
-            $oReturn = Config::getInstance();
-        }
-
-        return $oReturn;
-    }
-
-    /**
      * oxConfig instance getter
      *
      * @return Config
@@ -248,12 +232,10 @@ class FcPoHelper extends BaseModel
      * @param string $sParameter
      * @return mixed
      */
-    public function fcpoGetRequestParameter($sParameter)
+    public function fcpoGetRequestParameter(string $sParameter): mixed
     {
-        $oRequest = Registry::get(\OxidEsales\Eshop\Core\Request::class);
-        $mReturn = $oRequest->getRequestParameter($sParameter);
-
-        return $mReturn;
+        $oRequest = Registry::get(Request::class);
+        return $oRequest->getRequestParameter($sParameter);
     }
 
     /**
@@ -261,7 +243,7 @@ class FcPoHelper extends BaseModel
      *
      * @return mixed
      */
-    public function fcpoGetLang()
+    public function fcpoGetLang(): mixed
     {
         return oxNew(Language::class);
     }
@@ -269,9 +251,9 @@ class FcPoHelper extends BaseModel
     /**
      * Returns a utilsfile instance
      *
-     * @return mixed
+     * @return UtilsFile
      */
-    public function fcpoGetUtilsFile()
+    public function fcpoGetUtilsFile(): UtilsFile
     {
         return oxNew(UtilsFile::class);
     }
@@ -279,49 +261,49 @@ class FcPoHelper extends BaseModel
     /**
      * Returns a utilsobject instance
      *
-     * @return mixed
+     * @return UtilsObject
      */
-    public function fcpoGetUtilsObject()
+    public function fcpoGetUtilsObject(): UtilsObject
     {
         return oxNew(UtilsObject::class);
     }
 
     /**
-     * Returns an instance of oxutils
+     * Returns an instance of Utils
      *
-     * @return mixed
+     * @return Utils
      */
-    public function fcpoGetUtils()
+    public function fcpoGetUtils(): Utils
     {
         return oxNew(Utils::class);
     }
 
     /**
-     * Returns an instance of oxutilsview
+     * Returns an instance of UtilsView
      *
-     * @return mixed
+     * @return UtilsView
      */
-    public function fcpoGetUtilsView()
+    public function fcpoGetUtilsView(): UtilsView
     {
         return oxNew(UtilsView::class);
     }
 
     /**
-     * Returns an instance of oxviewvonfig
+     * Returns an instance of ViewConfig
      *
-     * @return mixed
+     * @return ViewConfig
      */
-    public function fcpoGetViewConfig()
+    public function fcpoGetViewConfig(): ViewConfig
     {
         return oxNew(ViewConfig::class);
     }
 
     /**
-     * Returns an instance of oxutilserver
+     * Returns an instance of UtilsServer
      *
-     * @return mixed
+     * @return UtilsServer
      */
-    public function fcpoGetUtilsServer()
+    public function fcpoGetUtilsServer(): UtilsServer
     {
         return oxNew(UtilsServer::class);
     }
@@ -329,9 +311,9 @@ class FcPoHelper extends BaseModel
     /**
      * Returns an instance of oxUtilsDate
      *
-     * @return mixed
+     * @return UtilsDate
      */
-    public function fcpoGetUtilsDate()
+    public function fcpoGetUtilsDate(): UtilsDate
     {
         return oxNew(UtilsDate::class);
     }
@@ -351,7 +333,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public function fcpoGetModuleVersion()
+    public function fcpoGetModuleVersion(): string
     {
         include_once __DIR__ . "/../metadata.php";
         return $aModule['version'];
@@ -449,7 +431,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public function fcpoGetShopName()
+    public function fcpoGetShopName(): string
     {
         $oConfig = $this->fcpoGetConfig();
 
@@ -461,7 +443,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public function fcpoGetHelpUrl()
+    public function fcpoGetHelpUrl(): string
     {
         return "https://www.payone.de";
     }
@@ -471,7 +453,7 @@ class FcPoHelper extends BaseModel
      *
      * @return array
      */
-    public function fcpoGetPayoneStatusList()
+    public function fcpoGetPayoneStatusList(): array
     {
         return [
             'appointed',
@@ -492,10 +474,10 @@ class FcPoHelper extends BaseModel
     /**
      * Returns a static instance of given object name
      *
-     * @param $sObjectName
+     * @param string $sObjectName
      * @return mixed
      */
-    public function getStaticInstance($sObjectName)
+    public function getStaticInstance(string $sObjectName): mixed
     {
         return Registry::get($sObjectName);
     }
@@ -505,7 +487,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public function fcpoGetIntegratorId()
+    public function fcpoGetIntegratorId(): string
     {
         $oConfig = $this->fcpoGetConfig();
 
@@ -523,19 +505,18 @@ class FcPoHelper extends BaseModel
     /**
      * Item price in smallest available unit
      *
-     * @param BasketItem/double $mValue
-     * @return int
+     * @param float|BasketItem $mValue
+     * @return float
      */
-    public function fcpoGetCentPrice($mValue)
+    public function fcpoGetCentPrice(float|BasketItem $mValue): float
     {
         $oConfig = $this->fcpoGetConfig();
-        $dBruttoPrice = 0.00;
         if ($mValue instanceof BasketItem) {
             $oPrice = $mValue->getPrice();
             $dBruttoPricePosSum = $oPrice->getBruttoPrice();
             $dAmount = $mValue->getAmount();
             $dBruttoPrice = round($dBruttoPricePosSum / $dAmount, 2);
-        } elseif (is_float($mValue)) {
+        } else {
             $dBruttoPrice = $mValue;
         }
 
@@ -581,7 +562,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public function getModulesDir($absolute = true)
+    public function getModulesDir(bool $absolute = true): string
     {
         if ($absolute) {
             $oConfig = $this->fcpoGetConfig();

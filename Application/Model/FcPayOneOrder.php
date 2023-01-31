@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Model;
@@ -35,7 +35,6 @@ use OxidEsales\Eshop\Core\Exception\NoArticleException;
 use OxidEsales\Eshop\Core\Exception\OutOfStockException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Model\ListModel;
-use oxlist;
 
 class FcPayOneOrder extends FcPayOneOrder_parent
 {
@@ -72,6 +71,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
     /**
      * Array with all request parameters from API order request
+     *
      * @var array
      */
     protected $_aRequest = null;
@@ -135,6 +135,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
     /**
      * PaymentId of order
+     *
      * @var string
      */
     protected $_sFcpoPaymentId = null;
@@ -142,23 +143,27 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Flag that indicates that payone payment of this order is flagged as redirect payment
      * Flag for marking order as generally problematic
+     *
      * @var bool
      */
     protected $_blOrderHasProblems = false;
 
     /** Flag that indicates that payone payment of this order is flagged as redirect payment
+     *
      * @var boolean
      */
     protected $_blOrderPaymentFlaggedAsRedirect = null;
 
     /**
      * Flag for finishing order completely
+     *
      * @var bool
      */
     protected $_blFinishingSave = true;
 
     /**
      * Indicator if loading basket from session has been triggered
+     *
      * @var bool
      */
     protected $_blFcPoLoadFromSession = false;
@@ -193,7 +198,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Method validates if given payment-type is an payone iframe payment
      *
-     * @param  string $sPaymenttype
+     * @param string $sPaymenttype
      * @return bool
      */
     public function isPayOneIframePayment($sPaymenttype = null)
@@ -207,7 +212,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Checks if user already exists
      *
-     * @param  string $sEmail
+     * @param string $sEmail
      * @return mixed
      * @todo Should be moved to User
      */
@@ -221,7 +226,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Returns user id by given username
      *
-     * @param  string $sUserName
+     * @param string $sUserName
      * @return string
      */
     public function fcpoGetIdByUserName($sUserName)
@@ -239,7 +244,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Returns countryid by given countrycode
      *
-     * @param  string $sCode
+     * @param string $sCode
      * @return mixed
      */
     public function fcpoGetIdByCode($sCode)
@@ -251,7 +256,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Returns salutation stored in database by firstname
      *
-     * @param  string $sFirstname
+     * @param string $sFirstname
      * @return string
      */
     public function fcpoGetSalByFirstName($sFirstname)
@@ -263,7 +268,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Checks address database for receiving a address matching to response
      *
-     * @param  array $aResponse
+     * @param array $aResponse
      * @return mixed
      */
     public function fcpoGetAddressIdByResponse($aResponse, $sStreet, $sStreetNr)
@@ -294,7 +299,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     protected function _fcProcessUserAgentInfo($sAgent)
     {
         if ($sAgent) {
-            $sAgent = getStr()->preg_replace("/MSIE(\s)?(\S)*(\s)/", "", (string) $sAgent);
+            $sAgent = getStr()->preg_replace("/MSIE(\s)?(\S)*(\s)/", "", (string)$sAgent);
         }
         return $sAgent;
     }
@@ -350,7 +355,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     }
 
     /**
-     * Returns true if this request is the return to the shop from a payment provider where the user has been redirected to
+     * Returns true if this request is the return to the shop from a payment provider where the user has been
+     * redirected to
      *
      * @return bool
      */
@@ -389,12 +395,12 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * Mailing status (1 if OK, 0 on error) is returned.
      *
      * @param Basket $oBasket              Shopping basket object
-     * @param object                                             $oUser                Current user object
-     * @param bool                                               $blRecalculatingOrder Order recalculation
-     *
-     * @throws Exception
+     * @param object $oUser                Current user object
+     * @param bool   $blRecalculatingOrder Order recalculation
      *
      * @return integer
+     * @throws Exception
+     *
      */
     public function finalizeOrder(Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
@@ -595,9 +601,9 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Triggers steps to execute payment
      *
-     * @param  bool          $blSaveAfterRedirect
-     * @param  Basket      $oBasket
-     * @param  UserPayment $oUserPayment
+     * @param bool        $blSaveAfterRedirect
+     * @param Basket      $oBasket
+     * @param UserPayment $oUserPayment
      * @return mixed
      */
     protected function _fcpoExecutePayment($blSaveAfterRedirect, $oBasket, $oUserPayment, $blRecalculatingOrder)
@@ -655,7 +661,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $sAuthMode = $this->oxorder__fcpoauthmode->value;
 
         $blSendMail = (
-            in_array($sPaymentId, ['fcpoinvoice','fcpopayadvance']) &&
+            in_array($sPaymentId, ['fcpoinvoice', 'fcpopayadvance']) &&
             $sAuthMode == 'preauthorization'
         );
 
@@ -681,8 +687,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $oLang = $this->_oFcpoHelper->getFactoryObject('oxLang');
         $oShop = $this->_oFcpoHelper->getFactoryObject('oxShop');
         $oShop->load($this->oxorder__oxshopid->value);
-        $sSubject = $oShop->oxshops__oxname->value." - ";
-        $sSubject .= $oLang->translateString('FCPO_EMAIL_CLEARING_SUBJECT')." ";
+        $sSubject = $oShop->oxshops__oxname->value . " - ";
+        $sSubject .= $oLang->translateString('FCPO_EMAIL_CLEARING_SUBJECT') . " ";
         $sSubject .= $this->oxorder__oxordernr->value;
 
         return $sSubject;
@@ -701,13 +707,13 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $sBody = $oLang->translateString('FCPO_EMAIL_CLEARING_BODY_WELCOME');
         $sBody = str_replace('%NAME%', $this->oxorder__oxbillfname->value, $sBody);
         $sBody = str_replace('%SURNAME%', $this->oxorder__oxbilllname->value, $sBody);
-        $sBody .= $oLang->translateString("FCPO_BANKACCOUNTHOLDER").": ".$this->getFcpoBankaccountholder()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_BANK")." ".$this->getFcpoBankname()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_ROUTINGNUMBER")." ".$this->getFcpoBankcode()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_ACCOUNTNUMBER")." ".$this->getFcpoBanknumber()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_BIC")." ".$this->getFcpoBiccode()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_IBAN")." ".$this->getFcpoIbannumber()."\n";
-        $sBody .= $oLang->translateString("FCPO_EMAIL_USAGE").": ".$this->oxorder__fcpotxid->value."\n";
+        $sBody .= $oLang->translateString("FCPO_BANKACCOUNTHOLDER") . ": " . $this->getFcpoBankaccountholder() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_BANK") . " " . $this->getFcpoBankname() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_ROUTINGNUMBER") . " " . $this->getFcpoBankcode() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_ACCOUNTNUMBER") . " " . $this->getFcpoBanknumber() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_BIC") . " " . $this->getFcpoBiccode() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_IBAN") . " " . $this->getFcpoIbannumber() . "\n";
+        $sBody .= $oLang->translateString("FCPO_EMAIL_USAGE") . ": " . $this->oxorder__fcpotxid->value . "\n";
         $sBody .= "\n\n";
         $sThankyou = $oLang->translateString('FCPO_EMAIL_CLEARING_BODY_THANKYOU');
         $sBody .= str_replace('%SHOPNAME%', $oShop->oxshops__oxname->value, $sThankyou);
@@ -718,14 +724,14 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Handles basket loading into order
      *
-     * @param  bool     $blSaveAfterRedirect
-     * @param  Basket $oBasket
+     * @param bool   $blSaveAfterRedirect
+     * @param Basket $oBasket
      * @return void
      */
     protected function _fcpoHandleBasket($blSaveAfterRedirect, $oBasket)
     {
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
-        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blFCPOPresaveOrder === false || $blSaveAfterRedirect === false) {
             $this->loadFromBasket($oBasket);
@@ -737,7 +743,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      *
      *
-     * @param bool     $blSaveAfterRedirected
+     * @param bool   $blSaveAfterRedirected
      * @param Basket $oBasket
      * @param User   $oUser
      * @return mixed
@@ -780,7 +786,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Finishes order and returns state
      *
-     * @param bool          $blRecalculatingOrder
+     * @param bool        $blRecalculatingOrder
      * @param User        $oUser
      * @param Basket      $oBasket
      * @param UserPayment $oUserPayment
@@ -800,7 +806,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Mathod triggers saving after redirect if this option has been configured
      *
-     * @param  bool $blSaveAfterRedirect
+     * @param bool $blSaveAfterRedirect
      * @return void
      */
     protected function _fcpoSaveAfterRedirect($blSaveAfterRedirect)
@@ -841,7 +847,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         $blOrderOk = (
             $this->_fcpoGetAppointedError() === false &&
-           $this->_blOrderHasProblems === false
+            $this->_blOrderHasProblems === false
         );
 
         return $blOrderOk;
@@ -850,7 +856,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Method triggers marking vouchers if order hasn't been set for recalculation
      *
-     * @param  bool $blRecalculatingOrder
+     * @param bool $blRecalculatingOrder
      * @return void
      */
     protected function _fcpoMarkVouchers($blRecalculatingOrder, $oUser, $oBasket)
@@ -863,7 +869,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Summed steps to process a payone order
      *
-     * @param  string $sTxid
+     * @param string $sTxid
      * @return void
      */
     protected function _fcpoProcessOrder($sTxid)
@@ -880,14 +886,14 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Saves payone specific orderlines
      *
-     * @param  string $sTxid
-     * @param  int    $iOrderNotChecked
+     * @param string $sTxid
+     * @param int    $iOrderNotChecked
      * @return void
      */
     protected function _fcpoSaveOrderValues($sTxid, $iOrderNotChecked)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
             $this->oxorder__oxordernr = new Field($this->_oFcpoHelper->fcpoGetSessionVariable('fcpoOrderNr'), Field::T_RAW);
         }
@@ -930,7 +936,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
             $sCurrentRemark = $this->oxorder__oxremark->value;
             $sAddErrorRemark = $oLang->translateString('FCPO_REMARK_APPOINTED_MISSING');
-            $sNewRemark = $sCurrentRemark." ".$sAddErrorRemark;
+            $sNewRemark = $sCurrentRemark . " " . $sAddErrorRemark;
             $this->oxorder__oxremark = new Field($sNewRemark, Field::T_RAW);
         }
         $this->_fcpoSetAppointedError($blAppointedError);
@@ -970,7 +976,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     public function save()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === false || $this->isPayOnePaymentType() === false) {
             return parent::save();
         }
@@ -1040,7 +1046,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
                 fcpo_txaction = 'appointed'
         ";
 
-        $iCount = (int) $this->_oFcpoDb->GetOne($sQuery);
+        $iCount = (int)$this->_oFcpoDb->GetOne($sQuery);
 
         return ($iCount === 1);
     }
@@ -1219,7 +1225,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         );
 
         if ($blFetchCaptureResponse) {
-            $sWhere = "fcpo_request LIKE '%".$this->oxorder__fcpotxid->value."%'";
+            $sWhere = "fcpo_request LIKE '%" . $this->oxorder__fcpotxid->value . "%'";
             $sAnd = "
                 fcpo_requesttype = 'capture'
             ";
@@ -1348,14 +1354,14 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @param object $oBasket basket object
      *
+     * @return null
      * @throws Exception
      *
-     * @return null
      */
     public function validateStock($oBasket)
     {
-        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
-        $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
         $blCheckProduct = (
             $blReduceStockBefore &&
             $this->_isRedirectAfterSave()
@@ -1475,8 +1481,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Handle authorization of current order
      *
-     * @param  bool $blReturnRedirectUrl
-     * @param  PaymentGateway $oPayGateway
+     * @param bool           $blReturnRedirectUrl
+     * @param PaymentGateway $oPayGateway
      * @return boolean
      */
     public function fcHandleAuthorization($blReturnRedirectUrl = false, $oPayGateway = null)
@@ -1489,7 +1495,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $aDynvalue = $this->_oFcpoHelper->fcpoGetSessionVariable('dynvalue');
         $aDynvalue = $aDynvalue ? $aDynvalue : $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
 
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
             $sOrderNr = $this->_fcpoGetNextOrderNr();
             $this->oxorder__oxordernr = new Field($sOrderNr, Field::T_RAW);
@@ -1522,7 +1528,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
         $blShow = (
             ($this->oxorder__fcpoauthmode == 'authorization' && $sPaymentId == 'fcpoinvoice') ||
-        ($sPaymentId === 'fcpopayadvance')
+            ($sPaymentId === 'fcpopayadvance')
         );
 
         return $blShow;
@@ -1533,20 +1539,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @return string
      */
-    protected function _fcpoGetNextOrderNr()
+    protected function _fcpoGetNextOrderNr(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sShopVersion = $oConfig->getVersion();
-
-        if (version_compare($sShopVersion, '4.6.0', '>=')) {
-            $oCounter = $this->_oFcpoHelper->getFactoryObject('oxCounter');
-            $sOrderNr = $oCounter->getNext($this->getCounterIdent());
-        } else {
-            $sQuery = "SELECT MAX(oxordernr)+1 FROM oxorder LIMIT 1";
-            $sOrderNr = $this->_oFcpoDb->GetOne($sQuery);
-        }
-
-        return $sOrderNr;
+        $oCounter = $this->_oFcpoHelper->getFactoryObject('oxCounter');
+        return $oCounter->getNext($this->getCounterIdent());
     }
 
     /**
@@ -1567,12 +1563,12 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Cares about validation of authorization request
      *
-     * @param  array  $aResponse
-     * @param  object $oPayGateway
-     * @param  string $sRefNr
-     * @param  string $sMode
-     * @param  string $sAuthorizationType
-     * @param  bool   $blReturnRedirectUrl
+     * @param array  $aResponse
+     * @param object $oPayGateway
+     * @param string $sRefNr
+     * @param string $sMode
+     * @param string $sAuthorizationType
+     * @param bool   $blReturnRedirectUrl
      * @return boolean
      */
     protected function _fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl)
@@ -1582,7 +1578,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         if ($aResponse['status'] == 'ERROR') {
             $this->_fcpoHandleAuthorizationError($aResponse, $oPayGateway);
             $mReturn = false;
-        } elseif (in_array($aResponse['status'], ['APPROVED','PENDING'])) {
+        } elseif (in_array($aResponse['status'], ['APPROVED', 'PENDING'])) {
             $this->_fcpoHandleAuthorizationApproved($aResponse, $sRefNr, $sAuthorizationType, $sMode);
             $mReturn = true;
         } elseif ($aResponse['status'] == 'REDIRECT') {
@@ -1606,11 +1602,11 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Handles case of redirect type authorization
      *
-     * @param  array  $aResponse
-     * @param  string $sRefNr
-     * @param  string $sAuthorizationType
-     * @param  string $sMode
-     * @param  bool   $blReturnRedirectUrl
+     * @param array  $aResponse
+     * @param string $sRefNr
+     * @param string $sAuthorizationType
+     * @param string $sMode
+     * @param bool   $blReturnRedirectUrl
      * @return void
      */
     protected function _fcpoHandleAuthorizationRedirect($aResponse, $sRefNr, $sAuthorizationType, $sMode, $blReturnRedirectUrl)
@@ -1620,7 +1616,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
 
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
             $this->_blFinishingSave = false;
             $this->save();
@@ -1667,7 +1663,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sPaymentId = $this->oxorder__oxpaymenttype->value;
-        $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
         $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
 
         if ($blReduceStockBefore && $blIsRedirectPayment) {
@@ -1681,10 +1677,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Handles case of approved authorization
      *
-     * @param  array  $aResponse
-     * @param  string $sRefNr
-     * @param  string $sAuthorizationType
-     * @param  string $sMode
+     * @param array  $aResponse
+     * @param string $sRefNr
+     * @param string $sAuthorizationType
+     * @param string $sMode
      * @return void
      */
     protected function _fcpoHandleAuthorizationApproved($aResponse, $sRefNr, $sAuthorizationType, $sMode)
@@ -1713,15 +1709,15 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * For certain payments it's mandatory to save workorderid
      *
-     * @param  string $sPaymentId
-     * @param  array  $aResponse
+     * @param string $sPaymentId
+     * @param array  $aResponse
      * @return void
      */
     protected function _fcpoSaveWorkorderId($sPaymentId, $aResponse)
     {
         if (in_array($sPaymentId, $this->_aPaymentsWorkorderIdSave)) {
             $sWorkorderId = (
-                isset($aResponse['add_paydata[workorderid]'])
+            isset($aResponse['add_paydata[workorderid]'])
             ) ?
                 $aResponse['add_paydata[workorderid]'] :
                 $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoWorkorderId');
@@ -1738,8 +1734,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * For certain payments it's mandatory to save clearing reference
      *
-     * @param  string $sPaymentId
-     * @param  array  $aResponse
+     * @param string $sPaymentId
+     * @param array  $aResponse
      * @return void
      */
     protected function _fcpoSaveClearingReference($sPaymentId, $aResponse)
@@ -1755,8 +1751,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * For certain payments it's mandatory to save (external) shopid/userid (e. g- ratepay payments)
      *
-     * @param  string $sPaymentId
-     * @param  array  $aResponse
+     * @param string $sPaymentId
+     * @param array  $aResponse
      * @return void
      */
     protected function _fcpoSaveProfileIdent($sPaymentId, $aResponse)
@@ -1773,7 +1769,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Handles case of Authorization error
      *
-     * @param array $aResponse
+     * @param array  $aResponse
      * @param object $oPayGateway
      * @return mixed int|bool
      */
@@ -1782,8 +1778,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $mReturn = false;
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
 
-        $sResponseErrorCode = (string) trim($aResponse['errorcode']);
-        $sResponseCustomerMessage = (string) trim($aResponse['customermessage']);
+        $sResponseErrorCode = (string)trim($aResponse['errorcode']);
+        $sResponseCustomerMessage = (string)trim($aResponse['customermessage']);
         $sPaymenttype = $this->oxorder__oxpaymenttype->value;
         if ($sPaymenttype == 'fcpoamazonpay') {
             $sResponseErrorCode = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
@@ -1852,7 +1848,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     public function fcpoGetAmazonErrorTranslationString($iSuccess)
     {
-        $iSuccess = (int) $iSuccess;
+        $iSuccess = (int)$iSuccess;
 
         switch ($iSuccess) {
             case self::FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD:
@@ -1890,8 +1886,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Returns wether given paymentid is of payone type
      *
-     * @param  string $sId
-     * @param  bool   $blIFrame
+     * @param string $sId
+     * @param bool   $blIFrame
      * @return bool
      */
     protected function _fcpoIsPayonePaymentType($sId, $blIFrame = false)
@@ -1918,7 +1914,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Sets appointed error
      *
-     * @param  bool $blError appointed error indicator
+     * @param bool $blError appointed error indicator
      * @return void
      */
     protected function _fcpoSetAppointedError($blError = false)

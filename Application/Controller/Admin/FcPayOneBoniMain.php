@@ -131,6 +131,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
 
         $aConfBools = $this->_oFcpoHelper->fcpoGetRequestParameter("confbools");
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
+
         if (is_array($aConfBools)) {
             foreach ($aConfBools as $sVarName => $sVarVal) {
                 $oConfig->saveShopConfVar("bool", $sVarName, $sVarVal);
@@ -139,18 +140,14 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
 
         if (is_array($aConfStrs)) {
             foreach ($aConfStrs as $sVarName => $sVarVal) {
-                if (array_search($sVarName, $this->_aMultiLangFields) !== false) {
+                if (in_array($sVarName, $this->_aMultiLangFields)) {
                     $sVarName = $sVarName . '_' . $iLang;
                 }
                 $oConfig->saveShopConfVar("str", $sVarName, $sVarVal);
             }
         }
 
-        /**
-         * @TODO _fcpoValidateAddresscheckType not exist
-         */
-        $iValidateCode = $this->_fcpoValidateAddresscheckType();
-        $this->_fcpoDisplayMessage($iValidateCode);
+        $this->_fcpoValidateAddresscheckType();
     }
 
     /**
@@ -263,9 +260,9 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validate settings and check if this must be switched to basic addresscheck depending on
      * selected bonicheck
      *
-     * @return int
+     * @return void
      */
-    protected function _fcpoValidateAddresscheckBasic()
+    protected function _fcpoValidateAddresscheckBasic(): void
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
@@ -287,9 +284,9 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validate settings and check if this must be switched to person addresscheck depending on
      * selected bonicheck
      *
-     * @return int
+     * @return void
      */
-    protected function _fcpoValidateAddresscheckPerson(): int
+    protected function _fcpoValidateAddresscheckPerson(): void
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
@@ -315,7 +312,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      *
      * @return void
      */
-    protected function _fcpoCheckIssetBoniAddresscheck()
+    protected function _fcpoCheckIssetBoniAddresscheck(): void
     {
         $blBoniCheckActive = $this->_fcpoCheckBonicheckIsActive();
         $blBoniAddresscheckActive = $this->_fcpoBoniAddresscheckActive();
@@ -338,7 +335,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      *
      * @return void
      */
-    protected function _fcpoValidateDuplicateAddresscheck()
+    protected function _fcpoValidateDuplicateAddresscheck(): void
     {
         $blBoniCheckActive = $this->_fcpoCheckBonicheckIsActive();
         $blBoniAddressCheckActive = $this->_fcpoBoniAddresscheckActive();
@@ -370,8 +367,9 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * Validates addresscheck related to boniversum. Correct settings and return error
      * code for notifying user
      *
+     * @return void
      */
-    protected function _fcpoValidateAddresscheckBoniversum()
+    protected function _fcpoValidateAddresscheckBoniversum(): void
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
@@ -402,7 +400,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      *
      * @return void
      */
-    protected function _fcpoDisplayValidationMessages()
+    protected function _fcpoDisplayValidationMessages(): void
     {
         // collect messages
         $sTranslatedMessage = "";
@@ -431,7 +429,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      * @param $iValidateCode
      * @return void
      */
-    public function _fcpoDisplayMessage($iValidateCode)
+    public function _fcpoDisplayMessage($iValidateCode): void
     {
         if ($iValidateCode > 0 && isset($this->_aValidateCode2Message[$iValidateCode])) {
             $oUtilsView = Registry::get('oxUtilsView');

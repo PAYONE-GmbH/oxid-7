@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
@@ -74,6 +74,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
 
     /**
      * List of config errors encountered
+     *
      * @var array
      */
     protected $_aConfErrors = null;
@@ -219,8 +220,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
     public function render(): string
     {
         $sReturn = parent::render();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
         $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
 
         if ($this->_oFcpoHelper->fcpoGetRequestParameter("aoc")) {
@@ -229,16 +228,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
             $sType = $this->_oFcpoHelper->fcpoGetRequestParameter("type");
             $this->_aViewData["type"] = $sType;
 
-            if (version_compare($oConfig->getVersion(), '4.6.0', '>=')) {
-                $oPayOneAjax = oxNew(FcPayOneMainAjax::class);
-                $aColumns = $oPayOneAjax->getColumns();
-            } else {
-                $aColumns = [];
-                include_once 'inc/' . strtolower(__CLASS__) . '.inc.php';
-            }
+            $oPayOneAjax = oxNew(FcPayOneMainAjax::class);
+            $aColumns = $oPayOneAjax->getColumns();
             $this->_aViewData['oxajax'] = $aColumns;
 
-            return "fcpayone_popup_main.tpl";
+            return "@fcpayone/admin/fcpayone_popup_main";
         }
         return $sReturn;
     }
@@ -339,7 +333,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
                 $oConfig->saveShopConfVar("str", $sVarName, $sVarVal);
             }
         }
-
         if (is_array($aConfArrs)) {
             foreach ($aConfArrs as $sVarName => $aVarVal) {
                 // home country multiple selectlist feature
@@ -397,7 +390,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $blValidAccountData = $this->_fcpoValidateAccountData();
 
         return (
-            $blValidAccountData
+        $blValidAccountData
         );
     }
 
@@ -442,8 +435,8 @@ class FcPayOneMain extends FcPayOneAdminDetails
 
         $blValidCountryData = (
             isset($this->_aConfArrs["aFCPODebitCountries"]) &&
-                count($this->_aConfArrs["aFCPODebitCountries"]) &&
-                count($oCountryList)
+            count($this->_aConfArrs["aFCPODebitCountries"]) &&
+            count($oCountryList)
         );
 
         if ($blValidCountryData) {
@@ -496,13 +489,13 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Insert RatePay profile
      *
-     *  @return void
+     * @return void
      */
     protected function _fcpoInsertProfiles(): void
     {
         $aRatePayProfiles = $this->_oFcpoHelper->fcpoGetRequestParameter('aRatepayProfiles');
         if (is_array($aRatePayProfiles)) {
-            foreach ($aRatePayProfiles as $sOxid=>$aRatePayData) {
+            foreach ($aRatePayProfiles as $sOxid => $aRatePayData) {
                 $this->_oFcpoRatePay->fcpoInsertProfile($sOxid, $aRatePayData);
             }
         }
@@ -650,7 +643,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function fcpoIsCampaignAdded(): bool
     {
-        return  (
+        return (
             isset($this->_aAdminMessages["blCampaignAdded"]) &&
             $this->_aAdminMessages["blCampaignAdded"] === true
         );

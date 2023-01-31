@@ -1637,18 +1637,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns the sum of basket
      *
-     * @return decimal
+     * @return string
      */
-    public function fcpoGetBasketSum()
+    public function fcpoGetBasketSum(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sShopVersion = $oConfig->getVersion();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-        $dBruttoSum = (version_compare($sShopVersion, '4.7.0', '>=')) ? $oBasket->getBruttoSum() : $oBasket->getProductsPrice()->getBruttoSum();
-        $sBruttoSum = number_format($dBruttoSum, 2, ',', '.');
-
-        return $sBruttoSum;
+        $dBruttoSum = $oBasket->getBruttoSum();
+        return number_format($dBruttoSum, 2, ',', '.');
     }
 
     /**

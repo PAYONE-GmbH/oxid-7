@@ -125,7 +125,7 @@ class FcPoConfigExport extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $sQuery = "select oxvarname, oxvartype, DECODE( oxvarvalue, " . $oDb->quote($oConfig->getConfigParam('sConfigKey')) . ") as oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
+        $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
         $aResult = $oDb->getAll($sQuery);
 
         if (count($aResult)) {
