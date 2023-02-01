@@ -25,6 +25,8 @@ use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\PaymentGateway;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Application\Model\User;
@@ -1506,7 +1508,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         }
 
         $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($this->oxorder__oxpaymenttype->value);
         $sAuthorizationType = $oPayment->oxpayments__fcpoauthmode->value;
 
@@ -1545,7 +1547,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoGetNextOrderNr(): string
     {
-        $oCounter = $this->_oFcpoHelper->getFactoryObject('oxCounter');
+        $oCounter = $this->_oFcpoHelper->getFactoryObject(Country::class);
         return $oCounter->getNext($this->getCounterIdent());
     }
 

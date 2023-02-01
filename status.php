@@ -48,7 +48,7 @@ if (array_search($sRemoteIp, $aWhitelist) === false) {
     foreach ($aWhitelist as $sIP) {
         if (stripos($sIP, '*') !== false) {
             $sDelimiter = '/';
-            
+
             $sRegex = preg_quote($sIP, $sDelimiter);
             $sRegex = str_replace('\*', '\d{1,3}', $sRegex);
             $sRegex = $sDelimiter.'^'.$sRegex.'$'.$sDelimiter;
@@ -59,7 +59,7 @@ if (array_search($sRemoteIp, $aWhitelist) === false) {
             }
         }
     }
-    
+
     if ($blMatch === false) {
         echo 'Access denied';
         exit;
@@ -69,6 +69,8 @@ if (array_search($sRemoteIp, $aWhitelist) === false) {
 include_once dirname(__FILE__) . "/../../../bootstrap.php";
 include_once dirname(__FILE__) . "/statusbase.php";
 
+use Exception;
+use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Language;
 
@@ -225,7 +227,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
 
         return $sOxid;
     }
-    
+
     /**
      * Handling configured forwarding of statusmessage to other endpoints
      *
@@ -242,7 +244,8 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             throw $e;
         }
 
-        $oConfig = $this->getConfig();
+        $oFcpoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $oFcpoHelper->fcpoGetConfig();
         $sTransactionForwardMethod =
             $oConfig->getConfigParam('sTransactionRedirectMethod');
 
@@ -263,7 +266,8 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $sParams .= $this->_addParam('key', $sKey);
         $sParams .= $this->_addParam('statusmessageid', $sStatusmessageId);
 
-        $oConfig = $this->getConfig();
+        $oFcpoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sSslShopUrl = $oConfig->getSslShopUrl();
         $sConfTimeout = $oConfig->getConfigParam('sTransactionRedirectTimeout');
@@ -310,7 +314,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $oDb = DatabaseProvider::getDb();
         $oOrder = $this->_getOrder($sTxid);
         $sPaymentId = $oDb->quote($oOrder->oxorder__oxpaymenttype->value);
-        
+
         $sQuery = "
             SELECT fcpo_folder 
             FROM fcpostatusmapping 
@@ -463,7 +467,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             throw $e;
         }
     }
-    
+
     /**
      * Checks based on the transaction status received by PAYONE whether
      * the debit request is available for this order at the moment.

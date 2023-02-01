@@ -22,6 +22,7 @@
 namespace Fatchip\PayOne\Tests\Application\Controller;
 
 use Fatchip\PayOne\Application\Controller\FcPayOneIframe;
+use OxidEsales\Eshop\Application\Model\Order;
 
 class Unit_fcPayOne_Application_Controllers_fcpayoneiframe extends OxidTestCase
 {
@@ -142,7 +143,7 @@ class Unit_fcPayOne_Application_Controllers_fcpayoneiframe extends OxidTestCase
     {
         $oTestObject = oxNew(FcPayOneIframe::class);
 
-        $sResult = $oTestObject->getFactoryObject('oxOrder');
+        $sResult = $oTestObject->getFactoryObject(Order::class);
 
         $this->assertInstanceOf('oxOrder', $sResult);
     }

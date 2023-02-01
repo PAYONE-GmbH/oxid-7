@@ -25,11 +25,16 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
 class FcPayOnePaymentView extends FcPayOnePaymentView_parent
@@ -178,7 +183,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoShowAsRegularPaymentSelection($sPaymentId)
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
         $blShowAsRegularPaymentSelection =
             $oPayment->fcpoShowAsRegularPaymentSelection();
@@ -203,7 +208,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
         if ($sOrderId && $blPresaveOrder && $blReduceStockBefore && ($sType == 'error' || $sType == 'cancel')) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOrderId);
             if ($oOrder) {
                 $oOrder->cancelOrder();
@@ -351,6 +356,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
+     * Returns array of years for credit cards
+     *
+     * @return array
+     */
+    public function getCreditYears(): array {
+        return range( date('Y'), date('Y', strtotime('+10 year')) );
+    }
+
+    /**
      * checks if chosen payment method is allowed according to
      * consumer score setting
      *
@@ -371,7 +385,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoPaymentActive($sPaymentId)
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
         $blPaymentActive = (bool) ($oPayment->oxpayments__oxactive->value);
         $blPaymentAllowed = $this->isPaymentMethodAllowedByBoniCheck($oPayment);
@@ -789,7 +803,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetActiveThemePath()
     {
-        $oViewConfig = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+        $oViewConfig = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
 
         return $oViewConfig->fcpoGetActiveThemePath();
     }
@@ -974,7 +988,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $oUser = $oBasket->getUser();
         $sCountryIso = $oUser->fcpoGetUserCountryIso();
 
-        $oConfig = $this->_oFcpoHelper->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oActCurrency = $oConfig->getActShopCurrencyObject();
         $sCurrencyName = $oActCurrency->name;
 
@@ -1242,7 +1256,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function getUserDelCountryId()
     {
         if ($this->_sUserDelCountryId === null) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
             $oDelAddress = $oOrder->getDelAddressInfo();
             $sUserDelCountryId = false;
             if ($oDelAddress !== null) {
@@ -1363,7 +1377,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _getOperationModeELV()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpodebitnote');
         return $oPayment->fcpoGetOperationMode();
     }
@@ -1428,7 +1442,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (array_key_exists('fcpo_' . $sType . '_del_addinfo', $aDynValue) !== false) {
             $sDeliveryAddressId = $oUser->getSelectedAddressId();
             if ($sDeliveryAddressId) {
-                $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+                $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
                 if ($oAddress->load($sDeliveryAddressId)) {
                     $oAddress->oxaddress__oxaddinfo = new Field($aDynValue['fcpo_' . $sType . '_del_addinfo'], Field::T_RAW);
                     $oAddress->save();
@@ -1501,7 +1515,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if ($mReturn == 'order') { // success
             $this->_fcpoSetKlarnaCampaigns();
 
-            $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+            $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
             $oPayment->load($sPaymentId);
             $mReturn = $this->_fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId);
             $blContinue = $this->_fcpoCheckBoniMoment($oPayment);
@@ -2038,7 +2052,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoValidatePayolutionBillHasUstid()
     {
         $blReturn = true;
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
         $blIsCompany = (bool)$this->fcpoGetUserValue('oxcompany');
@@ -3117,7 +3131,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetConfirmationText()
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $sId = $oPayment->fcpoGetKlarnaStoreId();
         $sKlarnaLang = $this->_fcpoGetKlarnaLang();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
@@ -3186,7 +3200,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $oUser = $this->getUser();
             $sDeliveryAddressId = $oUser->getSelectedAddressId();
             if ($sDeliveryAddressId) {
-                $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+                $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
                 $oAddress->load($sDeliveryAddressId);
                 if ($oAddress && !$oAddress->oxaddress__oxaddinfo->value) {
                     $blReturn = true;
@@ -3263,7 +3277,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if (is_array($aFCPODebitCountries) && count($aFCPODebitCountries)) {
             foreach ($aFCPODebitCountries as $sCountryId) {
-                $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+                $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
                 $aCountries[$oPayment->fcpoGetCountryIsoAlphaById($sCountryId)] = $oPayment->fcpoGetCountryNameById($sCountryId);
             }
         }
@@ -3366,11 +3380,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     {
         $mReturn = false;
         if ($oUser && $sPaymentType != null) {
-            $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+            $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
             $sOxid = $oPayment->fcpoGetUserPaymentId($oUser->getId(), $sPaymentType);
 
             if ($sOxid) {
-                $oUserPayment = $this->_oFcpoHelper->getFactoryObject('oxuserpayment');
+                $oUserPayment = $this->_oFcpoHelper->getFactoryObject(UserPayment::class);
                 $oUserPayment->load($sOxid);
                 $mReturn = $oUserPayment;
             }
@@ -3428,7 +3442,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     public function fcGetBillCountry()
     {
         $sBillCountryId = $this->getUserBillCountryId();
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
+        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         $sReturn = ($oCountry->load($sBillCountryId)) ? $oCountry->oxcountry__oxisoalpha2->value : '';
 
         return $sReturn;
@@ -3442,7 +3456,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     public function fcGetShippingCountry()
     {
         $sShippingCountryId = $this->getUserDelCountryId();
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
+        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         $sReturn = ($oCountry->load($sShippingCountryId)) ? $oCountry->oxcountry__oxisoalpha2->value : '';
 
         return $sReturn;

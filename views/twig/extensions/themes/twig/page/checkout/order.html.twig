@@ -1,0 +1,103 @@
+{% extends 'page/checkout/order.html.twig' %}
+
+{% block order_basket %}
+    {{ parent() }}
+    {% set payment = oView.getPayment() %}
+    {% set sMandateText = payment.fcpoGetMandateText() %}
+    {% if payment and attribute(payment, 'fcpoGetMandateText') is defined and payment.fcpoGetMandateText() %}
+        {{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne.js'), dynamic: __oxid_include_dynamic }) }}
+        {{ script({ include: oViewConf.fcpoGetModuleCssPath('fcpayone.css'), dynamic: __oxid_include_dynamic }) }}
+        <div id="fcpoSEPAMandate">
+            <h3 class="section">
+                <strong>SEPA-Lastschrift</strong>
+            </h3>
+            {{ translate({ ident: "FCPO_ORDER_MANDATE_INFOTEXT" }) }}
+            <div class="fcpoSEPAMandate">
+                {{ sMandateText }}
+            </div>
+
+            <div class="fcpoSEPAMandateCheckbox">
+                <label style="float:left; padding-right:10px;" for="mandate_status"
+                       class="control-label">{{ translate({ ident: "FCPO_ORDER_MANDATE_CHECKBOX" }) }}</label>
+                <input type="checkbox" onclick="fcpoHandleMandateCheckbox(this);">
+                <div class="clear"></div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block checkout_order_errors %}
+    {{ parent() }}
+    {% if oView.fcpoIsMandateError() %}
+        {% include "message/error.html.twig" with {statusMessage: "FCPO_ORDER_MANDATE_ERROR"|translate} %}
+    {% endif %}
+{% endblock %}
+
+{% block checkout_order_address %}
+    {% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
+
+    {% if oViewConf.fcpoAmazonLoginSessionActive() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_amazonpay_order.html.twig" %}
+
+    {% endif %}
+
+    {% if oViewConf.fcpoUserHasSalutation() %}
+        {{ parent() }}
+        {% if oViewConf.fcpoIsKlarnaPaynow() %}
+            <script type="text/javascript">
+                window.addEventListener("load", function () {
+                    var orderForm = document.getElementById('orderConfirmAgbBottom');
+                    var klarna_client_token = '{{ oViewConf.fcpoGetClientToken() }}';
+                    var klarna_cancel_url = '{{ oViewConf.fcpoGetKlarnaCancelUrl() }}';
+                    // extend orer form with hidden field in order to submit the klarna auth token
+                    var input = document.createElement("input");
+                    input.type = "hidden";
+                    input.id = 'fcpo_klarna_auth_token'
+                    input.name = "dynvalue[klarna_authorization_token]";
+                    input.value = '{{ oViewConf.fcpoGetKlarnaAuthToken() }}';
+                    orderForm.appendChild(input);
+                    orderForm.addEventListener('submit', function (e) {
+                        var authToken = document.getElementById('fcpo_klarna_auth_token').value;
+                        if (typeof (authToken) is
+                        same
+                        as('undefined' || authToken === '')
+                        {)
+                            e.preventDefault();
+                            // obtain auth token from Klarna
+                            Klarna.Payments.init({
+                                client_token: klarna_client_token
+                            });
+                            Klarna.Payments.finalize({
+                                    payment_method_category: 'pay_now'
+                                }, {},
+                                function (res) {
+                                    document.getElementById('fcpo_klarna_auth_token').value = res.authorization_token;
+                                    if (res.show_form is
+                                    same
+                                    as(true && res.approved !== true && typeof (res.error) === 'undefined')
+                                    {)
+                                        // user canceled, so redirect back to payment and show error
+                                        window.location.replace(klarna_cancel_url);
+                                    }
+                                else
+                                    if (res.show_form is
+                                    same
+                                    as(false)
+                                    {)
+                                        window.location.replace(klarna_cancel_url);
+                                    }
+                                else
+                                    {
+                                        orderForm.submit();
+                                    }
+                                })
+                        }
+                    });
+                });
+            </script>
+            <script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
+        {% endif %}
+    {% else %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_order.html.twig" %}
+    {% endif %}
+{% endblock %}

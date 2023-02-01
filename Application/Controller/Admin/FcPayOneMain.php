@@ -27,6 +27,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\CountryList;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\EshopCommunity\Application\Controller\Admin\DeliverySetList;
 
 class FcPayOneMain extends FcPayOneAdminDetails
 {
@@ -860,7 +861,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     public function fcpoGetDeliverySets(): array
     {
         $oDeliveryAdminList =
-            $this->_oFcpoHelper->getFactoryObject('DeliverySet_List');
+            $this->_oFcpoHelper->getFactoryObject(DeliverySetList::class);
         $oList = $oDeliveryAdminList->getItemList();
         return $oList->getArray();
     }

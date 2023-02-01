@@ -323,7 +323,7 @@ class FcPoHelper extends BaseModel
      *
      * @return string
      */
-    public static function fcpoGetStaticModuleVersion()
+    public static function fcpoGetStaticModuleVersion(): string
     {
         return '1.5.0';
     }
@@ -335,7 +335,10 @@ class FcPoHelper extends BaseModel
      */
     public function fcpoGetModuleVersion(): string
     {
-        include_once __DIR__ . "/../metadata.php";
+        include_once $this->getModulesDir() . "fc/fcpayone/metadata.php";
+        if(!$aModule['version']) {
+            return self::fcpoGetStaticModuleVersion();
+        }
         return $aModule['version'];
     }
 

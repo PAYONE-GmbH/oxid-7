@@ -29,6 +29,7 @@ include_once dirname(__FILE__) . "/../../../bootstrap.php";
 include_once dirname(__FILE__) . "/statusbase.php";
 
 use Exception;
+use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
@@ -276,7 +277,8 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     protected function _forwardRequest($sQueueId, $sForwardId, $sStatusmessageId)
     {
         try {
-            $oConfig = $this->getConfig();
+            $oFcpoHelper = oxNew(FcPoHelper::class);
+            $oConfig = $oFcpoHelper->fcpoGetConfig();
             $sConfTimeout = $oConfig->getConfigParam('sTransactionRedirectTimeout');
             $iTimeout = ($sConfTimeout) ? (int) $sConfTimeout : 10;
             $aParams = $this->_fetchPostParams($sStatusmessageId);

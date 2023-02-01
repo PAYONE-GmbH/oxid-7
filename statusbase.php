@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne;
 
 use Exception;
+use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\UtilsObject;
 
@@ -62,7 +63,8 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
      */
     protected function _fcCheckLoggingAllowed()
     {
-        $oConfig = $this->getConfig();
+        $oFcpoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $oFcpoHelper->fcpoGetConfig();
         $sLogMethod =
             $oConfig->getConfigParam('sTransactionRedirectLogging');
 
@@ -111,10 +113,13 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
 
     protected function _getConfigParams($sParam)
     {
+        $oFcpoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $oFcpoHelper->fcpoGetConfig();
+
         $aShops = $this->_getShopList();
         $aParams = [];
         foreach ($aShops as $sShop) {
-            $mValue = $this->getConfig()->getShopConfVar($sParam, $sShop);
+            $mValue = $oConfig->getShopConfVar($sParam, $sShop);
             if ($mValue) {
                 $aParams[$sShop] = $mValue;
             }

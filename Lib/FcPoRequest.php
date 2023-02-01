@@ -33,6 +33,7 @@ use OxidEsales\Eshop\Application\Model\OrderArticleList;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\ViewConfig;
 
 class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 {
@@ -1511,7 +1512,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoAddAmazonPayParameters($oOrder)
     {
         $oUser = $oOrder->getOrderUser();
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
@@ -2161,7 +2162,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoGetPaydirektCheckoutType()
     {
         $oPayment =
-            $this->_oFcpoHelper->getFactoryObject('oxPayment');
+            $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpopaydirekt_express');
         $sAuthorizationType = $oPayment->oxpayments__fcpoauthmode->value;
         $blIsPreauthorization = ($sAuthorizationType == 'preauthorization');
@@ -2212,12 +2213,12 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     public function addDeliveryAddressParams($blFallbackBillAddress = false)
     {
         $sDelAddressId = $this->_oFcpoHelper->fcpoGetSessionVariable('deladrid');
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxAddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject(Address::class);
         $sKey = 'shipping';
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
-        $oParamsParser = $this->_oFcpoHelper->getFactoryObject('fcpoparamsparser');
+        $oParamsParser = $this->_oFcpoHelper->getFactoryObject(FcPoParamSparser::class);
 
         if (!$oAddress->load($sDelAddressId)) {
             if (!$blFallbackBillAddress) {
@@ -2276,7 +2277,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         ];
 
-        $oDelCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
+        $oDelCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
         $oDelCountry->load($oAddress->{$aMap['countryid'][$sKey]}->value);
         $this->addParameter('shipping_firstname', $oAddress->{$aMap['shipping_firstname'][$sKey]}->value);
         $this->addParameter('shipping_lastname', $oAddress->{$aMap['shipping_lastname'][$sKey]}->value);

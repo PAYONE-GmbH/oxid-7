@@ -1,6 +1,3 @@
-{% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
-{% set sFcPoTemplatePath = sFcPoTemplatePath|cat('/fcpo_nosalutation_address.html.twig') %}
-
 <div id="orderAddress">
     <form action="{{ oViewConf.getSslSelfLink() }}" method="post">
         <div class="hidden">
@@ -14,7 +11,7 @@
                 {{ translate({ ident: "EDIT" }) }}
             </button>
         </h3>
-        {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" %}
     </form>
 
     <form action="{{ oViewConf.getSslSelfLink() }}" method="post">
@@ -29,7 +26,8 @@
                 {{ translate({ ident: "EDIT" }) }}
             </button>
         </h3>
-        {% include oViewConf->fcpoGetAbsModuleTemplateFrontendPath(sFcPoTemplatePath) with {delivadr: oDelAdress} %}
+        {% set oDelAddress = oView.getDelAddress %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" with {delivadr: oDelAddress} %}
     </form>
 
     {% if oView.getOrderRemark() %}
