@@ -10,10 +10,8 @@
             }
 
             var accessToken = getURLParameter("access_token", location.hash);
-            if (typeof accessToken is
-            same
-            as('string' && accessToken.match(/^Atza/))
-            {)
+            if (typeof accessToken == 'string' && accessToken.match(/^Atza/))
+            {
                 document.cookie = "amazon_Login_accessToken=" + accessToken +
                     ";secure";
                 // and do it again

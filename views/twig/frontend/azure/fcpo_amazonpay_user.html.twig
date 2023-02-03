@@ -71,15 +71,11 @@
 
             var accessToken = getCookie('amazon_Login_accessToken');
 
-            if (typeof accessToken is
-            same
-            as('string' && accessToken === '')
-            {)
+            if (typeof accessToken == 'string' && accessToken === '')
+            {
                 var accessToken = getURLParameter("access_token", location.hash);
-                if (typeof accessToken is
-                same
-                as('string' && accessToken.match(/^Atza/))
-                {)
+                if (typeof accessToken == 'string' && accessToken.match(/^Atza/))
+                {
                     document.cookie = "amazon_Login_accessToken=" + accessToken +
                         ";secure";
                 }

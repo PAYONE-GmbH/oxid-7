@@ -58,10 +58,8 @@
                     orderForm.appendChild(input);
                     orderForm.addEventListener('submit', function (e) {
                         var authToken = document.getElementById('fcpo_klarna_auth_token').value;
-                        if (typeof (authToken) is
-                        same
-                        as('undefined' || authToken === '')
-                        {)
+                        if (typeof authToken == 'undefined' || authToken === '')
+                        {
                             e.preventDefault();
                             // obtain auth token from Klarna
                             Klarna.Payments.init({
@@ -72,18 +70,14 @@
                                 }, {},
                                 function (res) {
                                     document.getElementById('fcpo_klarna_auth_token').value = res.authorization_token;
-                                    if (res.show_form is
-                                    same
-                                    as(true && res.approved !== true && typeof (res.error) === 'undefined')
-                                    {)
+                                    if (res.show_form == true && res.approved !== true && typeof (res.error) === 'undefined')
+                                    {
                                         // user canceled, so redirect back to payment and show error
                                         window.location.replace(klarna_cancel_url);
                                     }
                                 else
-                                    if (res.show_form is
-                                    same
-                                    as(false)
-                                    {)
+                                    if (res.show_form === false)
+                                    {
                                         window.location.replace(klarna_cancel_url);
                                     }
                                 else

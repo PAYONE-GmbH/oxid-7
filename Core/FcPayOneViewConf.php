@@ -26,6 +26,7 @@ use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\Theme;
 
@@ -37,7 +38,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @var string
      */
-    protected $_sModuleFolder = "../../modules/fc/fcpayone";
+    protected string $_sModuleFolder = "fc/fcpayone/";
 
     /**
      * Helper object for dealing with different shop versions
@@ -51,13 +52,13 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @var string
      */
-    protected $_sFcPoHostedJsUrl = 'https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js';
+    protected string $_sFcPoHostedJsUrl = 'https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js';
 
     /**
      * List of handled themes and their belonging pathes
      * @var array
      */
-    protected $_aSupportedThemes = [
+    protected array $_aSupportedThemes = [
         'flow' => 'flow',
         'azure' => 'azure',
         'wave' => 'wave',
@@ -68,7 +69,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * List of themes and their
      * @var array
      */
-    protected $_aTheme2CssPayButtonSelector = [
+    protected array $_aTheme2CssPayButtonSelector = [
         'flow' => 'nextStep',
         'azure' => 'nextStep',
         'wave' => 'nextStep',
@@ -79,13 +80,13 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * Counts the amount of widgets have been included by call
      * @var int
      */
-    protected $_iAmzWidgetIncludeCounter = 0;
+    protected int $_iAmzWidgetIncludeCounter = 0;
 
     /**
      * Determines the source of a button include
      * @var string|null
      */
-    protected $_sCurrentAmazonButtonId = null;
+    protected ?string $_sCurrentAmazonButtonId = null;
 
 
     /**
@@ -103,9 +104,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetModulePath()
+    public function fcpoGetModulePath(): string
     {
-        return $this->getModulePath($this->_sModuleFolder);
+        return $this->_oFcpoHelper->getModulesDir() . $this->_sModuleFolder;
     }
 
     /**
@@ -113,9 +114,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetModuleUrl()
+    public function fcpoGetModuleUrl(): string
     {
-        return $this->getModuleUrl($this->_sModuleFolder);
+        return $this->_oFcpoHelper->getModulesDir(false) . $this->_sModuleFolder;
     }
 
     /**
@@ -123,7 +124,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAdminModuleImgUrl()
+    public function fcpoGetAdminModuleImgUrl(): string
     {
         $sModuleUrl = $this->fcpoGetModuleUrl();
         $sModuleAdminImgUrl = $sModuleUrl . 'out/admin/img/';
@@ -134,12 +135,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the path to javascripts of module
      *
-     * @param  string $sFile
+     * @param string $sFile
      * @return string
      */
-    public function fcpoGetAbsModuleJsPath($sFile = "")
+    public function fcpoGetAbsModuleJsPath(string $sFile = ""): string
     {
-        $sModulePath = $this->fcpoGetModulePath();
+        $sModulePath = $this->fcpoGetModuleUrl();
         $sModuleJsPath = $sModulePath . 'out/src/js/';
         if ($sFile) {
             $sModuleJsPath = $sModuleJsPath . $sFile;
@@ -151,17 +152,32 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the path to javascripts of module
      *
-     * @param  string $sFile
+     * @param string $sFile
      * @return string
      */
-    public function fcpoGetModuleJsPath($sFile = "")
+    public function fcpoGetModuleJsPath(string $sFile = ""): string
     {
         $sModuleUrl = $this->fcpoGetModuleUrl();
         $sModuleJsUrl = $sModuleUrl . 'out/src/js/';
         if ($sFile) {
             $sModuleJsUrl = $sModuleJsUrl . $sFile;
         }
+        return $sModuleJsUrl;
+    }
 
+    /**
+     * Returns the path to javascripts of module
+     *
+     * @param string $sFile
+     * @return string
+     */
+    public function fcpoGetAdminModuleJsPath(string $sFile = ""): string
+    {
+        $sModuleUrl = '/' . $this->fcpoGetModuleUrl();
+        $sModuleJsUrl = $sModuleUrl . 'out/src/js/';
+        if ($sFile) {
+            $sModuleJsUrl = $sModuleJsUrl . $sFile;
+        }
         return $sModuleJsUrl;
     }
 
@@ -170,7 +186,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetIntShopVersion()
+    public function fcpoGetIntShopVersion(): string
     {
         return $this->_oFcpoHelper->fcpoGetIntShopVersion();
     }
@@ -178,12 +194,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the path to javascripts of module
      *
-     * @param  string $sFile
+     * @param string $sFile
      * @return string
      */
-    public function fcpoGetModuleCssPath($sFile = "")
+    public function fcpoGetModuleCssPath(string $sFile = ""): string
     {
-        $sModuleUrl = $this->fcpoGetModuleUrl();
+        $sModuleUrl = '/' . $this->fcpoGetModuleUrl();
         $sModuleUrl = $sModuleUrl . 'out/src/css/';
         if ($sFile) {
             $sModuleUrl = $sModuleUrl . $sFile;
@@ -195,12 +211,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the path to javascripts of module
      *
-     * @param  string $sFile
+     * @param string $sFile
      * @return string
      */
-    public function fcpoGetAbsModuleTemplateFrontendPath($sFile = "")
+    public function fcpoGetAbsModuleTemplateFrontendPath(string $sFile = ""): string
     {
-        $sModulePath = $this->fcpoGetModulePath();
+        $sModulePath = $this->fcpoGetModuleUrl();
         $sModulePath = $sModulePath . 'views/frontend/';
         if ($sFile) {
             $sModulePath = $sModulePath . $sFile;
@@ -214,7 +230,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetHostedPayoneJs()
+    public function fcpoGetHostedPayoneJs(): string
     {
         return $this->_sFcPoHostedJsUrl;
     }
@@ -224,7 +240,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return array
      */
-    public function fcpoGetIframeMappings()
+    public function fcpoGetIframeMappings(): array
     {
         $oErrorMapping = $this->_oFcpoHelper->getFactoryObject(FcPoErrorMapping::class);
         return $oErrorMapping->fcpoGetExistingMappings('iframe');
@@ -236,7 +252,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param  string $sLangId
      * @return string
      */
-    public function fcpoGetLangAbbrById($sLangId)
+    public function fcpoGetLangAbbrById($sLangId): string
     {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         return $oLang->getLanguageAbbr($sLangId);
@@ -247,7 +263,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoUserHasSalutation()
+    public function fcpoUserHasSalutation(): bool
     {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -265,9 +281,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns session variable
      *
-     * @return bool
+     * @return ?string
      */
-    public function fcpoGetClientToken()
+    public function fcpoGetClientToken(): ?string
     {
         return $this->_oFcpoHelper->fcpoGetSessionVariable('klarna_client_token');
     }
@@ -275,9 +291,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns session variable
      *
-     * @return bool
+     * @return ?string
      */
-    public function fcpoGetKlarnaAuthToken()
+    public function fcpoGetKlarnaAuthToken(): ?string
     {
         return $this->_oFcpoHelper->fcpoGetSessionVariable('klarna_authorization_token');
     }
@@ -285,9 +301,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns cancel url for klarna payments
      *
-     * @return bool
+     * @return string
      */
-    public function fcpoGetKlarnaCancelUrl()
+    public function fcpoGetKlarnaCancelUrl(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopURL = $oConfig->getCurrentShopUrl();
@@ -302,7 +318,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoIsKlarnaPaynow()
+    public function fcpoIsKlarnaPaynow(): bool
     {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         /** @var Basket $oBasket */
@@ -315,11 +331,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoCanDisplayAmazonPayButton()
+    public function fcpoCanDisplayAmazonPayButton(): bool
     {
-        $blIsActive = $this->_fcpoPaymentIsActive('fcpoamazonpay');
-
-        return $blIsActive;
+        return $this->_fcpoPaymentIsActive('fcpoamazonpay');
     }
 
     /**
@@ -327,10 +341,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoCanDisplayPaydirektExpressButton()
+    public function fcpoCanDisplayPaydirektExpressButton(): bool
     {
-        $blIsActive = $this->_fcpoPaymentIsActive('fcpopaydirekt_express');
-        return $blIsActive;
+        return $this->_fcpoPaymentIsActive('fcpopaydirekt_express');
     }
 
     /**
@@ -339,19 +352,17 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param $sPaymentId
      * @return bool
      */
-    protected function _fcpoPaymentIsActive($sPaymentId)
+    protected function _fcpoPaymentIsActive($sPaymentId): bool
     {
         $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
-        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
-
-        return $blIsActive;
+        return (bool) $oPayment->oxpayments__oxactive->value;
     }
 
     /**
      * Returns amazon widgets url depending if mode is live or test
      */
-    public function fcpoGetAmazonWidgetsUrl()
+    public function fcpoGetAmazonWidgetsUrl(): string
     {
         $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpoamazonpay');
@@ -370,7 +381,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonPayClientId()
+    public function fcpoGetAmazonPayClientId(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sClientId = $oConfig->getConfigParam('sFCPOAmazonPayClientId');
@@ -383,7 +394,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonPaySellerId()
+    public function fcpoGetAmazonPaySellerId(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sSellerId = $oConfig->getConfigParam('sFCPOAmazonPaySellerId');
@@ -396,7 +407,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonBuyNowButtonCssSelector()
+    public function fcpoGetAmazonBuyNowButtonCssSelector(): string
     {
         $sThemeId = $this->fcpoGetActiveThemePath();
 
@@ -418,12 +429,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return mixed
      */
-    public function fcpoGetAmazonPayReferenceId()
+    public function fcpoGetAmazonPayReferenceId(): mixed
     {
-        $sAmazonReferenceId =
-            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
-
-        return $sAmazonReferenceId;
+        return $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
     }
 
     /**
@@ -431,7 +439,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonPayButtonType()
+    public function fcpoGetAmazonPayButtonType(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonType');
@@ -444,7 +452,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonPayButtonColor()
+    public function fcpoGetAmazonPayButtonColor(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonColor');
@@ -457,11 +465,9 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoGetAmazonPayAddressWidgetIsReadOnly()
+    public function fcpoGetAmazonPayAddressWidgetIsReadOnly(): bool
     {
-        $blAmazonPayAddressWidgetLocked =
-            (bool)$this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayAddressWidgetLocked');
-        return $blAmazonPayAddressWidgetLocked;
+        return (bool)$this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayAddressWidgetLocked');
     }
 
     /**
@@ -469,12 +475,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmazonRedirectUrl()
+    public function fcpoGetAmazonRedirectUrl(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getSslShopUrl();
         // force protocol to be 100% ssl
-        if (strpos($sShopUrl, 'http://') !== false) {
+        if (str_contains($sShopUrl, 'http://')) {
             $sShopUrl = str_replace('http://', 'https://', $sShopUrl);
         }
         return $sShopUrl . "index.php?cl=user&fnc=fcpoamazonloginreturn";
@@ -485,12 +491,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoAmazonLoginSessionActive()
+    public function fcpoAmazonLoginSessionActive(): bool
     {
         $sAmazonLoginAccessToken =
             $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
 
-        return ($sAmazonLoginAccessToken) ? true : false;
+        return (bool)$sAmazonLoginAccessToken;
     }
 
     /**
@@ -499,7 +505,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetActiveThemePath()
+    public function fcpoGetActiveThemePath(): string
     {
         $sReturn = 'flow';
         $oTheme = $this->_oFcpoHelper->getFactoryObject(Theme::class);
@@ -528,7 +534,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param $sEmail
      * @return string
      */
-    public function fcpoAmazonEmailEncode($sEmail)
+    public function fcpoAmazonEmailEncode($sEmail): string
     {
         return "fcpoamz_" . $sEmail;
     }
@@ -539,7 +545,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param $sEmail
      * @return string
      */
-    public function fcpoAmazonEmailDecode($sEmail)
+    public function fcpoAmazonEmailDecode($sEmail): string
     {
         $sOriginEmail = $sEmail;
         if (strpos($sEmail, 'fcpoamz_') !== false) {
@@ -554,7 +560,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoIsAmazonAsyncMode()
+    public function fcpoIsAmazonAsyncMode(): bool
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
@@ -572,7 +578,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAmzPopup()
+    public function fcpoGetAmzPopup(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAmazonLoginMode = (string) $oConfig->getConfigParam('sFCPOAmazonLoginMode');
@@ -598,7 +604,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return int
      */
-    public function fcpoGetCurrentAmzWidgetCount()
+    public function fcpoGetCurrentAmzWidgetCount(): int
     {
         return $this->_iAmzWidgetIncludeCounter;
     }
@@ -610,7 +616,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param string $sButtonId
      * @return void
      */
-    public function fcpoSetCurrentAmazonButtonId($sButtonId)
+    public function fcpoSetCurrentAmazonButtonId($sButtonId): void
     {
         $this->_sCurrentAmazonButtonId = $sButtonId;
     }
@@ -622,7 +628,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return bool
      */
-    public function fcpoGetAllowIncludeAmazonWidgetUrl()
+    public function fcpoGetAllowIncludeAmazonWidgetUrl(): bool
     {
         $iCurrentInludeCount = (int)$this->_oFcpoHelper->fcpoGetSessionVariable('iAmzWidgetsIncludeCounter');
         $iCurrentInludeCount++;
@@ -630,7 +636,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
         $iExpectedButtonAmount = $this->_fcpoGetExpectedButtonAmount();
 
-        $blReturn = ($iCurrentInludeCount >= $iExpectedButtonAmount) ? true : false;
+        $blReturn = $iCurrentInludeCount >= $iExpectedButtonAmount;
         if ($blReturn) {
             // reset counter
             $this->_oFcpoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', 0);
@@ -667,7 +673,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetAjaxControllerUrl()
+    public function fcpoGetAjaxControllerUrl(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
@@ -680,7 +686,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetShopUrl()
+    public function fcpoGetShopUrl(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         return $oConfig->getShopUrl();
@@ -692,7 +698,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @param $sPaymentId
      * @return bool
      */
-    public function fcpoIsPayonePayment($sPaymentId)
+    public function fcpoIsPayonePayment($sPaymentId): bool
     {
         return FcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
     }
@@ -702,7 +708,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return mixed
      */
-    public function fcpoGetAmazonConfirmErrorUrl()
+    public function fcpoGetAmazonConfirmErrorUrl(): mixed
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
@@ -720,7 +726,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return mixed
      */
-    public function fcpoGetDeliveryMD5()
+    public function fcpoGetDeliveryMD5(): mixed
     {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -741,7 +747,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return string
      */
-    public function fcpoGetDelAddrInfo()
+    public function fcpoGetDelAddrInfo(): string
     {
         $sAddressId = $this->_oFcpoHelper->fcpoGetRequestParameter('deladrid');
         if (!$sAddressId) {
@@ -761,7 +767,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return mixed
      */
-    public function fcpoGetPaymentError()
+    public function fcpoGetPaymentError(): mixed
     {
         $iPayError = $this->_oFcpoHelper->fcpoGetRequestParameter('payerror');
 
@@ -778,7 +784,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @return mixed
      */
-    public function fcpoGetPaymentErrorText()
+    public function fcpoGetPaymentErrorText(): mixed
     {
         $sPayErrorText = $this->_oFcpoHelper->fcpoGetRequestParameter('payerrortext');
 
