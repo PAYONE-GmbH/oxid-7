@@ -93,7 +93,7 @@
                              class="alert-danger">{{ translate({ ident: "FCPO_CC_HOSTED_ERROR_INCOMPLETE" }) }}</div>
                     </div>
                 </div>
-                {% include_dynamic "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_creditcard_script.html.twig" %}
+                {% include_dynamic "@fcpayone/frontend/fcpo_payment_creditcard_script.html.twig" %}
                 {% block checkout_payment_longdesc %}
                     {% if paymentmethod.oxpayments__oxlongdesc.value %}
                         <div class="alert alert-info col-lg-offset-3 desc">

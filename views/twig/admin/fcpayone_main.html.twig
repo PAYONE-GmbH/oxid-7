@@ -10,7 +10,7 @@
 {% set confstrs = oView.fcpoGetConfStrs() %}
 {% set confarrs = oView.fcpoGetConfArrs() %}
 
-<script src="{{ oViewConf.fcpoGetAdminModuleJsPath('fcpayone_main.js') }}"></script>
+<script src="{{ oViewConf.fcpoGetAdminModuleJsPath('fcPayOne_main.js') }}"></script>
 <form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
     {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="oxid" value="{{ oxid }}">

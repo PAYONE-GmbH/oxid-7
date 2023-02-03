@@ -3,7 +3,7 @@
 {% set status_oxid = oView.fcpoGetStatusOxid() %}
 {% set status = oView.getStatus() %}
 
-{{ script({ include: oViewConf.fcpoGetModuleJsPath('fcpayone_order.js'), dynamic: __oxid_include_dynamic }) }}
+{{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne_order.js'), dynamic: __oxid_include_dynamic }) }}
 
 
 {% if readonly %}

@@ -32,6 +32,7 @@ use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Core\Base;
+use OxidEsales\Eshop\Core\Counter;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Email;
 use OxidEsales\Eshop\Core\Exception\ArticleInputException;
@@ -546,7 +547,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         if (!$this->oxorder__oxordernr->value) {
             $this->setNumber();
         } else {
-            oxNew(\OxidEsales\Eshop\Core\Counter::class)->update($this->getCounterIdent(), $this->oxorder__oxordernr->value);
+            oxNew(Counter::class)->update($this->getCounterIdent(), $this->oxorder__oxordernr->value);
         }
 
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
@@ -1547,7 +1548,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoGetNextOrderNr(): string
     {
-        $oCounter = $this->_oFcpoHelper->getFactoryObject(Country::class);
+        $oCounter = $this->_oFcpoHelper->getFactoryObject(Counter::class);
         return $oCounter->getNext($this->getCounterIdent());
     }
 

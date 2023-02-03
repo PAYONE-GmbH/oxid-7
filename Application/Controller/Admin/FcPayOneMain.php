@@ -214,7 +214,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Loads PAYONE configuration and passes it to Smarty engine, returns
+     * Loads PAYONE configuration and passes it to template engine, returns
      * name of template file "fcpayone_main.tpl".
      *
      * @return string
@@ -234,7 +234,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
             $aColumns = $oPayOneAjax->getColumns();
             $this->_aViewData['oxajax'] = $aColumns;
 
-            return "@fcpayone/admin/fcpayone_popup_main";
+            return "@fcpayone/admin/popups/fcpayone_popup_main";
         }
         return $sReturn;
     }
@@ -929,7 +929,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
             }
             $sJsCode .= "\t\t" . "}," . "\n";
         }
-
         return $sJsCode;
     }
 

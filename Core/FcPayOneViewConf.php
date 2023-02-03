@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Core;
@@ -24,7 +24,6 @@ namespace Fatchip\PayOne\Core;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
@@ -56,6 +55,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
     /**
      * List of handled themes and their belonging pathes
+     *
      * @var array
      */
     protected array $_aSupportedThemes = [
@@ -67,6 +67,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
     /**
      * List of themes and their
+     *
      * @var array
      */
     protected array $_aTheme2CssPayButtonSelector = [
@@ -78,12 +79,14 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
     /**
      * Counts the amount of widgets have been included by call
+     *
      * @var int
      */
     protected int $_iAmzWidgetIncludeCounter = 0;
 
     /**
      * Determines the source of a button include
+     *
      * @var string|null
      */
     protected ?string $_sCurrentAmazonButtonId = null;
@@ -126,7 +129,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetAdminModuleImgUrl(): string
     {
-        $sModuleUrl = $this->fcpoGetModuleUrl();
+        $sModuleUrl = '/' . $this->fcpoGetModuleUrl();
         $sModuleAdminImgUrl = $sModuleUrl . 'out/admin/img/';
 
         return $sModuleAdminImgUrl;
@@ -157,12 +160,14 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetModuleJsPath(string $sFile = ""): string
     {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sModuleUrl = $this->fcpoGetModuleUrl();
+
         $sModuleJsUrl = $sModuleUrl . 'out/src/js/';
         if ($sFile) {
             $sModuleJsUrl = $sModuleJsUrl . $sFile;
         }
-        return $sModuleJsUrl;
+        return $oConfig->getShopUrl() . $sModuleJsUrl;
     }
 
     /**
@@ -199,13 +204,15 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetModuleCssPath(string $sFile = ""): string
     {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
         $sModuleUrl = '/' . $this->fcpoGetModuleUrl();
         $sModuleUrl = $sModuleUrl . 'out/src/css/';
         if ($sFile) {
             $sModuleUrl = $sModuleUrl . $sFile;
         }
 
-        return $sModuleUrl;
+        return $oConfig->getShopUrl() . $sModuleUrl;
     }
 
     /**
@@ -249,7 +256,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns abbroviation by given id
      *
-     * @param  string $sLangId
+     * @param string $sLangId
      * @return string
      */
     public function fcpoGetLangAbbrById($sLangId): string
@@ -308,7 +315,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopURL = $oConfig->getCurrentShopUrl();
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $sPaymentErrorTextParam =  "&payerrortext=".urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
+        $sPaymentErrorTextParam = "&payerrortext=" . urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
         $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
         return $sShopURL . 'index.php?type=error&cl=payment' . $sPaymentErrorParam . $sPaymentErrorTextParam;
     }
@@ -356,7 +363,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
-        return (bool) $oPayment->oxpayments__oxactive->value;
+        return (bool)$oPayment->oxpayments__oxactive->value;
     }
 
     /**
@@ -419,7 +426,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         }
 
         $sCssSelector =
-            (string) $this->_aTheme2CssPayButtonSelector[$sThemeId];
+            (string)$this->_aTheme2CssPayButtonSelector[$sThemeId];
 
         return $sCssSelector;
     }
@@ -581,7 +588,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetAmzPopup(): string
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sFCPOAmazonLoginMode = (string) $oConfig->getConfigParam('sFCPOAmazonLoginMode');
+        $sFCPOAmazonLoginMode = (string)$oConfig->getConfigParam('sFCPOAmazonLoginMode');
         switch ($sFCPOAmazonLoginMode) {
             case 'popup':
                 $sReturn = 'true';
@@ -655,7 +662,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
         $aController2Amount = array(
             'basket' => 3,
-            'user'=> 2,
+            'user' => 2,
         );
 
         $sActController = $this->_oFcpoHelper->fcpoGetRequestParameter('cl');
@@ -678,7 +685,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sPath = "modules/fc/fcpayone/Application/Model/FcPayOneAjax.php";
-        return $sShopUrl.$sPath;
+        return $sShopUrl . $sPath;
     }
 
     /**
@@ -714,11 +721,11 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
 
         $sShopUrl = $oConfig->getShopUrl();
-        $sShopUrl = $sShopUrl."index.php?cl=basket";
+        $sShopUrl = $sShopUrl . "index.php?cl=basket";
 
         $sTranslation = $oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false);
-        $sPaymentErrorTextParam =  "&fcpoerror=".urlencode($sTranslation);
-        return $sShopUrl.$sPaymentErrorTextParam."&fcpoamzaction=logoff";
+        $sPaymentErrorTextParam = "&fcpoerror=" . urlencode($sTranslation);
+        return $sShopUrl . $sPaymentErrorTextParam . "&fcpoamzaction=logoff";
     }
 
     /**

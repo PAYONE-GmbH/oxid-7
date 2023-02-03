@@ -1,5 +1,5 @@
 <script>
-    var request, config;
+    let request, config;
     config = {
         fields: {
             cardpan: {
@@ -83,14 +83,15 @@
         {% endif %}
         {% endif %}
     };
-    {% capture name = "fcpoCCIframes" %}
-    {% for oMapping in oViewConf.fcpoGetIframeMappings() %}
-    {% set sLangId = oMapping.sLangId %}
-    {% set sLangAbbr = oViewConf.fcpoGetLangAbbrById(sLangId) %}
-    Payone.ClientApi.Language
-    .{{ sLangAbbr }}.{{ oMapping.sErrorCode }} = '{{ oMapping.sMappedMessage }}';
-    {% endfor %}
-    var iframes = fcInitCCIframes();
-    {% endcapture %}
-    {{ script({ add: smarty.capture.fcpoCCIframes, dynamic: __oxid_include_dynamic }) }}
 </script>
+{% capture assign = "fcpoCCIframes" %}
+    {% apply spaceless %}
+        {% for oMapping in oViewConf.fcpoGetIframeMappings() %}
+            {% set sLangId = oMapping.sLangId %}
+            {% set sLangAbbr = oViewConf.fcpoGetLangAbbrById(sLangId) %}
+            Payone.ClientApi.Language.{{ sLangAbbr }}.{{ oMapping.sErrorCode }} = '{{ oMapping.sMappedMessage }}';
+        {% endfor %}
+        const iframes = fcInitCCIframes();
+    {% endapply %}
+{% endcapture %}
+{{ script({ add: fcpoCCIframes, dynamic: __oxid_include_dynamic }) }}

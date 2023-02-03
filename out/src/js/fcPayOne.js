@@ -1,9 +1,9 @@
 function getSelectedPaymentMethod() {
-    var oForm = getPaymentForm();
-    if(oForm && oForm.paymentid) {
-        if(oForm.paymentid.length) {
-            for(var i = 0;i < oForm.paymentid.length; i++) {
-                if(oForm.paymentid[i].checked == true) {
+    const oForm = getPaymentForm();
+    if (oForm && oForm.paymentid) {
+        if (oForm.paymentid.length) {
+            for (let i = 0; i < oForm.paymentid.length; i++) {
+                if (oForm.paymentid[i].checked === true) {
                     return oForm.paymentid[i].value;
                 }
             }
@@ -15,12 +15,12 @@ function getSelectedPaymentMethod() {
 }
 
 function getPaymentForm() {
-    if(document.order) {
-        if(document.order[0].nodeName != 'FORM' && document.order.paymentid) {
+    if (document.order) {
+        if (document.order[0].nodeName !== 'FORM' && document.order.paymentid) {
             return document.order;
         } else {
-            for(var i = 0; i < document.order.length; i++) {
-                if(document.order[i].paymentid) {
+            for (let i = 0; i < document.order.length; i++) {
+                if (document.order[i].paymentid) {
                     return document.order[i];
                 }
             }
@@ -30,16 +30,16 @@ function getPaymentForm() {
 }
 
 function getOperationMode(sType) {
-    var sSelectedPaymentOperationMode = 'fcpo_mode_' + getSelectedPaymentMethod();
-    if(sType != '') {
+    let sSelectedPaymentOperationMode = 'fcpo_mode_' + getSelectedPaymentMethod();
+    if (sType !== '') {
         sSelectedPaymentOperationMode += '_' + sType;
     }
-    var oForm = getPaymentForm();
+    const oForm = getPaymentForm();
     return oForm[sSelectedPaymentOperationMode].value;
 }
 
 function fcCheckType(element) {
-    if(fcpoGetCreditcardType() == 'U') {
+    if (fcpoGetCreditcardType() === 'U') {
         document.getElementById('fcpo_kkcsn_row').style.display = 'table-row';
     } else {
         document.getElementById('fcpo_kkcsn_row').style.display = 'none';
@@ -47,26 +47,26 @@ function fcCheckType(element) {
 }
 
 function fcCheckDebitCountry() {
-    var oForm = getPaymentForm();
-    if(fcpoGetElvCountry() == 'DE') {
-        if(document.getElementById('fcpo_elv_ktonr_info')) {
+    const oForm = getPaymentForm();
+    if (fcpoGetElvCountry() === 'DE') {
+        if (document.getElementById('fcpo_elv_ktonr_info')) {
             document.getElementById('fcpo_elv_ktonr_info').style.display = '';
         }
-        if(document.getElementById('fcpo_elv_ktonr')) {
+        if (document.getElementById('fcpo_elv_ktonr')) {
             document.getElementById('fcpo_elv_ktonr').style.display = '';
         }
-        if(document.getElementById('fcpo_elv_blz')) {
+        if (document.getElementById('fcpo_elv_blz')) {
             document.getElementById('fcpo_elv_blz').style.display = '';
         }
     } else {
-        if(document.getElementById('fcpo_elv_ktonr_info')) {
+        if (document.getElementById('fcpo_elv_ktonr_info')) {
             document.getElementById('fcpo_elv_ktonr_info').style.display = 'none';
         }
-        if(document.getElementById('fcpo_elv_ktonr')) {
+        if (document.getElementById('fcpo_elv_ktonr')) {
             document.getElementById('fcpo_elv_ktonr').style.display = 'none';
             oForm['dynvalue[fcpo_elv_ktonr]'].value = '';
         }
-        if(document.getElementById('fcpo_elv_blz')) {
+        if (document.getElementById('fcpo_elv_blz')) {
             document.getElementById('fcpo_elv_blz').style.display = 'none';
             oForm['dynvalue[fcpo_elv_blz]'].value = '';
         }
@@ -75,107 +75,107 @@ function fcCheckDebitCountry() {
 }
 
 function resetErrorContainers() {
-    if(document.getElementById('fcpo_cc_number_invalid')) {
+    if (document.getElementById('fcpo_cc_number_invalid')) {
         document.getElementById('fcpo_cc_number_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_cc_date_invalid')) {
+    if (document.getElementById('fcpo_cc_date_invalid')) {
         document.getElementById('fcpo_cc_date_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_cc_cvc2_invalid')) {
+    if (document.getElementById('fcpo_cc_cvc2_invalid')) {
         document.getElementById('fcpo_cc_cvc2_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_cc_cardholder_invalid')) {
+    if (document.getElementById('fcpo_cc_cardholder_invalid')) {
         document.getElementById('fcpo_cc_cardholder_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_cc_error')) {
+    if (document.getElementById('fcpo_cc_error')) {
         document.getElementById('fcpo_cc_error').style.display = '';
     }
-    if(document.getElementById('fcpo_cc_error_content')) {
+    if (document.getElementById('fcpo_cc_error_content')) {
         document.getElementById('fcpo_cc_error_content').innerHTML = '';
     }
-    if(document.getElementById('fcpo_elv_error_blocked')) {
+    if (document.getElementById('fcpo_elv_error_blocked')) {
         document.getElementById('fcpo_elv_error_blocked').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_iban_invalid')) {
+    if (document.getElementById('fcpo_elv_iban_invalid')) {
         document.getElementById('fcpo_elv_iban_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_bic_invalid')) {
+    if (document.getElementById('fcpo_elv_bic_invalid')) {
         document.getElementById('fcpo_elv_bic_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_blz_invalid')) {
+    if (document.getElementById('fcpo_elv_blz_invalid')) {
         document.getElementById('fcpo_elv_blz_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_ktonr_invalid')) {
+    if (document.getElementById('fcpo_elv_ktonr_invalid')) {
         document.getElementById('fcpo_elv_ktonr_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_error')) {
+    if (document.getElementById('fcpo_elv_error')) {
         document.getElementById('fcpo_elv_error').style.display = '';
     }
-    if(document.getElementById('fcpo_elv_error_content')) {
+    if (document.getElementById('fcpo_elv_error_content')) {
         document.getElementById('fcpo_elv_error_content').innerHTML = '';
     }
-    if(document.getElementById('fcpo_ou_iban_invalid')) {
+    if (document.getElementById('fcpo_ou_iban_invalid')) {
         document.getElementById('fcpo_ou_iban_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_ou_bic_invalid')) {
+    if (document.getElementById('fcpo_ou_bic_invalid')) {
         document.getElementById('fcpo_ou_bic_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_ou_blz_invalid')) {
+    if (document.getElementById('fcpo_ou_blz_invalid')) {
         document.getElementById('fcpo_ou_blz_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_ou_ktonr_invalid')) {
+    if (document.getElementById('fcpo_ou_ktonr_invalid')) {
         document.getElementById('fcpo_ou_ktonr_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_ou_error')) {
+    if (document.getElementById('fcpo_ou_error')) {
         document.getElementById('fcpo_ou_error').style.display = '';
     }
-    if(document.getElementById('fcpo_ou_error_content')) {
+    if (document.getElementById('fcpo_ou_error_content')) {
         document.getElementById('fcpo_ou_error_content').innerHTML = '';
     }
-    if(document.getElementById('fcpo_klv_fon_invalid')) {
+    if (document.getElementById('fcpo_klv_fon_invalid')) {
         document.getElementById('fcpo_klv_fon_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_klv_birthday_invalid')) {
+    if (document.getElementById('fcpo_klv_birthday_invalid')) {
         document.getElementById('fcpo_klv_birthday_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_klv_addinfo_invalid')) {
+    if (document.getElementById('fcpo_klv_addinfo_invalid')) {
         document.getElementById('fcpo_klv_addinfo_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_klv_del_addinfo_invalid')) {
+    if (document.getElementById('fcpo_klv_del_addinfo_invalid')) {
         document.getElementById('fcpo_klv_del_addinfo_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_klv_personalid_invalid')) {
+    if (document.getElementById('fcpo_klv_personalid_invalid')) {
         document.getElementById('fcpo_klv_personalid_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_klv_confirmation_missing')) {
+    if (document.getElementById('fcpo_klv_confirmation_missing')) {
         document.getElementById('fcpo_klv_confirmation_missing').style.display = '';
     }
-    if(document.getElementById('fcpo_klarna_campaign_invalid')) {
+    if (document.getElementById('fcpo_klarna_campaign_invalid')) {
         document.getElementById('fcpo_klarna_campaign_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_fon_invalid')) {
+    if (document.getElementById('fcpo_kls_fon_invalid')) {
         document.getElementById('fcpo_kls_fon_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_birthday_invalid')) {
+    if (document.getElementById('fcpo_kls_birthday_invalid')) {
         document.getElementById('fcpo_kls_birthday_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_addinfo_invalid')) {
+    if (document.getElementById('fcpo_kls_addinfo_invalid')) {
         document.getElementById('fcpo_kls_addinfo_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_del_addinfo_invalid')) {
+    if (document.getElementById('fcpo_kls_del_addinfo_invalid')) {
         document.getElementById('fcpo_kls_del_addinfo_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_personalid_invalid')) {
+    if (document.getElementById('fcpo_kls_personalid_invalid')) {
         document.getElementById('fcpo_kls_personalid_invalid').style.display = '';
     }
-    if(document.getElementById('fcpo_kls_confirmation_missing')) {
+    if (document.getElementById('fcpo_kls_confirmation_missing')) {
         document.getElementById('fcpo_kls_confirmation_missing').style.display = '';
     }
 }
 
 function fcpoGetCreditcardType() {
-    var oForm = getPaymentForm();
-    if(oForm["dynvalue[fcpo_kktype]"].nodeName == 'INPUT') {
+    const oForm = getPaymentForm();
+    if (oForm["dynvalue[fcpo_kktype]"].nodeName === 'INPUT') {
         sCreditcardType = oForm["dynvalue[fcpo_kktype]"].value;
     } else {
         sCreditcardType = oForm["dynvalue[fcpo_kktype]"].options[oForm["dynvalue[fcpo_kktype]"].selectedIndex].value;
@@ -184,73 +184,73 @@ function fcpoGetCreditcardType() {
 }
 
 function fcpoGetCardExpireDate() {
-    var oForm = getPaymentForm();
-    if(oForm["dynvalue[fcpo_kkyear]"].nodeName == 'INPUT') {
-        sDate = oForm["dynvalue[fcpo_kkyear]"].value.substr(2,2) + oForm["dynvalue[fcpo_kkmonth]"].value;
+    const oForm = getPaymentForm();
+    if (oForm["dynvalue[fcpo_kkyear]"].nodeName === 'INPUT') {
+        sDate = oForm["dynvalue[fcpo_kkyear]"].value.substr(2, 2) + oForm["dynvalue[fcpo_kkmonth]"].value;
     } else {
-        sDate = oForm["dynvalue[fcpo_kkyear]"].options[oForm["dynvalue[fcpo_kkyear]"].selectedIndex].innerHTML.substr(2,2) + oForm["dynvalue[fcpo_kkmonth]"].options[oForm["dynvalue[fcpo_kkmonth]"].selectedIndex].innerHTML;
+        sDate = oForm["dynvalue[fcpo_kkyear]"].options[oForm["dynvalue[fcpo_kkyear]"].selectedIndex].innerHTML.substr(2, 2) + oForm["dynvalue[fcpo_kkmonth]"].options[oForm["dynvalue[fcpo_kkmonth]"].selectedIndex].innerHTML;
     }
     return sDate;
 }
 
 function startCCRequest() {
     resetErrorContainers();
-    var oForm = getPaymentForm();
+    const oForm = getPaymentForm();
     oForm["dynvalue[fcpo_kknumber]"].value = getCleanedNumber(oForm["dynvalue[fcpo_kknumber]"].value);
-    if(oForm["dynvalue[fcpo_kknumber]"].value == '') {
+    if (oForm["dynvalue[fcpo_kknumber]"].value === '') {
         document.getElementById('fcpo_cc_number_invalid').style.display = 'block';
         return false;
     }
 
     oForm["dynvalue[fcpo_kkpruef]"].value = getCleanedNumber(oForm["dynvalue[fcpo_kkpruef]"].value);
-    if(oForm["dynvalue[fcpo_kkpruef]"].value == '' || oForm["dynvalue[fcpo_kkpruef]"].value.length < 3) {
+    if (oForm["dynvalue[fcpo_kkpruef]"].value === '' || oForm["dynvalue[fcpo_kkpruef]"].value.length < 3) {
         document.getElementById('fcpo_cc_cvc2_invalid').style.display = 'block';
         return false;
     }
 
-    var sKKType = fcpoGetCreditcardType();
+    const sKKType = fcpoGetCreditcardType();
 
-    var sMode = getOperationMode(sKKType);
+    const sMode = getOperationMode(sKKType);
 
-    var data = {
-        mid : oForm.fcpo_mid.value,
-        portalid : oForm.fcpo_portalid.value,
-        mode : sMode,
-        request : 'creditcardcheck',
-        responsetype : 'JSON',
-        hash : oForm["fcpo_hashcc_" + sKKType].value,
-        encoding : oForm.fcpo_encoding.value,
-        aid : oForm.fcpo_aid.value,
-        cardpan : oForm["dynvalue[fcpo_kknumber]"].value,
-        cardtype : sKKType,
-        cardexpiredate : fcpoGetCardExpireDate(),
-        cardcvc2 : oForm["dynvalue[fcpo_kkpruef]"].value,
-        storecarddata : 'yes',
-        language : oForm.fcpo_tpllang.value,
-        integrator_name : 'oxid',
-        integrator_version : oForm.fcpo_integratorver.value,
-        solution_name : 'fatchip',
-        solution_version : oForm.fcpo_integratorextver.value
+    const data = {
+        mid: oForm.fcpo_mid.value,
+        portalid: oForm.fcpo_portalid.value,
+        mode: sMode,
+        request: 'creditcardcheck',
+        responsetype: 'JSON',
+        hash: oForm["fcpo_hashcc_" + sKKType].value,
+        encoding: oForm.fcpo_encoding.value,
+        aid: oForm.fcpo_aid.value,
+        cardpan: oForm["dynvalue[fcpo_kknumber]"].value,
+        cardtype: sKKType,
+        cardexpiredate: fcpoGetCardExpireDate(),
+        cardcvc2: oForm["dynvalue[fcpo_kkpruef]"].value,
+        storecarddata: 'yes',
+        language: oForm.fcpo_tpllang.value,
+        integrator_name: 'oxid',
+        integrator_version: oForm.fcpo_integratorver.value,
+        solution_name: 'fatchip',
+        solution_version: oForm.fcpo_integratorextver.value
 
     };
-    if(sKKType == 'U') {
+    if (sKKType === 'U') {
         data.cardsequencenumber = oForm["dynvalue[fcpo_kkcsn]"].value;
     }
-    var options = {
-        return_type : 'object',
-        callback_function_name : 'processPayoneResponseCC'
+    const options = {
+        return_type: 'object',
+        callback_function_name: 'processPayoneResponseCC'
     };
 
-    var request = new PayoneRequest(data, options);
+    const request = new PayoneRequest(data, options);
     request.checkAndStore();
     return false;
 }
 
 function validateCardholder(e) {
-    var error = false;
-    var cardholder = document.getElementById('fcpo_cc_cardholder').value;
-    var cardholderLabel = document.getElementById('fcpo_cc_cardholder_label');
-    var cardholderReg = new RegExp(/^[A-Za-z \-äöüÄÖÜß]{1,50}$/);
+    let error = false;
+    const cardholder = document.getElementById('fcpo_cc_cardholder').value;
+    const cardholderLabel = document.getElementById('fcpo_cc_cardholder_label');
+    const cardholderReg = new RegExp(/^[A-Za-z \-äöüÄÖÜß]{1,50}$/);
     if (cardholderReg.test(cardholder)) {
         document.getElementById('fcpo_cc_cardholder_invalid').style.display = '';
         cardholderLabel.classList.remove("text-danger");
@@ -265,11 +265,11 @@ function validateCardholder(e) {
 }
 
 function getCleanedNumber(dirtyNumber) {
-    var cleanedNumber = '';
-    var tmpChar;
+    let cleanedNumber = '';
+    let tmpChar;
     for (i = 0; i < dirtyNumber.length; i++) {
         tmpChar = dirtyNumber.charAt(i);
-        if (tmpChar != ' ' && !isNaN(tmpChar)) {
+        if (tmpChar !== ' ' && !isNaN(tmpChar)) {
             cleanedNumber = cleanedNumber + tmpChar;
         }
     }
@@ -277,12 +277,12 @@ function getCleanedNumber(dirtyNumber) {
 }
 
 function getCleanedNumberIBAN(sDirtyNumber) {
-    var sCleanedNumber = '';
-    var sTmpChar;
+    let sCleanedNumber = '';
+    let sTmpChar;
     for (i = 0; i < sDirtyNumber.length; i++) {
         sTmpChar = sDirtyNumber.charAt(i);
-        if (sTmpChar != ' ' && (!isNaN(sTmpChar) || /^[A-Za-z]/.test(sTmpChar))) {
-            if(/^[a-z]/.test(sTmpChar)) {
+        if (sTmpChar !== ' ' && (!isNaN(sTmpChar) || /^[A-Za-z]/.test(sTmpChar))) {
+            if (/^[a-z]/.test(sTmpChar)) {
                 sTmpChar = sTmpChar.toUpperCase();
             }
             sCleanedNumber = sCleanedNumber + sTmpChar;
@@ -293,44 +293,44 @@ function getCleanedNumberIBAN(sDirtyNumber) {
 
 function checkKlarna() {
     resetErrorContainers();
-    var oForm = getPaymentForm();
+    const oForm = getPaymentForm();
 
-    if(oForm['dynvalue[fcpo_klv_fon]']) {
+    if (oForm['dynvalue[fcpo_klv_fon]']) {
         oForm['dynvalue[fcpo_klv_fon]'].value = oForm['dynvalue[fcpo_klv_fon]'].value.trim();
-        if(oForm['dynvalue[fcpo_klv_fon]'].value == '') {
+        if (oForm['dynvalue[fcpo_klv_fon]'].value === '') {
             document.getElementById('fcpo_klv_fon_invalid').style.display = 'block';
             return false;
         }
     }
-    if(oForm['dynvalue[fcpo_klv_birthday][month]']) {
-        if(oForm['dynvalue[fcpo_klv_birthday][month]'].value == '' || oForm['dynvalue[fcpo_klv_birthday][day]'].value == '' || oForm['dynvalue[fcpo_klv_birthday][year]'].value == '') {
+    if (oForm['dynvalue[fcpo_klv_birthday][month]']) {
+        if (oForm['dynvalue[fcpo_klv_birthday][month]'].value === '' || oForm['dynvalue[fcpo_klv_birthday][day]'].value === '' || oForm['dynvalue[fcpo_klv_birthday][year]'].value === '') {
             document.getElementById('fcpo_klv_birthday_invalid').style.display = 'block';
             return false;
         }
     }
-    if(oForm['dynvalue[fcpo_klv_addinfo]']) {
+    if (oForm['dynvalue[fcpo_klv_addinfo]']) {
         oForm['dynvalue[fcpo_klv_addinfo]'].value = oForm['dynvalue[fcpo_klv_addinfo]'].value.trim();
-        if(oForm['dynvalue[fcpo_klv_addinfo]'].value == '') {
+        if (oForm['dynvalue[fcpo_klv_addinfo]'].value === '') {
             document.getElementById('fcpo_klv_addinfo_invalid').style.display = 'block';
             return false;
         }
     }
-    if(oForm['dynvalue[fcpo_klv_del_addinfo]']) {
+    if (oForm['dynvalue[fcpo_klv_del_addinfo]']) {
         oForm['dynvalue[fcpo_klv_del_addinfo]'].value = oForm['dynvalue[fcpo_klv_del_addinfo]'].value.trim();
-        if(oForm['dynvalue[fcpo_klv_del_addinfo]'].value == '') {
+        if (oForm['dynvalue[fcpo_klv_del_addinfo]'].value === '') {
             document.getElementById('fcpo_klv_del_addinfo_invalid').style.display = 'block';
             return false;
         }
     }
-    if(oForm['dynvalue[fcpo_klv_personalid]']) {
+    if (oForm['dynvalue[fcpo_klv_personalid]']) {
         oForm['dynvalue[fcpo_klv_personalid]'].value = oForm['dynvalue[fcpo_klv_personalid]'].value.trim();
-        if(oForm['dynvalue[fcpo_klv_personalid]'].value == '') {
+        if (oForm['dynvalue[fcpo_klv_personalid]'].value === '') {
             document.getElementById('fcpo_klv_personalid_invalid').style.display = 'block';
             return false;
         }
     }
-    if(oForm['dynvalue[fcpo_klv_confirm]']) {
-        if(!oForm['dynvalue[fcpo_klv_confirm]'][1].checked) {
+    if (oForm['dynvalue[fcpo_klv_confirm]']) {
+        if (!oForm['dynvalue[fcpo_klv_confirm]'][1].checked) {
             document.getElementById('fcpo_klv_confirmation_missing').style.display = 'block';
             return false;
         }
@@ -339,10 +339,10 @@ function checkKlarna() {
 }
 
 function fcpoGetElvCountry() {
-    var oForm = getPaymentForm();
-    var sElvCountry = 'DE';
+    const oForm = getPaymentForm();
+    let sElvCountry = 'DE';
     if (oForm["dynvalue[fcpo_elv_country]"].length > 0) {
-        if(oForm["dynvalue[fcpo_elv_country]"].nodeName == 'INPUT') {
+        if (oForm["dynvalue[fcpo_elv_country]"].nodeName === 'INPUT') {
             sElvCountry = oForm["dynvalue[fcpo_elv_country]"].value;
         } else {
             sElvCountry = oForm["dynvalue[fcpo_elv_country]"].options[oForm["dynvalue[fcpo_elv_country]"].selectedIndex].value;
@@ -353,119 +353,118 @@ function fcpoGetElvCountry() {
 
 function startELVRequest() {
     resetErrorContainers();
-    var oForm = getPaymentForm();
+    const oForm = getPaymentForm();
 
-    if(oForm['dynvalue[fcpo_elv_blz]']) {
+    if (oForm['dynvalue[fcpo_elv_blz]']) {
         oForm['dynvalue[fcpo_elv_blz]'].value = getCleanedNumber(oForm['dynvalue[fcpo_elv_blz]'].value);
     }
-    if(oForm['dynvalue[fcpo_elv_ktonr]']) {
+    if (oForm['dynvalue[fcpo_elv_ktonr]']) {
         oForm['dynvalue[fcpo_elv_ktonr]'].value = getCleanedNumber(oForm['dynvalue[fcpo_elv_ktonr]'].value);
     }
-    if(oForm['dynvalue[fcpo_elv_iban]']) {
+    if (oForm['dynvalue[fcpo_elv_iban]']) {
         oForm['dynvalue[fcpo_elv_iban]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_elv_iban]'].value);
     }
-    if(oForm['dynvalue[fcpo_elv_bic]']) {
+    if (oForm['dynvalue[fcpo_elv_bic]']) {
         oForm['dynvalue[fcpo_elv_bic]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_elv_bic]'].value);
     }
 
-    if(oForm['dynvalue[fcpo_payolution_iban]']) {
+    if (oForm['dynvalue[fcpo_payolution_iban]']) {
         oForm['dynvalue[fcpo_payolution_iban]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_payolution_iban]'].value);
     }
-    if(oForm['dynvalue[fcpo_payolution_bic]']) {
+    if (oForm['dynvalue[fcpo_payolution_bic]']) {
         oForm['dynvalue[fcpo_payolution_bic]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_payolution_bic]'].value);
     }
 
-    if(oForm['dynvalue[fcpo_elv_iban]'].value == '' && (!oForm['dynvalue[fcpo_elv_bic]'] || oForm['dynvalue[fcpo_elv_bic]'].value == '') && (!oForm['dynvalue[fcpo_elv_blz]'] || oForm['dynvalue[fcpo_elv_blz]'].value == '') && (!oForm['dynvalue[fcpo_elv_ktonr]'] || oForm['dynvalue[fcpo_elv_ktonr]'].value == '')) {
+    if (oForm['dynvalue[fcpo_elv_iban]'].value === '' && (!oForm['dynvalue[fcpo_elv_bic]'] || oForm['dynvalue[fcpo_elv_bic]'].value === '') && (!oForm['dynvalue[fcpo_elv_blz]'] || oForm['dynvalue[fcpo_elv_blz]'].value === '') && (!oForm['dynvalue[fcpo_elv_ktonr]'] || oForm['dynvalue[fcpo_elv_ktonr]'].value === '')) {
         document.getElementById('fcpo_elv_iban_invalid').style.display = 'block';
         return false;
     }
 
-    if(oForm['dynvalue[fcpo_payolution_iban]'] && oForm['dynvalue[fcpo_payolution_bic]']) {
-        if (oForm['dynvalue[fcpo_payolution_iban]'].value == '' && oForm['dynvalue[fcpo_payolution_bic]'].value == '') {
+    if (oForm['dynvalue[fcpo_payolution_iban]'] && oForm['dynvalue[fcpo_payolution_bic]']) {
+        if (oForm['dynvalue[fcpo_payolution_iban]'].value === '' && oForm['dynvalue[fcpo_payolution_bic]'].value === '') {
             document.getElementById('fcpo_payolution_iban_invalid').style.display = 'block';
             return false;
         }
     }
 
-    var blIsGermany = false;
-    if(oForm['dynvalue[fcpo_elv_blz]'] && oForm['dynvalue[fcpo_elv_ktonr]'] && fcpoGetElvCountry() == 'DE') {
+    let blIsGermany = false;
+    if (oForm['dynvalue[fcpo_elv_blz]'] && oForm['dynvalue[fcpo_elv_ktonr]'] && fcpoGetElvCountry() === 'DE') {
         blIsGermany = true;
     }
 
-    if(blIsGermany == true && oForm['dynvalue[fcpo_elv_iban]'].value == '') {
-        if(oForm['dynvalue[fcpo_elv_ktonr]'].value == '' || oForm['dynvalue[fcpo_elv_ktonr]'].value.length > 10) {
+    if (blIsGermany === true && oForm['dynvalue[fcpo_elv_iban]'].value === '') {
+        if (oForm['dynvalue[fcpo_elv_ktonr]'].value === '' || oForm['dynvalue[fcpo_elv_ktonr]'].value.length > 10) {
             document.getElementById('fcpo_elv_ktonr_invalid').style.display = 'block';
             return false;
         }
 
-        if(oForm['dynvalue[fcpo_elv_blz]'].value == '' || oForm['dynvalue[fcpo_elv_blz]'].value.length != 8) {
+        if (oForm['dynvalue[fcpo_elv_blz]'].value === '' || oForm['dynvalue[fcpo_elv_blz]'].value.length !== 8) {
             document.getElementById('fcpo_elv_blz_invalid').style.display = 'block';
             return false;
         }
-    }
-    else {
-        if(oForm['dynvalue[fcpo_elv_iban]'].value == '' || oForm['dynvalue[fcpo_elv_iban]'].value.length > 34) {
+    } else {
+        if (oForm['dynvalue[fcpo_elv_iban]'].value === '' || oForm['dynvalue[fcpo_elv_iban]'].value.length > 34) {
             document.getElementById('fcpo_elv_iban_invalid').style.display = 'block';
             return false;
         }
-        if(oForm['dynvalue[fcpo_elv_bic]'] && (oForm['dynvalue[fcpo_elv_bic]'].value == '' || oForm['dynvalue[fcpo_elv_bic]'].value.length > 11)) {
+        if (oForm['dynvalue[fcpo_elv_bic]'] && (oForm['dynvalue[fcpo_elv_bic]'].value === '' || oForm['dynvalue[fcpo_elv_bic]'].value.length > 11)) {
             document.getElementById('fcpo_elv_bic_invalid').style.display = 'block';
             return false;
         }
     }
 
-    if(oForm.fcpo_checktype && oForm.fcpo_checktype.value == '-1') {
+    if (oForm.fcpo_checktype && oForm.fcpo_checktype.value === '-1') {
         oForm.submit();
         return false;
     }
 
-    var sMode = getOperationMode('');
-    var data = {
-        mid : oForm.fcpo_mid.value,
-        portalid : oForm.fcpo_portalid.value,
-        mode : sMode,
-        request : 'bankaccountcheck',
-        responsetype : 'JSON',
-        hash : oForm.fcpo_hashelvWith.value,
-        encoding : oForm.fcpo_encoding.value,
-        aid : oForm.fcpo_aid.value,
-        checktype : oForm.fcpo_checktype.value,
-        language : oForm.fcpo_tpllang.value,
-        integrator_name : 'oxid',
-        integrator_version : oForm.fcpo_integratorver.value,
-        solution_name : 'fatchip',
-        solution_version : oForm.fcpo_integratorextver.value,
+    const sMode = getOperationMode('');
+    const data = {
+        mid: oForm.fcpo_mid.value,
+        portalid: oForm.fcpo_portalid.value,
+        mode: sMode,
+        request: 'bankaccountcheck',
+        responsetype: 'JSON',
+        hash: oForm.fcpo_hashelvWith.value,
+        encoding: oForm.fcpo_encoding.value,
+        aid: oForm.fcpo_aid.value,
+        checktype: oForm.fcpo_checktype.value,
+        language: oForm.fcpo_tpllang.value,
+        integrator_name: 'oxid',
+        integrator_version: oForm.fcpo_integratorver.value,
+        solution_name: 'fatchip',
+        solution_version: oForm.fcpo_integratorextver.value,
     };
 
-    if(oForm['dynvalue[fcpo_elv_iban]'].value != '' && (!oForm['dynvalue[fcpo_elv_bic]'] || oForm['dynvalue[fcpo_elv_bic]'].value != '')) {
+    if (oForm['dynvalue[fcpo_elv_iban]'].value !== '' && (!oForm['dynvalue[fcpo_elv_bic]'] || oForm['dynvalue[fcpo_elv_bic]'].value !== '')) {
         data.iban = oForm['dynvalue[fcpo_elv_iban]'].value;
-        if(oForm['dynvalue[fcpo_elv_bic]']) data.bic = oForm['dynvalue[fcpo_elv_bic]'].value;
+        if (oForm['dynvalue[fcpo_elv_bic]']) data.bic = oForm['dynvalue[fcpo_elv_bic]'].value;
     } else {
         data.bankcountry = fcpoGetElvCountry();
         data.bankaccount = oForm['dynvalue[fcpo_elv_ktonr]'].value;
         data.bankcode = oForm['dynvalue[fcpo_elv_blz]'].value;
     }
 
-    var options = {
-        return_type : 'object',
-        callback_function_name : 'processPayoneResponseELV'
+    const options = {
+        return_type: 'object',
+        callback_function_name: 'processPayoneResponseELV'
     };
 
-    var request = new PayoneRequest(data, options);
+    const request = new PayoneRequest(data, options);
     request.checkAndStore();
 
     return false;
 }
 
 function fcCheckPaymentSelection() {
-    var sCheckedValue = getSelectedPaymentMethod();
-    if(sCheckedValue != false) {
+    const sCheckedValue = getSelectedPaymentMethod();
+    if (sCheckedValue !== false) {
         var oForm = getPaymentForm();
-        if(sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
+        if (sCheckedValue === 'fcpocreditcard' && oForm.fcpo_cc_type.value === 'ajax') {
             return startCCRequest();
-        } else if(sCheckedValue == 'fcpodebitnote') {
+        } else if (sCheckedValue === 'fcpodebitnote') {
             return startELVRequest(true);
-        } else if(sCheckedValue == 'fcpoklarna') {
+        } else if (sCheckedValue === 'fcpoklarna') {
             return checkKlarna();
         }
     }
@@ -473,97 +472,102 @@ function fcCheckPaymentSelection() {
 }
 
 function processPayoneResponseELV(response) {
-    if(response.get('status') != 'VALID') {
-        if(response.get('errorcode') == '1083') {
+    if (response.get('status') !== 'VALID') {
+        if (response.get('errorcode') === '1083') {
             document.getElementById('fcpo_elv_ktonr_invalid').style.display = 'block';
-        } else if(response.get('errorcode') == '1084' || response.get('errorcode') == '884') {
+        } else if (response.get('errorcode') === '1084' || response.get('errorcode') === '884') {
             document.getElementById('fcpo_elv_blz_invalid').style.display = 'block';
-        } else if(response.get('status') == 'BLOCKED') {
+        } else if (response.get('status') === 'BLOCKED') {
             document.getElementById('fcpo_elv_error_blocked').style.display = 'block';
         } else {
-            document.getElementById('fcpo_elv_error_content').innerHTML = '"'+response.get('customermessage')+'"';
+            document.getElementById('fcpo_elv_error_content').innerHTML = '"' + response.get('customermessage') + '"';
             document.getElementById('fcpo_elv_error').style.display = 'block';
         }
     } else {
-        var oForm = getPaymentForm();
+        const oForm = getPaymentForm();
         oForm.submit();
     }
 }
 
 function processPayoneResponseCC(response) {
-    var cardholderError = validateCardholder();
+    const cardholderError = validateCardholder();
     if (cardholderError) {
         return false;
     }
-    if(response.get('status') == 'VALID') {
-        var oForm = getPaymentForm();
+    if (response.get('status') === 'VALID') {
+        let oForm = getPaymentForm();
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.get('pseudocardpan');
         oForm["dynvalue[fcpo_ccmode]"].value = getOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.get('truncatedcardpan');
         oForm["dynvalue[fcpo_kkpruef]"].value = 'xxx';
         oForm.submit();
-    } else if(response.get('status') != 'VALID') {
-        if(response.get('errorcode') == '1078' || response.get('errorcode') == '877') {
+    } else if (response.get('status') !== 'VALID') {
+        if (response.get('errorcode') === '1078' || response.get('errorcode') === '877') {
             document.getElementById('fcpo_cc_number_invalid').style.display = 'block';
-        } else if(response.get('errorcode') == '1079') {
+        } else if (response.get('errorcode') === '1079') {
             document.getElementById('fcpo_cc_cvc2_invalid').style.display = 'block';
-        } else if(response.get('errorcode') == '33') {
+        } else if (response.get('errorcode') === '33') {
             document.getElementById('fcpo_cc_date_invalid').style.display = 'block';
         } else {
-            document.getElementById('fcpo_cc_error_content').innerHTML = '"'+response.get('customermessage')+'"';
+            document.getElementById('fcpo_cc_error_content').innerHTML = '"' + response.get('customermessage') + '"';
             document.getElementById('fcpo_cc_error').style.display = 'block';
         }
     }
 }
 
 function fcHandleDebitInputs(sDebitBICMandatory) {
-    if (typeof(sDebitBICMandatory) == undefined) {
+    if (typeof (sDebitBICMandatory) === undefined) {
         sDebitBICMandatory = 'true';
     }
     fcHandleDebitInputsTypeIban();
     fcHandleDebitInputsTypeBlz();
 }
+
 function fcEnableDebitInputsTypeIban() {
-    var oForm = getPaymentForm();
-    if (oForm['dynvalue[fcpo_elv_iban]'] && oForm['dynvalue[fcpo_elv_bic]'] ) {
+    let oForm = getPaymentForm();
+    if (oForm['dynvalue[fcpo_elv_iban]'] && oForm['dynvalue[fcpo_elv_bic]']) {
         oForm['dynvalue[fcpo_elv_iban]'].disabled = false;
         oForm['dynvalue[fcpo_elv_iban]'].style.backgroundColor = "";
         oForm['dynvalue[fcpo_elv_bic]'].disabled = false;
         oForm['dynvalue[fcpo_elv_bic]'].style.backgroundColor = "";
     }
 }
+
 function fcEnableDebitInputsTypeBlz() {
-    var oForm = getPaymentForm();
-    if (oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]'] ) {
+    let oForm = getPaymentForm();
+    if (oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]']) {
         oForm['dynvalue[fcpo_elv_ktonr]'].disabled = false;
         oForm['dynvalue[fcpo_elv_ktonr]'].style.backgroundColor = "";
         oForm['dynvalue[fcpo_elv_blz]'].disabled = false;
         oForm['dynvalue[fcpo_elv_blz]'].style.backgroundColor = "";
     }
 }
+
 function fcDisableDebitInputsTypeIban() {
-    var oForm = getPaymentForm();
-    if (oForm['dynvalue[fcpo_elv_iban]'] && oForm['dynvalue[fcpo_elv_bic]'] ) {
+    let oForm = getPaymentForm();
+    if (oForm['dynvalue[fcpo_elv_iban]'] && oForm['dynvalue[fcpo_elv_bic]']) {
         oForm['dynvalue[fcpo_elv_iban]'].disabled = true;
         oForm['dynvalue[fcpo_elv_iban]'].style.backgroundColor = "#EEE";
         oForm['dynvalue[fcpo_elv_bic]'].disabled = true;
         oForm['dynvalue[fcpo_elv_bic]'].style.backgroundColor = "#EEE";
     }
 }
+
 function fcDisableDebitInputsTypeBlz() {
-    var oForm = getPaymentForm();
-    if (oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]'] ) {
+    let oForm = getPaymentForm();
+    if (oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]']) {
         oForm['dynvalue[fcpo_elv_ktonr]'].disabled = true;
         oForm['dynvalue[fcpo_elv_ktonr]'].style.backgroundColor = "#EEE";
         oForm['dynvalue[fcpo_elv_blz]'].disabled = true;
         oForm['dynvalue[fcpo_elv_blz]'].style.backgroundColor = "#EEE";
     }
 }
+
 function fcHandleDebitInputsTypeIban() {
-    var oForm = getPaymentForm();
-    if((oForm['dynvalue[fcpo_elv_bic]'] && oForm['dynvalue[fcpo_elv_iban]'])) {
-        if(fcpoGetElvCountry() == 'DE'
-            && (oForm['dynvalue[fcpo_elv_iban]'].value != '' || oForm['dynvalue[fcpo_elv_bic]'].value != '' )
+    let oForm = getPaymentForm();
+    if ((oForm['dynvalue[fcpo_elv_bic]'] && oForm['dynvalue[fcpo_elv_iban]'])) {
+        if (fcpoGetElvCountry() === 'DE'
+            && (oForm['dynvalue[fcpo_elv_iban]'].value !== '' || oForm['dynvalue[fcpo_elv_bic]'].value !== '')
         ) {
             fcEnableDebitInputsTypeIban();
             fcDisableDebitInputsTypeBlz();
@@ -574,10 +578,10 @@ function fcHandleDebitInputsTypeIban() {
 }
 
 function fcHandleDebitInputsTypeBlz() {
-    var oForm = getPaymentForm();
-    if((oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]'])) {
-        if(fcpoGetElvCountry() == 'DE'
-            && (oForm['dynvalue[fcpo_elv_ktonr]'].value != '' || oForm['dynvalue[fcpo_elv_blz]'].value != '')
+    let oForm = getPaymentForm();
+    if ((oForm['dynvalue[fcpo_elv_ktonr]'] && oForm['dynvalue[fcpo_elv_blz]'])) {
+        if (fcpoGetElvCountry() === 'DE'
+            && (oForm['dynvalue[fcpo_elv_ktonr]'].value !== '' || oForm['dynvalue[fcpo_elv_blz]'].value !== '')
         ) {
             fcEnableDebitInputsTypeBlz();
             fcDisableDebitInputsTypeIban();
@@ -588,11 +592,11 @@ function fcHandleDebitInputsTypeBlz() {
 }
 
 function fcpoHandleMandateCheckbox(oCheckbox) {
-    if(document.getElementById('fcpoMandateCheckboxTop')) {
+    if (document.getElementById('fcpoMandateCheckboxTop')) {
         document.getElementById('fcpoMandateCheckboxTop').value = oCheckbox.checked;
     } else {
-        if(document.getElementById('orderConfirmAgbTop')) {
-            var oInput = document.createElement("input");
+        if (document.getElementById('orderConfirmAgbTop')) {
+            let oInput = document.createElement("input");
             oInput.setAttribute("type", "hidden");
             oInput.setAttribute("name", "fcpoMandateCheckbox");
             oInput.setAttribute("id", "fcpoMandateCheckboxTop");
@@ -600,11 +604,11 @@ function fcpoHandleMandateCheckbox(oCheckbox) {
             document.getElementById("orderConfirmAgbTop").appendChild(oInput);
         }
     }
-    if(document.getElementById('fcpoMandateCheckboxBottom')) {
+    if (document.getElementById('fcpoMandateCheckboxBottom')) {
         document.getElementById('fcpoMandateCheckboxBottom').value = oCheckbox.checked;
     } else {
-        if(document.getElementById('orderConfirmAgbBottom')) {
-            var oInput = document.createElement("input");
+        if (document.getElementById('orderConfirmAgbBottom')) {
+            let oInput = document.createElement("input");
             oInput.setAttribute("type", "hidden");
             oInput.setAttribute("name", "fcpoMandateCheckbox");
             oInput.setAttribute("id", "fcpoMandateCheckboxBottom");
@@ -618,12 +622,12 @@ function fcpoHandleMandateCheckbox(oCheckbox) {
  * Creates payone form input fields and appends it at the form end
  *
  * @param   {type} oForm
- * @param   {type} sName
+ * @param   {string} sName
  * @param   {type} sValue
  * @returns {undefined}
  */
 function fcSetPayoneInput(oForm, sName, sValue) {
-    var sInput = '<input type="hidden" name="'+sName+'" value="'+sValue+'" />';
+    const sInput = '<input type="hidden" name="' + sName + '" value="' + sValue + '" />';
     oForm.insertAdjacentHTML('beforeend', sInput);
 }
 
@@ -634,12 +638,12 @@ function fcSetPayoneInput(oForm, sName, sValue) {
  * @returns {undefined}
  */
 function fcSetPayoneInputFields(oForm) {
-    for(var sInput in oFcPayOneData.inputs) {
-        var sInputName = sInput;
-        var sInputValue = oFcPayOneData.inputs[sInput];
-        if (sInput.indexOf('dynvalue') != -1 ) {
+    for (var sInput in oFcPayOneData.inputs) {
+        let sInputName = sInput;
+        const sInputValue = oFcPayOneData.inputs[sInput];
+        if (sInput.indexOf('dynvalue') !== -1) {
             sInputName = sInputName.replace('dynvalue_', '');
-            sInputName = 'dynvalue['+sInputName+']';
+            sInputName = 'dynvalue[' + sInputName + ']';
         }
         fcSetPayoneInput(oForm, sInputName, sInputValue);
     }
@@ -651,11 +655,11 @@ function fcSetPayoneInputFields(oForm) {
  * @param void
  */
 $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
-    function() {
-        var payment_id = $('#klarna_payment_selector').children("option:selected").val();
-        var oForm = getPaymentForm();
+    function () {
+        const payment_id = $('#klarna_payment_selector').children("option:selected").val();
+        let oForm = getPaymentForm();
 
-        if ($('#fcpo_klarna_combined_agreed').is(':checked') == false) {
+        if ($('#fcpo_klarna_combined_agreed').is(':checked') === false) {
             $('#klarna_widget_combined_container').empty();
 
             if ($('#klarna_combined_js_inject').html() !== '') {
@@ -663,21 +667,21 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
             }
             return;
         } else {
-            if (typeof(oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
-                var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-'+ oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
+            if (typeof (oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
+                var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
             }
-            if (typeof(oForm['dynvalue[fcpo_klarna_telephone]']) !== 'undefined') {
+            if (typeof (oForm['dynvalue[fcpo_klarna_telephone]']) !== 'undefined') {
                 var telephone = oForm['dynvalue[fcpo_klarna_telephone]'].value;
             }
-            if (typeof(oForm['dynvalue[fcpo_klarna_personalid]']) !== 'undefined') {
+            if (typeof (oForm['dynvalue[fcpo_klarna_personalid]']) !== 'undefined') {
                 var personalid = oForm['dynvalue[fcpo_klarna_personalid]'].value;
             }
         }
 
         let payment_category_list = {
-            "fcpoklarna_invoice" : "pay_later",
-            "fcpoklarna_directdebit" : "direct_debit",
-            "fcpoklarna_installments" : "pay_over_time",
+            "fcpoklarna_invoice": "pay_later",
+            "fcpoklarna_directdebit": "direct_debit",
+            "fcpoklarna_installments": "pay_over_time",
         }
 
         var payment_category = payment_category_list[payment_id];
@@ -688,8 +692,8 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
             '"birthday":"' + birthday + '",' +
             '"personalid":"' + personalid + '",' +
             '"telephone":"' + telephone + '"' +
-        '}';
-
+            '}';
+        alert(payoneAjaxControllerUrl);
         $.ajax(
             {
                 url: payoneAjaxControllerUrl,
@@ -702,7 +706,7 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
                     params: formParams,
                     birthday: birthday,
                 },
-                success: function(Response) {
+                success: function (Response) {
                     $('#klarna_widget_combined_container').empty();
                     $('#klarna_combined_js_inject').empty().html(Response);
                     $('#payment_klarna_combined').val(payment_id);
@@ -716,44 +720,42 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
 );
 
 
-
-
 /**
  * Triggers precheck for payolution installment via ajax
  *
  * @param void
  */
 $('#payolution_installment_check_availability').click(
-    function(){
+    function () {
         // trigger loading animation and disable button
         $('#payolution_installment_calculation_selection').html('<div id="payolution_center_animation"><img src="modules/fc/fcpayone/out/img/ajax-loader.gif"</div>');
         $('#payolution_installment_check_availability').attr('disabled', true);
         // collect data from form to pass it through to controller
-        var formParams = '{';
+        let formParams = '{';
         $('[name^="dynvalue"]').each(
-            function(key, value) {
-                var formType = $(this).attr('type');
-                var rawName = $(this).attr("name");
+            function (key, value) {
+                let inputValue;
+                const formType = $(this).attr('type');
+                const rawName = $(this).attr("name");
 
-                var regExp = /\[([^)]+)\]/;
-                var matches = regExp.exec(rawName);
+                const regExp = /\[([^)]+)\]/;
+                const matches = regExp.exec(rawName);
                 if (matches === null) {
                     return true;
                 }
 
-                var nameInBrackets = matches[1];
-                if (key > 0 && formParams != '{') {
+                const nameInBrackets = matches[1];
+                if (key > 0 && formParams !== '{') {
                     formParams += ', ';
                 }
 
-                if (formType == 'checkbox') {
-                    var inputValue = '';
+                if (formType === 'checkbox') {
+                    inputValue = '';
                     if ($(this).is(':checked')) {
                         inputValue = $(this).val();
                     }
-                }
-                else {
-                    var inputValue = $(this).val();
+                } else {
+                    inputValue = $(this).val();
                 }
                 formParams += '"' + nameInBrackets + '":"' + inputValue + '"';
             }
@@ -766,23 +768,23 @@ $('#payolution_installment_check_availability').click(
                 method: 'POST',
                 type: 'POST',
                 dataType: 'text',
-                data: { paymentid: "fcpopo_installment", action: "precheck", params: formParams },
-                success: function(Response) {
+                data: {paymentid: "fcpopo_installment", action: "precheck", params: formParams},
+                success: function (Response) {
                     $('#payolution_installment_calculation_selection').html(Response);
                     $('#payolution_installment_check_availability').attr('disabled', false);
-                    var numberOfInstallments = $('#payolution_no_installments').val();
+                    const numberOfInstallments = $('#payolution_no_installments').val();
                     $('#payolution_sum_number_installments').html(numberOfInstallments);
                     $('input[name=payolution_installment_selection]').bind(
-                        'change', function() {
+                        'change', function () {
                             // selected interest data will be set into summary box
-                            var selectedInstallmentIndex = $('input[name=payolution_installment_selection]:checked').val();
+                            const selectedInstallmentIndex = $('input[name=payolution_installment_selection]:checked').val();
                             // disable all installment details and enable selected
-                            for (i=1;i<=numberOfInstallments;i++) {
-                                $('#payolution_rates_details_'+i).removeClass('payolution_rates_visible');
-                                $('#payolution_rates_details_'+i).addClass('payolution_rates_invisible');
+                            for (i = 1; i <= numberOfInstallments; i++) {
+                                $('#payolution_rates_details_' + i).removeClass('payolution_rates_visible');
+                                $('#payolution_rates_details_' + i).addClass('payolution_rates_invisible');
                             }
-                            $('#payolution_rates_details_'+selectedInstallmentIndex).addClass('payolution_rates_visible');
-                            $('#payolution_rates_details_'+selectedInstallmentIndex).removeClass('payolution_rates_invisible');
+                            $('#payolution_rates_details_' + selectedInstallmentIndex).addClass('payolution_rates_visible');
+                            $('#payolution_rates_details_' + selectedInstallmentIndex).removeClass('payolution_rates_invisible');
                             // set needed values to foreseen fields
                             $('#payolution_sum_number_installments').html(numberOfInstallments);
                             $('#payolution_financing_sum').html($('#payolution_installment_total_amount_' + selectedInstallmentIndex).val());
@@ -807,32 +809,31 @@ $('#payolution_installment_check_availability').click(
  */
 
 
-
-(function(d, t) {
-    var g = d.createElement(t),
+(function (d, t) {
+    const g = d.createElement(t),
         s = d.getElementsByTagName(t)[0];
     g.src = 'https://secure.pay1.de/client-api/js/ajax.js';
     s.parentNode.insertBefore(g, s);
 
-    var oForm = getPaymentForm();
+    const oForm = getPaymentForm();
     if (oForm) {
         fcSetPayoneInputFields(oForm);
 
-        if(oForm["dynvalue[fcpo_sotype]"]) {
+        if (oForm["dynvalue[fcpo_sotype]"]) {
             fcCheckOUType(oForm["dynvalue[fcpo_sotype]"]);
         }
-        if(oForm["dynvalue[fcpo_elv_country]"]) {
+        if (oForm["dynvalue[fcpo_elv_country]"]) {
             fcCheckDebitCountry(oForm["dynvalue[fcpo_elv_country]"]);
         }
-        $(oForm).on('submit', function(e){
-            if ( fcCheckPaymentSelection() == false ) {
+        $(oForm).on('submit', function (e) {
+            if (fcCheckPaymentSelection() === false) {
                 e.preventDefault();
             }
         });
     }
     setTimeout(
-        function(){
-            if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
+        function () {
+            if (document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
                 document.getElementById('fcpoCreditcard').style.display = '';
             }
         }, 2000
@@ -847,9 +848,9 @@ $('#payolution_installment_check_availability').click(
  */
 
 function fcInitCCIframes() {
-    var oForm = getPaymentForm();
-    var sKKType = fcpoGetCreditcardType();
-    var sMode = oForm["fcpo_mode_fcpocreditcard_" + sKKType].value;
+    const oForm = getPaymentForm();
+    const sKKType = fcpoGetCreditcardType();
+    const sMode = oForm["fcpo_mode_fcpocreditcard_" + sKKType].value;
 
     request = {
         request: 'creditcardcheck', // fixed value
@@ -862,7 +863,7 @@ function fcInitCCIframes() {
         storecarddata: 'yes', // fixed value
         hash: oForm["fcpo_hashcc_" + sKKType].value
     };
-    var iframes = new Payone.ClientApi.HostedIFrames(config, request);
+    const iframes = new Payone.ClientApi.HostedIFrames(config, request);
 
     //set default cardType on initialization
     iframes.setCardType("V");
@@ -873,13 +874,13 @@ function fcInitCCIframes() {
 /**
  * validates the expiredate given in response
  *
- * @param object response
  * @returns bool
+ * @param response
  */
 function validateCardExpireDate(response) {
     if (response.status === "VALID") {
         // current year month string has to be set into format YYMM
-        var fullMonth = new Array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+        var fullMonth = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 
         var currentDate = new Date();
         var fullYear = currentDate.getFullYear(); // need to use full year because getYear() is broken due to Y2K-Bug
@@ -914,11 +915,10 @@ function validateCCHostedInputs() { // Function called by submitting PAY-button
     if (iframes.isComplete()) {
         return 1;
     } else {
-        if(iframes.isCardTypeComplete() &&
+        if (iframes.isCardTypeComplete() &&
             iframes.isCardpanComplete() &&
             iframes.isExpireMonthComplete() &&
-            iframes.isExpireYearComplete())
-        {
+            iframes.isExpireYearComplete()) {
             return 2;
         }
     }
@@ -935,7 +935,7 @@ function processPayoneResponseCCHosted(response) {
     response = validateCardExpireDate(response);
     console.log(response);
     if (response.status === "VALID") {
-        var oForm = getPaymentForm();
+        let oForm = getPaymentForm();
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.pseudocardpan;
         oForm["dynvalue[fcpo_ccmode]"].value = getOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.truncatedcardpan;
@@ -960,11 +960,11 @@ function hideCCHostedErrorsAtSubmit() {
  * @param e
  */
 function validateCardTypeCCHosted(e) {
-    var paymentId = $('input[name=paymentid]:checked').val();
-    var cardType = $( '#cardtype option:selected' ).attr('data-cardtype');
-    var oForm = getPaymentForm();
+    const paymentId = $('input[name=paymentid]:checked').val();
+    const cardType = $('#cardtype option:selected').attr('data-cardtype');
+    const oForm = getPaymentForm();
 
-    if(paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType == 'none') {
+    if (paymentId === 'fcpocreditcard' && oForm.fcpo_cc_type.value === 'hosted' && cardType === 'none') {
         $('#errorCardType').show();
 
         e.preventDefault();
@@ -977,22 +977,22 @@ function validateCardTypeCCHosted(e) {
  * @param e
  */
 function validateInputCCHosted(e) {
-    var paymentId = $('input[name=paymentid]:checked').val();
-    var cardType = $( '#cardtype option:selected' ).attr('data-cardtype');
-    var oForm = getPaymentForm();
+    const paymentId = $('input[name=paymentid]:checked').val();
+    const cardType = $('#cardtype option:selected').attr('data-cardtype');
+    const oForm = getPaymentForm();
 
-    if(paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType != 'none') {
+    if (paymentId === 'fcpocreditcard' && oForm.fcpo_cc_type.value === 'hosted' && cardType !== 'none') {
         $validateResult = validateCCHostedInputs();
 
-        var cardholderError = validateCardholder(e);
+        const cardholderError = validateCardholder(e);
         if (cardholderError) {
             e.preventDefault();
             return;
         }
-        if($validateResult == 0) {
+        if ($validateResult === 0) {
             e.preventDefault();
             $('#errorIncomplete').show();
-        } else if($validateResult == 2) {
+        } else if ($validateResult === 2) {
             $('#errorCVC').show();
             e.preventDefault();
         } else {
@@ -1009,14 +1009,14 @@ function validateInputCCHosted(e) {
  * card type is preselected and cvc check may is not working
  */
 function resetCardTypeCCHosted() {
-    var cardTypeOptionEl = $('#cardtype option[data-cardtype="none"]');
-    var cardTypeEl = $('#cardtype');
+    const cardTypeOptionEl = $('#cardtype option[data-cardtype="none"]');
+    const cardTypeEl = $('#cardtype');
 
-    if(cardTypeOptionEl) {
+    if (cardTypeOptionEl) {
         cardTypeOptionEl.attr('selected', true);
     }
 
-    if(cardTypeOptionEl && cardTypeEl && (typeof cardTypeEl.selectpicker === "function")) {
+    if (cardTypeOptionEl && cardTypeEl && (typeof cardTypeEl.selectpicker === "function")) {
         cardTypeEl.selectpicker('refresh');
     }
 }
@@ -1024,16 +1024,17 @@ function resetCardTypeCCHosted() {
 /**
  * handles form submission if method is credit card hosted iframe
  */
-$(document).ready(function() {
-    var paymentForm = $('#payment');
+$(document).ready(function () {
+    const paymentForm = $('#payment');
 
     resetCardTypeCCHosted();
 
     //check cvc, check if cardtype is selected, progress request, output errors
-    paymentForm.on('submit', function(e) {
-        var klarna_auth_done = $('#fcpo_klarna_auth_done').val();
-        var klarna_paymentid = $('#payment_klarna_combined').val();
-        var klarna_combined_checked = $('#payment_klarna_combined').is(':checked');
+    paymentForm.on('submit', function (e) {
+        const klarna_combined = $('#payment_klarna_combined');
+        const klarna_auth_done = $('#fcpo_klarna_auth_done').val();
+        const klarna_paymentid = klarna_combined.val();
+        const klarna_combined_checked = klarna_combined.is(':checked');
 
         hideCCHostedErrorsAtSubmit();
         validateCardTypeCCHosted(e);
@@ -1041,7 +1042,7 @@ $(document).ready(function() {
         if (klarna_combined_checked && klarna_paymentid) {
             if (klarna_auth_done === 'false') {
                 e.preventDefault();
-                if ($('#fcpo_klarna_combined_agreed').is(':checked') == true) {
+                if ($('#fcpo_klarna_combined_agreed').is(':checked') === true) {
                     // defined in snippets/fcpoKlarnaWidget.txt
                     klarnaAuthorize(e);
                 }
@@ -1049,7 +1050,7 @@ $(document).ready(function() {
         }
     });
 
-    $('#cardtype').on('change', function(e) {
+    $('#cardtype').on('change', function (e) {
         iframes.setCardType(this.value);
     });
 });

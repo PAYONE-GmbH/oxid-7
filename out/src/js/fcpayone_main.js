@@ -1,4 +1,4 @@
-/* 
+/*
  * JS of fcpayone_main.js
  */
 
@@ -11,8 +11,8 @@ function handlePresaveOrderCheckbox(oCheckbox) {
 }
 
 function handleRatePayShowDetails(oCheckbox) {
-    var sOxid = oCheckbox.value;
-    var sId = 'ratepay_profile_details_' + sOxid;
+    const sOxid = oCheckbox.value;
+    const sId = 'ratepay_profile_details_' + sOxid;
     if(oCheckbox.checked) {
         document.getElementById(sId).style.display = 'block';
     } else {
@@ -21,7 +21,7 @@ function handleRatePayShowDetails(oCheckbox) {
 }
 
 function _groupExp(oElement) {
-    var _cur = oElement.parentNode;
+    let _cur = oElement.parentNode;
 
     if (_cur.className === "exp") {
         _cur.className = "";
@@ -59,7 +59,7 @@ function handleSizeFields(oSelect, sRowName) {
         inputEnable('input_width_' + sRowName);
     } else {
         inputDisable('input_height_' + sRowName);
-        inputDisable('input_width_' + sRowName);            
+        inputDisable('input_width_' + sRowName);
     }
 }
 
