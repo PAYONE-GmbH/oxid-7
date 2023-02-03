@@ -45,7 +45,7 @@ $sUseLogin = filter_input(INPUT_GET, 'login');
  *
  * @author andre
  */
-class FcPopopUpContent extends BaseModel
+class FcPoPopUpContent extends BaseModel
 {
 
     /**
@@ -169,5 +169,5 @@ class FcPopopUpContent extends BaseModel
     }
 }
 
-$oPopupContent = new FcPopopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
+$oPopupContent = new FcPoPopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
 echo $oPopupContent->fcpo_fetch_content();

@@ -101,7 +101,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @var bool
      */
-    protected $_blFcPayoneAppointedError = false;
+    protected $_blFcPayOneAppointedError = false;
 
     /**
      * List of Payment IDs which need to save workorderid
@@ -1914,7 +1914,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoGetAppointedError()
     {
-        return $this->_blFcPayoneAppointedError;
+        return $this->_blFcPayOneAppointedError;
     }
 
     /**
@@ -1925,6 +1925,6 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoSetAppointedError($blError = false)
     {
-        $this->_blFcPayoneAppointedError = $blError;
+        $this->_blFcPayOneAppointedError = $blError;
     }
 }

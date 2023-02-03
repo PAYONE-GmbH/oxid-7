@@ -23,8 +23,8 @@
 
 {% block change_payment %}
     <script type="text/javascript">
-        var oFcPayoneData = oFcPayoneData || [];
-        oFcPayoneData.inputs =
+        var oFcPayOneData = oFcPayOneData || [];
+        oFcPayOneData.inputs =
             {
                 fcpo_mid: '{{ oView.getMerchantId() }}',
                 fcpo_portalid: '{{ oView.getPortalId() }}',

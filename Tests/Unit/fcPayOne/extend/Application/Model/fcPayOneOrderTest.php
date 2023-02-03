@@ -2497,7 +2497,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     public function test__fcpoGetAppointedError_Coverage()
     {
         $oTestObject = oxNew(FcPayOneOrder::class);
-        $this->invokeSetAttribute($oTestObject, '_blFcPayoneAppointedError', true);
+        $this->invokeSetAttribute($oTestObject, '_blFcPayOneAppointedError', true);
 
         $this->assertEquals(true, $oTestObject->_fcpoGetAppointedError());
     }

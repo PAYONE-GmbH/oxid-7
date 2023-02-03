@@ -21,7 +21,7 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-class FcPayOneApiLogMain extends FcPayoneAdminView
+class FcPayOneApiLogMain extends FcPayOneAdminView
 {
 
     /**
