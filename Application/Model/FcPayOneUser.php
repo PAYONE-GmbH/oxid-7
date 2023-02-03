@@ -78,7 +78,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     public function load($sOXID): mixed
     {
         $mReturn = parent::load($sOXID);
-        if ($mReturn !== false) {
+        if ($mReturn != false) {
             $this->_fcpoSetUserFlags();
         }
 
@@ -92,7 +92,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     public function fcpoGetFlagsOfUser()
     {
-        if ($this->_aUserFlags === null) {
+        if ($this->_aUserFlags == null) {
             $this->_fcpoSetUserFlags();
         }
         return $this->_aUserFlags;
@@ -241,7 +241,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoLogMeIn($sUserId=null)
     {
-        if ($sUserId === null) {
+        if ($sUserId == null) {
             $sUserId = $this->getId();
         }
         $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
@@ -594,7 +594,7 @@ class FcPayOneUser extends FcPayOneUser_parent
 
         $this->oxuser__oxboni->value = $boni;
 
-        $blValidResponse = ($aResponse && is_array($aResponse) && array_key_exists('fcWrongCountry', $aResponse) === false);
+        $blValidResponse = ($aResponse && is_array($aResponse) && array_key_exists('fcWrongCountry', $aResponse) == false);
 
         if ($blValidResponse) {
             $this->oxuser__fcpobonicheckdate = new Field(date('Y-m-d H:i:s'));
@@ -830,12 +830,12 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoValidateDelAddress($blIsValidAddress, $blFCPOCheckDelAddress)
     {
-        if ($blIsValidAddress && $blFCPOCheckDelAddress === true) {
+        if ($blIsValidAddress && $blFCPOCheckDelAddress == true) {
             //check delivery address
             $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
             $aResponse = $oPORequest->sendRequestAddresscheck($this, true);
 
-            if ($aResponse === false || $aResponse === true) {
+            if ($aResponse == false || $aResponse == true) {
                 // false = No deliveryaddress given
                 // true = Address-check has been skipped because the address has been checked before
                 return true;
@@ -861,7 +861,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
         $aResponse = $oPORequest->sendRequestAddresscheck($this);
 
-        if ($aResponse === true) {
+        if ($aResponse == true) {
             // check has been performed recently
             $blIsValidAddress = true;
         } else {
@@ -898,7 +898,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $iDefaultBoni = $oConfig->getConfigParam('sFCPODefaultBoni');
-        if ($iDefaultBoni !== null && is_numeric($iDefaultBoni) === true) {
+        if ($iDefaultBoni != null && is_numeric($iDefaultBoni) == true) {
             return $iDefaultBoni;
         }
         return parent::getBoni();
@@ -915,7 +915,7 @@ class FcPayOneUser extends FcPayOneUser_parent
             $aResponse &&
             is_array($aResponse) &&
             array_key_exists('fcWrongCountry', $aResponse) &&
-            $aResponse['fcWrongCountry'] === true
+            $aResponse['fcWrongCountry'] == true
         );
 
         // early return on quick check

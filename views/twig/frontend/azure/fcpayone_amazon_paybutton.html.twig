@@ -17,7 +17,7 @@
 <div id="{{ sAmazonButtonId }}{{ iAmzButtonIncluded }}" class="{{ sAmazonButtonClass }}"></div>
 <script>
     // initialize client
-    if (typeof window.onAmazonLoginReady !== 'function') {
+    if (typeof window.onAmazonLoginReady != 'function') {
         window.onAmazonLoginReady = function () {
             amazon.Login.setClientId('{{ oViewConf.fcpoGetAmazonPayClientId() }}');
             {% if not oViewConf.fcpoAmazonLoginSessionActive() %}
@@ -32,7 +32,7 @@
     }
 
     // iterate through filled array with buttons
-    if (typeof window.onAmazonPaymentsReady !== 'function') {
+    if (typeof window.onAmazonPaymentsReady != 'function') {
         window.onAmazonPaymentsReady = function () {
             window.onAmazonPaymentsReadyArray.forEach(function (callback) {
                 callback();

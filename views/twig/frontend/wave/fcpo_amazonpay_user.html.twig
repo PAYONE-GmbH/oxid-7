@@ -68,7 +68,7 @@
 
             var accessToken = getCookie('amazon_Login_accessToken');
 
-            if (typeof accessToken == 'string' && accessToken === '')
+            if (typeof accessToken == 'string' && accessToken == '')
             {
                 var accessToken = getURLParameter("access_token", location.hash);
                 if (typeof accessToken == 'string' && accessToken.match(/^Atza/))

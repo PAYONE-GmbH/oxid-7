@@ -94,7 +94,7 @@ class FcPayOneIframe extends \OxidEsales\Eshop\Application\Controller\FrontendCo
      */
     public function getOrder()
     {
-        if ($this->_oOrder === null) {
+        if ($this->_oOrder == null) {
             $sOrderId = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
             if ($sOrderId) {
                 $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);

@@ -43,10 +43,10 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 }
 
 $sRemoteIp = isset($sClientIp) ? $sClientIp : $_SERVER['REMOTE_ADDR'];
-if (array_search($sRemoteIp, $aWhitelist) === false) {
+if (array_search($sRemoteIp, $aWhitelist) == false) {
     $blMatch = false;
     foreach ($aWhitelist as $sIP) {
-        if (stripos($sIP, '*') !== false) {
+        if (stripos($sIP, '*') != false) {
             $sDelimiter = '/';
 
             $sRegex = preg_quote($sIP, $sDelimiter);
@@ -60,7 +60,7 @@ if (array_search($sRemoteIp, $aWhitelist) === false) {
         }
     }
 
-    if ($blMatch === false) {
+    if ($blMatch == false) {
         echo 'Access denied';
         exit;
     }
@@ -373,8 +373,8 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      */
     protected function _getOrder($sTxid=null)
     {
-        if ($this->_oFcOrder === null) {
-            if ($sTxid === null) {
+        if ($this->_oFcOrder == null) {
+            if ($sTxid == null) {
                 $sTxid = $this->fcGetPostParam('txid');
             }
 

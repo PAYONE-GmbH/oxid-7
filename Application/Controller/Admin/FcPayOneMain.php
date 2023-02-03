@@ -635,7 +635,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function fcpoIsLogoAdded(): bool
     {
-        return isset($this->_aAdminMessages["blLogoAdded"]) && $this->_aAdminMessages["blLogoAdded"] === true;
+        return isset($this->_aAdminMessages["blLogoAdded"]) && $this->_aAdminMessages["blLogoAdded"] == true;
     }
 
     /**
@@ -647,7 +647,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     {
         return (
             isset($this->_aAdminMessages["blCampaignAdded"]) &&
-            $this->_aAdminMessages["blCampaignAdded"] === true
+            $this->_aAdminMessages["blCampaignAdded"] == true
         );
     }
 
@@ -658,7 +658,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function fcpoIsStoreIdAdded(): bool
     {
-        return isset($this->_aAdminMessages["blStoreIdAdded"]) && $this->_aAdminMessages["blStoreIdAdded"] === true;
+        return isset($this->_aAdminMessages["blStoreIdAdded"]) && $this->_aAdminMessages["blStoreIdAdded"] == true;
     }
 
     /**

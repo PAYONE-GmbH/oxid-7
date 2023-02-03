@@ -19,7 +19,7 @@ function klarnaAuthorize (e) {
     var orderlines = $.parseJSON('%%KLARNA_ORDERLINES%%');
     var order = $.parseJSON('%%KLARNA_ORDER%%');
     var payment_category = '%%PAYMENT_CATEGORY%%';
-    var auto_finalize = (payment_category === 'pay_now') ? false : true;
+    var auto_finalize = (payment_category == 'pay_now') ? false : true;
 
     Klarna.Payments.authorize({
         payment_method_category: payment_category,
@@ -36,7 +36,7 @@ function klarnaAuthorize (e) {
         $("#fcpo_klarna_auth_token").val(res.authorization_token);
         $("#fcpo_klarna_auth_done").val(true);
         // reset agreement box on errors
-        if (typeof(res.error) !== 'undefined' || res.approved == false) {
+        if (typeof(res.error) != 'undefined' || res.approved == false) {
             $('#fcpo_klarna_combined_agreed').prop('checked', false);
         }
         paymentForm.submit();

@@ -61,7 +61,7 @@ class FcPoRatepay extends BaseModel
      */
     public function fcpoInsertProfile($sOxid, $aRatePayData)
     {
-        if (array_key_exists('delete', $aRatePayData) !== false) {
+        if (array_key_exists('delete', $aRatePayData) != false) {
             $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
             $this->_oFcpoDb->execute($sQuery);
         } else {

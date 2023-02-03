@@ -106,7 +106,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
 
         $aConfStrs = $this->_aViewData["confstrs"];
         foreach ($this->_aDefaultValues as $sVarName => $sValue) {
-            if (array_key_exists($sVarName, $aConfStrs) === false || empty($aConfStrs[$sVarName])) {
+            if (array_key_exists($sVarName, $aConfStrs) == false || empty($aConfStrs[$sVarName])) {
                 $aConfStrs[$sVarName] = $sValue;
             }
         }
@@ -178,8 +178,8 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
         $blIsActive = (
-            $sFCPOBonicheck !== null &&
-            $sFCPOBonicheck !== '-1'
+            $sFCPOBonicheck != null &&
+            $sFCPOBonicheck != '-1'
         );
 
         return $blIsActive;
@@ -196,8 +196,8 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
 
         $blIsActive = (
-            $sFCPOAddresscheck !== null &&
-            $sFCPOAddresscheck !== 'NO'
+            $sFCPOAddresscheck != null &&
+            $sFCPOAddresscheck != 'NO'
         );
 
         return $blIsActive;

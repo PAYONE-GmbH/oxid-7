@@ -250,7 +250,7 @@ class FcPoErrorMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     protected function _fcpoGetQuery($sMappingId, $aData, $sType)
     {
         // quote values from outer space
-        if (array_key_exists('delete', $aData) !== false) {
+        if (array_key_exists('delete', $aData) != false) {
             $oDb = $this->_oFcpoHelper->fcpoGetDb();
             $sOxid = $oDb->quote($sMappingId);
             $sQuery = "DELETE FROM fcpoerrormapping WHERE oxid = {$sOxid}";

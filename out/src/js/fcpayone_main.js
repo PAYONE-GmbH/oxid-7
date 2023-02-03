@@ -23,7 +23,7 @@ function handleRatePayShowDetails(oCheckbox) {
 function _groupExp(oElement) {
     let _cur = oElement.parentNode;
 
-    if (_cur.className === "exp") {
+    if (_cur.className == "exp") {
         _cur.className = "";
     } else {
         _cur.className = "exp";
@@ -31,7 +31,7 @@ function _groupExp(oElement) {
 }
 
 function toggleHostedTemplate() {
-    if(document.getElementById('fcpoHostedCCTemplate').style.display !== "") {
+    if(document.getElementById('fcpoHostedCCTemplate').style.display != "") {
         document.getElementById('fcpoHostedCCTemplate').style.display = "";
     } else {
         document.getElementById('fcpoHostedCCTemplate').style.display = "none";
@@ -39,7 +39,7 @@ function toggleHostedTemplate() {
 }
 
 function togglePreview() {
-    if(document.getElementById('fcpoHostedCCPreview').style.display !== "") {
+    if(document.getElementById('fcpoHostedCCPreview').style.display != "") {
         document.getElementById('fcpoHostedCCPreview').style.display = "";
     } else {
         document.getElementById('fcpoHostedCCPreview').style.display = "none";
@@ -54,7 +54,7 @@ function inputDisable(sInputId) {
 }
 
 function handleSizeFields(oSelect, sRowName) {
-    if(oSelect.options[oSelect.selectedIndex].value === 'custom') {
+    if(oSelect.options[oSelect.selectedIndex].value == 'custom') {
         inputEnable('input_height_' + sRowName);
         inputEnable('input_width_' + sRowName);
     } else {
@@ -64,7 +64,7 @@ function handleSizeFields(oSelect, sRowName) {
 }
 
 function handleCss(oSelect, sRowName) {
-    if(oSelect.options[oSelect.selectedIndex].value === 'custom') {
+    if(oSelect.options[oSelect.selectedIndex].value == 'custom') {
         inputEnable('input_css_' + sRowName);
     } else {
         inputDisable('input_css_' + sRowName);

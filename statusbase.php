@@ -45,7 +45,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
      */
     protected function _getUtilsObject()
     {
-        if ($this->_oUtilsObject === null) {
+        if ($this->_oUtilsObject == null) {
             try {
                 $this->_oUtilsObject = oxNew(UtilsObject::class);
             } catch (Exception $e) {
@@ -96,7 +96,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
 
     protected function _getShopList()
     {
-        if ($this->_aShopList === null) {
+        if ($this->_aShopList == null) {
             $aShops = [];
 
             $sQuery = "SELECT oxid FROM oxshops";
@@ -236,7 +236,7 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     protected function _addQueueEntries($sStatusmessageId, $sPayoneStatus=null)
     {
         try {
-            if ($sPayoneStatus === null) {
+            if ($sPayoneStatus == null) {
                 $sPayoneStatus = $this->fcGetPostParam('txaction');
             }
 

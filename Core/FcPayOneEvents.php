@@ -512,7 +512,7 @@ class FcPayOneEvents
 
             //INSERT PAYMENT METHOD CONFIGURATION
             $blInserted = self::insertRowIfNotExists('oxobject2group', array('OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid), "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
-            if ($blInserted === true) {
+            if ($blInserted == true) {
                 $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
                 $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
                 $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidforeigncustomer');");
@@ -690,7 +690,7 @@ class FcPayOneEvents
     {
         $aColumns = DatabaseProvider::getDb()->getAll("SHOW COLUMNS FROM {$sTableName} LIKE '{$sColumnName}'");
 
-        if (!$aColumns || count($aColumns) === 0) {
+        if (!$aColumns || count($aColumns) == 0) {
             try {
                 DatabaseProvider::getDb()->execute($sQuery);
             } catch (Exception $e) {
@@ -926,7 +926,7 @@ class FcPayOneEvents
      */
     public static function copyFile($sSource, $sDestination)
     {
-        if (file_exists($sSource) === true) {
+        if (file_exists($sSource) == true) {
             self::deleteFileIfExists($sDestination);
             if (copy($sSource, $sDestination)) {
                 echo 'Datei ' . $sDestination . ' in Theme kopiert.<br>';

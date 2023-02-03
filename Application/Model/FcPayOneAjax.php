@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Model;
@@ -35,7 +35,7 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
 if (!function_exists('getShopBasePath')) {
     function getShopBasePath()
     {
-        return dirname(__FILE__).'/../../../../../';
+        return dirname(__FILE__) . '/../../../../../';
     }
 }
 
@@ -77,7 +77,7 @@ class FcPayOneAjax extends BaseModel
     /**
      * init object construction
      *
-     * @return null
+     * @return void
      */
     public function __construct()
     {
@@ -86,18 +86,17 @@ class FcPayOneAjax extends BaseModel
     }
 
     /**
-     *
-     *
-     * @param $sPaymentId
-     * @param $sAction
-     * @param $sParamsJson
+     * @param string $sPaymentId
+     * @param string $sAction
+     * @param string $sParamsJson
      * @return string
      */
-    public function fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson)
+    public function fcpoTriggerKlarnaAction(string $sPaymentId, string $sAction, string $sParamsJson)
     {
-        if ($sAction === 'start_session') {
+        if ($sAction == 'start_session') {
             return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
         }
+        return '';
     }
 
     /**
@@ -114,7 +113,7 @@ class FcPayOneAjax extends BaseModel
         $aResponse = $oRequest->sendRequestKlarnaStartSession($sPaymentId);
         $blIsValid = (
             isset($aResponse['status'], $aResponse['add_paydata[client_token]']) &&
-            $aResponse['status'] === 'OK'
+            $aResponse['status'] == 'OK'
         );
 
         if (!$blIsValid) {
@@ -134,7 +133,6 @@ class FcPayOneAjax extends BaseModel
                 $aResponse['add_paydata[client_token]'],
                 $sParamsJson
             );
-
         return $sKlarnaWidgetJS;
     }
 
@@ -151,13 +149,13 @@ class FcPayOneAjax extends BaseModel
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
         /** @var User $oUser value */
-        if ($aParams['birthday'] !== 'undefined') {
+        if ($aParams['birthday'] != 'undefined') {
             $oUser->oxuser__oxbirthdate = new Field($aParams['birthday']);
         }
-        if ($aParams['telephone'] !== 'undefined') {
+        if ($aParams['telephone'] != 'undefined') {
             $oUser->oxuser__oxfon = new Field($aParams['telephone']);
         }
-        if ($aParams['personalid'] !== 'undefined') {
+        if ($aParams['personalid'] != 'undefined') {
             $oUser->oxuser__fcpopersonalid = new Field($aParams['personalid']);
         }
         $oUser->save();
@@ -304,15 +302,15 @@ class FcPayOneAjax extends BaseModel
     /**
      * Performs a precheck for payolution installment
      *
-     * @param  string $sPaymentId
+     * @param string $sPaymentId
      * @return bool
      */
     public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson)
     {
         $oPaymentController = $this->_oFcpoHelper->getFactoryObject(Payment::class);
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
-        $mPreCheckResult =  $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
-        $sReturn = ($mPreCheckResult === true) ? 'SUCCESS': $mPreCheckResult;
+        $mPreCheckResult = $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
+        $sReturn = ($mPreCheckResult == true) ? 'SUCCESS' : $mPreCheckResult;
 
         return $sReturn;
     }
@@ -338,7 +336,7 @@ class FcPayOneAjax extends BaseModel
     /**
      * Parse result of calculation to html for returning html code
      *
-     * @param  array $aCalculation
+     * @param array $aCalculation
      * @return string
      */
     public function fcpoParseCalculation2Html($aCalculation)
@@ -348,16 +346,16 @@ class FcPayOneAjax extends BaseModel
         $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
         $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
 
-        $oConfig =$this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sHtml = '
             <div class="content">
-                <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">2. '.$sTranslateInstallmentSelection.'</p>
-                <p id="payolution_installment_calculation_headline" class="payolution_installment_box_subtitle">'.$sTranslateSelectInstallment.'</p>
+                <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">2. ' . $sTranslateInstallmentSelection . '</p>
+                <p id="payolution_installment_calculation_headline" class="payolution_installment_box_subtitle">' . $sTranslateSelectInstallment . '</p>
         ';
         $sHtml .= '<div class="payolution_installment_offers">';
-        $sHtml .= '<input id="payolution_no_installments" type="hidden" value="'.count($aCalculation).'">';
+        $sHtml .= '<input id="payolution_no_installments" type="hidden" value="' . count($aCalculation) . '">';
         $sHtml .= '<fieldset>';
-        foreach ($aCalculation as $sKey=>$aCurrentInstallment) {
+        foreach ($aCalculation as $sKey => $aCurrentInstallment) {
             $sHtml .= $this->_fcpoGetInsterestHiddenFields($sKey, $aCurrentInstallment);
             $sHtml .= $this->_fcpoGetInsterestRadio($sKey, $aCurrentInstallment);
             $sHtml .= $this->_fcpoGetInsterestLabel($sKey, $aCurrentInstallment);
@@ -366,16 +364,16 @@ class FcPayOneAjax extends BaseModel
         $sHtml .= '</fieldset>';
         $sHtml .= '</div></div>';
         $sHtml .= '<div class="payolution_installment_details">';
-        foreach ($aCalculation as $sKey=>$aCurrentInstallment) {
-            $sHtml .= '<div id="payolution_rates_details_'.$sKey.'" class="payolution_rates_invisible">';
-            foreach ($aCurrentInstallment['Months'] as $sMonth=>$aRatesDetails) {
-                $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails).'<br>';
+        foreach ($aCalculation as $sKey => $aCurrentInstallment) {
+            $sHtml .= '<div id="payolution_rates_details_' . $sKey . '" class="payolution_rates_invisible">';
+            foreach ($aCurrentInstallment['Months'] as $sMonth => $aRatesDetails) {
+                $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) . '<br>';
             }
-            $sDownloadUrl = $oConfig->getShopUrl().'/modules/fc/fcpayone/lib/fcpopopup_content.php?login=1&loadurl='.$aCurrentInstallment['StandardCreditInformationUrl'];
+            $sDownloadUrl = $oConfig->getShopUrl() . '/modules/fc/fcpayone/lib/fcpopopup_content.php?login=1&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
             $sHtml .= '</div>';
         }
         $sHtml .= '</div>';
-        $sHtml .= '<div class="payolution_draft_download"><a href="'.$sDownloadUrl.'"'.$this->_fcpoGetLightView().'>'.$oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_DOWNLOAD_DRAFT').'</a></div>';
+        $sHtml .= '<div class="payolution_draft_download"><a href="' . $sDownloadUrl . '"' . $this->_fcpoGetLightView() . '>' . $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_DOWNLOAD_DRAFT') . '</a></div>';
 
         return $sHtml;
     }
@@ -398,12 +396,12 @@ class FcPayOneAjax extends BaseModel
     /**
      * Formats error message to be displayed in a error box
      *
-     * @param  string $sMessage
+     * @param string $sMessage
      * @return string
      */
     public function fcpoReturnErrorMessage($sMessage)
     {
-        $sReturn  = '<p class="payolution_message_error">';
+        $sReturn = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';
 
@@ -414,17 +412,17 @@ class FcPayOneAjax extends BaseModel
     /**
      * Set hidden fields for beeing able to set needed values
      *
-     * @param  string $sKey
-     * @param  array  $aCurrentInstallment
+     * @param string $sKey
+     * @param array  $aCurrentInstallment
      * @return string
      */
     protected function _fcpoGetInsterestHiddenFields($sKey, $aCurrentInstallment)
     {
-        $sHtml  = '<input type="hidden" id="payolution_installment_value_'.$sKey.'" value="'.str_replace('.', ',', $aCurrentInstallment['Amount']).'">';
-        $sHtml .= '<input type="hidden" id="payolution_installment_duration_'.$sKey.'" value="'.$aCurrentInstallment['Duration'].'">';
-        $sHtml .= '<input type="hidden" id="payolution_installment_eff_interest_rate_'.$sKey.'" value="'.str_replace('.', ',', $aCurrentInstallment['EffectiveInterestRate']).'">';
-        $sHtml .= '<input type="hidden" id="payolution_installment_interest_rate_'.$sKey.'" value="'.str_replace('.', ',', $aCurrentInstallment['InterestRate']).'">';
-        $sHtml .= '<input type="hidden" id="payolution_installment_total_amount_'.$sKey.'" value="'.str_replace('.', ',', $aCurrentInstallment['TotalAmount']).'">';
+        $sHtml = '<input type="hidden" id="payolution_installment_value_' . $sKey . '" value="' . str_replace('.', ',', $aCurrentInstallment['Amount']) . '">';
+        $sHtml .= '<input type="hidden" id="payolution_installment_duration_' . $sKey . '" value="' . $aCurrentInstallment['Duration'] . '">';
+        $sHtml .= '<input type="hidden" id="payolution_installment_eff_interest_rate_' . $sKey . '" value="' . str_replace('.', ',', $aCurrentInstallment['EffectiveInterestRate']) . '">';
+        $sHtml .= '<input type="hidden" id="payolution_installment_interest_rate_' . $sKey . '" value="' . str_replace('.', ',', $aCurrentInstallment['InterestRate']) . '">';
+        $sHtml .= '<input type="hidden" id="payolution_installment_total_amount_' . $sKey . '" value="' . str_replace('.', ',', $aCurrentInstallment['TotalAmount']) . '">';
 
         return $sHtml;
     }
@@ -432,8 +430,8 @@ class FcPayOneAjax extends BaseModel
     /**
      * Returns a caption for a certain month
      *
-     * @param  string $sMonth
-     * @param  array  $aRatesDetails
+     * @param string $sMonth
+     * @param array  $aRatesDetails
      * @return string
      */
     protected function _fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails)
@@ -444,7 +442,7 @@ class FcPayOneAjax extends BaseModel
         $sDue = date('d.m.Y', strtotime($aRatesDetails['Due']));
         $sRate = str_replace('.', ',', $aRatesDetails['Amount']);
 
-        $sMonthDetailsCaption = $sMonth.'. '.$sRateCaption.': '. $sRate.' '.$aRatesDetails['Currency'].' ('.$sDueCaption.' '.$sDue.')';
+        $sMonthDetailsCaption = $sMonth . '. ' . $sRateCaption . ': ' . $sRate . ' ' . $aRatesDetails['Currency'] . ' (' . $sDueCaption . ' ' . $sDue . ')';
 
         return $sMonthDetailsCaption;
     }
@@ -452,13 +450,13 @@ class FcPayOneAjax extends BaseModel
     /**
      * Returns a html radio button for current installment offer
      *
-     * @param  string $sKey
-     * @param  array  $aCurrentInstallment
+     * @param string $sKey
+     * @param array  $aCurrentInstallment
      * @return string
      */
     protected function _fcpoGetInsterestRadio($sKey, $aCurrentInstallment)
     {
-        $sHtml = '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
+        $sHtml = '<input type="radio" id="payolution_installment_offer_' . $sKey . '" name="payolution_installment_selection" value="' . $sKey . '">';
 
         return $sHtml;
     }
@@ -466,14 +464,14 @@ class FcPayOneAjax extends BaseModel
     /**
      * Returns a html label for current installment offer radiobutton
      *
-     * @param  string $sKey
-     * @param  array  $aCurrentInstallment
+     * @param string $sKey
+     * @param array  $aCurrentInstallment
      * @return string
      */
     protected function _fcpoGetInsterestLabel($sKey, $aCurrentInstallment)
     {
         $sInterestCaption = $this->_fcpoGetInsterestCaption($aCurrentInstallment);
-        $sHtml = '<label for="payolution_installment_offer_'.$sKey.'">'.$sInterestCaption.'</label>';
+        $sHtml = '<label for="payolution_installment_offer_' . $sKey . '">' . $sInterestCaption . '</label>';
 
         return $sHtml;
     }
@@ -481,7 +479,7 @@ class FcPayOneAjax extends BaseModel
     /**
      * Returns translated caption for current installment offer
      *
-     * @param  array $aCurrentInstallment
+     * @param array $aCurrentInstallment
      * @return string
      */
     protected function _fcpoGetInsterestCaption($aCurrentInstallment)
@@ -494,7 +492,7 @@ class FcPayOneAjax extends BaseModel
         $sCurrency = $aCurrentInstallment['Currency'];
 
         // put all together to final caption
-        $sCaption = $sMonthlyAmount." ".$sCurrency." ".$sPerMonth." - ".$sDuration." ".$sRates;
+        $sCaption = $sMonthlyAmount . " " . $sCurrency . " " . $sPerMonth . " - " . $sDuration . " " . $sRates;
 
         return $sCaption;
     }
@@ -504,7 +502,7 @@ class FcPayOneAjax extends BaseModel
 if ($sPaymentId) {
     $oPayoneAjax = new FcPayOneAjax();
     if ($sAction == 'precheck') {
-        $sResult =  $oPayoneAjax->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
+        $sResult = $oPayoneAjax->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
         if ($sResult == 'SUCCESS') {
             $sAction = 'calculation';
         } else {

@@ -77,7 +77,7 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
     public function load($sOXID)
     {
         $mReturn = parent::load($sOXID);
-        if ($mReturn !== false) {
+        if ($mReturn != false) {
             $this->_fcpoSetEffects();
         }
 
@@ -253,7 +253,7 @@ class FcPoUserFlag extends \OxidEsales\Eshop\Core\Model\BaseModel
         $iDurationHours =  $this->fcpouserflags__fcpoflagduration->value;
         $iTimeStampActiveUntil = $this->_fcpoGetTimeStampActiveUntil();
         $iTimeStampNow = time();
-        return ($iTimeStampActiveUntil >= $iTimeStampNow || $iDurationHours === 0);
+        return ($iTimeStampActiveUntil >= $iTimeStampNow || $iDurationHours == 0);
     }
 
     /**

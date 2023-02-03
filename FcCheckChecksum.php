@@ -79,7 +79,7 @@ class FcCheckChecksum
         if (file_exists($this->_getBasePath().'composer.json')) {
             $this->_handleComposerJson($this->_getBasePath().'composer.json');
         }
-        if ($this->_blGotModuleInfo === true) {
+        if ($this->_blGotModuleInfo == true) {
             $sRequestUrl = $this->_sVersionCheckUrl.'?module='.$this->_sModuleId.'&version='.$this->_sModuleVersion;
             $sResponse = file_get_contents($sRequestUrl);
             if ($sResponse) {
@@ -134,7 +134,7 @@ class FcCheckChecksum
         $aFiles = $this->_getFilesToCheck();
         $aChecksums = $this->_checkFiles($aFiles);
         $sResult = $this->_getCheckResults($aChecksums);
-        if ($blOutput === true) {
+        if ($blOutput == true) {
             if ($sResult == 'correct') {
                 echo $sResult;
             } else {

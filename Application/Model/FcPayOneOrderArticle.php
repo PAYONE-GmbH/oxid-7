@@ -91,8 +91,8 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         }
 
         $blUseParentOrderMethod = (
-            $blPresaveOrder === false ||
-            $oOrder->isPayOnePaymentType() === false
+            $blPresaveOrder == false ||
+            $oOrder->isPayOnePaymentType() == false
         );
 
         if ($blUseParentOrderMethod) {
@@ -106,7 +106,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         }
 
         // ordered articles
-        if (($blSave = Base::save()) && $this->isNewOrderItem() || $blBefore === false) {
+        if (($blSave = parent::save()) && $this->isNewOrderItem() || $blBefore == false) {
             if ($oConfig->getConfigParam('blUseStock')) {
                 if ($oConfig->getConfigParam('blPsBasketReservationEnabled')) {
                     $this->getSession()
@@ -166,7 +166,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      */
     protected function _isRedirectAfterSave($oOrder)
     {
-        if ($this->_blIsRedirectAfterSave === null) {
+        if ($this->_blIsRedirectAfterSave == null) {
             $this->_blIsRedirectAfterSave = false;
             $sSuccess = $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess');
             $sRefNr = $this->_oFcpoHelper->fcpoGetRequestParameter('refnr');
@@ -205,7 +205,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         if ($sPaymentId) {
             $oPayment = oxNew(Payment::class);
             $oPayment->load($sPaymentId);
-            if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) === false) {
+            if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) == false) {
                 return parent::delete($sOXID);
             }
         }
@@ -213,7 +213,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         $blDelete = $this->_fcpoProcessBaseDelete($sOXID);
         if ($blDelete) {
             $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
-            if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore !== false) {
+            if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore != false) {
                 $this->updateArticleStock($this->oxorderarticles__oxamount->value, $oConfig->getConfigParam('blAllowNegativeStock'));
             }
         }
@@ -249,9 +249,9 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
             $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
             $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') ||
             (
-                $blFinishingSave === true &&
-                $blPresaveOrder === true &&
-                $blReduceStockBefore === false
+                $blFinishingSave == true &&
+                $blPresaveOrder == true &&
+                $blReduceStockBefore == false
             )
         );
 

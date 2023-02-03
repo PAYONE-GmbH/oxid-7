@@ -179,7 +179,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
         $sProcessFile = $this->_getProcessFilePath();
         $iPid = (int) file_get_contents($sProcessFile);
 
-        if ($iPid === 0) {
+        if ($iPid == 0) {
             unlink($sProcessFile);
             $sMessage =
                 'Processfile did not contain a valid PID! '.
@@ -380,7 +380,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
                 WHERE OXID=".$oDb->quote($sStatusmessageId);
 
             $aRow = $oDb->getRow($sQuery);
-            if ($aRow === false) {
+            if ($aRow == false) {
                 $sExceptionMessage =
                     'Could not find transaction status message for ID '.$sStatusmessageId.'!';
                 throw new Exception($sExceptionMessage);
@@ -419,7 +419,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             if (!$blValid) {
                 continue;
             }
-            if ($sKey === 'FCPO_TXTIME') {
+            if ($sKey == 'FCPO_TXTIME') {
                 $sValue = strtotime($sValue);
             }
             $sCallKey = $this->_aDbFields2Params[$sKey];
@@ -447,7 +447,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
                 WHERE OXID=".$oDb->quote($sForwardId);
 
         $aRow = $oDb->getRow($sQuery);
-        if ($aRow === false) {
+        if ($aRow == false) {
             throw new Exception('Could not find forward data for ID '.$sForwardId.'!');
         }
 

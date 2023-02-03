@@ -195,7 +195,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     public function addParameter($sKey, $sValue, $blAddAsNullIfEmpty = false)
     {
         $blSetNullForEmpty = (
-            $blAddAsNullIfEmpty === true &&
+            $blAddAsNullIfEmpty == true &&
             empty($sValue)
         );
         if ($blSetNullForEmpty) {
@@ -288,8 +288,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $blIsWalletTypePaymentWithDelAddress = (
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express' ||
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
-            $oOrder->fcIsPayPalOrder() === true &&
-            $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true
+            $oOrder->fcIsPayPalOrder() == true &&
+            $oConfig->getConfigParam('blFCPOPayPalDelAddress') == true
         );
 
         if ($oOrder->oxorder__oxdellname->value != '') {
@@ -393,7 +393,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
 
         $aMandate = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMandate');
-        if ($aMandate && array_key_exists('mandate_identification', $aMandate) !== false && $aMandate['mandate_status'] == 'pending') {
+        if ($aMandate && array_key_exists('mandate_identification', $aMandate) != false && $aMandate['mandate_status'] == 'pending') {
             $this->addParameter('mandate_identification', $aMandate['mandate_identification']);
         }
 
@@ -611,7 +611,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 return false;
         }
 
-        if ($blAddRedirectUrls === true) {
+        if ($blAddRedirectUrls == true) {
             $this->_addRedirectUrls('payment', $sRefNr);
         }
         return true;
@@ -911,8 +911,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         /** @var OrderArticle $oOrderarticle */
         foreach ($aOrderArticleListe->getArray() as $oOrderarticle) {
-            if ($aPositions === false || array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
-                if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
+            if ($aPositions == false || array_key_exists($oOrderarticle->getId(), $aPositions) != false) {
+                if ($aPositions != false && array_key_exists($oOrderarticle->getId(), $aPositions) != false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
                 } else {
                     $dItemAmount = $oOrderarticle->oxorderarticles__oxamount->value;
@@ -931,9 +931,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $sQuery = "SELECT IF(SUM(fcpocapturedamount) = 0, 1, 0) AS b FROM oxorderarticles WHERE oxorderid = '{$oOrder->getId()}' GROUP BY oxorderid";
         $blFirstCapture = (bool)DatabaseProvider::getDb()->getOne($sQuery);
 
-        if ($aPositions === false || $blFirstCapture === true || $blDebit === true) {
+        if ($aPositions == false || $blFirstCapture == true || $blDebit == true) {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
-            if ($oOrder->oxorder__oxdelcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxdelcost', $aPositions) !== false))) {
+            if ($oOrder->oxorder__oxdelcost->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxdelcost', $aPositions) != false))) {
                 $sDelDesc = '';
                 if ($oOrder->oxorder__oxdelcost->value > 0) {
                     $sDelDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
@@ -950,7 +950,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxdelvat->value * 100, 0, '.', ''));
                 $i++;
             }
-            if ($oOrder->oxorder__oxpaycost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxpaycost', $aPositions) !== false))) {
+            if ($oOrder->oxorder__oxpaycost->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxpaycost', $aPositions) != false))) {
                 $sPayDesc = '';
                 if ($oOrder->oxorder__oxpaycost->value > 0) {
                     $sPayDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
@@ -967,7 +967,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxpayvat->value * 100, 0, '.', ''));
                 $i++;
             }
-            if ($oOrder->oxorder__oxwrapcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxwrapcost', $aPositions) !== false))) {
+            if ($oOrder->oxorder__oxwrapcost->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxwrapcost', $aPositions) != false))) {
                 $this->addParameter('id[' . $i . ']', 'wrapping');
                 $this->addParameter('pr[' . $i . ']', number_format($oOrder->oxorder__oxwrapcost->value, 2, '.', '') * 100);
                 $dAmount += $oOrder->oxorder__oxwrapcost->value;
@@ -978,7 +978,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('va[' . $i . ']', '0');
                 $i++;
             }
-            if ($oOrder->oxorder__oxgiftcardcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxgiftcardcost', $aPositions) !== false))) {
+            if ($oOrder->oxorder__oxgiftcardcost->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxgiftcardcost', $aPositions) != false))) {
                 $this->addParameter('id[' . $i . ']', 'giftcard');
                 $this->addParameter('pr[' . $i . ']', number_format($oOrder->oxorder__oxgiftcardcost->value, 2, '.', '') * 100);
                 $dAmount += $oOrder->oxorder__oxgiftcardcost->value;
@@ -1000,7 +1000,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                     $this->addParameter('va[' . $i . ']', '0');
                     $i++;
                 }
-            } elseif ($oOrder->oxorder__oxvoucherdiscount->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxvoucherdiscount', $aPositions) !== false))) {
+            } elseif ($oOrder->oxorder__oxvoucherdiscount->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxvoucherdiscount', $aPositions) != false))) {
                 $this->addParameter('id[' . $i . ']', 'voucher');
                 $this->addParameter('pr[' . $i . ']', $oOrder->oxorder__oxvoucherdiscount->value * -100);
                 $dAmount += ($oOrder->oxorder__oxvoucherdiscount->value * -1);
@@ -1010,7 +1010,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
                 $this->addParameter('va[' . $i . ']', '0');
                 $i++;
             }
-            if ($oOrder->oxorder__oxdiscount->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxdiscount', $aPositions) !== false))) {
+            if ($oOrder->oxorder__oxdiscount->value != 0 && ($aPositions == false || ($blDebit == false || array_key_exists('oxdiscount', $aPositions) != false))) {
                 $this->addParameter('id[' . $i . ']', 'discount');
                 $this->addParameter('pr[' . $i . ']', round($oOrder->oxorder__oxdiscount->value, 2) * -100);
                 $dAmount += (round($oOrder->oxorder__oxdiscount->value, 2) * -1);
@@ -1041,7 +1041,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $blIsPreAuth = $sType == 'preauthorization' ? true : false;
 
         $blPayMethodIsKnown = $this->setAuthorizationParameters($oOrder, $oUser, $aDynvalue, $sRefNr, $blIsPreAuth);
-        if ($blPayMethodIsKnown === true) {
+        if ($blPayMethodIsKnown == true) {
             $mOutput = $this->send();
             if ($oOrder->oxorder__oxpaymenttype->value == 'fcpoamazonpay') {
                 $mOutput = $this->_fcpoHandleAmazonAuthorizationResponse($mOutput);
@@ -1181,9 +1181,9 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $aHashParams = [];
         foreach ($this->_aParameters as $sKey => $sValue) {
-            if (array_search($sKey, $this->_aFrontendUnsetParams) !== false) {
+            if (array_search($sKey, $this->_aFrontendUnsetParams) != false) {
                 unset($this->_aParameters[$sKey]);
-            } elseif (array_search($sKey, $this->_aFrontendHashParams) !== false || stripos($sKey, '[') !== false) {
+            } elseif (array_search($sKey, $this->_aFrontendHashParams) != false || stripos($sKey, '[') != false) {
                 $aHashParams[$sKey] = $sValue;
             }
         }
@@ -1457,7 +1457,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoFetchCostsFromBasket($oBasket, $costType)
     {
         $costs = $oBasket->getCosts($costType);
-        if ($costs === null) {
+        if ($costs == null) {
             return 0.0;
         }
 
@@ -1474,7 +1474,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoFetchVatCostsFromBasket($oBasket, $costType)
     {
         $vatCosts = $oBasket->getCosts($costType);
-        if ($vatCosts === null) {
+        if ($vatCosts == null) {
             return 0.0;
         }
 
@@ -1548,7 +1548,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoGetAmazonTimeout($sAmazonMode = null)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        if ($sAmazonMode === null) {
+        if ($sAmazonMode == null) {
             $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
         }
 
@@ -1593,7 +1593,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
-        if ($sWorkorderId !== null) {
+        if ($sWorkorderId != null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
 
@@ -1692,7 +1692,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $this->addParameter('add_paydata[action]', $sAction);
         $this->addParameter('api_version', '3.10');
 
-        if ($sWorkorderId !== null) {
+        if ($sWorkorderId != null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
 
@@ -1758,7 +1758,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');
 
-        if ($sWorkorderId !== null) {
+        if ($sWorkorderId != null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
 
@@ -1912,7 +1912,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $this->addParameter('clearingtype', 'fnc');
         $this->addParameter('financingtype', $sFinancingType);
 
-        if ($sWorkorderId !== false) {
+        if ($sWorkorderId != false) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
         $this->addParameter('add_paydata[action]', 'profile');
@@ -2333,7 +2333,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $this->addParameter('narrative_text', 'Test');
 
-        if ($sWorkorderId !== false) {
+        if ($sWorkorderId != false) {
             $this->addParameter('workorderid', $sWorkorderId);
             $this->addParameter('add_paydata[action]', 'getexpresscheckoutdetails');
         } else {
@@ -2370,7 +2370,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
         $this->addParameter('currency', $oOrder->oxorder__oxcurrency->value); //Currency
 
-        if ($oOrder->allowAccountSettlement() === true && $blSettleAccount === false) {
+        if ($oOrder->allowAccountSettlement() == true && $blSettleAccount == false) {
             $sSettleAccount = 'no';
         } else {
             $sSettleAccount = 'auto';
@@ -2386,7 +2386,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         if ($blAddProductInfo) {
             $dAmount = $this->addProductInfo($oOrder, $aPositions);
-            if ($aPositions !== false) {
+            if ($aPositions != false) {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
@@ -2400,7 +2400,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $aResponse = $this->send();
 
-        if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
+        if ($aPositions && $aResponse && array_key_exists('status', $aResponse) != false && $aResponse['status'] == 'APPROVED') {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 $sQuery = "UPDATE oxorderarticles SET fcpocapturedamount = fcpocapturedamount + {$aPos['amount']} WHERE oxid = '{$sOrderArtId}'";
                 DatabaseProvider::getDb()->execute($sQuery);
@@ -2432,7 +2432,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         $sPaymentId =
             (string)$oOrder->oxorder__oxpaymenttype->value;
-        $blPaymentMatches = ($sPaymentId === 'fcpo_secinvoice');
+        $blPaymentMatches = ($sPaymentId == 'fcpo_secinvoice');
 
         if (!$blPaymentMatches) {
             return;
@@ -2495,7 +2495,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $this->addParameter('transactiontype', 'GT');
 
-        if ($sBankAccount !== false && $sBankCountry !== false) {
+        if ($sBankAccount != false && $sBankCountry != false) {
             $this->addParameter('bankcountry', $sBankCountry);
             $this->addParameter('bankaccount', $sBankAccount);
             $this->addParameter('bankcode', $sBankCode);
@@ -2507,7 +2507,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             $dAmount = $this->addProductInfo($oOrder, $aPositions, true);
             // amount for credit entry has to be negative
             $dAmount = (double)$dAmount * -1;
-            if ($aPositions !== false) {
+            if ($aPositions != false) {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
@@ -2519,7 +2519,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
         $aResponse = $this->send();
 
-        if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
+        if ($aPositions && $aResponse && array_key_exists('status', $aResponse) != false && $aResponse['status'] == 'APPROVED') {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 switch ($sOrderArtId) {
                     case 'oxdelcost':
@@ -2553,7 +2553,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
     protected function _stateNeeded($sIso2Country)
     {
-        if (array_search($sIso2Country, $this->_aStateNeededCountries) !== false) {
+        if (array_search($sIso2Country, $this->_aStateNeededCountries) != false) {
             return true;
         }
         return false;
@@ -2651,21 +2651,21 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         switch ($sCountryIso2) {
             case 'AT':
             case 'DE':
-                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
                 break;
             case 'CH':
-                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
                 break;
             case 'GB':
             case 'US':
-                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
+                $sTitle = ($sGender == 'male') ? 'Mr' : 'Ms';
                 break;
             case 'DK':
             case 'FI':
             case 'SE':
             case 'NL':
             case 'NO':
-                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
+                $sTitle = ($sGender == 'male') ? 'Dhr.' : 'Mevr.';
                 break;
         }
         return $sTitle;
@@ -2713,13 +2713,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     {
         if (isset($aResponse['personstatus'])) {
             $iNewMalus = $oUser->getConfig()->getConfigParam('sFCPOMalus' . strtoupper($aResponse['personstatus']));
-            if ($iNewMalus !== null) {// null comes if personstatus is unkown
+            if ($iNewMalus != null) {// null comes if personstatus is unkown
                 $iOldMalus = (int)$oUser->oxuser__fcpocurrmalus->value;
 
                 //realboni field is used to keep track of the "real" boni, since this calculation cuts of the boni at 0
                 //otherwise the customer could gain boni through this
                 $iOldBoni = $oUser->oxuser__fcporealboni->value;
-                if ($iOldBoni === null) {// real boni not yet calculated
+                if ($iOldBoni == null) {// real boni not yet calculated
                     $iOldBoni = (int)$oUser->oxuser__oxboni->value;
                 }
 
@@ -2766,13 +2766,13 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
             //AddressCheck Person nur in Deutschland
             //Erfolgreichen Check simulieren
             return ['fcWrongCountry' => true];
-        } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) === false) {
+        } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) == false) {
             //AddressCheck Basic nur in bestimmten L?ndern
             //Erfolgreichen Check simulieren
             return ['fcWrongCountry' => true];
         } else {
             $oAddress = oxNew(Address::class);
-            if ($blCheckDeliveryAddress === true) {
+            if ($blCheckDeliveryAddress == true) {
                 $sDeliveryAddressId = $oUser->getSelectedAddressId();
                 if ($sDeliveryAddressId) {
                     $oAddress->load($sDeliveryAddressId);
@@ -2786,7 +2786,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
 
             $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
-            if ($this->_wasAddressCheckedBefore() === false) {
+            if ($this->_wasAddressCheckedBefore() == false) {
                 $aResponse = $this->send();
 
                 if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
@@ -2954,8 +2954,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
     protected function _fcpoCorrectAddressParam($sParamKey, $sParamValue, $aResponse)
     {
         $blCorrectAddressParam = (
-            $aResponse !== false &&
-            array_key_exists($sParamKey, $aResponse) !== false &&
+            $aResponse != false &&
+            array_key_exists($sParamKey, $aResponse) != false &&
             $aResponse[$sParamKey] != $sParamValue
         );
 
@@ -3169,8 +3169,8 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         $iErrorNumber = '';
         $sErrorString = '';
 
-        if ($this->getParameter('mid') === false || $this->getParameter('portalid') === false
-            || $this->getParameter('key') === false || $this->getParameter('mode') === false
+        if ($this->getParameter('mid') == false || $this->getParameter('portalid') == false
+            || $this->getParameter('key') == false || $this->getParameter('mode') == false
         ) {
             $aOutput['errormessage'] = "Payone API Setup Data not complete (API-URL, MID, AID, PortalID, Key, Mode)";
             return $aOutput;
@@ -3187,7 +3187,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         }
         $sRequestUrl = $this->_sApiUrl . "?" . substr($sRequestUrl, 1);
 
-        if ($blOnlyGetUrl === true) {
+        if ($blOnlyGetUrl == true) {
             return $sRequestUrl;
         }
 
@@ -3438,7 +3438,7 @@ class FcPoRequest extends \OxidEsales\Eshop\Core\Base
         );
         $oContext = stream_context_create($aOptions);
         $oContent = file_get_contents($this->_sApiUrl, false, $oContext);
-        if ($oContent !== false) {
+        if ($oContent != false) {
             file_put_contents($sDestinationFile, $oContent);
 
             if (file_exists($sDestinationFile)) {

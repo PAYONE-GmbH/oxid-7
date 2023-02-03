@@ -330,7 +330,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         /** @var Basket $oBasket */
         $oBasket = $oSession->getBasket();
-        return ($oBasket->getPaymentId() === 'fcpoklarna_directdebit');
+        return ($oBasket->getPaymentId() == 'fcpoklarna_directdebit');
     }
 
     /**
@@ -555,7 +555,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoAmazonEmailDecode($sEmail): string
     {
         $sOriginEmail = $sEmail;
-        if (strpos($sEmail, 'fcpoamz_') !== false) {
+        if (strpos($sEmail, 'fcpoamz_') != false) {
             $sOriginEmail = str_replace('fcpoamz_', '', $sEmail);
         }
 

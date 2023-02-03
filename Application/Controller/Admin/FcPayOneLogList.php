@@ -89,7 +89,7 @@ class FcPayOneLogList extends FcPayOneAdminList
      */
     public function getListFilter()
     {
-        if ($this->_aListFilter === null) {
+        if ($this->_aListFilter == null) {
             $this->_aListFilter = $this->_oFcpoHelper->fcpoGetRequestParameter("where");
         }
 
@@ -104,7 +104,7 @@ class FcPayOneLogList extends FcPayOneAdminList
      */
     public function getListSorting()
     {
-        if ($this->_aCurrSorting === null) {
+        if ($this->_aCurrSorting == null) {
             $this->_aCurrSorting = $this->_oFcpoHelper->fcpoGetRequestParameter('sort');
 
             if (!$this->_aCurrSorting && $this->_sDefSortField && ($oBaseObject = $this->getItemListBaseObject())) {

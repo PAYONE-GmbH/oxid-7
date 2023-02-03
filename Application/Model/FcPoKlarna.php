@@ -78,7 +78,7 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_array($aCampaigns) && count($aCampaigns) > 0) {
             foreach ($aCampaigns as $iId => $aCampaignData) {
-                if (array_key_exists('delete', $aCampaignData) !== false) {
+                if (array_key_exists('delete', $aCampaignData) != false) {
                     $sQuery = "DELETE FROM fcpoklarnacampaigns WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
                 } else {
                     $sQuery = " UPDATE
@@ -106,7 +106,7 @@ class FcPoKlarna extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         if (is_array($aStoreIds) && count($aStoreIds) > 0) {
             foreach ($aStoreIds as $iId => $aStoreIdData) {
-                if (array_key_exists('delete', $aStoreIdData) !== false) {
+                if (array_key_exists('delete', $aStoreIdData) != false) {
                     $sQuery = "DELETE FROM fcpopayment2country WHERE fcpo_paymentid = 'KLV' AND fcpo_type = " . DatabaseProvider::getDb()->quote($iId);
                     $this->_oFcpoDb->execute($sQuery);
                     $sQuery = "DELETE FROM fcpoklarnastoreids WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);

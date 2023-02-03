@@ -116,7 +116,7 @@ class FcPoForwarding extends \OxidEsales\Eshop\Core\Model\BaseModel
         $iTimeout = $oDb->quote($aData['iForwardingTimeout']);
 
 
-        if (array_key_exists('delete', $aData) !== false) {
+        if (array_key_exists('delete', $aData) != false) {
             $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = {$sOxid}";
         } else {
             $sQuery = $this->_fcpoGetUpdateQuery($sForwardingId, $sPayoneStatus, $sUrl, $iTimeout);

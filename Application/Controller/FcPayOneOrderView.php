@@ -161,7 +161,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
 
         $blIsExpressException = (
-            $blReturn !== false &&
+            $blReturn != false &&
             (
                 $sPaymentId == 'fcpopaypal_express' ||
                 $sPaymentId == 'fcpopaydirekt_express'
@@ -188,7 +188,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
         $blReturn = $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
-        $blIsPaypalExpressException = ($blReturn !== false && $sPaymentId == 'fcpopaypal_express');
+        $blIsPaypalExpressException = ($blReturn != false && $sPaymentId == 'fcpopaypal_express');
 
         if ($blIsPaypalExpressException) {
             // always using the address that has been sent by paypal express is mandatory
@@ -342,7 +342,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             $oUser->oxuser__oxfname->value == $aResponse['add_paydata[shipping_firstname]'] ||
             $oUser->oxuser__oxlname->value == $aResponse['add_paydata[shipping_lastname]'] ||
             $oUser->oxuser__oxcity->value == $aResponse['add_paydata[shipping_city]'] ||
-            stripos($aResponse['add_paydata[shipping_street]'], $oUser->oxuser__oxstreet->value) !== false
+            stripos($aResponse['add_paydata[shipping_street]'], $oUser->oxuser__oxstreet->value) != false
         );
 
         return $blIsSamePayPalUser;
@@ -708,8 +708,8 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     protected function _fcpoMandateAcceptanceNeeded()
     {
         $aMandate = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMandate');
-        if ($aMandate && array_key_exists('mandate_status', $aMandate) !== false && $aMandate['mandate_status'] == 'pending') {
-            if (array_key_exists('mandate_text', $aMandate) !== false) {
+        if ($aMandate && array_key_exists('mandate_status', $aMandate) != false && $aMandate['mandate_status'] == 'pending') {
+            if (array_key_exists('mandate_text', $aMandate) != false) {
                 return true;
             }
         }
@@ -735,7 +735,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _validateTermsAndConditions()
     {
-        if (parent::_validateTermsAndConditions() === true) {
+        if (parent::_validateTermsAndConditions() == true) {
             return true;
         }
 

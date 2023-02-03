@@ -118,21 +118,21 @@ class FcPoParamSparser
         switch ($sCountryIso2) {
             case 'AT':
             case 'DE':
-                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
                 break;
             case 'CH':
-                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
                 break;
             case 'GB':
             case 'US':
-                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
+                $sTitle = ($sGender == 'male') ? 'Mr' : 'Ms';
                 break;
             case 'DK':
             case 'FI':
             case 'SE':
             case 'NL':
             case 'NO':
-                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
+                $sTitle = ($sGender == 'male') ? 'Dhr.' : 'Mevr.';
                 break;
         }
         return $sTitle;
@@ -216,7 +216,7 @@ class FcPoParamSparser
     protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
     {
         $oDelivery = $oBasket->getCosts('oxdelivery');
-        if ($oDelivery === null) {
+        if ($oDelivery == null) {
             return 0.0;
         }
 
@@ -310,7 +310,7 @@ class FcPoParamSparser
         $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
 
         return [
-            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
+            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value == '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
             'gender' => $sGender,
             'national_identification_number' => $oUser->oxuser__fcpopersonalid->value,
         ];
@@ -323,7 +323,7 @@ class FcPoParamSparser
      */
     protected function _fcpoGetUser()
     {
-        if ($this->_oUser === null) {
+        if ($this->_oUser == null) {
             $oSession = $this->_oFcpoHelper->fcpoGetSession();
             $oBasket = $oSession->getBasket();
             $this->_oUser = $oBasket->getUser();

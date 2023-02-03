@@ -2,7 +2,7 @@
 
 {% block checkout_thankyou_proceed %}
     {% if oView.fcpoGetBarzahlenHtml() %}
-        {{ oView.fcpoGetBarzahlenHtml() }}
+        {{ oView.fcpoGetBarzahlenHtml()|raw }}
     {% else %}
         {{ parent() }}
         {% if oView.fcpoIsAppointedError() %}

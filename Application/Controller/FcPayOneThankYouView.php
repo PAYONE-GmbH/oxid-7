@@ -97,7 +97,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 
             $aMandate = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMandate');
 
-            if ($aMandate && array_key_exists('mandate_identification', $aMandate) !== false) {
+            if ($aMandate && array_key_exists('mandate_identification', $aMandate) != false) {
                 $sMandateIdentification = $aMandate['mandate_identification'];
             }
 
@@ -228,7 +228,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      */
     public function fcpoGetBarzahlenHtml()
     {
-        if ($this->_sBarzahlenHtml === null) {
+        if ($this->_sBarzahlenHtml == null) {
             $this->_sBarzahlenHtml = $this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
             // delete this from session after we have the result for one time displaying
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');

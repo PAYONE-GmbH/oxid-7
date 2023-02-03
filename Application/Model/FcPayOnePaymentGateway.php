@@ -37,8 +37,8 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
      */
     public function executePayment($dAmount, &$oOrder)
     {
-        // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
-        if ($oOrder->isPayOnePaymentType() === false) {
+        // if($oOrder->isPayOnePaymentType() == false || $oOrder->isPayOneIframePayment()) {
+        if ($oOrder->isPayOnePaymentType() == false) {
             return parent::executePayment($dAmount, $oOrder);
         }
 

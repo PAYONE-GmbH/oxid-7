@@ -172,7 +172,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             $oOrder->load($sOxid);
 
             $blSettleAccount = $this->_oFcpoHelper->fcpoGetRequestParameter("capture_settleaccount");
-            $blSettleAccount = ($blSettleAccount === null) ? true : (bool) $blSettleAccount;
+            $blSettleAccount = ($blSettleAccount == null) ? true : (bool) $blSettleAccount;
 
             $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
 

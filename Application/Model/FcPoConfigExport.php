@@ -175,7 +175,7 @@ class FcPoConfigExport extends BaseModel
     public function fcpoExportConfig()
     {
         $sXml = $this->fcpoGetConfigXml();
-        if ($sXml !== false) {
+        if ($sXml != false) {
             $this->_oFcpoHelper->fcpoHeader("Content-Type: text/xml; charset=\"utf8\"");
             $this->_oFcpoHelper->fcpoHeader("Content-Disposition: attachment; filename=\"payone_config_export" . date('Y-m-d H-i-s') . "_" . md5($sXml) . ".xml\"");
             echo $this->_oFcpoHelper->fcpoProcessResultString($sXml);
@@ -472,7 +472,7 @@ class FcPoConfigExport extends BaseModel
             $sXml .= $this->_sT . $this->_sT . $this->_sT . "<status>Cant verify checksums, curl is not activated on customer-server</status>" . $this->_sN;
         } else {
             $aErrors = $this->_getChecksumErrors();
-            if ($aErrors === false) {
+            if ($aErrors == false) {
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . "<status>Correct</status>" . $this->_sN;
             } elseif (is_array($aErrors) && count($aErrors) > 0) {
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . "<status>Error</status>" . $this->_sN;
@@ -696,7 +696,7 @@ class FcPoConfigExport extends BaseModel
             $sAbbr = $this->_getPaymentAbbreviation($oCurrentMapping->sPaymentType);
             $sSubType = $this->_getPaymentSubType($oCurrentMapping->sPaymentType);
             $aSubTypes = explode(',', $sSubType);
-            if (array_key_exists($sAbbr, $aMappings) === false) {
+            if (array_key_exists($sAbbr, $aMappings) == false) {
                 $aMappings[$sAbbr] = [];
             }
             foreach ($aSubTypes as $sType) {

@@ -137,7 +137,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      */
     public function fcpoGetPayPalExpressPic()
     {
-        if ($this->_sPayPalExpressPic === null) {
+        if ($this->_sPayPalExpressPic == null) {
             $this->_sPayPalExpressPic = false;
             if ($this->_fcpoIsPayPalExpressActive()) {
                 $this->_sPayPalExpressPic = $this->_fcpoGetPayPalExpressPic();
@@ -198,7 +198,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      */
     public function fcpoGetPaydirektExpressPic()
     {
-        if ($this->_sPaydirektExpressPic === null) {
+        if ($this->_sPaydirektExpressPic == null) {
             $this->_sPaydirektExpressPic = false;
             if ($this->_fcpoIsPaydirektExpressActive()) {
                 $this->_sPaydirektExpressPic =

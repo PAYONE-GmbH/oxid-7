@@ -163,20 +163,20 @@ class FcPayOnePayment extends Payment
 
     public static function fcIsPayOnePaymentType($sPaymentId)
     {
-        $blReturn = (array_search($sPaymentId, self::$_aPaymentTypes) !== false) ? true : false;
+        $blReturn = (array_search($sPaymentId, self::$_aPaymentTypes) != false) ? true : false;
         return $blReturn;
     }
 
     public static function fcIsPayOneRedirectType($sPaymentId)
     {
-        $blReturn = (in_array($sPaymentId, self::$_aRedirectPayments) !== false) ? true : false;
+        $blReturn = (in_array($sPaymentId, self::$_aRedirectPayments) != false) ? true : false;
         $oHelper = oxNew(FcPoHelper::class);
 
         $blDynFlaggedAsRedirectPayment =
             (bool)$oHelper->fcpoGetSessionVariable('blDynFlaggedAsRedirectPayment');
         $blUseDynamicFlag = (
             !$blReturn &&
-            $blDynFlaggedAsRedirectPayment === true
+            $blDynFlaggedAsRedirectPayment == true
         );
 
         if ($blUseDynamicFlag) {
@@ -205,13 +205,13 @@ class FcPayOnePayment extends Payment
 
     public static function fcIsPayOneIframePaymentType($sPaymentId)
     {
-        $blReturn = (array_search($sPaymentId, self::$_aIframePaymentTypes) !== false) ? true : false;
+        $blReturn = (array_search($sPaymentId, self::$_aIframePaymentTypes) != false) ? true : false;
         return $blReturn;
     }
 
     public static function fcIsPayOneFrontendApiPaymentType($sPaymentId)
     {
-        $blReturn = (array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false) ? true : false;
+        $blReturn = (array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) != false) ? true : false;
         return $blReturn;
     }
 
@@ -358,7 +358,7 @@ class FcPayOnePayment extends Payment
     public function isPaymentMethodAvailableToUser($sSubPaymentId, $sType, $sUserBillCountryId, $sUserDelCountryId)
     {
         $sBaseQuery = "SELECT COUNT(*) FROM fcpopayment2country WHERE fcpo_paymentid = '{$sSubPaymentId}' AND fcpo_type = '{$sType}'";
-        if ($sUserDelCountryId !== false && $sUserBillCountryId != $sUserDelCountryId) {
+        if ($sUserDelCountryId != false && $sUserBillCountryId != $sUserDelCountryId) {
             $sWhereCountry = "AND (fcpo_countryid = '{$sUserBillCountryId}' || fcpo_countryid = '{$sUserDelCountryId}')";
         } else {
             $sWhereCountry = "AND fcpo_countryid = '{$sUserBillCountryId}'";
@@ -377,7 +377,7 @@ class FcPayOnePayment extends Payment
     protected function _fcGetDynValues($aDynValues)
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        if ((bool) $oConfig->getConfigParam('sFCPOSaveBankdata') === true) {
+        if ((bool) $oConfig->getConfigParam('sFCPOSaveBankdata') == true) {
             if ($this->getId() == 'fcpodebitnote') {
                 if (!is_array($aDynValues)) {
                     $aDynValues = [];
@@ -425,9 +425,9 @@ class FcPayOnePayment extends Payment
 
         $blMandateTextValid = (
             $aMandate &&
-                array_key_exists('mandate_status', $aMandate) !== false &&
+                array_key_exists('mandate_status', $aMandate) != false &&
                 $aMandate['mandate_status'] == 'pending' &&
-                array_key_exists('mandate_text', $aMandate) !== false
+                array_key_exists('mandate_text', $aMandate) != false
         );
 
         $mReturn = false;
@@ -483,7 +483,7 @@ class FcPayOnePayment extends Payment
             $aCampaign = $this->_fcpoGetKlarnaCampaignArray($aRow);
             $blAdd = ($blGetAll) ? true : $this->_fcpoCheckKlarnaCampaignsResult($aRow[0], $aCampaign);
 
-            if ($blAdd === true) {
+            if ($blAdd == true) {
                 $aStoreIds[$aRow[0]] = $aCampaign;
             }
         }
@@ -546,7 +546,7 @@ class FcPayOnePayment extends Payment
      */
     protected function _fcpoCheckAddCampaign($blAdd, $sNeedle, $aHaystack)
     {
-        if (in_array($sNeedle, $aHaystack) === false) {
+        if (in_array($sNeedle, $aHaystack) == false) {
             $blAdd = false;
         }
 

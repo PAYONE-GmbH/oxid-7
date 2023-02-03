@@ -546,7 +546,7 @@ class FcPoHelper extends BaseModel
      */
     protected static function _useRegistry()
     {
-        if (self::$_blUseRegistry === null) {
+        if (self::$_blUseRegistry == null) {
             self::$_blUseRegistry = false;
             if (class_exists('Registry')) {
                 $oConf = Registry::getConfig();

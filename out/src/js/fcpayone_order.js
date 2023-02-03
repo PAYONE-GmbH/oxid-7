@@ -19,7 +19,7 @@ function editThisStatus( sID, sOxid ) {
 }
 
 function toggleBankaccount() {
-    if(top.basefrm.edit.document.getElementById('fcBankAccount1').style.display === 'none') {
+    if(top.basefrm.edit.document.getElementById('fcBankAccount1').style.display == 'none') {
         top.basefrm.edit.document.getElementById('fcBankAccount1').style.display = '';
         top.basefrm.edit.document.getElementById('fcBankAccount2').style.display = '';
         top.basefrm.edit.document.getElementById('fcBankAccount3').style.display = '';
@@ -41,7 +41,7 @@ function onClickCapture(oElement) {
     const sErrorMessageCapture = document.getElementById('fc_error_message_capture_greater_null').value;
     const sConfirmSure = document.getElementById('fc_confirm_message').value;
 
-    if(dCaptureAmount === 0) {
+    if(dCaptureAmount == 0) {
         alert(sErrorMessageCapture);
     } else {
         if(confirm(sConfirmSure)) {

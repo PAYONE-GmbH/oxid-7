@@ -266,7 +266,7 @@ class FcPoPaypal extends \OxidEsales\Eshop\Core\Model\BaseModel
     {
         $blReturn = (
             $aFiles &&
-                array_key_exists('logo_' . $iId, $aFiles) !== false &&
+                array_key_exists('logo_' . $iId, $aFiles) != false &&
                 $aFiles['logo_' . $iId]['error'] == 0
         );
 
