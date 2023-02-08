@@ -13,12 +13,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Controller\FrontendController;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
@@ -27,24 +33,19 @@ ini_set('error_log', 'error.log');
 
 include_once dirname(__FILE__) . "/../../../bootstrap.php";
 
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-
 /**
- * Description of FcPayOneMandateDownload
+ * Description of fcPayOneMandateDownload
  *
  * @author Robert
  */
-class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\FrontendController
+class FcPayOneMandateDownload extends FrontendController
 {
     /**
      * Helper object for dealing with different shop versions
      *
      * @var object
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * init object construction
@@ -52,7 +53,7 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
@@ -68,38 +69,39 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     }
 
     /**
-     * Redownload existing mandate from payone platform
+     * Triggers download action for mandate
      *
-     * @param $sMandateFilename
-     * @param $sOrderId
-     * @param $sPaymentId
+     * @return void
      */
-    protected function _redownloadMandate($sMandateFilename, $sOrderId, $sPaymentId)
+    protected function _fcpoMandateDownloadAction()
     {
-        $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
-        $oPayment = oxNew(Payment::class);
-        $oPayment->load($sPaymentId);
-        $sMode = $oPayment->fcpoGetOperationMode();
+        $oDb = DatabaseProvider::getDb();
+        $sQuery = $this->_fcpoGetMandateQuery();
+        $aResult = $oDb->GetRow($sQuery);
 
-        $oPORequest = oxNew(FcPoRequest::class);
-        $oPORequest->sendRequestGetFile($sOrderId, $sMandateIdentification, $sMode);
-    }
-
-    /**
-     * Returns user id which has been sent directly as param
-     * or fetch userid from other sources
-     *
-     * @return mixed
-     */
-    protected function _fcpoGetUserId()
-    {
-        $sUserId = $this->_oFcpoHelper->fcpoGetRequestParameter('uid');
-        $oUser = $this->getUser();
-        if ($oUser) {
-            $sUserId = $oUser->getId();
+        if (!is_array($aResult)) {
+            echo 'Permission denied!';
+            return;
         }
 
-        return $sUserId;
+        $sFilename = (string)$aResult[0];
+        $sOrderId = (string)$aResult[1];
+        $sPaymentId = (string)$aResult[2];
+
+        $sPath = getShopBasePath() . 'modules/fc/fcpayone/mandates/' . $sFilename;
+
+        if (!file_exists($sPath)) {
+            $this->_redownloadMandate($sFilename, $sOrderId, $sPaymentId);
+        }
+
+        if (!file_exists($sPath)) {
+            echo 'Error: File not found!';#
+            return;
+        }
+
+        header("Content-Type: application/pdf");
+        header("Content-Disposition: attachment; filename=\"{$sFilename}\"");
+        readfile($sPath);
     }
 
     /**
@@ -109,11 +111,11 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
      */
     protected function _fcpoGetMandateQuery()
     {
-        $sOrderId = $this->_oFcpoHelper->fcpoGetRequestParameter('id');
+        $sOrderId = $this->_oFcPoHelper->fcpoGetRequestParameter('id');
         $sUserId = $this->_fcpoGetUserId();
 
         $sWhere = "
-            b.oxuserid = ".DatabaseProvider::getDb()->quote($sUserId)."
+            b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
         ";
         $sOrderBy = "
             ORDER BY
@@ -121,8 +123,8 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
         ";
         if ($sOrderId) {
             $sWhere = "
-                b.oxid = ".DatabaseProvider::getDb()->quote($sOrderId)." AND
-                b.oxuserid = ".DatabaseProvider::getDb()->quote($sUserId)."
+                b.oxid = " . DatabaseProvider::getDb()->quote($sOrderId) . " AND
+                b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
             ";
             $sOrderBy = "";
         }
@@ -144,39 +146,38 @@ class FcPayOneMandateDownload extends \OxidEsales\Eshop\Application\Controller\F
     }
 
     /**
-     * Triggers download action for mandate
+     * Returns user id which has been sent directly as param
+     * or fetch userid from other sources
      *
-     * @return void
+     * @return mixed
      */
-    protected function _fcpoMandateDownloadAction()
+    protected function _fcpoGetUserId()
     {
-        $oDb = DatabaseProvider::getDb();
-        $sQuery = $this->_fcpoGetMandateQuery();
-        $aResult = $oDb->GetRow($sQuery);
-
-        if (!is_array($aResult)) {
-            echo 'Permission denied!';
-            return;
+        $sUserId = $this->_oFcPoHelper->fcpoGetRequestParameter('uid');
+        $oUser = $this->getUser();
+        if ($oUser) {
+            $sUserId = $oUser->getId();
         }
 
-        $sFilename = (string) $aResult[0];
-        $sOrderId = (string) $aResult[1];
-        $sPaymentId = (string) $aResult[2];
+        return $sUserId;
+    }
 
-        $sPath = getShopBasePath().'modules/fc/fcpayone/mandates/'.$sFilename;
+    /**
+     * Redownload existing mandate from payone platform
+     *
+     * @param $sMandateFilename
+     * @param $sOrderId
+     * @param $sPaymentId
+     */
+    protected function _redownloadMandate($sMandateFilename, $sOrderId, $sPaymentId)
+    {
+        $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
+        $oPayment = oxNew(Payment::class);
+        $oPayment->load($sPaymentId);
+        $sMode = $oPayment->fcpoGetOperationMode();
 
-        if (!file_exists($sPath)) {
-            $this->_redownloadMandate($sFilename, $sOrderId, $sPaymentId);
-        }
-
-        if (!file_exists($sPath)) {
-            echo 'Error: File not found!';#
-            return;
-        }
-
-        header("Content-Type: application/pdf");
-        header("Content-Disposition: attachment; filename=\"{$sFilename}\"");
-        readfile($sPath);
+        $oPORequest = oxNew(FcPoRequest::class);
+        $oPORequest->sendRequestGetFile($sOrderId, $sMandateIdentification, $sMode);
     }
 }
 

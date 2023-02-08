@@ -5,7 +5,8 @@
             <dt>
                 <input id="payment_{{ sPaymentID }}" type="radio" name="paymentid" value="{{ sPaymentID }}"
                        {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %}>
-                <label for="payment_{{ sPaymentID }}"><b>{{ paymentmethod.oxpayments__oxdesc.value }} {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</b></label>
+                <label for="payment_{{ sPaymentID }}"><b>{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}
+                        {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</b></label>
             </dt>
             <dd class="{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% else %}payment-option{% endif %}">
                 <input type="hidden" name="fcpo_mode_{{ sPaymentID }}"
@@ -20,50 +21,50 @@
                     </div>
                 </div>
                 <div class="form-group fcpo_sotype">
-                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_ONLINE_UEBERWEISUNG_TYPE" }) }}
-                        :</label>
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_ONLINE_UEBERWEISUNG_TYPE" }) }}:</label>
                     <div class="col-lg-9">
                         <select name="dynvalue[fcpo_sotype]"
                                 onchange="fcCheckOUType(this, '{{ oView.fcpoGetSofoShowIban() }}');return false;"
                                 class="form-control">
                             {% for oPaymentMetaData in aFcPoOnlinePaymentMetaData %}
-                                <option value="{{ oPaymentMetaData.sShortcut }}"
-                                        {% if oPaymentMetaData.blSelected %}selected{% endif %}>{{ oPaymentMetaData.sCaption }}</option>
+                            <option value="{{ oPaymentMetaData.sShortcut }}"
+                                    {% if oPaymentMetaData.blSelected %}selected{% endif %}>{{ oPaymentMetaData.sCaption }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
                 {% if oPaymentMetaData.sShortcut != 'PNT' or (oPaymentMetaData.sShortcut == 'PNT' and oView.fcpoGetSofoShowIban() == 'true') %}
-                    <div class="form-group" id="fcpo_ou_iban">
-                        <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_IBAN" }) }}:</label>
-                        <div class="col-lg-9">
-                            <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}" class="form-control"
-                                   autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_iban]"
-                                   value="{{ dynvalue.fcpo_ou_iban }}">
-                            <div id="fcpo_ou_iban_invalid" class="fcpo_check_error">
+                <div class="form-group" id="fcpo_ou_iban">
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_IBAN" }) }}:</label>
+                    <div class="col-lg-9">
+                        <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}" class="form-control"
+                               autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_iban]"
+                               value="{{ dynvalue.fcpo_ou_iban }}">
+                        <div id="fcpo_ou_iban_invalid" class="fcpo_check_error">
                                 <span class="help-block ">
                                     <ul role="alert" class="list-unstyled text-danger">
                                         <li>{{ translate({ ident: "FCPO_IBAN_INVALID" }) }}</li>
                                     </ul>
                                 </span>
-                            </div>
                         </div>
                     </div>
-                    <div class="form-group" id="fcpo_ou_bic">
-                        <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_BIC" }) }}:</label>
-                        <div class="col-lg-9">
-                            <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}" class="form-control"
-                                   autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_bic]"
-                                   value="{{ dynvalue.fcpo_ou_bic }}">
-                            <div id="fcpo_ou_bic_invalid" class="fcpo_check_error">
+                </div>
+                <div class="form-group" id="fcpo_ou_bic">
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_BIC" }) }}:</label>
+                    <div class="col-lg-9">
+                        <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}" class="form-control"
+                               autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_bic]"
+                               value="{{ dynvalue.fcpo_ou_bic }}">
+                        <div id="fcpo_ou_bic_invalid" class="fcpo_check_error">
                                 <span class="help-block ">
                                     <ul role="alert" class="list-unstyled text-danger">
                                         <li>{{ translate({ ident: "FCPO_BIC_INVALID" }) }}</li>
                                     </ul>
                                 </span>
-                            </div>
                         </div>
                     </div>
+                </div>
                 {% endif %}
                 <div class="form-group" id="fcpo_ou_blz">
                     <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_CODE" }) }}:</label>
@@ -81,8 +82,7 @@
                     </div>
                 </div>
                 <div class="form-group" id="fcpo_ou_ktonr" style="display: none;">
-                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_ACCOUNT_NUMBER" }) }}
-                        :</label>
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_BANK_ACCOUNT_NUMBER" }) }}:</label>
                     <div class="col-lg-9">
                         <input placeholder="{{ translate({ ident: "FCPO_BANK_ACCOUNT_NUMBER" }) }}" class="form-control"
                                autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_ktonr]"
@@ -101,8 +101,7 @@
                     <div class="col-lg-9">
                         <select name="dynvalue[fcpo_so_bankgrouptype_eps]" class="form-control">
                             <option value="ARZ_OVB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_OVB" %}selected{% endif %}>
-                                Volksbanken
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_OVB" %}selected{% endif %}>Volksbanken
                             </option>
                             <option value="ARZ_BAF"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_BAF" %}selected{% endif %}>Bank f&uuml;r
@@ -113,20 +112,19 @@
                                 Landes-Hypo
                             </option>
                             <option value="ARZ_VLH"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_VLH" %}selected{% endif %}>
-                                Vorarlberger Landes-Hypo
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_VLH" %}selected{% endif %}>Vorarlberger
+                                Landes-Hypo
                             </option>
                             <option value="ARZ_BCS"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_BCS" %}selected{% endif %}>Bankhaus
-                                Carl Sp&auml;ngler & Co. AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_BCS" %}selected{% endif %}>Bankhaus Carl
+                                Sp&auml;ngler & Co. AG
                             </option>
                             <option value="ARZ_HTB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_HTB" %}selected{% endif %}>Hypo
-                                Tirol
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_HTB" %}selected{% endif %}>Hypo Tirol
                             </option>
                             <option value="ARZ_HAA"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_HAA" %}selected{% endif %}>Hypo
-                                Alpe Adria
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_HAA" %}selected{% endif %}>Hypo Alpe
+                                Adria
                             </option>
                             <option value="ARZ_IKB"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "ARZ_IKB" %}selected{% endif %}>
@@ -147,39 +145,33 @@
                                 Investment
                             </option>
                             <option value="BA_AUS"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BA_AUS" %}selected{% endif %}>Bank
-                                Austria
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BA_AUS" %}selected{% endif %}>Bank Austria
                             </option>
                             <option value="BAWAG_BWG"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_BWG" %}selected{% endif %}>BAWAG
                             </option>
                             <option value="BAWAG_PSK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_PSK" %}selected{% endif %}>PSK
-                                Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_PSK" %}selected{% endif %}>PSK Bank
                             </option>
                             <option value="BAWAG_ESY"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_ESY" %}selected{% endif %}>
-                                easybank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_ESY" %}selected{% endif %}>easybank
                             </option>
                             <option value="BAWAG_SPD"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_SPD" %}selected{% endif %}>Sparda
-                                Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "BAWAG_SPD" %}selected{% endif %}>Sparda Bank
                             </option>
                             <option value="SPARDAT_EBS"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "SPARDAT_EBS" %}selected{% endif %}>
-                                Erste Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "SPARDAT_EBS" %}selected{% endif %}>Erste
+                                Bank
                             </option>
                             <option value="SPARDAT_BBL"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "SPARDAT_BBL" %}selected{% endif %}>Bank
                                 Burgenland
                             </option>
                             <option value="RAC_RAC"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "RAC_RAC" %}selected{% endif %}>
-                                Raiffeisen
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "RAC_RAC" %}selected{% endif %}>Raiffeisen
                             </option>
                             <option value="HRAC_OOS"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "HRAC_OOS" %}selected{% endif %}>Hypo
-                                Ober&ouml;sterreich
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "HRAC_OOS" %}selected{% endif %}>Hypo Ober&ouml;sterreich
                             </option>
                             <option value="HRAC_SLB"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "HRAC_SLB" %}selected{% endif %}>Hypo
@@ -190,12 +182,11 @@
                                 Steiermark
                             </option>
                             <option value="EPS_SCHEL"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SCHEL" %}selected{% endif %}>
-                                Bankhaus Schelhammer & Schattera AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SCHEL" %}selected{% endif %}>Bankhaus
+                                Schelhammer & Schattera AG
                             </option>
                             <option value="EPS_OBAG"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_OBAG" %}selected{% endif %}>
-                                Oberbank AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_OBAG" %}selected{% endif %}>Oberbank AG
                             </option>
                             <option value="EPS_SCHOELLER"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SCHOELLER" %}selected{% endif %}>
@@ -210,48 +201,46 @@
                                 Anadi Bank AG
                             </option>
                             <option value="EPS_BKS"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_BKS" %}selected{% endif %}>BKS Bank
-                                AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_BKS" %}selected{% endif %}>BKS Bank AG
                             </option>
                             <option value="EPS_BKB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_BKB" %}selected{% endif %}>Brüll
-                                Kallmus Bank AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_BKB" %}selected{% endif %}>Brüll Kallmus
+                                Bank AG
                             </option>
                             <option value="EPS_VLB"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_VLB" %}selected{% endif %}>BTV VIER
                                 LÄNDER BANK
                             </option>
                             <option value="EPS_CBGG"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_CBGG" %}selected{% endif %}>Capital
-                                Bank Grawe Gruppe AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_CBGG" %}selected{% endif %}>Capital Bank
+                                Grawe Gruppe AG
                             </option>
                             <option value="EPS_DB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_DB" %}selected{% endif %}>
-                                Dolomitenbank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_DB" %}selected{% endif %}>Dolomitenbank
                             </option>
                             <option value="EPS_NOEGB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_NOEGB" %}selected{% endif %}>HYPO
-                                NOE Gruppe Bank AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_NOEGB" %}selected{% endif %}>HYPO NOE
+                                Gruppe Bank AG
                             </option>
                             <option value="EPS_NOELB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_NOELB" %}selected{% endif %}>HYPO
-                                NOE Landesbank AG
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_NOELB" %}selected{% endif %}>HYPO NOE
+                                Landesbank AG
                             </option>
                             <option value="EPS_HBL"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_HBL" %}selected{% endif %}>
-                                HYPO-BANK BURGENLAND Aktiengesellschaft
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_HBL" %}selected{% endif %}>HYPO-BANK
+                                BURGENLAND Aktiengesellschaft
                             </option>
                             <option value="EPS_MFB"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_MFB" %}selected{% endif %}>
-                                Marchfelder Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_MFB" %}selected{% endif %}>Marchfelder
+                                Bank
                             </option>
                             <option value="EPS_SPDBW"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SPDBW" %}selected{% endif %}>Sparda
-                                Bank Wien
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SPDBW" %}selected{% endif %}>Sparda Bank
+                                Wien
                             </option>
                             <option value="EPS_SPDBA"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SPDBA" %}selected{% endif %}>
-                                SPARDA-BANK AUSTRIA
+                                    {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_SPDBA" %}selected{% endif %}>SPARDA-BANK
+                                AUSTRIA
                             </option>
                             <option value="EPS_VKB"
                                     {% if dynvalue.fcpo_so_bankgrouptype_eps == "EPS_VKB" %}selected{% endif %}>
@@ -265,35 +254,31 @@
                     <div class="col-lg-9">
                         <select name="dynvalue[fcpo_so_bankgrouptype_idl]" class="form-control">
                             <option value="ABN_AMRO_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ABN_AMRO_BANK" %}selected{% endif %}>
-                                ABN Amro
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ABN_AMRO_BANK" %}selected{% endif %}>ABN
+                                Amro
                             </option>
                             <option value="BUNQ_BANK"
                                     {% if dynvalue.fcpo_so_bankgrouptype_idl == "BUNQ_BANK" %}selected{% endif %}>Bunq
                             </option>
-                            <option value="ING_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>ING
-                                Bank
-                            </option>
                             <option value="RABOBANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>
-                                Rabobank
-                            </option>
-                            <option value="SNS_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>SNS
-                                Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>Rabobank
                             </option>
                             <option value="ASN_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>ASN
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>ASN Bank
+                            </option>
+                            <option value="SNS_BANK"
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>SNS Bank
+                            </option>
+                            <option value="TRIODOS_BANK"
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>Triodos
                                 Bank
                             </option>
                             <option value="SNS_REGIO_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>
-                                Regio Bank
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>Regio
+                                Bank
                             </option>
-                            <option value="TRIODOS_BANK"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>
-                                Triodos Bank
+                            <option value="ING_BANK"
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>ING Bank
                             </option>
                             <option value="KNAB_BANK"
                                     {% if dynvalue.fcpo_so_bankgrouptype_idl == "KNAB_BANK" %}selected{% endif %}>Knab
@@ -302,24 +287,28 @@
                                     {% if dynvalue.fcpo_so_bankgrouptype_idl == "VAN_LANSCHOT_BANKIERS" %}selected{% endif %}>
                                 van Lanschot
                             </option>
-                            <option value="MONEYOU"
-                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "MONEYOU" %}selected{% endif %}>Moneyou
-                            </option>
                             <option value="HANDELSBANKEN"
                                     {% if dynvalue.fcpo_so_bankgrouptype_idl == "HANDELSBANKEN" %}selected{% endif %}>
                                 Handelsbanken
+                            </option>
+                            <option value="FRIESLAND_BANK"
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "FRIESLAND_BANK" %}selected{% endif %}>
+                                Friesland Bank
+                            </option>
+                            <option value="REVOLUT"
+                                    {% if dynvalue.fcpo_so_bankgrouptype_idl == "REVOLUT" %}selected{% endif %}>Revolut
                             </option>
                         </select>
                     </div>
                 </div>
                 {% block checkout_payment_longdesc %}
-                    {% if paymentmethod.oxpayments__oxlongdesc.value %}
-                        <div class="alert alert-info col-lg-offset-3 desc">
-                            {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
-                        </div>
-                    {% endif %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value %}
+                <div class="alert alert-info col-lg-offset-3 desc">
+                    {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
+                </div>
+                {% endif %}
                 {% endblock %}
             </dd>
         </dl>
     </div>
-{% endif %}
+    {% endif %}

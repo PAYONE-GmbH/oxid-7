@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
@@ -11,23 +10,23 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcpoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * List of boolean config values
      *
      * @var array
      */
-    protected $_aConfBools = [];
+    protected $_aConfBools = array();
 
     /**
      * fcpoconfigexport instance
      *
      * @var object
      */
-    protected $_oFcpoConfigExport = null;
+    protected $_oFcPoConfigExport = null;
 
 
     /**
@@ -38,11 +37,23 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoConfigExport = oxNew(FcPoConfigExport::class);
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $this->_oFcPoConfigExport = oxNew(FcPoConfigExport::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sShopId = $oConfig->getShopId();
         $this->_fcpoLoadConfigs($sShopId);
+    }
+
+    /**
+     * Loads configurations of payone and make them accessable
+     *
+     * @param string $sShopId
+     * @return void
+     */
+    protected function _fcpoLoadConfigs(string $sShopId): void
+    {
+        $aConfigs = $this->_oFcPoConfigExport->fcpoGetConfig($sShopId);
+        $this->_aConfBools = $aConfigs['bools'];
     }
 
     /**
@@ -64,27 +75,16 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     {
         parent::save();
 
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $aConfBools = $this->_oFcpoHelper->fcpoGetRequestParameter("confbools");
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $aConfBools = $this->_oFcPoHelper->fcpoGetRequestParameter("confbools");
 
         if (is_array($aConfBools)) {
             foreach ($aConfBools as $sVarName => $sVarVal) {
-                $oConfig->saveShopConfVar("bool", $sVarName, (bool) $sVarVal);
+                $oConfig->saveShopConfVar("bool", $sVarName, (bool)$sVarVal);
             }
         }
 
         $sShopId = $oConfig->getShopId();
         $this->_fcpoLoadConfigs($sShopId);
-    }
-
-    /**
-     * Loads configurations of payone and make them accessable
-     *
-     * @return void
-     */
-    protected function _fcpoLoadConfigs($sShopId)
-    {
-        $aConfigs = $this->_oFcpoConfigExport->fcpoGetConfig($sShopId);
-        $this->_aConfBools = $aConfigs['bools'];
     }
 }

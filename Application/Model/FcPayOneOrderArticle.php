@@ -1,5 +1,11 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\Payment;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,39 +20,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\Base;
-
 class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
 {
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcpoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Flag for redirecting after save
      *
      * @var bool
      */
-    protected $_blIsRedirectAfterSave = null;
+    protected ?bool $_blIsRedirectAfterSave = null;
 
     /**
      * Flag for finishing order completely
+     *
      * @var bool
      */
-    protected $_blFinishingSave = true;
+    protected bool $_blFinishingSave = true;
 
     /**
      * init object construction
@@ -56,7 +56,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
@@ -65,7 +65,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      * @param bool $blFinishingSave
      * @return void
      */
-    public function fcpoSetFinishingSave($blFinishingSave)
+    public function fcpoSetFinishingSave(bool $blFinishingSave): void
     {
         $this->_blFinishingSave = $blFinishingSave;
     }
@@ -79,10 +79,10 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      *
      * @return bool
      */
-    public function save()
+    public function save(): bool
     {
         $oOrder = $this->getOrder();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
 
         # @see https://integrator.payone.de/jira/browse/OX6-87
@@ -91,8 +91,8 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         }
 
         $blUseParentOrderMethod = (
-            $blPresaveOrder == false ||
-            $oOrder->isPayOnePaymentType() == false
+            $blPresaveOrder === false ||
+            $oOrder->isPayOnePaymentType() === false
         );
 
         if ($blUseParentOrderMethod) {
@@ -106,7 +106,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         }
 
         // ordered articles
-        if (($blSave = parent::save()) && $this->isNewOrderItem() || $blBefore == false) {
+        if (($blSave = parent::save()) && $this->isNewOrderItem() || $blBefore === false) {
             if ($oConfig->getConfigParam('blUseStock')) {
                 if ($oConfig->getConfigParam('blPsBasketReservationEnabled')) {
                     $this->getSession()
@@ -128,26 +128,48 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     }
 
     /**
+     * Returns wether payone order should be pre-saved
+     *
+     * @return bool
+     */
+    protected function _fcpoGetBefore(): bool
+    {
+        $blFinishingSave = $this->_blFinishingSave;
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+
+        // evaluate answer
+        return (
+            $this->_oFcPoHelper->fcpoGetRequestParameter('fcposuccess') &&
+            $this->_oFcPoHelper->fcpoGetRequestParameter('refnr') ||
+            (
+                $blFinishingSave === true &&
+                $blPresaveOrder === true &&
+                $blReduceStockBefore === false
+            )
+        );
+    }
+
+    /**
      * Method checks conditions for reducing stock after using a redirect payment
      * It depends on settings and payment method
      *
      * @return boolean
      */
-    protected function _fcCheckReduceStockAfterRedirect()
+    protected function _fcCheckReduceStockAfterRedirect(): bool
     {
-        if (isAdmin()) {
-            return false;
-        }
+        if (isAdmin()) return false;
 
         $oOrder = $this->getOrder();
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $sPaymentId = $oBasket->getPaymentId();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
         $blIsRedirectAfterSave = $this->_isRedirectAfterSave($oOrder);
-        $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
 
         $blReturn = false;
         if (!$blIsRedirectPayment) {
@@ -160,20 +182,22 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     }
 
     /**
-     * Returns true if this request is the return to the shop from a payment provider where the user has been redirected to
+     * Returns true if this request is the return to the shop from a payment provider where the user has been
+     * redirected to
      *
+     * @param Order $oOrder
      * @return bool
      */
-    protected function _isRedirectAfterSave($oOrder)
+    protected function _isRedirectAfterSave(Order $oOrder): bool
     {
-        if ($this->_blIsRedirectAfterSave == null) {
+        if ($this->_blIsRedirectAfterSave === null) {
             $this->_blIsRedirectAfterSave = false;
-            $sSuccess = $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess');
-            $sRefNr = $this->_oFcpoHelper->fcpoGetRequestParameter('refnr');
+            $sSuccess = $this->_oFcPoHelper->fcpoGetRequestParameter('fcposuccess');
+            $sRefNr = $this->_oFcPoHelper->fcpoGetRequestParameter('refnr');
             $sTxid =
                 ($oOrder->oxorder__fcpotxid->value) ?
                     $oOrder->oxorder__fcpotxid->value :
-                    $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid');
+                    $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoTxid');
 
             $blUseRedirectAfterSave = (
                 $sSuccess && $sRefNr && $sTxid
@@ -191,29 +215,29 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      * Deletes order article object. If deletion succeded - updates
      * article stock information. Returns deletion status
      *
-     * @param string $sOXID Article id
+     * @param string|null $sOXID Article id
      *
      * @return bool
      */
     public function delete($sOXID = null)
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $sPaymentId = $oBasket->getPaymentId();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
         if ($sPaymentId) {
             $oPayment = oxNew(Payment::class);
             $oPayment->load($sPaymentId);
-            if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) == false) {
+            if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) === false) {
                 return parent::delete($sOXID);
             }
         }
 
         $blDelete = $this->_fcpoProcessBaseDelete($sOXID);
         if ($blDelete) {
-            $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
-            if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore != false) {
+            $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+            if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore !== false) {
                 $this->updateArticleStock($this->oxorderarticles__oxamount->value, $oConfig->getConfigParam('blAllowNegativeStock'));
             }
         }
@@ -222,57 +246,32 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     }
 
     /**
-     * Processes the base version fo delete method and returns its result
-     *
-     * @param  string $sOXID
-     * @return mixed
-     */
-    protected function _fcpoProcessBaseDelete($sOXID)
-    {
-        return Base::delete($sOXID);
-    }
-
-    /**
-     * Returns wether payone order should be pre-saved
-     *
-     * @return bool
-     */
-    protected function _fcpoGetBefore()
-    {
-        $blFinishingSave = $this->_blFinishingSave;
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
-        $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
-
-        // evaluate answer
-        $blBefore = (
-            $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
-            $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') ||
-            (
-                $blFinishingSave == true &&
-                $blPresaveOrder == true &&
-                $blReduceStockBefore == false
-            )
-        );
-
-        return $blBefore;
-    }
-
-    /**
      * Returns wether given paymentid is of payone type
      *
-     * @param  string $sId
-     * @param  bool   $blIFrame
+     * @param string $sId
+     * @param bool   $blIFrame
      * @return bool
      */
-    protected function _fcpoIsPayonePaymentType($sId, $blIFrame = false)
+    protected function _fcpoIsPayonePaymentType(string $sId, bool $blIFrame = false): bool
     {
         if ($blIFrame) {
-            $blReturn = FcPayOnePayment::fcIsPayOnePaymentType($sId);
+            $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
         } else {
-            $blReturn = FcPayOnePayment::fcIsPayOneIframePaymentType($sId);
+            $blReturn = fcPayOnePayment::fcIsPayOneIframePaymentType($sId);
         }
 
         return $blReturn;
     }
+
+    /**
+     * Processes the base version fo delete method and returns its result
+     *
+     * @param string $sOXID
+     * @return mixed
+     */
+    protected function _fcpoProcessBaseDelete(string $sOXID): mixed
+    {
+        return parent::delete($sOXID);
+    }
+
 }

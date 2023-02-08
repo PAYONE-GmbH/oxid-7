@@ -46,9 +46,9 @@
                 scope: 'profile payments:widget payments:shipping_address payments:billing_address',
                 amazonOrderReferenceId: '{{ oViewConf.fcpoGetAmazonPayReferenceId() }}',
                 onPaymentSelect: function (orderReference) {
-                    console.log('triggered onPaymentSelect');
-                    $("[id^=paymentNextStep]").each(function () {
-                        $(this).attr("disabled", true);
+                    var paymentNextStep = $("button[id^=paymentNextStep]");
+                    paymentNextStep.each(function () {
+                        this.setAttribute('disabled', true);
                     });
 
                     var formParams = '{"fcpoAmazonReferenceId":"{{ oViewConf.fcpoGetAmazonPayReferenceId() }}"}';
@@ -59,8 +59,8 @@
                         dataType: 'text',
                         data: {paymentid: "fcpoamazonpay", action: "get_amazon_reference_details", params: formParams},
                         success: function (Response) {
-                            $("[id^=paymentNextStep]").each(function () {
-                                $(this).attr("disabled", false);
+                            paymentNextStep.each(function () {
+                                this.removeAttribute('disabled');
                             });
                         }
                     });
@@ -79,6 +79,7 @@
         <a href="{{ seo_url({ ident: oViewConf.getOrderLink() }) }}" class="prevStep submitButton largeButton"
            id="paymentBackStepBottom">{{ translate({ ident: "PREVIOUS_STEP" }) }}</a>
         <button type="submit" disabled name="userform" class="submitButton nextStep largeButton"
-                id="paymentNextStepBottom">{{ translate({ ident: "CONTINUE_TO_NEXT_STEP" }) }}</button>
+                id="paymentNextStepBottom">{{ translate({ ident: "CONTINUE_TO_NEXT_STEP" }) }}
+        </button>
     </div>
 </form>

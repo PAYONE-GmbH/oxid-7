@@ -1,3 +1,3 @@
 <?php
 
-include_once('lib/OxidTestCaseCompatibilityWrapper.php');
+include_once(__DIR__ . '/lib/OxidTestCaseCompatibilityWrapper.php');

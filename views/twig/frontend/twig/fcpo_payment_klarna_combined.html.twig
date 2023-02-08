@@ -3,7 +3,7 @@
     <dt>
         <input id="payment_klarna_combined" type="radio" name="paymentid" value="{{ sPaymentID }}"
                {% if oView.fcpoIsKlarnaCombined(checkedPaymentId) %}checked{% endif %}>
-        <label for="payment_klarna_combined"><b>Klarna</b></label>
+        <label for="payment_klarna_combined"><b>{{ translate({ ident: "FCPO_KLARNA" }) }}</b></label>
     </dt>
     <div class="hidden">
         <input type="hidden" id="fcpo_klarna_auth_token" name="dynvalue[klarna_authorization_token]">
@@ -11,58 +11,58 @@
     </div>
     <dd class="{% if oView.fcpoIsKlarnaCombined(checkedPaymentId) %}activePayment{% endif %}">
         {% if oView.fcpoKlarnaIsBirthdayNeeded() %}
-            <div class="form-group">
-                <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_BIRTHDAY" }) }}</label>
-                <div class="col-lg-3">
-                    <input class="form-control" placeholder="DD" autocomplete="off" type="text" size="3" maxlength="2"
-                           name="dynvalue[fcpo_klarna_birthday][day]">
-                </div>
-                <div class="col-lg-3">
-                    <input class="form-control" placeholder="MM" autocomplete="off" type="text" size="3" maxlength="2"
-                           name="dynvalue[fcpo_klarna_birthday][month]">
-                </div>
-                <div class="col-lg-3">
-                    <input class="form-control" placeholder="YYYY" autocomplete="off" type="text" size="8" maxlength="4"
-                           name="dynvalue[fcpo_klarna_birthday][year]">
-                </div>
+        <div class="form-group">
+            <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_BIRTHDAY" }) }}</label>
+            <div class="col-lg-3">
+                <input class="form-control" placeholder="DD" autocomplete="off" type="text" size="3" maxlength="2"
+                       name="dynvalue[fcpo_klarna_birthday][day]">
             </div>
+            <div class="col-lg-3">
+                <input class="form-control" placeholder="MM" autocomplete="off" type="text" size="3" maxlength="2"
+                       name="dynvalue[fcpo_klarna_birthday][month]">
+            </div>
+            <div class="col-lg-3">
+                <input class="form-control" placeholder="YYYY" autocomplete="off" type="text" size="8" maxlength="4"
+                       name="dynvalue[fcpo_klarna_birthday][year]">
+            </div>
+        </div>
         {% endif %}
 
         {% if oView.fcpoKlarnaIsTelephoneNumberNeeded() %}
-            <div class="form-group">
-                <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_TELEPHONENUMBER" }) }}</label>
-                <div class="col-lg-9">
-                    <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64"
-                           name="dynvalue[fcpo_klarna_telephone]">
-                </div>
+        <div class="form-group">
+            <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_TELEPHONENUMBER" }) }}</label>
+            <div class="col-lg-9">
+                <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64"
+                       name="dynvalue[fcpo_klarna_telephone]">
             </div>
+        </div>
         {% endif %}
 
         {% if oView.fcpoKlarnaIsPersonalIdNeeded() %}
-            <div class="form-group">
-                <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_PERSONALID" }) }}</label>
-                <div class="col-lg-9">
-                    <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64"
-                           name="dynvalue[fcpo_klarna_personalid]">
-                </div>
+        <div class="form-group">
+            <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_KLV_PERSONALID" }) }}</label>
+            <div class="col-lg-9">
+                <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64"
+                       name="dynvalue[fcpo_klarna_personalid]">
             </div>
+        </div>
         {% endif %}
 
         <select id="klarna_payment_selector" class="form-control">
             {% if oView.fcpoPaymentActive('fcpoklarna_installments') %}
-                <option value="fcpoklarna_installments"
-                        {% if sPaymentID == 'fcpoklarna_installments' %}selected{% endif %}>Klarna Slice it
-                </option>
+            <option value="fcpoklarna_installments" {% if sPaymentID == 'fcpoklarna_installments' %}selected{% endif %}>
+                Klarna Slice it
+            </option>
             {% endif %}
             {% if oView.fcpoPaymentActive('fcpoklarna_directdebit') %}
-                <option value="fcpoklarna_directdebit"
-                        {% if sPaymentID == 'fcpoklarna_directdebit' %}selected{% endif %}>Klarna Pay now
-                </option>
+            <option value="fcpoklarna_directdebit" {% if sPaymentID == 'fcpoklarna_directdebit' %}selected{% endif %}>Klarna
+                Pay now
+            </option>
             {% endif %}
             {% if oView.fcpoPaymentActive('fcpoklarna_invoice') %}
-                <option value="fcpoklarna_invoice" {% if sPaymentID == 'fcpoklarna_invoice' %}selected{% endif %}>Klarna
-                    Pay later
-                </option>
+            <option value="fcpoklarna_invoice" {% if sPaymentID == 'fcpoklarna_invoice' %}selected{% endif %}>Klarna Pay
+                later
+            </option>
             {% endif %}
         </select>
         <br>
@@ -78,11 +78,11 @@
         <div class="clearfix"></div>
 
         {% block checkout_payment_longdesc %}
-            {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
-                <div class="alert alert-info col-lg-offset-3 desc">
-                    {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
-                </div>
-            {% endif %}
+        {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+        <div class="alert alert-info col-lg-offset-3 desc">
+            {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
+        </div>
+        {% endif %}
         {% endblock %}
     </dd>
 </dl>

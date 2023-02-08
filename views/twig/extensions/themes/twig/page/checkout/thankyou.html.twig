@@ -40,7 +40,7 @@
                 {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ order.getFcpoBanknumber() }}<br>
                 {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ order.getFcpoBiccode() }}<br>
                 {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ order.getFcpoIbannumber() }} <br>
-                {{ translate({ ident: "FCPO_EMAIL_USAGE" }) }}: {{ order.oxorder__fcpotxid.value }}
+                {{ translate({ ident: "FCPO_EMAIL_USAGE" }) }}: {{ order.oxorder__fcpotxid.value|raw }}
             </div>
         {% endif %}
     {% endif %}

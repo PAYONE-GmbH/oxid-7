@@ -1,23 +1,23 @@
-<link rel="stylesheet" type="text/css" href="{{ oViewConf.fcpoGetModuleCssPath('fcpoamazon.css') }}">
+{{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPoAmazon.css") }) }}
 
 {% if sAmazonButtonId %}
     {% set iAmzButtonIncluded = iAmzButtonIncluded+1 %}
-{% elseif not iAmzButtonIncluded %}
+    {% elseif not iAmzButtonIncluded %}
     {% set iAmzButtonIncluded = "0" %}
-{% else %}
+    {% else %}
     {% set iAmzButtonIncluded = iAmzButtonIncluded+1 %}
-{% endif %}
+    {% endif %}
 
 {% if not sAmazonButtonId %}
     {% set sAmazonButtonId = 'LoginWithAmazon' %}
-{% endif %}
+    {% endif %}
 
 {{ oViewConf.fcpoSetCurrentAmazonButtonId(sAmazonButtonId) }}
 
 <div id="{{ sAmazonButtonId }}{{ iAmzButtonIncluded }}" class="{{ sAmazonButtonClass }}"></div>
 <script>
     // initialize client
-    if (typeof window.onAmazonLoginReady != 'function') {
+    if (typeof window.onAmazonLoginReady !== 'function') {
         window.onAmazonLoginReady = function () {
             amazon.Login.setClientId('{{ oViewConf.fcpoGetAmazonPayClientId() }}');
             {% if not oViewConf.fcpoAmazonLoginSessionActive() %}
@@ -27,12 +27,12 @@
     }
 
     // initialize button array
-    if (typeof window.onAmazonPaymentsReadyArray == 'undefined') {
+    if (typeof window.onAmazonPaymentsReadyArray is same as('undefined') {)
         window.onAmazonPaymentsReadyArray = [];
     }
 
     // iterate through filled array with buttons
-    if (typeof window.onAmazonPaymentsReady != 'function') {
+    if (typeof window.onAmazonPaymentsReady !== 'function') {
         window.onAmazonPaymentsReady = function () {
             window.onAmazonPaymentsReadyArray.forEach(function (callback) {
                 callback();
@@ -43,8 +43,7 @@
     // fill array with amazon pay button
     window.onAmazonPaymentsReadyArray.push(function () {
         var authRequest, loginOptions;
-        OffAmazonPayments.Button('{{ sAmazonButtonId }}{{ iAmzButtonIncluded }}',
-    '{{ oViewConf.fcpoGetAmazonPaySellerId() }}', {
+        OffAmazonPayments.Button('{{ sAmazonButtonId }}{{ iAmzButtonIncluded }}', '{{ oViewConf.fcpoGetAmazonPaySellerId() }}', {
             type: '{{ oViewConf.fcpoGetAmazonPayButtonType() }}',
             color: '{{ oViewConf.fcpoGetAmazonPayButtonColor() }}',
             language: 'none',
@@ -62,4 +61,4 @@
 </script>
 {% if oViewConf.fcpoGetAllowIncludeAmazonWidgetUrl() %}
     <script async="async" src='{{ oViewConf.fcpoGetAmazonWidgetsUrl() }}'></script>
-{% endif %}
+    {% endif %}

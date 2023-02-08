@@ -1,5 +1,11 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Order;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,17 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Order;
-
 class FcPayOneOrder extends FcPayOneAdminDetails
 {
 
@@ -41,6 +40,13 @@ class FcPayOneOrder extends FcPayOneAdminDetails
      * @var array
      */
     protected $_aStatus = null;
+
+    /**
+     * Holds the authorization method
+     *
+     * @var array
+     */
+    protected $_sAuthorizationMethod = null;
 
     /**
      * Holds prefix of request message to be able to translate right
@@ -73,40 +79,22 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     public function render()
     {
         parent::render();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oCur = $oConfig->getActShopCurrencyObject();
+        $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
 
-        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
-
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
             // load object
             $oOrder->load($sOxid);
             $this->_aViewData["edit"] = $oOrder;
+            $this->_aViewData["oShadowBasket"] = $oOrder->fcpoGetShadowBasket(true);
         }
 
-        $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
+        $this->_aViewData['sHelpURL'] = $this->_oFcPoHelper->fcpoGetHelpUrl();
+        $this->_aViewData['currency'] = $oCur;
 
         return $this->_sThisTemplate;
-    }
-
-    /**
-     * Returns the current status oxid
-     *
-     * @params void
-     * @return mixed
-     */
-    public function fcpoGetStatusOxid()
-    {
-        if (!$this->_sStatusOxid) {
-            $sStatusOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("status_oxid");
-            if ($sStatusOxid) {
-                $this->_sStatusOxid = $sStatusOxid;
-            } else {
-                $this->_sStatusOxid = '-1';
-            }
-        }
-
-
-        return $this->_sStatusOxid;
     }
 
     /**
@@ -119,10 +107,10 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     {
         $oReturn = false;
         $sStatusOxid = $this->fcpoGetStatusOxid();
-        $sOrderOxid = $this->_oFcpoHelper->fcpoGetRequestParameter('oxid');
+        $sOrderOxid = $this->_oFcPoHelper->fcpoGetRequestParameter('oxid');
 
         if ($sStatusOxid && $sOrderOxid) {
-            $oOrder = $this->fcpoGetInstance('oxOrder');
+            $oOrder = $this->fcpoGetInstance(Order::class);
             $oTransactionStatus = $this->fcpoGetInstance(FcPoTransactionStatus::class);
 
             $oOrder->load($sOrderOxid);
@@ -138,6 +126,116 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     }
 
     /**
+     * Returns the current status oxid
+     *
+     * @params void
+     * @return mixed
+     */
+    public function fcpoGetStatusOxid()
+    {
+        if ($this->_sStatusOxid === '' || $this->_sStatusOxid === '0') {
+            $sStatusOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("status_oxid");
+            $this->_sStatusOxid = $sStatusOxid ? $sStatusOxid : '-1';
+        }
+
+
+        return $this->_sStatusOxid;
+    }
+
+    /**
+     * Returns the payment request method Auth/Preauthorization
+     *
+     * @return string
+     */
+    public function getAuthorizationMethod()
+    {
+        if (!$this->_sAuthorizationMethod) {
+            $this->_sAuthorizationMethod = '';
+            $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
+            if ($sOxid != "-1" && isset($sOxid)) {
+                $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
+                $oOrder->load($sOxid);
+            }
+
+            if ($oOrder) {
+                $this->_sAuthorizationMethod = $oOrder->getAuthorizationMethod();
+            }
+        }
+
+        return $this->_sAuthorizationMethod;
+    }
+
+    /**
+     * Returns formatted/sorted txstatus entries
+     *
+     * @return array{capture: array<int, array{oxid: mixed, date: mixed, amount: mixed}>, debit: array<int, array{oxid:
+     *                        mixed, date: mixed, amount: mixed}>, paid: array<int, array{oxid: mixed, date: mixed,
+     *                        amount: mixed}>, totalCapture: float|int, totalDebit: float|int, totalBalance: mixed}
+     */
+    public function getCaptureDebitEntries(): array
+    {
+        $aEntries = array(
+            'capture' => array(),
+            'debit' => array(),
+            'paid' => array(),
+            'totalCapture' => 0,
+            'totalDebit' => 0,
+            'totalBalance' => 0
+        );
+
+        $dLastReceivable = 0.0;
+        $dLastPayment = 0.0;
+        foreach ($this->getStatus() as $oStatus) {
+            $dReceivable = $oStatus->fcpotransactionstatus__fcpo_receivable->value;
+            $dPayment = $oStatus->fcpotransactionstatus__fcpo_receivable->value - $oStatus->fcpotransactionstatus__fcpo_balance->value;
+
+            if ($dLastPayment !== $dPayment) {
+                $dPaymentAmount = $dPayment - $dLastPayment;
+            } else {
+                $dPaymentAmount = $oStatus->fcpotransactionstatus__fcpo_receivable->value;
+            }
+
+            if ($oStatus->fcpotransactionstatus__fcpo_txaction->value == 'capture') {
+                $aEntries['capture'][] = [
+                    'oxid' => $oStatus->fcpotransactionstatus__oxid->value,
+                    'date' => $oStatus->fcpotransactionstatus__fcpo_txtime->value,
+                    'amount' => $dPaymentAmount,
+                ];
+                $aEntries['totalCapture'] += $dPaymentAmount;
+
+                $dLastReceivable = $dReceivable;
+                $dLastPayment = $dPayment;
+
+                $aEntries['totalBalance'] = $dLastReceivable;
+            } elseif ($oStatus->fcpotransactionstatus__fcpo_txaction->value == 'debit') {
+                $aEntries['debit'][] = [
+                    'oxid' => $oStatus->fcpotransactionstatus__oxid->value,
+                    'date' => $oStatus->fcpotransactionstatus__fcpo_txtime->value,
+                    'amount' => $dPaymentAmount,
+                ];
+                $aEntries['totalDebit'] += $dPaymentAmount;
+
+                $dLastReceivable = $dReceivable;
+                $dLastPayment = $dPayment;
+
+                $aEntries['totalBalance'] = $dLastReceivable;
+            } elseif ($oStatus->fcpotransactionstatus__fcpo_txaction->value == 'paid') {
+                $aEntries['paid'][] = [
+                    'oxid' => $oStatus->fcpotransactionstatus__oxid->value,
+                    'date' => $oStatus->fcpotransactionstatus__fcpo_txtime->value,
+                    'amount' => $dPaymentAmount,
+                ];
+
+                $dLastReceivable = $dReceivable;
+                $dLastPayment = $dPayment;
+                $aEntries['totalBalance'] = $dLastReceivable;
+            }
+        }
+
+        return $aEntries;
+    }
+
+    /**
      * Get all transaction status for the given order
      *
      * @return array
@@ -145,10 +243,10 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     public function getStatus()
     {
         if (!$this->_aStatus) {
-            $this->_aStatus = [];
-            $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+            $this->_aStatus = array();
+            $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
             if ($sOxid != "-1" && isset($sOxid)) {
-                $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
+                $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
                 $oOrder->load($sOxid);
             }
 
@@ -164,23 +262,23 @@ class FcPayOneOrder extends FcPayOneAdminDetails
      *
      * @return null
      */
-    public function capture()
+    public function capture(): void
     {
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
 
-            $blSettleAccount = $this->_oFcpoHelper->fcpoGetRequestParameter("capture_settleaccount");
-            $blSettleAccount = ($blSettleAccount == null) ? true : (bool) $blSettleAccount;
+            $blSettleAccount = $this->_oFcPoHelper->fcpoGetRequestParameter("capture_settleaccount");
+            $blSettleAccount = ($blSettleAccount === null) ? true : (bool)$blSettleAccount;
 
-            $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
 
-            $sAmount = $this->_oFcpoHelper->fcpoGetRequestParameter('capture_amount');
+            $sAmount = $this->_oFcPoHelper->fcpoGetRequestParameter('capture_amount');
             if ($sAmount) {
-                $dAmount = str_replace(',', '.', $sAmount);
+                $dAmount = str_replace(',', '.', (string)$sAmount);
                 $oResponse = $oPORequest->sendRequestCapture($oOrder, $dAmount, $blSettleAccount);
-            } elseif ($aPositions = $this->_oFcpoHelper->fcpoGetRequestParameter('capture_positions')) {
+            } elseif ($aPositions = $this->_oFcPoHelper->fcpoGetRequestParameter('capture_positions')) {
                 $dAmount = 0;
                 foreach ($aPositions as $sOrderArtKey => $aOrderArt) {
                     if ($aOrderArt['capture'] == '0') {
@@ -204,32 +302,38 @@ class FcPayOneOrder extends FcPayOneAdminDetails
      *
      * @return null
      */
-    public function debit()
+    public function debit(): void
     {
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
 
-            $sBankCountry = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_bankcountry');
-            $sBankAccount = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_bankaccount');
-            $sBankCode = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_bankcode');
-            $sBankaccountholder = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_bankaccountholder');
-            $sAmount = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_amount');
+            $sBankCountry = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcountry');
+            $sBankAccount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccount');
+            $sBankCode = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcode');
+            $sBankaccountholder = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccountholder');
+            $sAmount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_amount');
+            $sCancellationReason = $this->_oFcPoHelper->fcpoGetRequestParameter('bnpl_cancellation_reason');
 
-            $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+
+            if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpopl_secinvoice', 'fcpopl_secinstallment'))) {
+                $oPORequest->addParameter('addPayData[cancellation_reason]', $sCancellationReason);
+            }
+
             if ($sAmount) {
-                $dAmount = (double) str_replace(',', '.', $sAmount);
+                $dAmount = (double)str_replace(',', '.', (string)$sAmount);
 
                 // amount for credit entry has to be negative
                 if ($dAmount > 0) {
-                    $dAmount = (double) $dAmount * -1;
+                    $dAmount = (double)$dAmount * -1;
                 }
 
                 if ($dAmount < 0) {
                     $oResponse = $oPORequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankaccountholder);
                 }
-            } elseif ($aPositions = $this->_oFcpoHelper->fcpoGetRequestParameter('debit_positions')) {
+            } elseif ($aPositions = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_positions')) {
                 $dAmount = 0;
                 foreach ($aPositions as $sOrderArtKey => $aOrderArt) {
                     if ($aOrderArt['debit'] == '0') {
@@ -254,11 +358,11 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     public function fcpoGetMandatePdfUrl()
     {
         $sPdfUrl = '';
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
 
         if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
+            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
             $oOrder->load($sOxid);
 
             $sPdfUrl = false;
@@ -276,56 +380,32 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     }
 
     /**
-     * Trigger redownloading the mandate
-     *
-     * @param  string $sMandateFilename
-     * @return void
-     */
-    protected function _redownloadMandate($sMandateFilename)
-    {
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
-        if ($sOxid != "-1" && isset($sOxid)) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
-            $blLoaded = $oOrder->load($sOxid);
-            if ($blLoaded) {
-                $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
-
-                $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-                $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $oOrder->oxorder__fcpomode->value);
-            }
-        }
-    }
-
-    /**
      * The download of mandate
      *
-     * @param  bool $blUnitTest
-     * @return void
+     * @param bool $blUnitTest
      */
-    public function download($blUnitTest = false)
+    public function download($blUnitTest = false): void
     {
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blFCPOMandateDownload = $oConfig->getConfigParam('blFCPOMandateDownload');
 
         if ($blFCPOMandateDownload) {
-            $oOrder = $this->fcpoGetInstance("oxOrder");
+            $oOrder = $this->fcpoGetInstance(Order::class);
             $oOrder->load($sOxid);
             $sFilename = $oOrder->fcpoGetMandateFilename();
 
             if ($sFilename) {
                 $sPath = getShopBasePath() . 'modules/fc/fcpayone/mandates/' . $sFilename;
 
-                if (!$this->_oFcpoHelper->fcpoFileExists($sPath)) {
+                if (!$this->_oFcPoHelper->fcpoFileExists($sPath)) {
                     $this->_redownloadMandate($sFilename);
                 }
 
-                if ($this->_oFcpoHelper->fcpoFileExists($sPath)) {
-                    if (!$blUnitTest) {
-                        header("Content-Type: application/pdf");
-                        header("Content-Disposition: attachment; filename=\"{$sFilename}\"");
-                        readfile($sPath);
-                    }
+                if ($this->_oFcPoHelper->fcpoFileExists($sPath) && !$blUnitTest) {
+                    header("Content-Type: application/pdf");
+                    header("Content-Disposition: attachment; filename=\"{$sFilename}\"");
+                    readfile($sPath);
                 }
             }
         }
@@ -336,16 +416,37 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     }
 
     /**
+     * Trigger redownloading the mandate
+     *
+     * @param string $sMandateFilename
+     * @return void
+     */
+    protected function _redownloadMandate($sMandateFilename)
+    {
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
+        if ($sOxid != "-1" && isset($sOxid)) {
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
+            $blLoaded = $oOrder->load($sOxid);
+            if ($blLoaded) {
+                $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
+
+                $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+                $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $oOrder->oxorder__fcpomode->value);
+            }
+        }
+    }
+
+    /**
      * Returns request message if there is a relevant one
      *
      * @return string
      */
-    public function fcpoGetRequestMessage(): string
+    public function fcpoGetRequestMessage()
     {
         $sReturn = "";
 
         if ($this->_aResponse && is_array($this->_aResponse) && $this->_sResponsePrefix) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
             if ($this->_aResponse['status'] == 'APPROVED') {
                 $sReturn = '<span style="color: green;">' . $oLang->translateString($this->_sResponsePrefix . 'APPROVED', null, true) . '</span>';
             } elseif ($this->_aResponse['status'] == 'ERROR') {
@@ -355,4 +456,5 @@ class FcPayOneOrder extends FcPayOneAdminDetails
 
         return $sReturn;
     }
+
 }

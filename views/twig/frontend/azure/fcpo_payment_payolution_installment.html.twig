@@ -2,50 +2,50 @@
     <dt>
         <input id="payment_{{ sPaymentID }}" type="radio" name="paymentid" value="{{ sPaymentID }}"
                {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %}>
-        <label for="payment_{{ sPaymentID }}"><b>{{ paymentmethod.oxpayments__oxdesc.value }}</b> {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}
-        </label>
+        <label for="payment_{{ sPaymentID }}"><b>{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</b>
+            {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</label>
     </dt>
     <dd class="{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% endif %}">
         <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
-        <link href="{{ oViewConf.fcpoGetModuleCssPath('lightview.css') }}" rel="stylesheet">
-        <script src="{{ oViewConf.fcpoGetModuleJsPath('jquery-1.10.1.min.js') }}"></script>
-        <script src="{{ oViewConf.fcpoGetModuleJsPath() }}lightview/lightview.js"></script>
+        <link href="{{ oViewConf.getModuleUrl("fcpayone", "css/lightview.css") }}" rel="stylesheet">
+        <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/jquery-3.6.0.min.js") }}"></script>
+        <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/lightview/lightview.js") }}"></script>
         <div class="fcRow">
             <div class="fcCol fcCol-1">
                 <div class="content">
-                    <p id="payolution_installment_availibility_headline" class="payolution_installment_box_headline">
-                        1. {{ translate({ ident: "FCPO_PAYOLUTION_CHECK_INSTALLMENT_AVAILABILITY" }) }}</p>
-                    <p id="payolution_installment_availibility_subtitle"
-                       class="payolution_installment_box_subtitle">{{ translate({ ident: "FCPO_PAYOLUTION_BIRTHDATE" }) }}
-                        :</p>
+                    <p id="payolution_installment_availibility_headline" class="payolution_installment_box_headline">1.
+                        {{ translate({ ident: "FCPO_PAYOLUTION_CHECK_INSTALLMENT_AVAILABILITY" }) }}</p>
+                    <p id="payolution_installment_availibility_subtitle" class="payolution_installment_box_subtitle">
+                        {{ translate({ ident: "FCPO_PAYOLUTION_BIRTHDATE" }) }}:</p>
                     <p id="payolution_installment_availibility_body" class="payolution_installment_box_body">
                     <p id="payolution_installment_availibility_body" class="payolution_installment_box_body">
                         <select name="dynvalue[fcpo_payolution_installment_birthdate_day]">
                             {% for sDay in oView.fcpoGetDayRange() %}
-                                <option value="{{ sDay }}"
-                                        {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>{{ sDay }}</option>
+                            <option value="{{ sDay }}"
+                                    {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>{{ sDay }}
+                            </option>
                             {% endfor %}
                         </select>
                         &nbsp;
                         <select name="dynvalue[fcpo_payolution_installment_birthdate_month]">
                             {% for sMonth in oView.fcpoGetMonthRange() %}
-                                <option value="{{ sMonth }}"
-                                        {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>{{ sMonth }}</option>
+                            <option value="{{ sMonth }}"
+                                    {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>{{ sMonth }}
+                            </option>
                             {% endfor %}
                         </select>
                         &nbsp;
                         <select name="dynvalue[fcpo_payolution_installment_birthdate_year]">
                             {% for sYear in oView.fcpoGetYearRange() %}
-                                <option value="{{ sYear }}"
-                                        {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>{{ sYear }}</option>
+                            <option value="{{ sYear }}"
+                                    {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>{{ sYear }}
+                            </option>
                             {% endfor %}
                         </select>
                         <br>
-                        <input name="dynvalue[fcpo_payolution_installment_agreed]" value="agreed"
-                               type="checkbox">&nbsp;{{ oView.fcpoGetPoAgreementInit(sPaymentID) }} <a
-                                href='{{ oView.fcpoGetPayolutionAgreementLink() }}'
-                                class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe"
-                                data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">{{ translate({ ident: "FCPO_PAYOLUTION_AGREE" }) }}</a> {{ translate({ ident: "FCPO_PAYOLUTION_AGREEMENT_PART_2" }) }}
+                        <input name="dynvalue[fcpo_payolution_installment_agreed]" value="agreed" type="checkbox">&nbsp;{{oView.fcpoGetPoAgreementInit(sPaymentID)}}<a href='{{ oView.fcpoGetPayolutionAgreementLink() }}'
+                             class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe"
+                             data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">{{ translate({ ident: "FCPO_PAYOLUTION_AGREE" }) }}</a> {{ translate({ ident: "FCPO_PAYOLUTION_AGREEMENT_PART_2" }) }}
                     </p>
                 </div>
                 <input type="button" id="payolution_installment_check_availability" class="fcBTN-bot"
@@ -56,18 +56,18 @@
                     <div class="content">
                         <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">
                             2. {{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_SELECTION" }) }}</p>
-                        <p id="payolution_installment_calculation_headline"
-                           class="payolution_installment_box_subtitle">{{ translate({ ident: "FCPO_PAYOLUTION_SELECT_INSTALLMENT" }) }}</p>
+                        <p id="payolution_installment_calculation_headline" class="payolution_installment_box_subtitle">
+                            {{ translate({ ident: "FCPO_PAYOLUTION_SELECT_INSTALLMENT" }) }}</p>
                         <p id="payolution_installment_calculation_headline" class="payolution_installment_box_body">
-                        <p id="payolution_installment_calculation_greeter"
-                           class="payolution_message_notifiation">{{ translate({ ident: "FCPO_PAYOLUTION_PLEASE_CHECK_AVAILABLILITY" }) }}</p>
+                        <p id="payolution_installment_calculation_greeter" class="payolution_message_notifiation">
+                            {{ translate({ ident: "FCPO_PAYOLUTION_PLEASE_CHECK_AVAILABLILITY" }) }}</p>
                     </div>
                 </div>
             </div>
             <div class="fcCol fcCol-3">
                 <div class="content">
-                    <p id="payolution_installment_overview_headline" class="payolution_installment_box_headline">
-                        3. {{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_SUMMARY_AND_ACCOUNT" }) }}</p>
+                    <p id="payolution_installment_overview_headline" class="payolution_installment_box_headline">3.
+                        {{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_SUMMARY_AND_ACCOUNT" }) }}</p>
                     <p id="payolution_installment_overview_headline" class="payolution_installment_box_body">
                     <div id="payolution_installment_overview_account_info">
                         <input name="dynvalue[fcpo_payolution_installment_index]" type="hidden"
@@ -84,7 +84,8 @@
                             <tr>
                                 <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_FINANCING_SUM" }) }}</td>
                                 <td>
-                                    <span id="payolution_financing_sum">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" }) }}</span> {{ currency.sign }}
+                                    <span id="payolution_financing_sum">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" }) }}</span>
+                                    {{ currency.sign }}
                                 </td>
                             </tr>
                             <tr>
@@ -102,11 +103,11 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>
-                                    <strong>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_MONTHLY_RATES" }) }}</strong>
+                                <td><strong>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_MONTHLY_RATES" }) }}</strong>
                                 </td>
                                 <td><span id="payolution_sum_monthly_rate"
-                                          class="fcpoPayolutionAgreeRed">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" }) }}</span> {{ currency.sign }}
+                                          class="fcpoPayolutionAgreeRed">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" }) }}</span>
+                                    {{ currency.sign }}
                                 </td>
                             </tr>
                         </table>
@@ -128,9 +129,8 @@
                         </li>
                         <li>
                             <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}:</label>
-                            <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}" autocomplete="off"
-                                   type="text" size="20" maxlength="64"
-                                   name="dynvalue[fcpo_payolution_installment_iban]"
+                            <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}" autocomplete="off" type="text"
+                                   size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_iban]"
                                    value="{{ dynvalue.fcpo_payolution_installment_iban }}"
                                    onkeyup="fcHandleDebitInputs();return false;">
                             <div id="fcpo_payolution_iban_invalid" class="fcpo_check_error">
@@ -141,8 +141,8 @@
                         </li>
                         <li>
                             <label>{{ translate({ ident: "FCPO_BANK_BIC" }) }}:</label>
-                            <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}" autocomplete="off"
-                                   type="text" size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_bic]"
+                            <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}" autocomplete="off" type="text"
+                                   size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_bic]"
                                    value="{{ dynvalue.fcpo_payolution_installment_bic }}"
                                    onkeyup="fcHandleDebitInputs();return false;">
                             <div id="fcpo_payolution_bic_invalid" class="fcpo_check_error">
@@ -160,11 +160,11 @@
             </div>
         </div>
         {% block checkout_payment_longdesc %}
-            {% if paymentmethod.oxpayments__oxlongdesc.value %}
-                <div class="desc">
-                    {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
-                </div>
-            {% endif %}
+        {% if paymentmethod.oxpayments__oxlongdesc.value %}
+        <div class="desc">
+            {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
+        </div>
+        {% endif %}
         {% endblock %}
     </dd>
 </dl>

@@ -1,6 +1,6 @@
 <script>
-    let request, config;
-    config = {
+    var oFcpoRequest, oFcpoConfig;
+    oFcpoConfig = {
         fields: {
             cardpan: {
                 selector: "cardpan", // put name of your div-container here
@@ -15,7 +15,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCNumberWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCNumberHeight') }}"
                 }
-                {% endif %}
+                    {% endif %}
             },
             {% if oView.getConfigParam('blFCPOCCUseCvc') %}
             cardcvc2: {
@@ -32,7 +32,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCCVCWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCCVCHeight') }}"
                 }
-                {% endif %}
+                    {% endif %}
             },
             {% endif %}
             cardexpiremonth: {
@@ -48,7 +48,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCMonthWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCMonthHeight') }}"
                 }
-                {% endif %}
+                    {% endif %}
             },
             cardexpireyear: {
                 selector: "cardexpireyear", // put name of your div-container here
@@ -63,7 +63,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCYearWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCYearHeight') }}"
                 }
-                {% endif %}
+                    {% endif %}
             }
         },
         defaultStyle: {
@@ -78,20 +78,18 @@
         error: "errorOutput", // area to display error-messages (optional)
         {% if oView.getConfigParam('sFCPOCCErrorsLang') == "de" %}
         language: Payone.ClientApi.Language.de // Language to display error-messages
-        {% else %}
+            {% else %}
         language: Payone.ClientApi.Language.en
-        {% endif %}
-        {% endif %}
+            {% endif %}
+            {% endif %}
     };
-</script>
-{% capture assign = "fcpoCCIframes" %}
-    {% apply spaceless %}
+    {% capture name = "fcpoCCIframes" %}
         {% for oMapping in oViewConf.fcpoGetIframeMappings() %}
-            {% set sLangId = oMapping.sLangId %}
-            {% set sLangAbbr = oViewConf.fcpoGetLangAbbrById(sLangId) %}
-            Payone.ClientApi.Language.{{ sLangAbbr }}.{{ oMapping.sErrorCode }} = '{{ oMapping.sMappedMessage }}';
-        {% endfor %}
-        const iframes = fcInitCCIframes();
-    {% endapply %}
-{% endcapture %}
-{{ script({ add: fcpoCCIframes, dynamic: __oxid_include_dynamic }) }}
+        {% set sLangId = oMapping.sLangId %}
+        {% set sLangAbbr = oViewConf.fcpoGetLangAbbrById(sLangId) %}
+    Payone.ClientApi.Language.{{ sLangAbbr }}.{{ oMapping.sErrorCode }} = '{{ oMapping.sMappedMessage }}';
+    {% endfor %}
+    var oFcpoIframes = fcInitCCIframes();
+    {% endcapture %}
+        {{ script({ add: smarty.capture.fcpoCCIframes, dynamic: __oxid_include_dynamic }) }}
+</script>

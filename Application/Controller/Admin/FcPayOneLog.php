@@ -1,5 +1,11 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Order;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,17 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Order;
-
 class FcPayOneLog extends FcPayOneAdminDetails
 {
 
@@ -50,33 +49,6 @@ class FcPayOneLog extends FcPayOneAdminDetails
      */
     protected $_aResponse = null;
 
-
-    /**
-     * Loads selected transactions status, passes
-     * it's data to Smarty engine and returns name of template file
-     * "fcpayone_log.tpl".
-     *
-     * @return string
-     */
-    public function render()
-    {
-        parent::render();
-
-        $oLogEntry = oxNew(FcPoTransactionStatus::class);
-
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
-        if ($sOxid != "-1" && isset($sOxid)) {
-            // load object
-            $oLogEntry->load($sOxid);
-            $this->_aViewData["edit"] = $oLogEntry;
-        }
-
-        $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
-
-        return $this->_sThisTemplate;
-    }
-
-
     /**
      * Get all transaction status for the given order
      *
@@ -87,9 +59,9 @@ class FcPayOneLog extends FcPayOneAdminDetails
     public function getStatus($oOrder)
     {
         if (!$this->_aStatus) {
-            $oDb = $this->_oFcpoHelper->fcpoGetDb();
+            $oDb = $this->_oFcPoHelper->fcpoGetDb();
             $aRows = $oDb->getAll("SELECT oxid FROM fcpotransactionstatus WHERE fcpo_txid = '{$oOrder->oxorder__fcpotxid->value}' ORDER BY oxid ASC");
-            $aStatus = [];
+            $aStatus = array();
             foreach ($aRows as $aRow) {
                 $oTransactionStatus = oxNew(FcPoTransactionStatus::class);
                 $oTransactionStatus->load($aRow[0]);
@@ -100,28 +72,26 @@ class FcPayOneLog extends FcPayOneAdminDetails
         return $this->_aStatus;
     }
 
-
     /**
      * Triggers capture request to PAYONE API and displays the result
      *
      * @return null
      */
-    public function capture()
+    public function capture(): void
     {
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
             $oOrder = oxNew(Order::class);
             $oOrder->load($sOxid);
 
-            $dAmount = $this->_oFcpoHelper->fcpoGetRequestParameter('capture_amount');
+            $dAmount = $this->_oFcPoHelper->fcpoGetRequestParameter('capture_amount');
             if ($dAmount && $dAmount > 0) {
-                $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+                $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
                 $oResponse = $oPORequest->sendRequestCapture($oOrder, $dAmount);
                 $this->_aResponse = $oResponse;
             }
         }
     }
-
 
     /**
      * Returns capture message if there is a relevant one
@@ -133,11 +103,11 @@ class FcPayOneLog extends FcPayOneAdminDetails
         $sReturn = "";
 
         if ($this->_aResponse) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
             if ($this->_aResponse['status'] == 'APPROVED') {
-                $sReturn = '<span style="color: green;">'.$oLang->translateString('FCPO_CAPTURE_APPROVED', null, true).'</span>';
+                $sReturn = '<span style="color: green;">' . $oLang->translateString('FCPO_CAPTURE_APPROVED', null, true) . '</span>';
             } elseif ($this->_aResponse['status'] == 'ERROR') {
-                $sReturn = '<span style="color: red;">'.$oLang->translateString('FCPO_CAPTURE_ERROR', null, true).$this->_aResponse['errormessage'].'</span>';
+                $sReturn = '<span style="color: red;">' . $oLang->translateString('FCPO_CAPTURE_ERROR', null, true) . $this->_aResponse['errormessage'] . '</span>';
             }
         }
 
@@ -146,19 +116,18 @@ class FcPayOneLog extends FcPayOneAdminDetails
 
     /**
      * Triggering forward redirects of current status message
-     *
-     * @return void
      */
-    public function fcpoTriggerForwardRedirects()
+    public function fcpoTriggerForwardRedirects(): void
     {
-        $sStatusmessageId = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sStatusmessageId = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if (!$sStatusmessageId || $sStatusmessageId == -1) {
             return;
         }
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sPortalKey = $oConfig->getConfigParam('sFCPOPortalKey');
-        $sKey = md5($sPortalKey);
+        $sKey = md5((string)$sPortalKey);
 
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sSslShopUrl = $oConfig->getSslShopUrl();
 
@@ -187,11 +156,36 @@ class FcPayOneLog extends FcPayOneAdminDetails
         $sParams = '';
         if (is_array($mValue)) {
             foreach ($mValue as $sKey2 => $mValue2) {
-                $sParams .= $this->_addParam($sKey.'['.$sKey2.']', $mValue2);
+                $sParams .= $this->_addParam($sKey . '[' . $sKey2 . ']', $mValue2);
             }
         } else {
-            $sParams .= "&".$sKey."=".urlencode($mValue);
+            $sParams .= "&" . $sKey . "=" . urlencode((string)$mValue);
         }
         return $sParams;
+    }
+
+    /**
+     * Loads selected transactions status, passes
+     * it's data to Smarty engine and returns name of template file
+     * "fcpayone_log.tpl".
+     *
+     * @return string
+     */
+    public function render()
+    {
+        parent::render();
+
+        $oLogEntry = oxNew(FcPoTransactionStatus::class);
+
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
+        if ($sOxid != "-1" && isset($sOxid)) {
+            // load object
+            $oLogEntry->load($sOxid);
+            $this->_aViewData["edit"] = $oLogEntry;
+        }
+
+        $this->_aViewData['sHelpURL'] = $this->_oFcPoHelper->fcpoGetHelpUrl();
+
+        return $this->_sThisTemplate;
     }
 }

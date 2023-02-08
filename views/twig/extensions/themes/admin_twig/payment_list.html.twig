@@ -1,4 +1,5 @@
 {% extends 'payment_list.html.twig' %}
+
 {% block admin_payment_list_filter %}
     <td valign="top" class="listfilter first" align="right">
         <div class="r1">
@@ -24,7 +25,8 @@
                 <!-- FCPAYONE BEGIN -->
                 | {{ translate({ ident: "FCPO_ONLY_PAYONE" }) }} <input class="listedit" onchange="this.form.submit();"
                                                                         type="checkbox"
-                                                                        name="where[oxpayments][fcpoispayone]" value='1'
+                                                                        name="where[oxpayments][fcpoispayone]"
+                                                                        value='1'
                                                                         {% if where.oxpayments.fcpoispayone == 1 %}checked{% endif %}>
                 <!-- FCPAYONE END -->
             </div>

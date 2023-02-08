@@ -2,7 +2,7 @@
 
 {% block base_style %}
     {{ parent() }}
-    {{ style({ include: oViewConf.fcpoGetModuleCssPath('fcpoamazon.css') }) }}
+    {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPoAmazon.css") }) }}
 {% endblock %}
 
 {% block base_js %}
@@ -11,5 +11,6 @@
         var payoneAjaxControllerUrl = '{{ oViewConf.fcpoGetAjaxControllerUrl() }}';
     {% endcapture %}
     {{ script({ add: sPayoneBaseUrl, dynamic: __oxid_include_dynamic }) }}
-    {{ script({ include: oViewConf.fcpoGetModuleJsPath('fcPayOne.js'), dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/fcPayOne.js"), dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.fcpoGetApplePayLibraryUrl(), dynamic: __oxid_include_dynamic }) }}
 {% endblock %}

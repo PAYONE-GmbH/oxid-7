@@ -7,14 +7,10 @@
     {% if oView.fcpoGetPayPalExpressPic() %}
         <form autocomplete="off" action="{{ oViewConf.getSslSelfLink() }}" method="post">
             {{ oViewConf.getHiddenSid()|raw }}
-            <input type="hidden" name="cl" value="basket">
+            <input type="hidden" name="cl" value="Basket">
             <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
             <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
         </form>
-    {% endif %}
-
-    {% if oViewConf.fcpoCanDisplayPaydirektExpressButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_paydirekt_express_button.html.twig" %}
     {% endif %}
 
     {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
@@ -27,14 +23,10 @@
     {% if oView.fcpoGetPayPalExpressPic() %}
         <form autocomplete="off" action="{{ oViewConf.getSslSelfLink() }}" method="post">
             {{ oViewConf.getHiddenSid()|raw }}
-            <input type="hidden" name="cl" value="basket">
+            <input type="hidden" name="cl" value="Basket">
             <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
             <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
         </form>
-    {% endif %}
-
-    {% if oViewConf.fcpoCanDisplayPaydirektExpressButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_paydirekt_express_button.html.twig" %}
     {% endif %}
 
     {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
@@ -45,11 +37,7 @@
 {% block checkout_basket_errors %}
     {% set iPayError = oViewConf.fcpoGetPaymentError() %}
     {% if iPayError == -20 %}
-        {% if attribute(oViewConf, 'getActiveTheme') is defined and oViewConf.getActiveTheme() == 'flow' %}
-            <div class="alert alert-danger">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
-        {% else %}
-            <div class="status error">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
-        {% endif %}
+        <div class="alert alert-danger">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
     {% endif %}
     {{ parent() }}
 {% endblock %}

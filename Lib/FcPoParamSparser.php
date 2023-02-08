@@ -1,5 +1,10 @@
 <?php
 
+namespace Fatchip\PayOne\Lib;
+
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Core\ViewConfig;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,18 +25,14 @@
  * @version   OXID eShop CE
  * @link      http://www.payone.de
  */
-
-namespace Fatchip\PayOne\Lib;
-
-use OxidEsales\Eshop\Application\Model\Address;
-use OxidEsales\Eshop\Core\ViewConfig;
-
-class FcPoParamSparser
+class FcPoParamsParser
 {
     /**
+     * Database object
+     *
      * @var FcPoHelper
      */
-    protected $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * @var null
@@ -43,7 +44,7 @@ class FcPoParamSparser
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
@@ -53,7 +54,7 @@ class FcPoParamSparser
      */
     public function fcpoGetKlarnaWidgetJS($sClientToken, $sParamsJson)
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
 
@@ -73,7 +74,7 @@ class FcPoParamSparser
         $aOrder = $this->_fcpoGetKlarnaOrderParams();
 
 
-        $aKlarnaWidgetSearch = [
+        $aKlarnaWidgetSearch = array(
             '%%TOKEN%%',
             '%%PAYMENT_CONTAINER_ID%%',
             '%%PAYMENT_CATEGORY%%',
@@ -83,9 +84,9 @@ class FcPoParamSparser
             '%%KLARNA_PURCHASE%%',
             '%%KLARNA_ORDERLINES%%',
             '%%KLARNA_ORDER%%',
-        ];
+        );
 
-        $aKlarnaWidgetReplace = [
+        $aKlarnaWidgetReplace = array(
             $sClientToken,
             $aParams['payment_container_id'],
             $aParams['payment_category'],
@@ -95,12 +96,70 @@ class FcPoParamSparser
             json_encode($aPurchase, JSON_UNESCAPED_UNICODE),
             json_encode($aOrderlines, JSON_UNESCAPED_UNICODE),
             json_encode($aOrder, JSON_UNESCAPED_UNICODE),
-        ];
+        );
 
         $sKlarnaWidgetJS = file_get_contents($this->_fcpoGetKlarnaWidgetPath());
         $sKlarnaWidgetJS = str_replace($aKlarnaWidgetSearch, $aKlarnaWidgetReplace, $sKlarnaWidgetJS);
 
-        return (string) $sKlarnaWidgetJS;
+        return (string)$sKlarnaWidgetJS;
+    }
+
+    /**
+     * Returns customer params for klarna widget
+     *
+     * @return array
+     */
+    protected function _fcpoGetKlarnaCustomerParams()
+    {
+        $oUser = $this->_fcpoGetUser();
+        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+
+        return array(
+            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
+            'gender' => $sGender,
+            'national_identification_number' => $oUser->oxuser__fcpopersonalid->value,
+        );
+    }
+
+    /**
+     * Returns user object of current logged in user
+     *
+     * @return mixed
+     */
+    protected function _fcpoGetUser()
+    {
+        if ($this->_oUser === null) {
+            $oSession = $this->_oFcPoHelper->fcpoGetSession();
+            $oBasket = $oSession->getBasket();
+            $this->_oUser = $oBasket->getUser();
+        }
+
+        return $this->_oUser;
+    }
+
+    /**
+     * Returns customer billing address params for klarna widget
+     *
+     * @return array
+     */
+    protected function _fcpoGetKlarnaBillingParams()
+    {
+        $oUser = $this->_fcpoGetUser();
+
+        return array(
+            'given_name' => $oUser->oxuser__oxfname->value,
+            'family_name' => $oUser->oxuser__oxlname->value,
+            'email' => $oUser->oxuser__oxusername->value,
+            'title' => $this->fcpoGetTitle(),
+            'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
+            'street_address2' => $oUser->oxuser__oxaddinfo->value,
+            'postal_code' => $oUser->oxuser__oxzip->value,
+            'city' => $oUser->oxuser__oxcity->value,
+            'region' => $oUser->getStateTitle(),
+            'phone' => $oUser->oxuser__oxfon->value,
+            'country' => $oUser->fcpoGetUserCountryIso(),
+            'organization_name' => $oUser->oxuser__oxcompany->value,
+        );
     }
 
     /**
@@ -110,7 +169,7 @@ class FcPoParamSparser
      */
     public function fcpoGetTitle()
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
         $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
@@ -118,128 +177,24 @@ class FcPoParamSparser
         switch ($sCountryIso2) {
             case 'AT':
             case 'DE':
-                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
                 break;
             case 'CH':
-                $sTitle = ($sGender == 'male') ? 'Herr' : 'Frau';
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
                 break;
             case 'GB':
             case 'US':
-                $sTitle = ($sGender == 'male') ? 'Mr' : 'Ms';
+                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
                 break;
             case 'DK':
             case 'FI':
             case 'SE':
             case 'NL':
             case 'NO':
-                $sTitle = ($sGender == 'male') ? 'Dhr.' : 'Mevr.';
+                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
                 break;
         }
         return $sTitle;
-    }
-
-    /**
-     * Returns and brings basket positions into appropriate form
-     *
-     * @return array
-     */
-    protected function _fcpoGetKlarnaOrderParams()
-    {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $dAmount = $oBasket->getPrice()->getBruttoPrice();
-        $dTaxAmount = $oBasket->getPrice()->getVat();
-
-        return [
-            'order_amount' => $dAmount * 100,
-            'order_tax_amount' => $dTaxAmount
-        ];
-    }
-
-    /**
-     * Returns and brings basket positions into appropriate form
-     *
-     * @return array
-     */
-    protected function _fcpoGetKlarnaOrderlinesParams()
-    {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-
-        $aOrderlines = [];
-        foreach ($oBasket->getContents() as $oBasketItem) {
-            $oArticle = $oBasketItem->getArticle();
-
-            $aOrderline = [
-                'reference' => $oArticle->oxarticles__oxartnum->value,
-                'name' =>  $oBasketItem->getTitle(),
-                'quantity' => $oBasketItem->getAmount(),
-                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() * 100,
-                'tax_rate' => $oBasketItem->getVatPercent() * 100,
-                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice() * 100 * $oBasketItem->getAmount(),
-                // 'product_url' => $oBasketItem->getLink(),
-                // 'image_url' => $oBasketItem->getIconUrl(),
-            ];
-            $aOrderlines[] = $aOrderline;
-        }
-
-        // add shipping information to order
-        // ToDO check Datatypes and Conversion
-        $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
-
-        $oDelivery = $oBasket->getCosts('oxdelivery');
-
-        $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
-        if ($sDeliveryCosts > 0) {
-            $aOrderlineShipping = [
-                'reference' => 'delivery',
-                'name' =>  'Standard Versand',
-                'quantity' => 1,
-                'unit_price' => $sDeliveryCosts * 100,
-                'tax_rate' => (string)$oDelivery->getVat() * 100,
-                'total_amount' => $sDeliveryCosts * 100,
-                // 'product_url' => $oBasketItem->getLink(),
-                // 'image_url' => $oBasketItem->getIconUrl(),
-            ];
-            $aOrderlines[] = $aOrderlineShipping;
-        }
-
-        return $aOrderlines;
-    }
-
-    /**
-     * Returns delivery costs of given basket object
-     *
-     * @param $oBasket
-     * @return object $oDelivery
-     */
-    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
-    {
-        $oDelivery = $oBasket->getCosts('oxdelivery');
-        if ($oDelivery == null) {
-            return 0.0;
-        }
-
-        return $oDelivery->getBruttoPrice();
-    }
-
-    /**
-     * Return needed data for performing authorization
-     *
-     * @return array
-     */
-    protected function _fcpoGetKlarnaPurchaseParams()
-    {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oUser = $this->_fcpoGetUser();
-        $oCur = $oConfig->getActShopCurrencyObject();
-
-        $aKlarnaData = [
-            'purchase_country' => $oUser->fcpoGetUserCountryIso(),
-            'purchase_currency' => $oCur->name,
-        ];
-
-        return $aKlarnaData;
     }
 
     /**
@@ -255,7 +210,7 @@ class FcPoParamSparser
         $blHasShipping = (!$oShippingAddress) ? false : true;
 
         if ($blHasShipping) {
-            return [
+            return array(
                 'given_name' => $oShippingAddress->oxaddress__oxfname->value,
                 'family_name' => $oShippingAddress->oxaddress__oxlname->value,
                 'email' => $oUser->oxuser__oxusername->value,
@@ -268,68 +223,10 @@ class FcPoParamSparser
                 'phone' => $oShippingAddress->oxaddress__oxfon->value,
                 'country' => $oShippingAddress->fcpoGetUserCountryIso(),
                 'organization_name' => $oShippingAddress->oxaddress__oxcompany->value
-            ];
+            );
         } else {
             return $this->_fcpoGetKlarnaBillingParams();
         }
-    }
-
-    /**
-     * Returns customer billing address params for klarna widget
-     *
-     * @return array
-     */
-    protected function _fcpoGetKlarnaBillingParams()
-    {
-        $oUser = $this->_fcpoGetUser();
-
-        return [
-            'given_name' => $oUser->oxuser__oxfname->value,
-            'family_name' => $oUser->oxuser__oxlname->value,
-            'email' => $oUser->oxuser__oxusername->value,
-            'title' => $this->fcpoGetTitle(),
-            'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
-            'street_address2' => $oUser->oxuser__oxaddinfo->value,
-            'postal_code' => $oUser->oxuser__oxzip->value,
-            'city' => $oUser->oxuser__oxcity->value,
-            'region' => $oUser->getStateTitle(),
-            'phone' => $oUser->oxuser__oxfon->value,
-            'country' => $oUser->fcpoGetUserCountryIso(),
-            'organization_name' => $oUser->oxuser__oxcompany->value,
-        ];
-    }
-
-    /**
-     * Returns customer params for klarna widget
-     *
-     * @return array
-     */
-    protected function _fcpoGetKlarnaCustomerParams()
-    {
-        $oUser = $this->_fcpoGetUser();
-        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
-
-        return [
-            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value == '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
-            'gender' => $sGender,
-            'national_identification_number' => $oUser->oxuser__fcpopersonalid->value,
-        ];
-    }
-
-    /**
-     * Returns user object of current logged in user
-     *
-     * @return mixed
-     */
-    protected function _fcpoGetUser()
-    {
-        if ($this->_oUser == null) {
-            $oSession = $this->_oFcpoHelper->fcpoGetSession();
-            $oBasket = $oSession->getBasket();
-            $this->_oUser = $oBasket->getUser();
-        }
-
-        return $this->_oUser;
     }
 
     /**
@@ -339,8 +236,8 @@ class FcPoParamSparser
      */
     protected function _fcpoGetShippingAddress()
     {
-        if (!($sAddressId = $this->_oFcpoHelper->fcpoGetRequestParameter('deladrid'))) {
-            $sAddressId = $this->_oFcpoHelper->fcpoGetSessionVariable('deladrid');
+        if (!($sAddressId = $this->_oFcPoHelper->fcpoGetRequestParameter('deladrid'))) {
+            $sAddressId = $this->_oFcPoHelper->fcpoGetSessionVariable('deladrid');
         }
 
         if (!$sAddressId) {
@@ -354,37 +251,151 @@ class FcPoParamSparser
     }
 
     /**
+     * Return needed data for performing authorization
+     *
+     * @return array
+     */
+    protected function _fcpoGetKlarnaPurchaseParams()
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oUser = $this->_fcpoGetUser();
+        $oCur = $oConfig->getActShopCurrencyObject();
+
+        $aKlarnaData = array(
+            'purchase_country' => $oUser->fcpoGetUserCountryIso(),
+            'purchase_currency' => $oCur->name,
+        );
+
+        return $aKlarnaData;
+    }
+
+    /**
+     * Returns and brings basket positions into appropriate form
+     *
+     * @return array
+     */
+    protected function _fcpoGetKlarnaOrderlinesParams()
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+
+        $aOrderlines = array();
+        foreach ($oBasket->getContents() as $oBasketItem) {
+            $oArticle = $oBasketItem->getArticle();
+
+            $aOrderline = array(
+                'reference' => $oArticle->oxarticles__oxartnum->value,
+                'name' => $oBasketItem->getTitle(),
+                'quantity' => $oBasketItem->getAmount(),
+                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() * 100,
+                'tax_rate' => $oBasketItem->getVatPercent() * 100,
+                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice() * 100 * $oBasketItem->getAmount(),
+                // 'product_url' => $oBasketItem->getLink(),
+                // 'image_url' => $oBasketItem->getIconUrl(),
+            );
+            $aOrderlines[] = $aOrderline;
+        }
+
+        // add shipping information to order
+        // ToDO check Datatypes and Conversion
+        $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
+
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+
+        $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
+        if ($sDeliveryCosts > 0) {
+            $aOrderlineShipping = array(
+                'reference' => 'delivery',
+                'name' => 'Standard Versand',
+                'quantity' => 1,
+                'unit_price' => $sDeliveryCosts * 100,
+                'tax_rate' => (string)$oDelivery->getVat() * 100,
+                'total_amount' => $sDeliveryCosts * 100,
+                // 'product_url' => $oBasketItem->getLink(),
+                // 'image_url' => $oBasketItem->getIconUrl(),
+            );
+            $aOrderlines[] = $aOrderlineShipping;
+        }
+
+        return $aOrderlines;
+    }
+
+    /**
+     * Returns delivery costs of given basket object
+     *
+     * @param $oBasket
+     * @return object $oDelivery
+     */
+    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
+    {
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+        if ($oDelivery === null) return 0.0;
+
+        return $oDelivery->getBruttoPrice();
+    }
+
+    /**
+     * Returns and brings basket positions into appropriate form
+     *
+     * @return array
+     */
+    protected function _fcpoGetKlarnaOrderParams()
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $dAmount = $oBasket->getPrice()->getBruttoPrice();
+        $dTaxAmount = $oBasket->getPrice()->getVat();
+
+        return array(
+            'order_amount' => $dAmount * 100,
+            'order_tax_amount' => $dTaxAmount
+        );
+    }
+
+    /**
+     * Returns the path to a text file with js for the klarna widget.
+     *
+     * @return string
+     */
+    protected function _fcpoGetKlarnaWidgetPath()
+    {
+        $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
+        $sPath = $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
+        return $sPath;
+    }
+
+    /**
      * Returns and brings basket positions into appropriate form
      *
      * @return array
      */
     protected function _fcpoGetKlarnaOrderdata()
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-        $aOrderData = [];
+        $aOrderData = array();
 
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
-            $aOrderData['orderlines'][] = [
+            $aOrderData['orderlines'][] = array(
                 'reference' => $oArticle->oxarticles__oxartnum->value,
-                'name' =>  $oBasketItem->getTitle(),
+                'name' => $oBasketItem->getTitle(),
                 'quantity' => $oBasketItem->getAmount(),
                 'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice(),
                 'tax_rate' => $oBasketItem->getVatPercent(),
                 'total_amount' => $oBasketItem->getPrice()->getBruttoPrice(),
                 // 'product_url' => $oBasketItem->getLink(),
                 // 'image_url' => $oBasketItem->getIconUrl(),
-            ];
+            );
         }
 
         $dAmount = $oBasket->getPrice()->getBruttoPrice();
         $dTaxAmount = $oBasket->getPrice()->getVat();
 
         $aOrderData['order_amount'] =
-            $this->_oFcpoHelper->fcpoGetCentPrice($dAmount);
+            $this->_oFcPoHelper->fcpoGetCentPrice($dAmount);
         $aOrderData['order_tax_amount'] =
-            $this->_oFcpoHelper->fcpoGetCentPrice($dTaxAmount);
+            $this->_oFcPoHelper->fcpoGetCentPrice($dTaxAmount);
 
         return $aOrderData;
     }
@@ -445,14 +456,4 @@ class FcPoParamSparser
         return $aKlarnaData;
     }
 
-    /**
-     * Returns the path to a text file with js for the klarna widget.
-     *
-     * @return string
-     */
-    protected function _fcpoGetKlarnaWidgetPath()
-    {
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject(ViewConfig::class);
-        return $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
-    }
 }

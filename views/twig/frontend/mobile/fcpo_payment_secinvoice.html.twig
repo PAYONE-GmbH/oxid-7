@@ -1,7 +1,7 @@
 <div id="paymentOption_{{ sPaymentID }}"
      class="payment-option {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}active-payment{% endif %}">
     <input id="payment_{{ sPaymentID }}" type="radio" name="paymentid" value="{{ sPaymentID }}"
-           {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked="checked"{% endif %} />
+           {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked="checked" {% endif %}/>
     <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
     <ul class="form">
         <li>

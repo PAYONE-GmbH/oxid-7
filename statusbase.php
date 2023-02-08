@@ -13,20 +13,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne;
 
 use Exception;
-use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\UtilsObject;
 
-class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPayOneTransactionStatusBase extends BaseModel
 {
+
     protected $_aShopList = null;
 
     protected $_sLogFile = 'log/fcpo_message_forwarding.log';
@@ -36,97 +37,6 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     protected $_oFcOrder = null;
 
     protected $_oUtilsObject = null;
-
-    /**
-     * Returns instance of oxUtilsObject
-     *
-     * @return |null
-     * @throws Exception
-     */
-    protected function _getUtilsObject()
-    {
-        if ($this->_oUtilsObject == null) {
-            try {
-                $this->_oUtilsObject = oxNew(UtilsObject::class);
-            } catch (Exception $e) {
-                throw $e;
-            }
-        }
-
-        return $this->_oUtilsObject;
-    }
-
-    /**
-     * Check if logging is activated by configuration
-     *
-     * @return bool
-     */
-    protected function _fcCheckLoggingAllowed()
-    {
-        $oFcpoHelper = oxNew(FcPoHelper::class);
-        $oConfig = $oFcpoHelper->fcpoGetConfig();
-        $sLogMethod =
-            $oConfig->getConfigParam('sTransactionRedirectLogging');
-
-        $blLoggingAllowed = $sLogMethod == 'all';
-
-        return $blLoggingAllowed;
-    }
-
-    /**
-     * Check and return post parameter
-     *
-     * @param  string $sKey
-     * @return string
-     */
-    public function fcGetPostParam($sKey)
-    {
-        $sReturn    = '';
-        $mValue     = filter_input(INPUT_GET, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
-        if (!$mValue) {
-            $mValue = filter_input(INPUT_POST, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
-        }
-        if ($mValue) {
-            $mValue = utf8_encode($mValue);
-            $sReturn = $mValue;
-        }
-
-        return $sReturn;
-    }
-
-    protected function _getShopList()
-    {
-        if ($this->_aShopList == null) {
-            $aShops = [];
-
-            $sQuery = "SELECT oxid FROM oxshops";
-            $aRows = DatabaseProvider::getDb()->getAll($sQuery);
-
-            foreach ($aRows as $aRow) {
-                $aShops[] = $aRow[0];
-            }
-
-            $this->_aShopList = $aShops;
-        }
-        return $this->_aShopList;
-    }
-
-    protected function _getConfigParams($sParam)
-    {
-        $oFcpoHelper = oxNew(FcPoHelper::class);
-        $oConfig = $oFcpoHelper->fcpoGetConfig();
-
-        $aShops = $this->_getShopList();
-        $aParams = [];
-        foreach ($aShops as $sShop) {
-            $mValue = $oConfig->getShopConfVar($sParam, $sShop);
-            if ($mValue) {
-                $aParams[$sShop] = $mValue;
-            }
-        }
-
-        return $aParams;
-    }
 
     /**
      * Check if key is available and valid. Throw exception if not
@@ -141,17 +51,14 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
         }
 
         $sKey = $this->fcGetPostParam('key');
-        if (!$sKey) {
+        if ($sKey === '' || $sKey === '0') {
             throw new Exception('Key missing!');
         }
 
-        $aKeys = array_merge(
-            array_values($this->_getConfigParams('sFCPOPortalKey')),
-            array_values($this->_getConfigParams('sFCPOSecinvoicePortalKey'))
-        );
+        $aKeys = [...array_values($this->_getConfigParams('sFCPOPortalKey')), ...array_values($this->_getConfigParams('sFCPOSecinvoicePortalKey')), ...array_values($this->_getConfigParams('sFCPOPLPortalKey'))];
         $blValid = false;
         foreach ($aKeys as $i => $sConfigKey) {
-            if (md5($sConfigKey) != $sKey) {
+            if (md5((string)$sConfigKey) !== $sKey) {
                 continue;
             }
             $blValid = true;
@@ -164,6 +71,61 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     }
 
     /**
+     * Check and return post parameter
+     *
+     * @param string $sKey
+     * @return string
+     */
+    public function fcGetPostParam($sKey)
+    {
+        $sReturn = '';
+        $mValue = filter_input(INPUT_GET, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
+        if (!$mValue) {
+            $mValue = filter_input(INPUT_POST, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
+        }
+        if ($mValue) {
+            $mValue = utf8_encode((string)$mValue);
+            $sReturn = $mValue;
+        }
+
+        return $sReturn;
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    protected function _getConfigParams($sParam): array
+    {
+        $aShops = $this->_getShopList();
+        $aParams = array();
+        foreach ($aShops as $aShop) {
+            $mValue = $this->_oFcPoHelper->fcpoGetConfig()->getShopConfVar($sParam, $aShop);
+            if ($mValue) {
+                $aParams[$aShop] = $mValue;
+            }
+        }
+
+        return $aParams;
+    }
+
+    protected function _getShopList()
+    {
+        if ($this->_aShopList === null) {
+            $aShops = array();
+
+            $sQuery = "SELECT oxid FROM oxshops";
+            $aRows = DatabaseProvider::getDb()->getAll($sQuery);
+
+            foreach ($aRows as $aRow) {
+                $aShops[] = $aRow[0];
+            }
+
+            $this->_aShopList = $aShops;
+        }
+        return $this->_aShopList;
+    }
+
+    /**
      * Logs exception for later analysis
      *
      * @param $sMessage
@@ -172,33 +134,9 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
     protected function _logException($sMessage)
     {
         $sBasePath = dirname(__FILE__) . "/../../../";
-        $sLogFilePath = $sBasePath.$this->_sExceptionLog;
-        $sPrefix = "[".date('Y-m-d H:i:s')."] ";
-        $sFullMessage = $sPrefix.$sMessage."\n";
-
-        $oLogFile = fopen($sLogFilePath, 'a');
-        fwrite($oLogFile, $sFullMessage);
-        fclose($oLogFile);
-    }
-
-
-    /**
-     * Logs given message if logging is activated
-     *
-     * @param $sMessage
-     * @return void
-     */
-    protected function _logForwardMessage($sMessage)
-    {
-        $blLoggingAllowed = $this->_fcCheckLoggingAllowed();
-        if (!$blLoggingAllowed) {
-            return;
-        }
-
-        $sBasePath = dirname(__FILE__) . "/../../../";
-        $sLogFilePath = $sBasePath.$this->_sLogFile;
-        $sPrefix = "[".date('Y-m-d H:i:s')."] ";
-        $sFullMessage = $sPrefix.$sMessage."\n";
+        $sLogFilePath = $sBasePath . $this->_sExceptionLog;
+        $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
+        $sFullMessage = $sPrefix . $sMessage . "\n";
 
         $oLogFile = fopen($sLogFilePath, 'a');
         fwrite($oLogFile, $sFullMessage);
@@ -217,10 +155,10 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
         $sParams = '';
         if (is_array($mValue)) {
             foreach ($mValue as $sKey2 => $mValue2) {
-                $sParams .= $this->_addParam($sKey.'['.$sKey2.']', $mValue2);
+                $sParams .= $this->_addParam($sKey . '[' . $sKey2 . ']', $mValue2);
             }
         } else {
-            $sParams .= "&".$sKey."=".urlencode($mValue);
+            $sParams .= "&" . $sKey . "=" . urlencode((string)$mValue);
         }
         return $sParams;
     }
@@ -233,10 +171,10 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
      * @return void
      * @throws
      */
-    protected function _addQueueEntries($sStatusmessageId, $sPayoneStatus=null)
+    protected function _addQueueEntries($sStatusmessageId, $sPayoneStatus = null)
     {
         try {
-            if ($sPayoneStatus == null) {
+            if ($sPayoneStatus === null) {
                 $sPayoneStatus = $this->fcGetPostParam('txaction');
             }
 
@@ -250,15 +188,48 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
 
             $aRows = DatabaseProvider::getDb()->getAll($sQuery);
 
-            $this->_logForwardMessage('Add fowardings to queue: '.print_r($aRows, true));
+            $this->_logForwardMessage('Add fowardings to queue: ' . print_r($aRows, true));
 
             foreach ($aRows as $aRow) {
-                $sForwardId = (string) $aRow[0];
+                $sForwardId = (string)$aRow[0];
                 $this->_addToQueue($sStatusmessageId, $sForwardId);
             }
         } catch (Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * Logs given message if logging is activated
+     *
+     * @param $sMessage
+     * @return void
+     */
+    protected function _logForwardMessage($sMessage)
+    {
+        $blLoggingAllowed = $this->_fcCheckLoggingAllowed();
+        if (!$blLoggingAllowed) return;
+
+        $sBasePath = dirname(__FILE__) . "/../../../";
+        $sLogFilePath = $sBasePath . $this->_sLogFile;
+        $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
+        $sFullMessage = $sPrefix . $sMessage . "\n";
+
+        $oLogFile = fopen($sLogFilePath, 'a');
+        fwrite($oLogFile, $sFullMessage);
+        fclose($oLogFile);
+    }
+
+    /**
+     * Check if logging is activated by configuration
+     */
+    protected function _fcCheckLoggingAllowed(): bool
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sLogMethod =
+            $oConfig->getConfigParam('sTransactionRedirectLogging');
+
+        return $sLogMethod == 'all';
     }
 
     /**
@@ -274,9 +245,9 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
         try {
             if ($this->_queueEntryExists($sStatusmessageId, $sForwardId)) {
                 $this->_logForwardMessage(
-                    'Entry already exitsts. Skipping. StatusmessageId: '.
-                    $sStatusmessageId.
-                    ', ForwardId: '.
+                    'Entry already exitsts. Skipping. StatusmessageId: ' .
+                    $sStatusmessageId .
+                    ', ForwardId: ' .
                     $sForwardId
                 );
                 return;
@@ -331,8 +302,27 @@ class FcPayOneTransactionStatusBase extends \OxidEsales\Eshop\Core\Model\BaseMod
                     FCSTATUSFORWARDID='{$sForwardId}'
         ";
 
-        $iRows = (int) DatabaseProvider::getDb()->getOne($sQuery);
+        $iRows = (int)DatabaseProvider::getDb()->getOne($sQuery);
 
-        return (bool) ($iRows > 0);
+        return (bool)($iRows > 0);
+    }
+
+    /**
+     * Returns instance of oxUtilsObject
+     *
+     * @return |null
+     * @throws Exception
+     */
+    protected function _getUtilsObject()
+    {
+        if ($this->_oUtilsObject === null) {
+            try {
+                $this->_oUtilsObject = oxNew(UtilsObject::class);
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+
+        return $this->_oUtilsObject;
     }
 }

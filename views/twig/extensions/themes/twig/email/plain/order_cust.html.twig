@@ -6,10 +6,10 @@
     {% else %}
         {% if payment.oxuserpayments__oxpaymentsid.value == "oxidpayadvance" %}
             {{ translate({ ident: "FCPO_EMAIL_BANK" }) }} {{ shop.oxshops__oxbankname.getRawValue() }}<br>
-            {{ translate({ ident: "FCPO_EMAIL_ROUTINGNUMBER" }) }} {{ shop.oxshops__oxbankcode.value }}<br>
-            {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ shop.oxshops__oxbanknumber.value }}<br>
-            {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ shop.oxshops__oxbiccode.value }}<br>
-            {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ shop.oxshops__oxibannumber.value }}
+            {{ translate({ ident: "FCPO_EMAIL_ROUTINGNUMBER" }) }} {{ shop.oxshops__oxbankcode.value|raw }}<br>
+            {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ shop.oxshops__oxbanknumber.value|raw }}<br>
+            {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ shop.oxshops__oxbiccode.value|raw }}<br>
+            {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ shop.oxshops__oxibannumber.value|raw }}
         {% elseif order.fcpoShowClearingData() %}
             {{ translate({ ident: "FCPO_BANKACCOUNTHOLDER" }) }} {{ order.getFcpoBankaccountholder() }}
             {{ translate({ ident: "FCPO_EMAIL_BANK" }) }} {{ order.getFcpoBankname() }}
@@ -17,12 +17,11 @@
             {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ order.getFcpoBanknumber() }}
             {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ order.getFcpoBiccode() }}
             {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ order.getFcpoIbannumber() }}
-            {{ translate({ ident: "FCPO_EMAIL_USAGE" }) }}: {{ order.oxorder__fcpotxid.value }}
+            {{ translate({ ident: "FCPO_EMAIL_USAGE" }) }}: {{ order.oxorder__fcpotxid.value|raw }}
         {% elseif payment.oxuserpayments__oxpaymentsid.value == "fcpopo_bill" or payment.oxuserpayments__oxpaymentsid.value == "fcpopo_debitnote" %}
             {{ translate({ ident: "FCPO_PAYOLUTION_EMAIL_CLEARING" }) }}: {{ smarty.session.payolution_clearing }}
         {% else %}
             {{ parent() }}
         {% endif %}
     {% endif %}
-
 {% endblock %}

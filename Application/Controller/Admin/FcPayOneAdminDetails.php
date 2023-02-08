@@ -13,14 +13,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use Fatchip\PayOne\Application\Model as PayOneModel;
+
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoForwarding;
@@ -30,6 +30,7 @@ use Fatchip\PayOne\Application\Model\FcPoPaypal;
 use Fatchip\PayOne\Application\Model\FcPoRatepay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 class FcPayOneAdminDetails extends AdminDetailsController
@@ -38,66 +39,66 @@ class FcPayOneAdminDetails extends AdminDetailsController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var FcPoHelper
+     * @var object
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Centralized Database instance
      *
-     * @var DatabaseProvider
+     * @var object
      */
-    protected $_oFcpoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
-     * FcPoConfigExport instance
+     * fcpoconfigexport instance
      *
-     * @var FcPoConfigExport
+     * @var object
      */
-    protected $_oFcpoConfigExport = null;
+    protected $_oFcPoConfigExport = null;
 
     /**
-     * FcPoPaypal instance
+     * fcpopaypal instance
      *
-     * @var FcPoPaypal
+     * @var object
      */
 
-    protected $_oFcpoPayPal = null;
-
-    /**
-     * FcPoKlarna instance
-     *
-     * @var FcPoKlarna
-     */
-    protected $_oFcpoKlarna = null;
+    protected $_oFcPoPayPal = null;
 
     /**
-     * FcPoMapping instance
+     * fcpopaypal instance
      *
-     * @var FcPoMapping
+     * @var object
      */
-    protected $_oFcpoMapping = null;
+    protected $_oFcPoKlarna = null;
 
     /**
-     * FcPoForwarding instance
+     * fcpomapping instance
      *
-     * @var FcPoForwarding
+     * @var object
      */
-    protected $_oFcpoForwarding = null;
+    protected $_oFcPoMapping = null;
 
     /**
-     * FcPoRatePay instance
+     * fcpoforwarding instance
      *
-     * @var null|FcPoRatePay
+     * @var object
      */
-    protected $_oFcpoRatePay = null;
+    protected $_oFcPoForwarding = null;
 
     /**
-     * FcPoErrorMapping instance
+     * fcporatepay instance
      *
-     * @var null|FcPoErrorMapping
+     * @var null|object
      */
-    protected $_oFcpoErrorMapping = null;
+    protected $_oFcPoRatePay = null;
+
+    /**
+     * fcpoerrormapping instance
+     *
+     * @var null|object
+     */
+    protected $_oFcPoErrorMapping = null;
 
 
     /**
@@ -106,25 +107,26 @@ class FcPayOneAdminDetails extends AdminDetailsController
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb     = DatabaseProvider::getDb();
-        $this->_oFcpoConfigExport = oxNew(PayOneModel\FcPoConfigExport::class);
-        $this->_oFcpoPayPal = oxNew(PayOneModel\FcPoPaypal::class);
-        $this->_oFcpoKlarna = oxNew(PayOneModel\FcPoKlarna::class);
-        $this->_oFcpoMapping = oxNew(PayOneModel\FcPoMapping::class);
-        $this->_oFcpoErrorMapping = oxNew(PayOneModel\FcPoErrorMapping::class);
-        $this->_oFcpoForwarding = oxNew(PayOneModel\FcPoForwarding::class);
-        $this->_oFcpoRatePay = oxNew(PayOneModel\FcPoRatePay::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoConfigExport = oxNew(FcPoConfigExport::class);
+        $this->_oFcPoPayPal = oxNew(FcPoPayPal::class);
+        $this->_oFcPoKlarna = oxNew(FcPoKlarna::class);
+        $this->_oFcPoMapping = oxNew(FcPoMapping::class);
+        $this->_oFcPoErrorMapping = oxNew(FcPoErrorMapping::class);
+        $this->_oFcPoForwarding = oxNew(FcPoForwarding::class);
+        $this->_oFcPoRatePay = oxNew(FcPoRatepay::class);
     }
 
     /**
      * Returns factory instance of given classname
      *
-     * @param  string $sClassName
+     * @param string $sClassName
      * @return object
      */
     public function fcpoGetInstance($sClassName)
     {
         return oxNew($sClassName);
     }
+
 }

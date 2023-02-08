@@ -13,12 +13,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne;
+
+use Exception;
+use OxidEsales\Eshop\Core\DatabaseProvider;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
@@ -28,79 +31,75 @@ ini_set('error_log', '../../../log/fcpoErrors.log');
 include_once dirname(__FILE__) . "/../../../bootstrap.php";
 include_once dirname(__FILE__) . "/statusbase.php";
 
-use Exception;
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-
 class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
 {
-    const STATE_STARTING = 'starting';
-    const STATE_FINISHED = 'finished';
+
+    final const STATE_STARTING = 'starting';
+    final const STATE_FINISHED = 'finished';
 
     /**
      * Map for translating database fields to call params
+     *
      * @var array
      */
-    protected $_aDbFields2Params = [
-        'FCPO_KEY'=>'key',
-        'FCPO_TXACTION'=>'txaction',
-        'FCPO_PORTALID'=>'portalid',
-        'FCPO_AID'=>'aid',
-        'FCPO_CLEARINGTYPE'=>'clearingtype',
-        'FCPO_TXTIME'=>'txtime',
-        'FCPO_CURRENCY'=>'currency',
-        'FCPO_USERID'=>'userid',
-        'FCPO_ACCESSNAME'=>'accessname',
-        'FCPO_ACCESSCODE'=>'accesscode',
-        'FCPO_PARAM'=>'param',
-        'FCPO_MODE'=>'mode',
-        'FCPO_PRICE'=>'price',
-        'FCPO_TXID'=>'txid',
-        'FCPO_REFERENCE'=>'reference',
-        'FCPO_SEQUENCENUMBER'=>'sequencenumber',
-        'FCPO_COMPANY'=>'company',
-        'FCPO_FIRSTNAME'=>'firstname',
-        'FCPO_LASTNAME'=>'lastname',
-        'FCPO_STREET'=>'street',
-        'FCPO_ZIP'=>'zip',
-        'FCPO_CITY'=>'city',
-        'FCPO_EMAIL'=>'email',
-        'FCPO_COUNTRY'=>'country',
-        'FCPO_SHIPPING_COMPANY'=>'shipping_company',
-        'FCPO_SHIPPING_FIRSTNAME'=>'shipping_firstname',
-        'FCPO_SHIPPING_LASTNAME'=>'shipping_lastname',
-        'FCPO_SHIPPING_STREET'=>'shipping_street',
-        'FCPO_SHIPPING_ZIP'=>'shipping_zip',
-        'FCPO_SHIPPING_CITY'=>'shipping_city',
-        'FCPO_SHIPPING_COUNTRY'=>'shipping_country',
-        'FCPO_BANKCOUNTRY'=>'bankcountry',
-        'FCPO_BANKACCOUNT'=>'bankaccount',
-        'FCPO_BANKCODE'=>'bankcode',
-        'FCPO_BANKACCOUNTHOLDER'=>'bankaccountholder',
-        'FCPO_CARDEXPIREDATE'=>'cardexpiredate',
-        'FCPO_CARDTYPE'=>'cardtype',
-        'FCPO_CARDPAN'=>'cardpan',
-        'FCPO_CUSTOMERID'=>'customerid',
-        'FCPO_BALANCE'=>'balance',
-        'FCPO_RECEIVABLE'=>'receivable',
-        'FCPO_CLEARING_BANKACCOUNTHOLDER'=>'clearing_bankaccountholder',
-        'FCPO_CLEARING_BANKACCOUNT'=>'clearing_bankaccount',
-        'FCPO_CLEARING_BANKCODE'=>'clearing_bankcode',
-        'FCPO_CLEARING_BANKNAME'=>'clearing_bankname',
-        'FCPO_CLEARING_BANKBIC'=>'clearing_bankbic',
-        'FCPO_CLEARING_BANKIBAN'=>'clearing_bankiban',
-        'FCPO_CLEARING_LEGALNOTE'=>'clearing_legalnote',
-        'FCPO_CLEARING_DUEDATE'=>'clearing_duedate',
-        'FCPO_CLEARING_REFERENCE'=>'clearing_reference',
-        'FCPO_CLEARING_INSTRUCTIONNOTE'=>'clearing_instructionnote',
-    ];
+    protected $_aDbFields2Params = array(
+        'FCPO_KEY' => 'key',
+        'FCPO_TXACTION' => 'txaction',
+        'FCPO_PORTALID' => 'portalid',
+        'FCPO_AID' => 'aid',
+        'FCPO_CLEARINGTYPE' => 'clearingtype',
+        'FCPO_TXTIME' => 'txtime',
+        'FCPO_CURRENCY' => 'currency',
+        'FCPO_USERID' => 'userid',
+        'FCPO_ACCESSNAME' => 'accessname',
+        'FCPO_ACCESSCODE' => 'accesscode',
+        'FCPO_PARAM' => 'param',
+        'FCPO_MODE' => 'mode',
+        'FCPO_PRICE' => 'price',
+        'FCPO_TXID' => 'txid',
+        'FCPO_REFERENCE' => 'reference',
+        'FCPO_SEQUENCENUMBER' => 'sequencenumber',
+        'FCPO_COMPANY' => 'company',
+        'FCPO_FIRSTNAME' => 'firstname',
+        'FCPO_LASTNAME' => 'lastname',
+        'FCPO_STREET' => 'street',
+        'FCPO_ZIP' => 'zip',
+        'FCPO_CITY' => 'city',
+        'FCPO_EMAIL' => 'email',
+        'FCPO_COUNTRY' => 'country',
+        'FCPO_SHIPPING_COMPANY' => 'shipping_company',
+        'FCPO_SHIPPING_FIRSTNAME' => 'shipping_firstname',
+        'FCPO_SHIPPING_LASTNAME' => 'shipping_lastname',
+        'FCPO_SHIPPING_STREET' => 'shipping_street',
+        'FCPO_SHIPPING_ZIP' => 'shipping_zip',
+        'FCPO_SHIPPING_CITY' => 'shipping_city',
+        'FCPO_SHIPPING_COUNTRY' => 'shipping_country',
+        'FCPO_BANKCOUNTRY' => 'bankcountry',
+        'FCPO_BANKACCOUNT' => 'bankaccount',
+        'FCPO_BANKCODE' => 'bankcode',
+        'FCPO_BANKACCOUNTHOLDER' => 'bankaccountholder',
+        'FCPO_CARDEXPIREDATE' => 'cardexpiredate',
+        'FCPO_CARDTYPE' => 'cardtype',
+        'FCPO_CARDPAN' => 'cardpan',
+        'FCPO_CUSTOMERID' => 'customerid',
+        'FCPO_BALANCE' => 'balance',
+        'FCPO_RECEIVABLE' => 'receivable',
+        'FCPO_CLEARING_BANKACCOUNTHOLDER' => 'clearing_bankaccountholder',
+        'FCPO_CLEARING_BANKACCOUNT' => 'clearing_bankaccount',
+        'FCPO_CLEARING_BANKCODE' => 'clearing_bankcode',
+        'FCPO_CLEARING_BANKNAME' => 'clearing_bankname',
+        'FCPO_CLEARING_BANKBIC' => 'clearing_bankbic',
+        'FCPO_CLEARING_BANKIBAN' => 'clearing_bankiban',
+        'FCPO_CLEARING_LEGALNOTE' => 'clearing_legalnote',
+        'FCPO_CLEARING_DUEDATE' => 'clearing_duedate',
+        'FCPO_CLEARING_REFERENCE' => 'clearing_reference',
+        'FCPO_CLEARING_INSTRUCTIONNOTE' => 'clearing_instructionnote',
+    );
 
     /**
      * Central handling of forward request
-     *
-     * @return void
      */
-    public function handleForwarding()
+    public function handleForwarding(): void
     {
         try {
             $this->_isJobAlreadyRunning();
@@ -112,36 +111,6 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             echo "Error occured! Please check logfile for details.\n";
             $this->_logException($e->getMessage());
             exit(1);
-        }
-    }
-
-    /**
-     * Setting current state of job
-     *
-     * @param $sState
-     * @return void
-     * @throws Exception
-     */
-    protected function _setJobState($sState)
-    {
-        try {
-            $sProcessFile = $this->_getProcessFilePath();
-            $iPid = getmypid();
-            $this->_logForwardMessage($sState.' job with PID '.$iPid);
-
-            if ($sState == self::STATE_STARTING) {
-                $oProcessFile = fopen($sProcessFile, 'w');
-                fwrite($oProcessFile, $iPid);
-                fclose($oProcessFile);
-                return;
-            }
-
-            if ($sState == self::STATE_FINISHED) {
-                unlink($sProcessFile);
-                return;
-            }
-        } catch (Exception $e) {
-            throw $e;
         }
     }
 
@@ -166,44 +135,9 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     }
 
     /**
-     * Deeply checking if former process still exists. If not processfile
-     * should be cleaned up and reported so we don't run into eternal loops.
-     * Killing processes is explicitely not done here due this should be
-     * handled by OS
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function _checkProcessExists()
-    {
-        $sProcessFile = $this->_getProcessFilePath();
-        $iPid = (int) file_get_contents($sProcessFile);
-
-        if ($iPid == 0) {
-            unlink($sProcessFile);
-            $sMessage =
-                'Processfile did not contain a valid PID! '.
-                'Deleted processfile for next run.';
-            throw new Exception($sMessage);
-        }
-
-        if (file_exists("/proc/$iPid")) {
-            throw new Exception('Cronjob already running! Abort current attempt.');
-        }
-
-        unlink($sProcessFile);
-        $sMessage =
-            'Former started process '.$iPid.' no longer exists! '.
-            'Deleted processfile for next run.';
-        throw new Exception($sMessage);
-    }
-
-    /**
      * Checking if process file exists
-     *
-     * @return bool
      */
-    protected function _checkProcessFileExists()
+    protected function _checkProcessFileExists(): bool
     {
         $sProcessFile = $this->_getProcessFilePath();
         return file_exists($sProcessFile);
@@ -216,10 +150,72 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      */
     protected function _getProcessFilePath()
     {
-        $sTmpPath = dirname(__FILE__)."/";
+        $sTmpPath = dirname(__FILE__) . "/";
         $sFile = "forwardprocess.txt";
 
-        return $sTmpPath.$sFile;
+        return $sTmpPath . $sFile;
+    }
+
+    /**
+     * Deeply checking if former process still exists. If not processfile
+     * should be cleaned up and reported so we don't run into eternal loops.
+     * Killing processes is explicitely not done here due this should be
+     * handled by OS
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function _checkProcessExists()
+    {
+        $sProcessFile = $this->_getProcessFilePath();
+        $iPid = (int)file_get_contents($sProcessFile);
+
+        if ($iPid === 0) {
+            unlink($sProcessFile);
+            $sMessage =
+                'Processfile did not contain a valid PID! Deleted processfile for next run.';
+            throw new Exception($sMessage);
+        }
+
+        if (file_exists("/proc/$iPid")) {
+            throw new Exception('Cronjob already running! Abort current attempt.');
+        }
+
+        unlink($sProcessFile);
+        $sMessage =
+            'Former started process ' . $iPid . ' no longer exists! ' .
+            'Deleted processfile for next run.';
+        throw new Exception($sMessage);
+    }
+
+    /**
+     * Setting current state of job
+     *
+     * @param $sState
+     * @return void
+     * @throws Exception
+     */
+    protected function _setJobState($sState)
+    {
+        try {
+            $sProcessFile = $this->_getProcessFilePath();
+            $iPid = getmypid();
+            $this->_logForwardMessage($sState . ' job with PID ' . $iPid);
+
+            if ($sState == self::STATE_STARTING) {
+                $oProcessFile = fopen($sProcessFile, 'w');
+                fwrite($oProcessFile, $iPid);
+                fclose($oProcessFile);
+                return;
+            }
+
+            if ($sState == self::STATE_FINISHED) {
+                unlink($sProcessFile);
+                return;
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -234,7 +230,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             $sLimitStatusmessageId =
                 $this->fcGetPostParam('statusmessageid');
 
-            if ($sLimitStatusmessageId) {
+            if ($sLimitStatusmessageId !== '' && $sLimitStatusmessageId !== '0') {
                 $this->_createMissingQueueEntries($sLimitStatusmessageId);
                 $sQueryLimitStatusmessageId =
                     " AND  FCSTATUSMESSAGEID='{$sLimitStatusmessageId}' ";
@@ -251,7 +247,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             ";
             $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
             $aRows = $oDb->getAll($sQuery);
-            $this->_logForwardMessage('Found requests to forward: '.print_r($aRows, true));
+            $this->_logForwardMessage('Found requests to forward: ' . print_r($aRows, true));
 
             foreach ($aRows as $aRow) {
                 $sQueueId = $aRow['OXID'];
@@ -266,6 +262,92 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     }
 
     /**
+     * If new redirect targets have been added for given statusmessage, create
+     * referring queue entries
+     *
+     * @param string $sStatusmessageId
+     * @return void
+     * @throws Exception
+     */
+    protected function _createMissingQueueEntries($sStatusmessageId)
+    {
+        try {
+            $aParams = $this->_fetchPostParams($sStatusmessageId);
+            $aRequest = $aParams['array'];
+            $sPayoneStatus = $aRequest['txaction'];
+            $this->_addQueueEntries($sStatusmessageId, $sPayoneStatus);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Collects request data from database and prepare result
+     *
+     * @param $sStatusmessageId
+     * @return array{string: string, array: mixed[]}
+     * @throws
+     */
+    protected function _fetchPostParams($sStatusmessageId)
+    {
+        try {
+            $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+            $sQuery = "
+                SELECT * 
+                FROM fcpotransactionstatus 
+                WHERE OXID=" . $oDb->quote($sStatusmessageId);
+
+            $aRow = $oDb->getRow($sQuery);
+            if ($aRow === false) {
+                $sExceptionMessage =
+                    'Could not find transaction status message for ID ' . $sStatusmessageId . '!';
+                throw new Exception($sExceptionMessage);
+            }
+
+            $aRequestParams = $this->_cleanParams($aRow);
+            $sParams = '';
+            foreach ($aRequestParams as $sKey => $mValue) {
+                $sParams .= $this->_addParam($sKey, $mValue);
+            }
+
+            return array(
+                'string' => $sParams,
+                'array' => $aRequestParams,
+            );
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Removes all empty params and translate db fields to corresponding
+     * call
+     *
+     * @param $aParams
+     * @return array<int|string, mixed>
+     */
+    protected function _cleanParams($aParams): array
+    {
+        $aCleanedParams = array();
+        foreach ($aParams as $sKey => $sValue) {
+            $blValid = (
+                isset($this->_aDbFields2Params[$sKey]) &&
+                $sValue != ''
+            );
+            if (!$blValid) {
+                continue;
+            }
+            if ($sKey === 'FCPO_TXTIME') {
+                $sValue = strtotime((string)$sValue);
+            }
+            $sCallKey = $this->_aDbFields2Params[$sKey];
+            $aCleanedParams[$sCallKey] = $sValue;
+        }
+
+        return $aCleanedParams;
+    }
+
+    /**
      * Forward request from queue
      *
      * @param $sQueueId
@@ -277,19 +359,18 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     protected function _forwardRequest($sQueueId, $sForwardId, $sStatusmessageId)
     {
         try {
-            $oFcpoHelper = oxNew(FcPoHelper::class);
-            $oConfig = $oFcpoHelper->fcpoGetConfig();
+            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
             $sConfTimeout = $oConfig->getConfigParam('sTransactionRedirectTimeout');
-            $iTimeout = ($sConfTimeout) ? (int) $sConfTimeout : 10;
+            $iTimeout = ($sConfTimeout) ? (int)$sConfTimeout : 10;
             $aParams = $this->_fetchPostParams($sStatusmessageId);
             $sParams = $aParams['string'];
             $aRequest = $aParams['array'];
             $aForwardData = $this->_getForwardData($sForwardId);
 
             $sUrl = $aForwardData['url'];
-            $this->_logForwardMessage('Trying to forward to url: '.$sUrl.'...');
+            $this->_logForwardMessage('Trying to forward to url: ' . $sUrl . '...');
             $this->_logForwardMessage($sParams);
-            $sParams = substr($sParams, 1);
+            $sParams = substr((string)$sParams, 1);
 
             $oCurl = curl_init($sUrl);
             curl_setopt($oCurl, CURLOPT_POST, 1);
@@ -311,6 +392,34 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     }
 
     /**
+     * Returns elementary forward data
+     *
+     * @param $sForwardId
+     * @return
+     * @throws
+     */
+    protected function _getForwardData($sForwardId): array
+    {
+        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $sQuery = "
+                SELECT 
+                    FCPO_URL,
+                    FCPO_TIMEOUT
+                FROM fcpostatusforwarding 
+                WHERE OXID=" . $oDb->quote($sForwardId);
+
+        $aRow = $oDb->getRow($sQuery);
+        if ($aRow === false) {
+            throw new Exception('Could not find forward data for ID ' . $sForwardId . '!');
+        }
+
+        return array(
+            'url' => $aRow['FCPO_URL'],
+            'timeout' => $aRow['FCPO_TIMEOUT'],
+        );
+    }
+
+    /**
      * Updates processed queue entry with current data
      *
      * @param $sQueueId
@@ -326,22 +435,22 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             $oDb = DatabaseProvider::getDb();
             $sFulfilled = ($blValidResult) ? '1' : '0';
             $sFulfilled = $oDb->quote($sFulfilled);
-            $sRequest =$oDb->quote(print_r($aRequest, true));
-            $sResponse = $oDb->quote((string) $mResult);
-            $sResponseInfo = $oDb->quote((string) print_r($mCurlInfo, true));
+            $sRequest = $oDb->quote(print_r($aRequest, true));
+            $sResponse = $oDb->quote((string)$mResult);
+            $sResponseInfo = $oDb->quote((string)print_r($mCurlInfo, true));
 
             $sQuery = "
             UPDATE fcpostatusforwardqueue
             SET 
                 FCTRIES=FCTRIES+1,
                 FCLASTTRY=NOW(),
-                FCLASTREQUEST=".$sRequest.",
-                FCLASTRESPONSE=".$sResponse.",
-                FCRESPONSEINFO=".$sResponseInfo.",
-                FCFULFILLED=".$sFulfilled."
+                FCLASTREQUEST=" . $sRequest . ",
+                FCLASTRESPONSE=" . $sResponse . ",
+                FCRESPONSEINFO=" . $sResponseInfo . ",
+                FCFULFILLED=" . $sFulfilled . "
             WHERE
-                OXID=".$oDb->quote($sQueueId);
-            $this->_logForwardMessage("Updating Request with query:\n".$sQuery."\n");
+                OXID=" . $oDb->quote($sQueueId);
+            $this->_logForwardMessage("Updating Request with query:\n" . $sQuery . "\n");
 
             $oDb->execute($sQuery);
 
@@ -352,126 +461,13 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             UPDATE fcpotransactionstatus
             SET 
                 FCPO_FORWARD_TRIES=FCPO_FORWARD_TRIES+1,
-                FCPO_FORWARD_STATE='".$sForwardState."'
+                FCPO_FORWARD_STATE='" . $sForwardState . "'
             WHERE
-                FCPO_TXID='".$aRequest['txid']."' AND FCPO_TXACTION = '".$aRequest['txaction']."'";
+                FCPO_TXID='" . $aRequest['txid'] . "' AND FCPO_TXACTION = '" . $aRequest['txaction'] . "'";
 
-            $this->_logForwardMessage("Updating transaction log with query:\n".$sQueryUpdateTransactionlog."\n");
+            $this->_logForwardMessage("Updating transaction log with query:\n" . $sQueryUpdateTransactionlog . "\n");
             $oDb->execute($sQueryUpdateTransactionlog);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
 
-    /**
-     * Collects request data from database and prepare result
-     *
-     * @param $sStatusmessageId
-     * @return array
-     * @throws
-     */
-    protected function _fetchPostParams($sStatusmessageId)
-    {
-        try {
-            $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-            $sQuery = "
-                SELECT * 
-                FROM fcpotransactionstatus 
-                WHERE OXID=".$oDb->quote($sStatusmessageId);
-
-            $aRow = $oDb->getRow($sQuery);
-            if ($aRow == false) {
-                $sExceptionMessage =
-                    'Could not find transaction status message for ID '.$sStatusmessageId.'!';
-                throw new Exception($sExceptionMessage);
-            }
-
-            $aRequestParams = $this->_cleanParams($aRow);
-            $sParams = '';
-            foreach ($aRequestParams as $sKey => $mValue) {
-                $sParams .= $this->_addParam($sKey, $mValue);
-            }
-
-            return [
-                'string' => $sParams,
-                'array' => $aRequestParams,
-            ];
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * Removes all empty params and translate db fields to corresponding
-     * call
-     *
-     * @param $aParams
-     * @return array
-     */
-    protected function _cleanParams($aParams)
-    {
-        $aCleanedParams = [];
-        foreach ($aParams as $sKey => $sValue) {
-            $blValid = (
-                isset($this->_aDbFields2Params[$sKey]) &&
-                $sValue != ''
-            );
-            if (!$blValid) {
-                continue;
-            }
-            if ($sKey == 'FCPO_TXTIME') {
-                $sValue = strtotime($sValue);
-            }
-            $sCallKey = $this->_aDbFields2Params[$sKey];
-            $aCleanedParams[$sCallKey] = $sValue;
-        }
-
-        return $aCleanedParams;
-    }
-
-    /**
-     * Returns elementary forward data
-     *
-     * @param $sForwardId
-     * @return
-     * @throws
-     */
-    protected function _getForwardData($sForwardId)
-    {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-        $sQuery = "
-                SELECT 
-                    FCPO_URL,
-                    FCPO_TIMEOUT
-                FROM fcpostatusforwarding 
-                WHERE OXID=".$oDb->quote($sForwardId);
-
-        $aRow = $oDb->getRow($sQuery);
-        if ($aRow == false) {
-            throw new Exception('Could not find forward data for ID '.$sForwardId.'!');
-        }
-
-        return [
-            'url' => $aRow['FCPO_URL'],
-            'timeout' => $aRow['FCPO_TIMEOUT'],
-        ];
-    }
-
-    /**
-     * If new redirect targets have been added for given statusmessage, create
-     * referring queue entries
-     *
-     * @param string $sStatusmessageId
-     * @return void
-     * @throws Exception
-     */
-    protected function _createMissingQueueEntries($sStatusmessageId)
-    {
-        try {
-            $aParams = $this->_fetchPostParams($sStatusmessageId);
-            $aRequest = $aParams['array'];
-            $sPayoneStatus = $aRequest['txaction'];
-            $this->_addQueueEntries($sStatusmessageId, $sPayoneStatus);
         } catch (Exception $e) {
             throw $e;
         }

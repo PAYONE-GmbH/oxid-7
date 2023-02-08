@@ -79,7 +79,7 @@ class ajaxComponent extends ListComponentAjax
     protected function _getQuery()
     {
         // looking for table/view
-        $sCountryTable = getViewName('oxcountry');
+        $sCountryTable = $this->getViewName('oxcountry');
         $sCountryId      = $this->_oFcPoHelper->fcpoGetRequestParameter('oxid');
         $sSynchCountryId = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
         $sType           = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
@@ -113,7 +113,7 @@ class ajaxComponent extends ListComponentAjax
         $soxId       = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
         $sType       = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sCountryTable = getViewName('oxcountry');
+            $sCountryTable = $this->getViewName('oxcountry');
             $aChosenCntr = $this->_getAll($this->_addFilter("select $sCountryTable.oxid ".$this->_getQuery()));
         }
         if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {

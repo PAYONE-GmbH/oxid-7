@@ -21,11 +21,13 @@
  * @link      http://www.payone.de
  */
 
- namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Core;
 
+use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 
 /**
@@ -35,48 +37,20 @@ class FcPayOneEvents
 {
 
     /**
-     * Database object
-     *
-     * @var FcPoHelper
-     */
-    protected static $_oFcpoHelper = null;
-
-    /**
      * Paymnts that were once used but now deprecated and marked for removal
      *
      * @var array
      */
-    public static $_aRemovedPaymentMethods = array(
+    public static $_aRemovedPaymentMethods = [
         'fcpoyapital',
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
         'fcpocreditcard_iframe',
         'fcpobillsafe',
         'fcpoonlineueberweisung',
-    );
-
-    /**
-     * Tables that have the oxtimestamp column whose type needs to be updated.
-     *
-     * @var string[]
-     */
-    protected static $updateOxtimestampTypeTable = [
-        'fcporefnr',
-        'fcporequestlog',
-        'fcpotransactionstatus',
-        'fcpopayment2country',
-        'fcpostatusforwarding',
-        'fcpostatusmapping',
-        'fcpoerrormapping',
-        'fcpoklarnastoreids',
-        'fcpopdfmandates',
-        'fcpoklarnacampaigns',
-        'fcpopayoneexpresslogos',
-        'fcpocheckedaddresses',
-        'fcporatepay',
-        'fcpouser2flag',
+        'fcpoklarna',
+        'fcpopaydirekt_express'
     ];
-
     public static $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
           FCPO_REFNR int(11) NOT NULL AUTO_INCREMENT,
@@ -228,7 +202,16 @@ class FcPayOneEvents
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (fcpo_address_hash)
         ) ENGINE=INNODB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;";
-
+    public static $sQueryTableFcpoShadowBasket = "
+        CREATE TABLE IF NOT EXISTS `fcposhadowbasket` (
+          `FCPOSESSIONID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '',
+          `OXORDERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT '',
+          `FCPOBASKET` BLOB NOT NULL,
+          `FCPOCREATED` datetime NOT NULL,
+          `FCPOCHECKED` datetime DEFAULT NULL,
+          PRIMARY KEY (`FCPOSESSIONID`),
+          KEY `OXORDERID` (`OXORDERID`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
     public static $sQueryTableRatePay = "
         CREATE TABLE `fcporatepay` (
           `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
@@ -295,7 +278,6 @@ class FcPayOneEvents
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     ";
-
     public static $sQueryTableFcpoUserFlags = "
         CREATE TABLE IF NOT EXISTS `fcpouserflags` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -308,7 +290,6 @@ class FcPayOneEvents
           UNIQUE KEY `FCPOCODE` (`FCPOCODE`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     ";
-
     public static $sQueryTableFcpoUser2Flag = "
         CREATE TABLE IF NOT EXISTS `fcpouser2flag` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -320,7 +301,6 @@ class FcPayOneEvents
           KEY `OXUSERID` (`OXUSERID`,`FCPOUSERFLAGID`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;    
     ";
-
     public static $sQueryTableStatusForwardQueue = "
         CREATE TABLE `fcpostatusforwardqueue` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -338,7 +318,6 @@ class FcPayOneEvents
           KEY `FCFULFILLED` (`FCFULFILLED`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     ";
-
     public static $sQueryAlterOxorderTxid = "ALTER TABLE oxorder ADD COLUMN FCPOTXID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
     public static $sQueryAlterOxorderRefNr = "ALTER TABLE oxorder ADD COLUMN FCPOREFNR VARCHAR(32) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderAuthMode = "ALTER TABLE oxorder ADD COLUMN FCPOAUTHMODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
@@ -390,40 +369,70 @@ class FcPayOneEvents
     public static $sQueryFcporequestlogCopyTimestampData = "UPDATE fcporequestlog SET OXTIMESTAMP = FCPO_TIMESTAMP;";
     public static $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
     public static $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
+    public static $sQueryAlterFcpoShadowBasketFcbasketChangeToBlob = "ALTER TABLE fcposhadowbasket MODIFY FCPOBASKET BLOB;";
+    public static $aPaymentMethods = array(
+        'fcpoinvoice' => 'PAYONE Rechnungskauf',
+        'fcpopayadvance' => 'PAYONE Vorkasse',
+        'fcpodebitnote' => 'PAYONE Lastschrift',
+        'fcpocashondel' => 'PAYONE Nachnahme',
+        'fcpocreditcard' => 'PAYONE Kreditkarte',
+        'fcpopaypal' => 'PAYONE PayPal',
+        'fcpopaypal_express' => 'PAYONE PayPal Express',
+        'fcpoklarna_invoice' => 'PAYONE Klarna Rechnung',
+        'fcpoklarna_installments' => 'PAYONE Klarna Ratenkauf',
+        'fcpoklarna_directdebit' => 'PAYONE Klarna Sofort bezahlen',
+        'fcpobarzahlen' => 'PAYONE Barzahlen',
+        'fcpopaydirekt' => 'PAYONE paydirekt',
+        'fcpopo_bill' => 'PAYONE Unzer Rechnungskauf',
+        'fcpopo_debitnote' => 'PAYONE Unzer Lastschrift',
+        'fcpopo_installment' => 'PAYONE Unzer Ratenkauf',
+        'fcporp_bill' => 'PAYONE Ratepay Rechnungskauf',
+        'fcpoamazonpay' => 'PAYONE Amazon Pay',
+        'fcpo_secinvoice' => 'PAYONE Gesicherter Rechnungskauf',
+        'fcpo_sofort' => 'PAYONE Sofort Überweisung',
+        'fcpo_giropay' => 'PAYONE Giropay',
+        'fcpo_eps' => 'PAYONE eps Überweisung',
+        'fcpo_pf_finance' => 'PAYONE PostFinance E-Finance',
+        'fcpo_pf_card' => 'PAYONE PostFinance Card',
+        'fcpo_ideal' => 'PAYONE iDEAL',
+        'fcpo_p24' => 'PAYONE Przelewy24',
+        'fcpo_bancontact' => 'PAYONE Bancontact',
+        'fcporp_debitnote' => 'PAYONE Ratepay Lastschrift',
+        'fcpo_alipay' => 'PAYONE Alipay',
+        'fcpo_trustly' => 'PAYONE Trustly',
+        'fcpo_wechatpay' => 'PAYONE WeChat Pay',
+        'fcpo_apple_pay' => 'PAYONE Apple Pay',
+        'fcporp_installment' => 'PAYONE Ratepay Ratenkauf',
+        'fcpopl_secinvoice' => 'PAYONE Gesicherter Rechnungskauf (neu)',
+        'fcpopl_secinstallment' => 'PAYONE Gesicherter Ratenkauf',
 
-    public static $aPaymentMethods = [
-        'fcpoinvoice' => 'Rechnung',
-        'fcpopayadvance' => 'Vorauskasse',
-        'fcpodebitnote' => 'Bankeinzug/Lastschrift',
-        'fcpocashondel' => 'Nachnahme',
-        'fcpocreditcard' => 'Kreditkarte',
-        'fcpopaypal' => 'PayPal',
-        'fcpopaypal_express' => 'PayPal Express',
-        'fcpoklarna' => 'Klarna Rechnung',
-        'fcpoklarna_invoice' => 'Klarna Pay later',
-        'fcpoklarna_installments' => 'Klarna Slice it',
-        'fcpoklarna_directdebit' => 'Klarna Pay now',
-        'fcpobarzahlen' => 'Barzahlen',
-        'fcpopaydirekt' => 'Paydirekt',
-        'fcpopo_bill' => 'Paysafe Pay Later™ Rechnungskauf',
-        'fcpopo_debitnote' => 'Paysafe Pay Later™ Lastschrift',
-        'fcpopo_installment' => 'Paysafe Pay Later™ Ratenkauf',
-        'fcporp_bill' => 'Ratepay Rechnungskauf',
-        'fcpoamazonpay' => 'AmazonPay',
-        'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
-        'fcpopaydirekt_express' => 'Paydirekt Express',
-        'fcpo_sofort' => 'Sofortüberweisung',
-        'fcpo_giropay' => 'Giropay',
-        'fcpo_eps' => 'eps - Onlineüberweisung',
-        'fcpo_pf_finance' => 'PostFinance E-Finance',
-        'fcpo_pf_card' => 'PostFinance Card',
-        'fcpo_ideal' => 'iDeal',
-        'fcpo_p24' => 'P24',
-        'fcpo_bancontact' => 'Bancontact',
-        'fcporp_debitnote' => 'Ratepay Lastschrift',
-        'fcpo_alipay' => 'Alipay',
-        'fcpo_trustly' => 'Trustly',
-        'fcpo_wechatpay'=> 'WeChat Pay',
+    );
+    /**
+     * Database object
+     *
+     * @var FcPoHelper
+     */
+    protected static $_oFcPoHelper = null;
+    /**
+     * Tables that have the oxtimestamp column whose type needs to be updated.
+     *
+     * @var string[]
+     */
+    protected static $updateOxtimestampTypeTable = [
+        'fcporefnr',
+        'fcporequestlog',
+        'fcpotransactionstatus',
+        'fcpopayment2country',
+        'fcpostatusforwarding',
+        'fcpostatusmapping',
+        'fcpoerrormapping',
+        'fcpoklarnastoreids',
+        'fcpopdfmandates',
+        'fcpoklarnacampaigns',
+        'fcpopayoneexpresslogos',
+        'fcpocheckedaddresses',
+        'fcporatepay',
+        'fcpouser2flag',
     ];
 
     /**
@@ -434,7 +443,7 @@ class FcPayOneEvents
     public static function onActivate()
     {
         $sMessage = "";
-        self::$_oFcpoHelper = oxNew(FcPoHelper::class);
+        self::$_oFcPoHelper = oxNew(FcPoHelper::class);
         self::addDatabaseStructure();
         $sMessage .= "Datenbankstruktur angepasst...<br>";
         self::addPayonePayments();
@@ -447,103 +456,7 @@ class FcPayOneEvents
         self::clearTmp();
         $sMessage .= "Tmp geleert...<br>";
         $sMessage .= "Installation erfolgreich!<br>";
-        // self::$_oFcpoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
-    }
-
-    /**
-     * Execute action on deactivate event.
-     *
-     * @return void
-     */
-    public static function onDeactivate()
-    {
-        self::$_oFcpoHelper = oxNew(FcPoHelper::class);
-        self::deactivatePaymethods();
-        $sMessage = "Payone-Zahlarten deaktiviert!<br>";
-        self::clearTmp();
-        $sMessage .= "Tmp geleert...<br>";
-        //self::$_oFcpoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
-    }
-
-    /**
-     * Regenerates database view-tables.
-     *
-     * @return void
-     */
-    public static function regenerateViews()
-    {
-        $oShop = oxNew(Shop::class);
-        $oShop->generateViews();
-    }
-
-    /**
-     * Clear tmp dir and smarty cache.
-     *
-     * @return void
-     */
-    public static function clearTmp()
-    {
-        $sTmpDir = getShopBasePath() . "/tmp/";
-        $sSmartyDir = $sTmpDir . "smarty/";
-
-        foreach (glob($sTmpDir . "*.txt") as $sFileName) {
-            @unlink($sFileName);
-        }
-        foreach (glob($sSmartyDir . "*.php") as $sFileName) {
-            @unlink($sFileName);
-        }
-    }
-
-    /**
-     * Adding payone payments.
-     *
-     * @return void
-     * @throws DatabaseErrorException|\OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     */
-    public static function addPayonePayments(): void
-    {
-        $oDb = DatabaseProvider::getDb();
-
-        $sShopId = self::$_oFcpoHelper->fcpoGetConfig()->getShopId();
-
-        foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
-            //INSERT PAYMENT METHOD
-            self::insertRowIfNotExists('oxpayments', array('OXID' => $sPaymentOxid), "INSERT INTO oxpayments(OXID,OXACTIVE,OXDESC,OXADDSUM,OXADDSUMTYPE,OXFROMBONI,OXFROMAMOUNT,OXTOAMOUNT,OXVALDESC,OXCHECKED,OXDESC_1,OXVALDESC_1,OXDESC_2,OXVALDESC_2,OXDESC_3,OXVALDESC_3,OXLONGDESC,OXLONGDESC_1,OXLONGDESC_2,OXLONGDESC_3,OXSORT,FCPOISPAYONE,FCPOAUTHMODE,FCPOLIVEMODE) VALUES ('{$sPaymentOxid}', 0, '{$sPaymentName}', 0, 'abs', 0, 0, 1000000, '', 0, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0, 1, 'preauthorization', 0);");
-
-            //INSERT PAYMENT METHOD CONFIGURATION
-            $blInserted = self::insertRowIfNotExists('oxobject2group', array('OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid), "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
-            if ($blInserted == true) {
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidforeigncustomer');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidgoodcust');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidmiddlecust');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewcustomer');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewsletter');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnotyetordered');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpowershopper');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricea');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpriceb');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricec');");
-                $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidsmallcust');");
-            }
-
-            self::insertRowIfNotExists('oxobject2payment', array('OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'), "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (REPLACE(UUID(),'-',''), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
-        }
-    }
-
-    /**
-     * Removing depreacted stuff.
-     *
-     * @return void
-     */
-    public static function removeDeprecated()
-    {
-        foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
-            self::dropRowIfExists("oxpayments", array('OXID' => $sRemovedPaymentMethod), "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2group", array('OXOBJECTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2payment", array('OXPAYMENTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
-        }
+        // self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
     }
 
     /**
@@ -562,6 +475,7 @@ class FcPayOneEvents
         self::addTableIfNotExists('fcpotransactionstatus', self::$sQueryTableFcpotransactionstatus);
         self::addTableIfNotExists('fcpopayment2country', self::$sQueryTableFcpopayment2country);
         self::addTableIfNotExists('fcpocheckedaddresses', self::$sQueryTableFcpocheckedaddresses);
+        self::addTableIfNotExists('fcposhadowbasket', self::$sQueryTableFcpoShadowBasket);
         self::addTableIfNotExists('fcpostatusforwarding', self::$sQueryTableFcpoStatusForwarding);
         self::addTableIfNotExists('fcpostatusmapping', self::$sQueryTableFcpoStatusMapping);
         self::addTableIfNotExists('fcpoerrormapping', self::$sQueryTableFcpoErrorMapping);
@@ -657,6 +571,9 @@ class FcPayOneEvents
         self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '2'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(2, 1, 1, 'btn_xpressCheckout_en.gif', 0);");
         // add available user flags
         self::insertRowIfNotExists('fcpouserflags', array('OXID' => 'fcporatepayrejected'), "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
+
+        // OX6-127: CHANGE SHADOW BASKET TYPE
+        self::changeColumnTypeIfWrong('fcposhadowbasket', 'FCPOBASKET', 'BLOB', self::$sQueryAlterFcpoShadowBasketFcbasketChangeToBlob);
     }
 
     /**
@@ -690,10 +607,12 @@ class FcPayOneEvents
     {
         $aColumns = DatabaseProvider::getDb()->getAll("SHOW COLUMNS FROM {$sTableName} LIKE '{$sColumnName}'");
 
-        if (!$aColumns || count($aColumns) == 0) {
+        if (!$aColumns || count($aColumns) === 0) {
+
             try {
                 DatabaseProvider::getDb()->execute($sQuery);
             } catch (Exception $e) {
+
             }
             return true;
         }
@@ -703,10 +622,10 @@ class FcPayOneEvents
     /**
      * Copy data from old column.
      *
-     * @param string $sTableName database table name
+     * @param string $sTableName    database table name
      * @param string $oldColumnName database old column name
      * @param string $newColumnName database new column name
-     * @param string $copyDataQuery  sql query to execute
+     * @param string $copyDataQuery sql query to execute
      * @return bool
      */
     public static function copyDataFromOldColumnIfExists($sTableName, $oldColumnName, $newColumnName, $copyDataQuery)
@@ -721,97 +640,10 @@ class FcPayOneEvents
     }
 
     /**
-     * Insert a database row to an existing table.
-     *
-     * @param string $sTableName database table name
-     * @param array  $aKeyValue  keys of rows to add for existance check
-     * @param string $sQuery     sql-query to insert data
-     *
-     * @return boolean true or false
-     */
-    public static function insertRowIfNotExists($sTableName, $aKeyValue, $sQuery)
-    {
-        $sWhere = '';
-        foreach ($aKeyValue as $key => $value) {
-            $sWhere .= " AND $key = '$value'";
-        }
-        $sCheckQuery = "SELECT * FROM {$sTableName} WHERE 1" . $sWhere;
-        $sExisting = DatabaseProvider::getDb()->getOne($sCheckQuery);
-
-        if (!$sExisting) {
-            DatabaseProvider::getDb()->execute($sQuery);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Check and change database table structure.
-     *
-     * @param string $sTableName    database table name
-     * @param string $sColumnName   database column name
-     * @param string $sExpectedType column structure type for comparison
-     * @param string $sQuery        sql-query to execute
-     *
-     * @return boolean true or false
-     */
-    public static function changeColumnTypeIfWrong($sTableName, $sColumnName, $sExpectedType, $sQuery)
-    {
-        $sCheckQuery = "
-            SHOW COLUMNS 
-            FROM {$sTableName} 
-            WHERE FIELD = '{$sColumnName}' 
-            AND TYPE = '{$sExpectedType}'
-        ";
-        if (!DatabaseProvider::getDb()->getOne($sCheckQuery)) {
-            DatabaseProvider::getDb()->execute($sQuery);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Check and change database table structure.
-     *
-     * @param string $sTableName    database table name
-     * @param string $sColumnName   database column name
-     * @param string $sQuery        sql-query to execute
-     *
-     * @return boolean true or false
-     */
-    public static function changeColumnNameIfWrong($sTableName, $sColumnName, $sQuery)
-    {
-        $checkQuery = "SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$sColumnName}'";
-        if (DatabaseProvider::getDb()->getOne($checkQuery)) {
-            DatabaseProvider::getDb()->execute($sQuery);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Delete a database index.
-     *
-     * @param string $sTable database table name
-     * @param string $sIndex database index name
-     *
-     * @return boolean true or false
-     */
-    public static function dropIndexIfExists($sTable, $sIndex)
-    {
-        if (DatabaseProvider::getDb()->getOne("SHOW KEYS FROM {$sTable} WHERE Key_name = '{$sIndex}'")) {
-            DatabaseProvider::getDb()->execute("ALTER TABLE {$sTable} DROP INDEX {$sIndex}");
-            // echo "In Tabelle {$sTable} den Index {$sIndex} entfernt.<br>";
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Delete a database column if the column itself and the new replacing column exist.
      *
-     * @param string $sTable database table name
-     * @param string $oldColumn database old column name
+     * @param string $sTable            database table name
+     * @param string $oldColumn         database old column name
      * @param string $replacementColumn database replacement column name
      *
      * @return boolean true or false
@@ -829,6 +661,151 @@ class FcPayOneEvents
     }
 
     /**
+     * Check and change database table structure.
+     *
+     * @param string $sTableName  database table name
+     * @param string $sColumnName database column name
+     * @param string $sQuery      sql-query to execute
+     *
+     * @return boolean true or false
+     */
+    public static function changeColumnNameIfWrong($sTableName, $sColumnName, $sQuery)
+    {
+        $checkQuery = "SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$sColumnName}'";
+        if (DatabaseProvider::getDb()->getOne($checkQuery)) {
+            DatabaseProvider::getDb()->execute($sQuery);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check and change database table structure.
+     *
+     * @param string $sTableName    database table name
+     * @param string $sColumnName   database column name
+     * @param string $sExpectedType column structure type for comparison
+     * @param string $sQuery        sql-query to execute
+     *
+     * @return boolean true or false
+     * @throws DatabaseConnectionException
+     */
+    public static function changeColumnTypeIfWrong($sTableName, $sColumnName, $sExpectedType, $sQuery)
+    {
+        $sCheckQuery = "
+            SHOW COLUMNS 
+            FROM {$sTableName} 
+            WHERE FIELD = '{$sColumnName}' 
+            AND TYPE = '{$sExpectedType}'
+        ";
+        if (!DatabaseProvider::getDb()->getOne($sCheckQuery)) {
+            DatabaseProvider::getDb()->execute($sQuery);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Delete a database index.
+     *
+     * @param string $sTable database table name
+     * @param string $sIndex database index name
+     *
+     * @return boolean true or false
+     * @throws DatabaseConnectionException
+     */
+    public static function dropIndexIfExists($sTable, $sIndex): bool
+    {
+        if (DatabaseProvider::getDb()->getOne("SHOW KEYS FROM {$sTable} WHERE Key_name = '{$sIndex}'")) {
+            DatabaseProvider::getDb()->execute("ALTER TABLE {$sTable} DROP INDEX {$sIndex}");
+            // echo "In Tabelle {$sTable} den Index {$sIndex} entfernt.<br>";
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Insert a database row to an existing table.
+     *
+     * @param string $sTableName database table name
+     * @param array  $aKeyValue  keys of rows to add for existance check
+     * @param string $sQuery     sql-query to insert data
+     *
+     * @return boolean true or false
+     * @throws DatabaseConnectionException|DatabaseErrorException
+     */
+    public static function insertRowIfNotExists($sTableName, $aKeyValue, $sQuery): bool
+    {
+        $sWhere = '';
+        foreach ($aKeyValue as $key => $value) {
+            $sWhere .= " AND $key = '$value'";
+        }
+        $sCheckQuery = "SELECT * FROM {$sTableName} WHERE 1" . $sWhere;
+        $sExisting = DatabaseProvider::getDb()->getOne($sCheckQuery);
+
+        if (!$sExisting) {
+            DatabaseProvider::getDb()->execute($sQuery);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Adding payone payments.
+     *
+     * @return void
+     * @throws DatabaseConnectionException|DatabaseErrorException
+     */
+    public static function addPayonePayments(): void
+    {
+        $oDb = DatabaseProvider::getDb();
+
+        $sShopId = self::$_oFcPoHelper->fcpoGetConfig()->getShopId();
+
+        foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
+            //INSERT PAYMENT METHOD
+            $blMethodCreated = self::insertRowIfNotExists('oxpayments', array('OXID' => $sPaymentOxid), "INSERT INTO oxpayments(OXID,OXACTIVE,OXDESC,OXADDSUM,OXADDSUMTYPE,OXFROMBONI,OXFROMAMOUNT,OXTOAMOUNT,OXVALDESC,OXCHECKED,OXDESC_1,OXVALDESC_1,OXDESC_2,OXVALDESC_2,OXDESC_3,OXVALDESC_3,OXLONGDESC,OXLONGDESC_1,OXLONGDESC_2,OXLONGDESC_3,OXSORT,FCPOISPAYONE,FCPOAUTHMODE,FCPOLIVEMODE) VALUES ('{$sPaymentOxid}', 0, '{$sPaymentName}', 0, 'abs', 0, 0, 1000000, '', 0, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0, 1, 'preauthorization', 0);");
+
+            // If method go created, user groups are assigned, otherwise we keep what is already set
+            if ($blMethodCreated) {
+                //INSERT PAYMENT METHOD CONFIGURATION
+                $blInserted = self::insertRowIfNotExists('oxobject2group', array('OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid), "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
+                if ($blInserted === true) {
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidforeigncustomer');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidgoodcust');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidmiddlecust');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewcustomer');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnewsletter');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidnotyetordered');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpowershopper');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricea');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpriceb');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidpricec');");
+                    $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidsmallcust');");
+                }
+            }
+
+            self::insertRowIfNotExists('oxobject2payment', array('OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'), "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (REPLACE(UUID(),'-',''), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
+        }
+    }
+
+    /**
+     * Removing depreacted stuff.
+     *
+     * @return void
+     */
+    public static function removeDeprecated()
+    {
+        foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
+            self::dropRowIfExists("oxpayments", array('OXID' => $sRemovedPaymentMethod), "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
+            self::dropRowIfExists("oxobject2group", array('OXOBJECTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
+            self::dropRowIfExists("oxobject2payment", array('OXPAYMENTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
+        }
+    }
+
+    /**
      * Drop a table entry.
      *
      * @param string $sTableName database table name
@@ -836,7 +813,6 @@ class FcPayOneEvents
      * @param string $sQuery     sql-query to execute
      *
      * @return boolean
-     * @throws DatabaseErrorException
      */
     public static function dropRowIfExists($sTableName, $aKeyValue, $sQuery)
     {
@@ -855,28 +831,113 @@ class FcPayOneEvents
     }
 
     /**
-     * Get the OXID eShop version.
+     * Regenerates database view-tables.
      *
-     * @return string versionnumber
+     * @return void
      */
-    public static function getCurrentVersion()
+    public static function regenerateViews()
     {
-        return self::$_oFcpoHelper->fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
+        $oShop = oxNew(Shop::class);
+        $oShop->generateViews();
     }
 
     /**
-     * Checks if OXID eShop is below given version.
+     * Sets default config values on activation.
      *
-     * @param string $sMaxVersion maximum allowed version
+     * @return void
+     */
+    public static function setDefaultConfigValues()
+    {
+        $oConfig = self::$_oFcPoHelper->fcpoGetConfig();
+        $blIsUpdate = self::isUpdate();
+        $blHashMethodSet = (bool)$oConfig->getConfigParam('sFCPOHashMethod');
+
+        if (!$blHashMethodSet && $blIsUpdate) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'md5');
+        } else if (!$blHashMethodSet) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
+        }
+
+        if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
+            $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
+        }
+    }
+
+    /**
+     * If there is an existing merchant id we assume, that current activation
+     * is an update
+     *
+     * @return bool
+     */
+    public static function isUpdate()
+    {
+        $oConfig = self::$_oFcPoHelper->fcpoGetConfig();
+
+        return (bool)($oConfig->getConfigParam('sFCPOMerchantID'));
+    }
+
+    /**
+     * Clear tmp dir and smarty cache.
+     *
+     * @return void
+     */
+    public static function clearTmp()
+    {
+        $sTmpDir = getShopBasePath() . "/tmp/";
+        $sSmartyDir = $sTmpDir . "smarty/";
+
+        foreach (glob($sTmpDir . "*.txt") as $sFileName) {
+            @unlink($sFileName);
+        }
+        foreach (glob($sSmartyDir . "*.php") as $sFileName) {
+            @unlink($sFileName);
+        }
+    }
+
+    /**
+     * Execute action on deactivate event.
+     *
+     * @return void
+     */
+    public static function onDeactivate()
+    {
+        self::$_oFcPoHelper = oxNew(FcPoHelper::class);
+        self::deactivatePaymethods();
+        $sMessage = "Payone-Zahlarten deaktiviert!<br>";
+        self::clearTmp();
+        $sMessage .= "Tmp geleert...<br>";
+        //self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+    }
+
+    /**
+     * Deactivates payone paymethods on module deactivation.
+     *
+     * @return void
+     */
+    public static function deactivatePaymethods()
+    {
+        $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
+        $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
+        DatabaseProvider::getDb()->execute($sQ);
+    }
+
+    /**
+     * Checks if OXID eShop is between two given versions.
+     *
+     * @param string $sMinVersion minimum allowed version number
+     * @param string $sMaxVersion maximum allowed version number
      *
      * @return boolean true or false
      */
-    public static function isUnderVersion($sMaxVersion)
+    public static function isBetweenVersions($sMinVersion, $sMaxVersion)
     {
-        $sCurrVersion = self::getCurrentVersion();
-        $blReturn = (version_compare($sCurrVersion, $sMaxVersion, '<')) ? true : false;
-
-        return $blReturn;
+        if (!self::isOverVersion($sMinVersion, true)) {
+            return false;
+        }
+        if (!self::isUnderVersion($sMaxVersion)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -898,22 +959,28 @@ class FcPayOneEvents
     }
 
     /**
-     * Checks if OXID eShop is between two given versions.
+     * Get the OXID eShop version.
      *
-     * @param string $sMinVersion minimum allowed version number
-     * @param string $sMaxVersion maximum allowed version number
+     * @return string versionnumber
+     */
+    public static function getCurrentVersion()
+    {
+        return self::$_oFcPoHelper->fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
+    }
+
+    /**
+     * Checks if OXID eShop is below given version.
+     *
+     * @param string $sMaxVersion maximum allowed version
      *
      * @return boolean true or false
      */
-    public static function isBetweenVersions($sMinVersion, $sMaxVersion): bool
+    public static function isUnderVersion($sMaxVersion)
     {
-        if (!self::isOverVersion($sMinVersion, true)) {
-            return false;
-        }
-        if (!self::isUnderVersion($sMaxVersion)) {
-            return false;
-        }
-        return true;
+        $sCurrVersion = self::getCurrentVersion();
+        $blReturn = (version_compare($sCurrVersion, $sMaxVersion, '<')) ? true : false;
+
+        return $blReturn;
     }
 
     /**
@@ -926,7 +993,7 @@ class FcPayOneEvents
      */
     public static function copyFile($sSource, $sDestination)
     {
-        if (file_exists($sSource) == true) {
+        if (file_exists($sSource) === true) {
             self::deleteFileIfExists($sDestination);
             if (copy($sSource, $sDestination)) {
                 echo 'Datei ' . $sDestination . ' in Theme kopiert.<br>';
@@ -950,51 +1017,4 @@ class FcPayOneEvents
         }
     }
 
-    /**
-     * Deactivates payone paymethods on module deactivation.
-     *
-     * @return void
-     * @throws DatabaseErrorException|\OxidEsales\Eshop\Core\Exception\DatabaseConnectionException
-     */
-    public static function deactivatePaymethods(): void
-    {
-        $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
-        $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
-        DatabaseProvider::getDB()->execute($sQ);
-    }
-
-    /**
-     * Sets default config values on activation.
-     *
-     * @return void
-     */
-    public static function setDefaultConfigValues()
-    {
-        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
-        $blIsUpdate = self::isUpdate();
-        $blHashMethodSet = (bool) $oConfig->getConfigParam('sFCPOHashMethod');
-
-        if (!$blHashMethodSet && $blIsUpdate) {
-            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'md5');
-        } elseif (!$blHashMethodSet) {
-            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
-        }
-
-        if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
-            $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
-        }
-    }
-
-    /**
-     * If there is an existing merchant id we assume, that current activation
-     * is an update
-     *
-     * @return bool
-     */
-    public static function isUpdate(): bool
-    {
-        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
-
-        return (bool) ($oConfig->getConfigParam('sFCPOMerchantID'));
-    }
 }

@@ -1,4 +1,13 @@
 <?php
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use stdClass;
+
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -13,18 +22,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use stdClass;
-
-class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPoMapping extends BaseModel
 {
 
     /**
@@ -32,34 +34,33 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Centralized Database instance
      *
-     * @var DatabaseProvider
+     * @var object
      */
-    protected $_oFcpoDb = null;
+    protected $_oFcPoDb = null;
 
     /**
      * Init needed data
      */
     public function __construct()
     {
-        parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
      * Requests database for existing mappings and returns an array of mapping objects
      *
-     * @return array
+     * @return stdClass[]
      */
-    public function fcpoGetExistingMappings()
+    public function fcpoGetExistingMappings(): array
     {
-        $aMappings = [];
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
+        $aMappings = array();
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_paymentid, fcpo_payonestatus, fcpo_folder FROM fcpostatusmapping ORDER BY oxid ASC";
         $aRows = $oDb->getAll($sQuery);
@@ -85,12 +86,11 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Updates current set of mappings into database
      *
-     * @param  array $aMappings
-     * @return void
+     * @param array $aMappings
      */
-    public function fcpoUpdateMappings($aMappings)
+    public function fcpoUpdateMappings($aMappings): void
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         // iterate through mappings
         foreach ($aMappings as $sMappingId => $aData) {
             $sQuery = $this->_fcpoGetQuery($sMappingId, $aData);
@@ -101,15 +101,15 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns the matching query for updating/adding data
      *
-     * @param  string $sMappingId
-     * @param  array  $aData
+     * @param string $sMappingId
+     * @param array  $aData
      * @return string
      */
     protected function _fcpoGetQuery($sMappingId, $aData)
     {
         // quote values from outer space
-        if (array_key_exists('delete', $aData) != false) {
-            $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        if (array_key_exists('delete', $aData)) {
+            $oDb = $this->_oFcPoHelper->fcpoGetDb();
             $sOxid = $oDb->quote($sMappingId);
             $sQuery = "DELETE FROM fcpostatusmapping WHERE oxid = {$sOxid}";
         } else {
@@ -122,18 +122,18 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Returns wether an insert or update query, depending on data
      *
-     * @param  string $sMappingId
-     * @param  array  $aData
+     * @param string $sMappingId
+     * @param array  $aData
      * @return string
      */
     protected function _fcpoGetUpdateQuery($sMappingId, $aData)
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sMappingId, $aData['sPaymentType'], $aData['sPayoneStatus'], $aData['sShopStatus']);
 
-        $sOxid = $this->_oFcpoDb->quote($sMappingId);
-        $sPaymentId = $this->_oFcpoDb->quote($aData['sPaymentType']);
-        $sPayoneStatus = $this->_oFcpoDb->quote($aData['sPayoneStatus']);
-        $sFolder = $this->_oFcpoDb->quote($aData['sShopStatus']);
+        $sOxid = $this->_oFcPoDb->quote($sMappingId);
+        $sPaymentId = $this->_oFcPoDb->quote($aData['sPaymentType']);
+        $sPayoneStatus = $this->_oFcPoDb->quote($aData['sPayoneStatus']);
+        $sFolder = $this->_oFcPoDb->quote($aData['sShopStatus']);
 
         if ($blValidNewEntry) {
             $sQuery = " INSERT INTO fcpostatusmapping (
@@ -157,17 +157,16 @@ class FcPoMapping extends \OxidEsales\Eshop\Core\Model\BaseModel
     /**
      * Checks if current entry is new and complete
      *
-     * @param  string $sMappingId
-     * @param  string $sPaymentId
-     * @param  string $sPayoneStatus
-     * @param  string $sFolder
-     * @return bool
+     * @param string $sMappingId
+     * @param string $sPaymentId
+     * @param string $sPayoneStatus
+     * @param string $sFolder
      */
-    protected function _fcpoIsValidNewEntry($sMappingId, $sPaymentId, $sPayoneStatus, $sFolder)
+    protected function _fcpoIsValidNewEntry($sMappingId, $sPaymentId, $sPayoneStatus, $sFolder): bool
     {
         $blComplete = (!empty($sPayoneStatus) || !empty($sPaymentId) || !empty($sFolder));
-        $blValid = ($sMappingId == 'new' && $blComplete) ? true : false;
 
-        return $blValid;
+        return $sMappingId == 'new' && $blComplete;
     }
+
 }

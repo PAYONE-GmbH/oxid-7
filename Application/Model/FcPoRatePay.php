@@ -1,5 +1,13 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,19 +22,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-
 class FcPoRatepay extends BaseModel
 {
     /**
@@ -34,23 +33,22 @@ class FcPoRatepay extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Centralized Database instance
      *
      * @var object
      */
-    protected $_oFcpoDb = null;
+    protected $_oFcPoDb = null;
 
     /**
      * Init needed data
      */
     public function __construct()
     {
-        parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
@@ -59,11 +57,11 @@ class FcPoRatepay extends BaseModel
      * @param string $sOxid
      * @param array  $aRatePayData
      */
-    public function fcpoInsertProfile($sOxid, $aRatePayData)
+    public function fcpoInsertProfile($sOxid, $aRatePayData): void
     {
-        if (array_key_exists('delete', $aRatePayData) != false) {
+        if (array_key_exists('delete', $aRatePayData)) {
             $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcpoDb->execute($sQuery);
+            $this->_oFcPoDb->execute($sQuery);
         } else {
             $sQuery = " UPDATE
                             fcporatepay
@@ -73,25 +71,129 @@ class FcPoRatepay extends BaseModel
                             oxpaymentid = " . DatabaseProvider::getDb()->quote($aRatePayData['paymentid']) . "
                         WHERE
                             oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcpoDb->execute($sQuery);
+            $this->_oFcPoDb->execute($sQuery);
             $this->_fcpoUpdateRatePayProfile($sOxid);
         }
     }
 
     /**
-     * Returns an array with Ratepay profiles
+     * Requests and updates payment information for given shop_id
      *
-     * @param  string $sPaymentId (optional)
+     * @param string $sOxid
+     * @return void
+     */
+    protected function _fcpoUpdateRatePayProfile($sOxid)
+    {
+        $aRatePayData = $this->fcpoGetProfileData($sOxid);
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+        $aResponse = $oRequest->sendRequestRatePayProfile($aRatePayData);
+        if (isset($aResponse['status']) && $aResponse['status'] == 'OK') {
+            $this->_fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse);
+        }
+    }
+
+    /**
+     * Returns profiledata by id
+     *
+     * @param string $sOxid
      * @return array
      */
-    public function fcpoGetRatePayProfiles($sPaymentId = null)
+    public function fcpoGetProfileData($sOxid)
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $aReturn = [];
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
+        $sQuery = "SELECT * FROM fcporatepay WHERE OXID=" . $this->_oFcPoDb->quote($sOxid);
+
+        return $oDb->GetRow($sQuery);
+    }
+
+    /**
+     * Collects profile information and save it into profile
+     *
+     * @param string $sOxid
+     * @param array  $aResponse
+     * @return void
+     */
+    protected function _fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse)
+    {
+        $sQuery = "
+            UPDATE fcporatepay SET
+                `merchant_name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[merchant-name]']) . ",
+                `merchant_status`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[merchant-status]']) . ",
+                `shop_name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[shop-name]']) . ",
+                `name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[name]']) . ",
+                `type`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[type]']) . ",
+                `activation_status_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-elv]']) . ",
+                `activation_status_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-installment]']) . ",
+                `activation_status_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-invoice]']) . ",
+                `activation_status_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-prepayment]']) . ",
+                `amount_min_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[amount-min-longrun]']) . ",
+                `b2b_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-full]']) . ",
+                `b2b_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-light]']) . ",
+                `b2b_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-elv]']) . ",
+                `b2b_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-installment]']) . ",
+                `b2b_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-invoice]']) . ",
+                `b2b_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-prepayment]']) . ",
+                `country_code_billing`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-billing]']) . ",
+                `country_code_delivery`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-delivery]']) . ",
+                `delivery_address_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-full]']) . ",
+                `delivery_address_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-light]']) . ",
+                `delivery_address_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-elv]']) . ",
+                `delivery_address_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-installment]']) . ",
+                `delivery_address_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-invoice]']) . ",
+                `delivery_address_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-prepayment]']) . ",
+                `device_fingerprint_snippet_id`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[device-fingerprint-snippet-id]']) . ",
+                `eligibility_device_fingerprint`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-device-fingerprint]']) . ",
+                `eligibility_ratepay_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-elv]']) . ",
+                `eligibility_ratepay_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-installment]']) . ",
+                `eligibility_ratepay_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-invoice]']) . ",
+                `eligibility_ratepay_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-full]']) . ",
+                `eligibility_ratepay_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-light]']) . ",
+                `eligibility_ratepay_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-prepayment]']) . ",
+                `interest_rate_merchant_towards_bank`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interest-rate-merchant-towards-bank]']) . ",
+                `interestrate_default`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-default]']) . ",
+                `interestrate_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-max]']) . ",
+                `interestrate_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-min]']) . ",
+                `min_difference_dueday`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[min-difference-dueday]']) . ",
+                `month_allowed`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-allowed]']) . ",
+                `month_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-longrun]']) . ",
+                `month_number_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-number-max]']) . ",
+                `month_number_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-number-min]']) . ",
+                `payment_amount`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-amount]']) . ",
+                `payment_firstday`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-firstday]']) . ",
+                `payment_lastrate`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-lastrate]']) . ",
+                `rate_min_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[rate-min-longrun]']) . ",
+                `rate_min_normal`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[rate-min-normal]']) . ",
+                `service_charge`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[service-charge]']) . ",
+                `tx_limit_elv_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-elv-max]']) . ",
+                `tx_limit_elv_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-elv-min]']) . ",
+                `tx_limit_installment_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-installment-max]']) . ",
+                `tx_limit_installment_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-installment-min]']) . ",
+                `tx_limit_invoice_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-invoice-max]']) . ",
+                `tx_limit_invoice_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-invoice-min]']) . ",
+                `tx_limit_prepayment_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-prepayment-max]']) . ",
+                `txLimitPrepaymentMin`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-prepayment-min]']) . ",
+                `valid_payment_firstdays`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[valid-payment-firstdays]']) . "
+            WHERE 
+                OXID=" . $this->_oFcPoDb->quote($sOxid) . "
+        ";
+
+        $this->_oFcPoDb->execute($sQuery);
+    }
+
+    /**
+     * Returns an array with Ratepay profiles
+     *
+     * @param string $sPaymentId (optional)
+     * @return array<int|string, mixed>
+     */
+    public function fcpoGetRatePayProfiles($sPaymentId = null): array
+    {
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
+        $aReturn = array();
 
         $sFilterPaymentId = "";
         if (is_string($sPaymentId)) {
-            $sFilterPaymentId = "WHERE OXPAYMENTID=".$oDb->quote($sPaymentId);
+            $sFilterPaymentId = "WHERE OXPAYMENTID=" . $oDb->quote($sPaymentId);
         }
 
         $sQuery = "SELECT * FROM fcporatepay {$sFilterPaymentId}";
@@ -105,15 +207,12 @@ class FcPoRatepay extends BaseModel
         return $aReturn;
     }
 
-
     /**
      * Add Ratepay shop
-     *
-     * @return void
      */
-    public function fcpoAddRatePayProfile()
+    public function fcpoAddRatePayProfile(): void
     {
-        $oUtilsObject = $this->_oFcpoHelper->fcpoGetUtilsObject();
+        $oUtilsObject = $this->_oFcPoHelper->fcpoGetUtilsObject();
         $sNewOxid = $oUtilsObject->generateUId();
         $sQuery = "
             INSERT INTO fcporatepay 
@@ -181,40 +280,25 @@ class FcPoRatepay extends BaseModel
             ) 
             VALUES 
             (
-                '".$sNewOxid."', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
+                '" . $sNewOxid . "', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
             )
         ";
-        $this->_oFcpoDb->execute($sQuery);
-    }
-
-    /**
-     * Returns profiledata by id
-     *
-     * @param  string $sOxid
-     * @return array
-     */
-    public function fcpoGetProfileData($sOxid)
-    {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $sQuery = "SELECT * FROM fcporatepay WHERE OXID=".$this->_oFcpoDb->quote($sOxid);
-        $aReturn = $oDb->GetRow($sQuery);
-
-        return $aReturn;
+        $this->_oFcPoDb->execute($sQuery);
     }
 
     /**
      * Returns matching profiledata by giving paymentid
      *
-     * @param  string $sPaymentId
+     * @param string $sPaymentId
      * @return array
      */
     public function fcpoGetProfileDataByPaymentId($sPaymentId)
     {
-        $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=".$this->_oFcpoDb->quote($sPaymentId)." LIMIT 1";
-        $sOxid = $this->_oFcpoDb->GetOne($sQuery);
-        $aProfile = [];
+        $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=" . $this->_oFcPoDb->quote($sPaymentId) . " LIMIT 1";
+        $sOxid = $this->_oFcPoDb->getOne($sQuery);
+        $aProfile = array();
         if ($sOxid) {
             $aProfile = $this->fcpoGetProfileData($sOxid);
         }
@@ -230,104 +314,14 @@ class FcPoRatepay extends BaseModel
     public function fcpoGetFields()
     {
         $sQuery = "SHOW FIELDS FROM fcporatepay";
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $aRow = $oDb->getRow($sQuery);
-        $aReturn = [];
+        $aReturn = array();
 
-        if (count($aRow)) {
+        if (count($aRow) > 0) {
             $aReturn = $aRow;
         }
         return $aReturn;
     }
 
-    /**
-     * Requests and updates payment information for given shop_id
-     *
-     * @param  string $sOxid
-     * @return void
-     */
-    protected function _fcpoUpdateRatePayProfile($sOxid)
-    {
-        $aRatePayData = $this->fcpoGetProfileData($sOxid);
-        $oRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-        $aResponse = $oRequest->sendRequestRatePayProfile($aRatePayData);
-        if (isset($aResponse['status']) && $aResponse['status'] == 'OK') {
-            $this->_fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse);
-        }
-    }
-
-    /**
-     * Collects profile information and save it into profile
-     *
-     * @param string $sOxid
-     * @param array  $aResponse
-     * @return void
-     * @throws DatabaseErrorException
-     */
-    protected function _fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse)
-    {
-        $sQuery = "
-            UPDATE fcporatepay SET
-                `merchant_name`=".$this->_oFcpoDb->quote($aResponse['add_paydata[merchant-name]']).",
-                `merchant_status`=".$this->_oFcpoDb->quote($aResponse['add_paydata[merchant-status]']).",
-                `shop_name`=".$this->_oFcpoDb->quote($aResponse['add_paydata[shop-name]']).",
-                `name`=".$this->_oFcpoDb->quote($aResponse['add_paydata[name]']).",
-                `type`=".$this->_oFcpoDb->quote($aResponse['add_paydata[type]']).",
-                `activation_status_elv`=".$this->_oFcpoDb->quote($aResponse['add_paydata[activation-status-elv]']).",
-                `activation_status_installment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[activation-status-installment]']).",
-                `activation_status_invoice`=".$this->_oFcpoDb->quote($aResponse['add_paydata[activation-status-invoice]']).",
-                `activation_status_prepayment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[activation-status-prepayment]']).",
-                `amount_min_longrun`=".$this->_oFcpoDb->quote($aResponse['add_paydata[amount-min-longrun]']).",
-                `b2b_pq_full`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-PQ-full]']).",
-                `b2b_pq_light`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-PQ-light]']).",
-                `b2b_elv`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-elv]']).",
-                `b2b_installment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-installment]']).",
-                `b2b_invoice`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-invoice]']).",
-                `b2b_prepayment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[b2b-prepayment]']).",
-                `country_code_billing`=".$this->_oFcpoDb->quote($aResponse['add_paydata[country-code-billing]']).",
-                `country_code_delivery`=".$this->_oFcpoDb->quote($aResponse['add_paydata[country-code-delivery]']).",
-                `delivery_address_pq_full`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-PQ-full]']).",
-                `delivery_address_pq_light`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-PQ-light]']).",
-                `delivery_address_elv`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-elv]']).",
-                `delivery_address_installment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-installment]']).",
-                `delivery_address_invoice`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-invoice]']).",
-                `delivery_address_prepayment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[delivery-address-prepayment]']).",
-                `device_fingerprint_snippet_id`=".$this->_oFcpoDb->quote($aResponse['add_paydata[device-fingerprint-snippet-id]']).",
-                `eligibility_device_fingerprint`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-device-fingerprint]']).",
-                `eligibility_ratepay_elv`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-elv]']).",
-                `eligibility_ratepay_installment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-installment]']).",
-                `eligibility_ratepay_invoice`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-invoice]']).",
-                `eligibility_ratepay_pq_full`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-full]']).",
-                `eligibility_ratepay_pq_light`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-light]']).",
-                `eligibility_ratepay_prepayment`=".$this->_oFcpoDb->quote($aResponse['add_paydata[eligibility-ratepay-prepayment]']).",
-                `interest_rate_merchant_towards_bank`=".$this->_oFcpoDb->quote($aResponse['add_paydata[interest-rate-merchant-towards-bank]']).",
-                `interestrate_default`=".$this->_oFcpoDb->quote($aResponse['add_paydata[interestrate-default]']).",
-                `interestrate_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[interestrate-max]']).",
-                `interestrate_min`=".$this->_oFcpoDb->quote($aResponse['add_paydata[interestrate-min]']).",
-                `min_difference_dueday`=".$this->_oFcpoDb->quote($aResponse['add_paydata[min-difference-dueday]']).",
-                `month_allowed`=".$this->_oFcpoDb->quote($aResponse['add_paydata[month-allowed]']).",
-                `month_longrun`=".$this->_oFcpoDb->quote($aResponse['add_paydata[month-longrun]']).",
-                `month_number_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[month-number-max]']).",
-                `month_number_min`=".$this->_oFcpoDb->quote($aResponse['add_paydata[month-number-min]']).",
-                `payment_amount`=".$this->_oFcpoDb->quote($aResponse['add_paydata[payment-amount]']).",
-                `payment_firstday`=".$this->_oFcpoDb->quote($aResponse['add_paydata[payment-firstday]']).",
-                `payment_lastrate`=".$this->_oFcpoDb->quote($aResponse['add_paydata[payment-lastrate]']).",
-                `rate_min_longrun`=".$this->_oFcpoDb->quote($aResponse['add_paydata[rate-min-longrun]']).",
-                `rate_min_normal`=".$this->_oFcpoDb->quote($aResponse['add_paydata[rate-min-normal]']).",
-                `service_charge`=".$this->_oFcpoDb->quote($aResponse['add_paydata[service-charge]']).",
-                `tx_limit_elv_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-elv-max]']).",
-                `tx_limit_elv_min`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-elv-min]']).",
-                `tx_limit_installment_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-installment-max]']).",
-                `tx_limit_installment_min`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-installment-min]']).",
-                `tx_limit_invoice_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-invoice-max]']).",
-                `tx_limit_invoice_min`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-invoice-min]']).",
-                `tx_limit_prepayment_max`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-prepayment-max]']).",
-                `txLimitPrepaymentMin`=".$this->_oFcpoDb->quote($aResponse['add_paydata[tx-limit-prepayment-min]']).",
-                `valid_payment_firstdays`=".$this->_oFcpoDb->quote($aResponse['add_paydata[valid-payment-firstdays]'])."
-            WHERE 
-                OXID=".$this->_oFcpoDb->quote($sOxid)."
-        ";
-
-        $this->_oFcpoDb->execute($sQuery);
-    }
 }

@@ -26,16 +26,16 @@
                 {{ translate({ ident: "EDIT" }) }}
             </button>
         </h3>
-        {% set oDelAddress = oView.getDelAddress %}
+        {% set oDelAddress = oView.getDelAddress() %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" with {delivadr: oDelAddress} %}
     </form>
 
     {% if oView.getOrderRemark() %}
-        <div class="orderRemarks">
-            <h3 class="section">
-                <strong>{{ translate({ ident: "WHAT_I_WANTED_TO_SAY" }) }}</strong>
-            </h3>
-            {{ oView.getOrderRemark()|nl2br }}
-        </div>
+    <div class="orderRemarks">
+        <h3 class="section">
+            <strong>{{ translate({ ident: "WHAT_I_WANTED_TO_SAY" }) }}</strong>
+        </h3>
+        {{ oView.getOrderRemark()|nl2br }}
+    </div>
     {% endif %}
 </div>

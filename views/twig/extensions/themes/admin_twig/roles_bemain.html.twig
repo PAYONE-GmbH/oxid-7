@@ -12,8 +12,8 @@
         <td>{{ translate({ ident: "ROLES_BEMAIN_TITLE" }) }}</td>
         <td>
             <input autocomplete="off" class="edittext" type="text" style="width:215px" name="editval[oxroles__oxtitle]"
-                   maxlength="{{ edit.oxroles__oxtitle.fldmax_length }}"
-                   value="{{ edit.oxroles__oxtitle.value }}" {{ readonly }}>
+                   maxlength="{{ edit.oxroles__oxtitle.fldmax_length }}" value="{{ edit.oxroles__oxtitle.value|raw }}"
+                    {{ readonly }}>
             {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_ROLES_BEMAIN_TITLE"), 'sHelpText': help_text("HELP_ROLES_BEMAIN_TITLE")} %}
         </td>
     </tr>
@@ -54,18 +54,18 @@
                                     {{ translate({ ident: oNode.getAttribute('id'), noerror: true }) }}
                                 </td>
                                 <td>
-                                    <input {{ readonly }}
-                                            type="radio" {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 2 %}disabled{% endif %}
-                                            name="aFields[{{ oNode.getAttribute('id') }}]"
-                                            onclick="setPerms( this );"
-                                            value="2" {% if idx == 2 %}checked{% endif %}>
+                                    <input {{ readonly }} type="radio"
+                                            {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 2 %}disabled{% endif %}
+                                                          name="aFields[{{ oNode.getAttribute('id') }}]"
+                                                          onclick="setPerms( this );"
+                                                          value="2" {% if idx == 2 %}checked{% endif %}>
                                 </td>
                                 <td>
-                                    <input {{ readonly }}
-                                            type="radio" {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 1 %}disabled{% endif %}
-                                            name="aFields[{{ oNode.getAttribute('id') }}]"
-                                            onclick="setPerms( this );"
-                                            value="1" {% if idx == 1 %}checked{% endif %}>
+                                    <input {{ readonly }} type="radio"
+                                            {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 1 %}disabled{% endif %}
+                                                          name="aFields[{{ oNode.getAttribute('id') }}]"
+                                                          onclick="setPerms( this );"
+                                                          value="1" {% if idx == 1 %}checked{% endif %}>
                                 </td>
                                 <td>
                                     <input {{ readonly }} type="radio" name="aFields[{{ oNode.getAttribute('id') }}]"
@@ -75,11 +75,10 @@
                                 <td>
                                     {% if oNode.childNodes.length %}
                                         <input readonly disabled type="checkbox"
-                                               id="aFields[{{ oNode.getAttribute('id') }}]_cust" value="0">
+                                               id="aFields[{{ oNode.getAttribute('id') }}]_cust"
+                                               value="0">
                                         <script type="text/javascript">
-                                            <!--
                                             updateCustInfo(document.getElementById("aFields[{{ oNode.getAttribute('id') }}]_cust"));
-                                            //-->
                                         </script>
                                     {% endif %}
                                 </td>
@@ -136,16 +135,16 @@
                                         <td>
                                             <input {{ readonly }}
                                                     type="radio" {% if iParentIdx < 2 %}disabled{% endif %}
-                                                    name="aFields[dyn_about]"
-                                                    onclick="setPerms( this );"
-                                                    value="2" {% if idx == 2 %}checked{% endif %}>
+                                                    name="aFields[dyn_about]" onclick="setPerms( this );"
+                                                    value="2"
+                                                    {% if idx == 2 %}checked{% endif %}>
                                         </td>
                                         <td>
                                             <input {{ readonly }}
                                                     type="radio" {% if iParentIdx < 1 %}disabled{% endif %}
-                                                    name="aFields[dyn_about]"
-                                                    onclick="setPerms( this );"
-                                                    value="1" {% if idx == 1 %}checked{% endif %}>
+                                                    name="aFields[dyn_about]" onclick="setPerms( this );"
+                                                    value="1"
+                                                    {% if idx == 1 %}checked{% endif %}>
                                         </td>
                                         <td>
                                             <input {{ readonly }} type="radio" name="aFields[dyn_about]"
@@ -177,15 +176,13 @@
                                         <td>
                                             <input {{ readonly }}
                                                     type="radio" {% if iParentIdx < 2 %}disabled{% endif %}
-                                                    name="aFields[dyn_interface]"
-                                                    onclick="setPerms( this );"
+                                                    name="aFields[dyn_interface]" onclick="setPerms( this );"
                                                     value="2" {% if idx == 2 %}checked{% endif %}>
                                         </td>
                                         <td>
                                             <input {{ readonly }}
                                                     type="radio" {% if iParentIdx < 1 %}disabled{% endif %}
-                                                    name="aFields[dyn_interface]"
-                                                    onclick="setPerms( this );"
+                                                    name="aFields[dyn_interface]" onclick="setPerms( this );"
                                                     value="1" {% if idx == 1 %}checked{% endif %}>
                                         </td>
                                         <td>
@@ -204,16 +201,16 @@
                                 {{ translate({ ident: 'dyn_menu', noerror: true }) }}
                             </td>
                             <td>
-                                <input {{ readonly }}
-                                        type="radio" {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 2 %}disabled{% endif %}
-                                        name="aFields[dyn_menu]" onclick="setPerms( this );"
-                                        value="2" {% if iParentIdx == 2 %}checked{% endif %}>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 2 %}disabled{% endif %}
+                                                      name="aFields[dyn_menu]" onclick="setPerms( this );" value="2"
+                                        {% if iParentIdx == 2 %}checked{% endif %}>
                             </td>
                             <td>
-                                <input {{ readonly }}
-                                        type="radio" {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 1 %}disabled{% endif %}
-                                        name="aFields[dyn_menu]" onclick="setPerms( this );"
-                                        value="1" {% if iParentIdx == 1 %}checked{% endif %}>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 1 %}disabled{% endif %}
+                                                      name="aFields[dyn_menu]" onclick="setPerms( this );" value="1"
+                                        {% if iParentIdx == 1 %}checked{% endif %}>
                             </td>
                             <td>
                                 <input {{ readonly }} type="radio" name="aFields[dyn_menu]"
@@ -223,9 +220,7 @@
                             <td>
                                 <input readonly disabled type="checkbox" id="aFields[dyn_menu]_cust" value="0">
                                 <script type="text/javascript">
-                                    <!--
                                     updateCustInfo(document.getElementById("aFields[dyn_menu]_cust"));
-                                    //-->
                                 </script>
                             </td>
                         </tr>
@@ -250,20 +245,20 @@
                                 {{ translate({ ident: 'fcpo_admin_title', noerror: true }) }}
                             </td>
                             <td>
-                                <input {{ readonly }}
-                                        type="radio" {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 2 %}disabled{% endif %}
-                                        name="aFields[fcpo_admin_title]"
-                                        value="2" {% if iParentIdx == 2 %}checked{% endif %}>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 2 %}disabled{% endif %}
+                                                      name="aFields[fcpo_admin_title]"
+                                                      value="2" {% if iParentIdx == 2 %}checked{% endif %}>
                             </td>
                             <td>
-                                <input {{ readonly }}
-                                        type="radio" {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 1 %}disabled{% endif %}
-                                        name="aFields[fcpo_admin_title]"
-                                        value="1" {% if iParentIdx == 1 %}checked{% endif %}>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 1 %}disabled{% endif %}
+                                                      name="aFields[fcpo_admin_title]"
+                                                      value="1" {% if iParentIdx == 1 %}checked{% endif %}>
                             </td>
                             <td>
-                                <input {{ readonly }} type="radio" name="aFields[fcpo_admin_title]"
-                                                      value="0" {% if not iParentIdx %}checked{% endif %}>
+                                <input {{ readonly }} type="radio" name="aFields[fcpo_admin_title]" value="0"
+                                        {% if not iParentIdx %}checked{% endif %}>
                             </td>
                             <td>
                             </td>

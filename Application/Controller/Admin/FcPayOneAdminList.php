@@ -1,4 +1,13 @@
 <?php
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,41 +26,32 @@
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-
 class FcPayOneAdminList extends AdminListController
 {
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var null|FcPoHelper
+     * @var object
      */
-    protected null|FcPoHelper $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Centralized Database instance
      *
      * @var object
      */
-    protected $_oFcpoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
 
     /**
      * Init needed data
-     *
-     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
+
 }

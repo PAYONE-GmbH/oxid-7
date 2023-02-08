@@ -13,23 +13,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Lib;
 
 /*
  * load OXID Framework
  */
+
+namespace Fatchip\PayOne\Lib;
 
 use Exception;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
 function getShopBasePath()
 {
-    return dirname(__FILE__).'/../../../../';
+    return dirname(__FILE__) . '/../../../modules/';
 }
 
 include_once getShopBasePath() . "/bootstrap.php";
@@ -45,7 +45,7 @@ $sUseLogin = filter_input(INPUT_GET, 'login');
  *
  * @author andre
  */
-class FcPoPopUpContent extends BaseModel
+class FcPopopUpContent extends BaseModel
 {
 
     /**
@@ -77,23 +77,17 @@ class FcPoPopUpContent extends BaseModel
     protected $_sDuration = null;
 
     /**
-     * @var FcPoHelper
-     */
-    protected $_oFcpoHelper;
-
-    /**
      * Initialization
      *
      * @param string $sUrl
      * @param bool   $blUseLogin
      */
-    public function __construct($sUrl, $sDuration, $blPdfHeader=true, $blUseLogin=false)
+    public function __construct($sUrl, $sDuration, $blPdfHeader = true, $blUseLogin = false)
     {
         $this->_sUrl = $sUrl;
         $this->_blUseLogin = $blUseLogin;
         $this->_blPdfHeader = $blPdfHeader;
         $this->_sDuration = $sDuration;
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
@@ -104,7 +98,7 @@ class FcPoPopUpContent extends BaseModel
     public function fcpo_fetch_content()
     {
         $resCurl = curl_init();
-        $sUrl = $this->_sUrl."&duration=".$this->_sDuration;
+        $sUrl = $this->_sUrl . "&duration=" . $this->_sDuration;
 
         curl_setopt($resCurl, CURLOPT_URL, $sUrl);
         curl_setopt($resCurl, CURLOPT_RETURNTRANSFER, true);
@@ -112,7 +106,7 @@ class FcPoPopUpContent extends BaseModel
 
         if ($this->_blUseLogin) {
             $aCredentials = $this->_fcpoGetPayolutionCredentials();
-            curl_setopt($resCurl, CURLOPT_USERPWD, $aCredentials['user'].':'.$aCredentials['pass']);
+            curl_setopt($resCurl, CURLOPT_USERPWD, $aCredentials['user'] . ':' . $aCredentials['pass']);
         }
 
         $blCurlError = false;
@@ -123,6 +117,7 @@ class FcPoPopUpContent extends BaseModel
                 $blCurlError = true;
                 $sContent = $this->_fcpoReturnErrorMessage('Authentication failure! Please check your credentials in payolution settings.');
             }
+
         } catch (Exception $oEx) {
             $blCurlError = true;
             $sContent = $this->_fcpoReturnErrorMessage($oEx->getMessage());
@@ -137,37 +132,37 @@ class FcPoPopUpContent extends BaseModel
     }
 
     /**
+     * Returns configured credentials
+     *
+     * @return void
+     */
+    protected function _fcpoGetPayolutionCredentials()
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $aCredentials = array();
+        $aCredentials['user'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthUser');
+        $aCredentials['pass'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthSecret');
+
+        return $aCredentials;
+    }
+
+    /**
      * Formats error message to be displayed in a error box
      *
-     * @param  string $sMessage
+     * @param string $sMessage
      * @return string
      */
     protected function _fcpoReturnErrorMessage($sMessage)
     {
-        $sReturn  = '<p class="payolution_message_error">';
+        $sMessage = utf8_encode($sMessage);
+        $sReturn = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
         $sReturn .= '</p>';
 
         return $sReturn;
     }
 
-
-    /**
-     * Returns configured credentials
-     *
-     * @return array
-     */
-    protected function _fcpoGetPayolutionCredentials(): array
-    {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
-        $aCredentials = [];
-        $aCredentials['user'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthUser');
-        $aCredentials['pass'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthSecret');
-
-        return $aCredentials;
-    }
 }
 
-$oPopupContent = new FcPoPopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
+$oPopupContent = new FcPopopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
 echo $oPopupContent->fcpo_fetch_content();

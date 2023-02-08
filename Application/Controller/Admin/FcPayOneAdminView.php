@@ -1,5 +1,12 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,29 +25,22 @@
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-
 class FcPayOneAdminView extends AdminController
 {
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var FcPoHelper|null
+     * @var object
      */
-    protected ?FcPoHelper $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Centralized Database instance
      *
      * @var object
      */
-    protected $_oFcpoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
 
     /**
@@ -49,8 +49,8 @@ class FcPayOneAdminView extends AdminController
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
 
@@ -61,7 +61,12 @@ class FcPayOneAdminView extends AdminController
      */
     public function fcGetAdminSeperator()
     {
-        return '&';
+        $iVersion = $this->_oFcPoHelper->fcpoGetIntShopVersion();
+        if ($iVersion < 4300) {
+            return '?';
+        } else {
+            return '&';
+        }
     }
 
     /**
@@ -82,7 +87,7 @@ class FcPayOneAdminView extends AdminController
      */
     public function fcpoGetIntegratorId()
     {
-        return $this->_oFcpoHelper->fcpoGetIntegratorId();
+        return $this->_oFcPoHelper->fcpoGetIntegratorId();
     }
 
 
@@ -93,7 +98,7 @@ class FcPayOneAdminView extends AdminController
      */
     public function fcpoGetVersion()
     {
-        return $this->_oFcpoHelper->fcpoGetModuleVersion();
+        return $this->_oFcPoHelper->fcpoGetModuleVersion();
     }
 
     /**
@@ -103,7 +108,8 @@ class FcPayOneAdminView extends AdminController
      */
     public function fcpoGetMerchantId()
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOMerchantID');
     }
+
 }

@@ -1,5 +1,10 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Country;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,23 +19,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Country;
-
 class FcPayOneAddress extends FcPayOneAddress_parent
 {
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var FcPoHelper
+     * @var object
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * init object construction
@@ -40,7 +40,7 @@ class FcPayOneAddress extends FcPayOneAddress_parent
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
@@ -49,13 +49,13 @@ class FcPayOneAddress extends FcPayOneAddress_parent
      * @param int $iVersion
      * @return string
      */
-    public function fcpoGetUserCountryIso($iVersion=2)
+    public function fcpoGetUserCountryIso($iVersion = 2)
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject(Country::class);
+        $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
         if (!$oCountry->load($this->oxaddress__oxcountryid->value)) {
             return '';
         }
-        $sField = "oxcountry__oxisoalpha".$iVersion;
+        $sField = "oxcountry__oxisoalpha" . $iVersion;
 
         return $oCountry->$sField->value;
     }

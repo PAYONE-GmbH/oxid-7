@@ -1,5 +1,10 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+
+use Fatchip\PayOne\Application\Model\FcPoRequestLog;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,15 +19,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoRequestLog;
-
 class FcPayOneApiLog extends FcPayOneAdminDetails
 {
 
@@ -52,17 +52,18 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
     {
         parent::render();
 
-        $oLogEntry = $this->_oFcpoHelper->getFactoryObject(FcPoRequestLog::class);
+        $oLogEntry = $this->_oFcPoHelper->getFactoryObject(FcPoRequestLog::class);
 
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
             // load object
             $oLogEntry->load($sOxid);
             $this->_aViewData["edit"] = $oLogEntry;
         }
 
-        $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
+        $this->_aViewData['sHelpURL'] = $this->_oFcPoHelper->fcpoGetHelpUrl();
 
         return $this->_sThisTemplate;
     }
+
 }

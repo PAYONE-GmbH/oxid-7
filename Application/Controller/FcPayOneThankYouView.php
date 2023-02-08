@@ -1,4 +1,10 @@
 <?php
+
+namespace Fatchip\PayOne\Application\Controller;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -13,18 +19,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-
 class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
 
@@ -34,14 +32,14 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      *
      * @var object
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Instance of DatabaseProvider
      *
-     * @var DatabaseProvider
+     * @var object
      */
-    protected $_oFcpoDb = null;
+    protected $_oFcPoDb = null;
 
     /**
      * Mandate pdf url
@@ -59,6 +57,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 
     /**
      * Flag indicates if current order is/was of type amazon
+     *
      * @var bool
      */
     protected $_blIsAmazonOrder = false;
@@ -72,8 +71,8 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb     = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
 
@@ -84,59 +83,59 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      */
     public function fcpoGetMandatePdfUrl()
     {
-        $sPdfUrl    = false;
-        $oConfig    = $this->_oFcpoHelper->fcpoGetConfig();
-        $oOrder     = $this->getOrder();
+        $sPdfUrl = false;
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oOrder = $this->getOrder();
 
 
         if ($oOrder->oxorder__oxpaymenttype->value == 'fcpodebitnote' && $oConfig->getConfigParam('blFCPOMandateDownload')) {
             $sMandateIdentification = false;
-            $oPayment = $this->_oFcpoHelper->getFactoryObject(Payment::class);
+            $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
             $oPayment->load($oOrder->oxorder__oxpaymenttype->value);
             $sMode = $oPayment->fcpoGetOperationMode();
 
-            $aMandate = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMandate');
+            $aMandate = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoMandate');
 
-            if ($aMandate && array_key_exists('mandate_identification', $aMandate) != false) {
+            if ($aMandate && array_key_exists('mandate_identification', $aMandate) !== false) {
                 $sMandateIdentification = $aMandate['mandate_identification'];
             }
 
 
             if ($sMandateIdentification && $aMandate['mandate_status'] == 'active') {
                 $oPayment->fcpoAddMandateToDb($oOrder->getId(), $sMandateIdentification);
-                $sPdfUrl = $oConfig->getShopUrl()."modules/fc/fcpayone/download.php?id=".$oOrder->getId();
+                $sPdfUrl = $oConfig->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $oOrder->getId();
             } elseif ($sMandateIdentification && $sMode && $oOrder) {
-                $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+                $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
                 $sPdfUrl = $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $sMode);
             }
 
             $oUser = $this->getUser();
             if (!$oUser || !$oUser->oxuser__oxpassword->value) {
-                $sPdfUrl .= '&uid='.$this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoUserId');
+                $sPdfUrl .= '&uid=' . $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoUserId');
             }
         }
         $this->_sMandatePdfUrl = $sPdfUrl;
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoMandate');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoMandate');
 
         return $this->_sMandatePdfUrl;
     }
 
 
     /**
-     * Method checks for an appointment error
+     * Method checks if any error occured (appointment-error, fraud etc.)
      *
      * @return bool
      */
-    public function fcpoIsAppointedError()
+    public function fcpoOrderHasProblems()
     {
-        $blReturn   = false;
-        $oOrder     = $this->getOrder();
+        $oOrder = $this->getOrder();
+        $blIsPayone = $oOrder->isPayOnePaymentType();
 
-        if ($oOrder->isPayOnePaymentType()) {
-            if ($oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' && $oOrder->oxorder__oxtransstatus->value == 'ERROR') {
-                $blReturn = true;
-            }
-        }
+        $blReturn = (
+            $blIsPayone &&
+            $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
+            $oOrder->oxorder__oxtransstatus->value == 'ERROR'
+        );
 
         return $blReturn;
     }
@@ -151,7 +150,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     {
         $oUser = $this->getUser();
         if ($oUser) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('sFcpoUserId', $oUser->getId());
+            $this->_oFcPoHelper->fcpoSetSessionVariable('sFcpoUserId', $oUser->getId());
         }
 
         $this->_fcpoHandleAmazonThankyou();
@@ -163,15 +162,51 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     }
 
     /**
+     * Loggs off Amazon if this is an Amazon order
+     *
+     * @return void
+     */
+    protected function _fcpoHandleAmazonThankyou()
+    {
+        $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();
+        if ($blIsAmazonOrder) {
+            $this->_blIsAmazonOrder = true;
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('amazonRefNr');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('usr');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayOrderIsPending');
+        }
+    }
+
+    /**
+     * Checks if current order is of type amazon
+     *
+     * @return bool
+     */
+    protected function _fcpoDetermineAmazonOrder()
+    {
+        $blReturn = false;
+        $sAmazonLoginAccessToken = $this->_oFcPoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
+        if ($sAmazonLoginAccessToken) {
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
+    /**
      * Deletes session variables that should not last after finishing order
      *
      * @return void
      */
     protected function _fcpoDeleteSessionVariablesOnOrderFinish()
     {
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('klarna_client_token');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_client_token');
     }
 
     /**
@@ -185,53 +220,16 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     }
 
     /**
-     * Loggs off Amazon if this is an Amazon order
-     *
-     * @return void
-     */
-    protected function _fcpoHandleAmazonThankyou()
-    {
-        $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();
-        if ($blIsAmazonOrder) {
-            $this->_blIsAmazonOrder = true;
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('amazonRefNr');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayOrderIsPending');
-        }
-    }
-
-    /**
-     * Checks if current order is of type amazon
-     *
-     * @return bool
-     */
-    protected function _fcpoDetermineAmazonOrder()
-    {
-        $blReturn = false;
-        $sAmazonLoginAccessToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
-        if ($sAmazonLoginAccessToken) {
-            $blReturn = true;
-        }
-
-        return $blReturn;
-    }
-
-
-    /**
      * Returns the html of barzahlen instructions
      *
      * @return mixed
      */
     public function fcpoGetBarzahlenHtml()
     {
-        if ($this->_sBarzahlenHtml == null) {
-            $this->_sBarzahlenHtml = $this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
+        if ($this->_sBarzahlenHtml === null) {
+            $this->_sBarzahlenHtml = $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
             // delete this from session after we have the result for one time displaying
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
         }
 
         return $this->_sBarzahlenHtml;

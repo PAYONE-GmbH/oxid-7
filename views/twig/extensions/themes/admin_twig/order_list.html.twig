@@ -22,7 +22,7 @@
 {% block admin_order_list_item %}
     <!-- FCPAYONE BEGIN -->
     {% if listitem.oxorder__oxstorno.value == 1 %}
-        {% set listclass = "listitem3" %}
+        {% set listclass = 'listitem3' %}
     {% else %}
         {% if listitem['blacklist'] is defined and listitem.blacklist == 1 %}
             {% set listclass = "listitem3" %}
@@ -31,12 +31,13 @@
         {% endif %}
     {% endif %}
     {% if listitem.getId() == oxid %}
-        {% set listclass = "listitem4" %}
+        {% set listclass = 'listitem4' %}
     {% endif %}
+
     <td valign="top" class="{{ listclass }}" height="15">
         <div class="listitemfloating">
-            <a href="Javascript:top.oxid.admin.editThis('{{ listitem.oxorder__oxid.value }}');" class="{{ listclass }}">
-                {{ listitem.oxorder__fcporefnr.value }}
+            <a href="Javascript:top.oxid.admin.editThis('{{ listitem.oxorder__oxid.value|raw }}');" class="{{ listclass }}">
+                {{ listitem.oxorder__fcporefnr.value|raw }}
             </a>
         </div>
     </td>
@@ -52,14 +53,11 @@
 
 {% block admin_order_list_sorting %}
     <td class="listheader" height="15">
-        <a href="Javascript:top.oxid.admin.setSorting( document.search, 'oxorder',
-    'fcporefnr',
-    'asc');document.search.submit();"
+        <a href="Javascript:top.oxid.admin.setSorting( document.search, 'oxorder', 'fcporefnr', 'asc');document.search.submit();"
            class="listheader">
             PAYONE Ref.Nr.
         </a>
     </td>
 
     {{ parent() }}
-
 {% endblock %}

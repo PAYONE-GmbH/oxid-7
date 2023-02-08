@@ -4,15 +4,16 @@
             <dt>
                 <input id="payment_{{ sPaymentID }}" type="radio" name="paymentid" value="{{ sPaymentID }}"
                        {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %}>
-                <label for="payment_{{ sPaymentID }}"><b>{{ paymentmethod.oxpayments__oxdesc.value }} {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</b></label>
+                <label for="payment_{{ sPaymentID }}"><b>{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}
+                        {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</b></label>
             </dt>
             <dd class="{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% endif %}">
                 <input type="hidden" name="fcpo_cc_type" value="ajax">
                 {% for oFcPoCCPaymentMetaData in aFcPoCCPaymentMetaData %}
-                    <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sHashName }}"
-                           value="{{ oFcPoCCPaymentMetaData.sHashValue }}">
-                    <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sOperationModeName }}"
-                           value="{{ oFcPoCCPaymentMetaData.sOperationModeValue }}">
+            <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sHashName }}"
+                   value="{{ oFcPoCCPaymentMetaData.sHashValue }}">
+            <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sOperationModeName }}"
+                   value="{{ oFcPoCCPaymentMetaData.sOperationModeValue }}">
                 {% endfor %}
                 <input type="hidden" name="fcpo_mode_{{ sPaymentID }}"
                        value="{{ paymentmethod.fcpoGetOperationMode() }}">
@@ -29,11 +30,13 @@
                     <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CREDITCARD" }) }}:</label>
                     <div class="col-lg-9">
                         <select name="dynvalue[fcpo_kktype]"
-                                {% if oView.getMaestroUK() %}onchange="fcCheckType(this); return false;"{% endif %}
+                                {% if oView.getMaestroUK() %}onchange="fcCheckType(this); return false;" {% endif %}
                                 class="form-control selectpicker" required="required">
                             {% for oFcPoCCPaymentMetaData in aFcPoCCPaymentMetaData %}
-                                <option value="{{ oFcPoCCPaymentMetaData.sPaymentTag }}"
-                                        {% if oFcPoCCPaymentMetaData.blSelected %}selected{% endif %}>{{ oFcPoCCPaymentMetaData.sPaymentName }}</option>
+                            <option value="{{ oFcPoCCPaymentMetaData.sPaymentTag }}"
+                                    {% if oFcPoCCPaymentMetaData.blSelected %}selected{% endif %}>
+                                {{ oFcPoCCPaymentMetaData.sPaymentName }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -64,7 +67,7 @@
                                class="form-control"
                                size="20" maxlength="50" id="fcpo_cc_cardholder" name="dynvalue[fcpo_kkcardholder]"
                                value="{{ dynvalue.fcpo_kkcardholder }}"
-                               onkeyup="validateCardholder()"
+                               onkeyup="fcpoValidateCardholder()"
                         >
                         <span class="help-block">{{ translate({ ident: "FCPO_CC_CARDHOLDER_HELPTEXT" }) }}</span>
                         <div id="fcpo_cc_cardholder_invalid" class="fcpo_check_error">
@@ -78,8 +81,7 @@
                 </div>
 
                 <div class="form-group fcpo_kkexpire">
-                    <label class="req control-label col-xs-12 col-lg-3">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}
-                        :</label>
+                    <label class="req control-label col-xs-12 col-lg-3">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}:</label>
                     <div class="col-xs-6 col-lg-2">
                         <select name="dynvalue[fcpo_kkmonth]" class="form-control selectpicker" required="required">
                             <option {% if dynvalue.fcpo_kkmonth == "01" %}selected{% endif %}>01</option>
@@ -99,7 +101,7 @@
                     <div class="col-xs-6 col-lg-2">
                         <select name="dynvalue[fcpo_kkyear]" class="form-control selectpicker">
                             {% for year in oView.getCreditYears() %}
-                                <option {% if dynvalue.fcpo_kkyear == year %}selected{% endif %}>{{ year }}</option>
+                            <option {% if dynvalue.fcpo_kkyear == year %}selected{% endif %}>{{ year }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -115,13 +117,12 @@
                     </div>
                 </div>
                 <div class="form-group fcpo_kkpruef">
-                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}
-                        :</label>
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}:</label>
                     <div class="col-lg-9">
                         <input placeholder="{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}" autocomplete="off"
                                type="text" class="form-control js-oxValidate js-oxValidate_notEmpty payment_text"
-                               size="20" maxlength="64" name="dynvalue[fcpo_kkpruef]"
-                               value="{{ dynvalue.fcpo_kkpruef }}" required="required">
+                               size="20" maxlength="64" name="dynvalue[fcpo_kkpruef]" value="{{ dynvalue.fcpo_kkpruef }}"
+                               required="required">
                         <div id="fcpo_cc_cvc2_invalid" class="fcpo_check_error">
                             <span class="help-block">
                                 <ul role="alert" class="list-unstyled text-danger">
@@ -133,24 +134,24 @@
                     </div>
                 </div>
                 {% if oView.getMaestroUK() %}
-                    <div class="form-group" id="fcpo_kkcsn_row" style="display: none;">
-                        <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}</label>
-                        <div class="col-lg-9">
-                            <input placeholder="{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}"
-                                   autocomplete="off" type="text" class="payment_text" size="20" maxlength="64"
-                                   name="dynvalue[fcpo_kkcsn]" value="{{ dynvalue.fcpo_kkcsn }}">
-                        </div>
+                <div class="form-group" id="fcpo_kkcsn_row" style="display: none;">
+                    <label class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}</label>
+                    <div class="col-lg-9">
+                        <input placeholder="{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}" autocomplete="off"
+                               type="text" class="payment_text" size="20" maxlength="64" name="dynvalue[fcpo_kkcsn]"
+                               value="{{ dynvalue.fcpo_kkcsn }}">
                     </div>
+                </div>
                 {% endif %}
                 <div class="clearfix"></div>
                 {% block checkout_payment_longdesc %}
-                    {% if paymentmethod.oxpayments__oxlongdesc.value %}
-                        <div class="alert alert-info col-lg-offset-3 desc">
-                            {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
-                        </div>
-                    {% endif %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value %}
+                <div class="alert alert-info col-lg-offset-3 desc">
+                    {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
+                </div>
+                {% endif %}
                 {% endblock %}
             </dd>
         </dl>
     </div>
-{% endif %}
+    {% endif %}

@@ -1,4 +1,9 @@
 <?php
+
+namespace Fatchip\PayOne\Application\Model;
+
+use OxidEsales\Eshop\Application\Model\Order;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -13,13 +18,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
 class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
 {
 
@@ -30,47 +32,46 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
      * Executes payment, returns true on success.
      *
      * @param double $dAmount Goods amount
-     * @param object &$oOrder User ordering object
+     * @param Order &$oOrder  User ordering object
      *
      * @extend executePayment
      * @return bool
      */
-    public function executePayment($dAmount, &$oOrder)
+    public function executePayment($dAmount, &$oOrder): bool
     {
-        // if($oOrder->isPayOnePaymentType() == false || $oOrder->isPayOneIframePayment()) {
-        if ($oOrder->isPayOnePaymentType() == false) {
+        // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
+        if ($oOrder->isPayOnePaymentType() === false) {
             return parent::executePayment($dAmount, $oOrder);
         }
 
         $this->_iLastErrorNo = null;
         $this->_sLastError = null;
-        
-        $oResponse = $oOrder->fcHandleAuthorization(false, $this);
-        
-        return $oResponse;
+
+        return $oOrder->fcHandleAuthorization(false, $this);
     }
-    
-    
+
+
     /**
      * Setter for last error number
      *
-     * @param  int $iLastErrorNr
+     * @param int $iLastErrorNr
      * @return void
      */
-    public function fcSetLastErrorNr($iLastErrorNr)
+    public function fcSetLastErrorNr(int $iLastErrorNr): void
     {
         $this->_iLastErrorNo = $iLastErrorNr;
     }
 
-    
+
     /**
      * Setter for last error text
      *
-     * @param  int $sLastError
+     * @param string $sLastError
      * @return void
      */
-    public function fcSetLastError($sLastError)
+    public function fcSetLastError(string $sLastError): void
     {
         $this->_sLastError = $sLastError;
     }
+
 }

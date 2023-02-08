@@ -4,7 +4,7 @@
     {% if edit.oxpayments__fcpoispayone.value == 1 %}
         <tr>
             <td class="edittext" colspan="2">
-                <img src="{{ oViewConf.fcpoGetAdminModuleImgUrl() }}logoclaim.gif" alt="PAYONE"><br><br>
+                <img src="{{ oViewConf.getModuleUrl("fcpayone", "admin/img/logo_payone_new.gif") }}" alt="PAYONE"><br><br>
                 {{ translate({ ident: "FC_IS_PAYONE" }) }}
                 {% if edit.oxpayments__oxid.value == 'fcpobarzahlen' %}
                     <input type="hidden" name="editval[oxpayments__fcpoauthmode]" value="preauthorization">
@@ -18,10 +18,12 @@
                 </td>
                 <td class="edittext">
                     <input type="radio" name="editval[oxpayments__fcpoauthmode]" value="preauthorization"
-                           {% if edit.oxpayments__fcpoauthmode.value == 'preauthorization' %}checked{% endif %}> {{ translate({ ident: "FCPO_PREAUTHORIZATION" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_PREAUTHORIZATION_HELP"), 'sHelpText': help_text("FCPO_PREAUTHORIZATION_HELP")} %}
+                           {% if edit.oxpayments__fcpoauthmode.value == 'preauthorization' %}checked{% endif %}>
+                    {{ translate({ ident: "FCPO_PREAUTHORIZATION" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_PREAUTHORIZATION_HELP"), 'sHelpText': help_text("FCPO_PREAUTHORIZATION_HELP")} %}
                     <br>
                     <input type="radio" name="editval[oxpayments__fcpoauthmode]" value="authorization"
-                           {% if edit.oxpayments__fcpoauthmode.value == 'authorization' %}checked{% endif %}> {{ translate({ ident: "FCPO_AUTHORIZATION" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_AUTHORIZATION_HELP"), 'sHelpText': help_text("FCPO_AUTHORIZATION_HELP")} %}
+                           {% if edit.oxpayments__fcpoauthmode.value == 'authorization' %}checked{% endif %}>
+                    {{ translate({ ident: "FCPO_AUTHORIZATION" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_AUTHORIZATION_HELP"), 'sHelpText': help_text("FCPO_AUTHORIZATION_HELP")} %}
                 </td>
             {% endif %}
         </tr>
@@ -40,8 +42,8 @@
                                        {% if edit.oxpayments__fcpolivemode.value == '1' %}checked{% endif %}>
                                 <strong>{{ translate({ ident: "FCPO_LIVE_MODE" }) }}</strong><br>
                                 <input type="radio" name="editval[oxpayments__fcpolivemode]" value="0"
-                                       {% if edit.oxpayments__fcpolivemode.value == '0' %}checked{% endif %}> {{ translate({ ident: "FCPO_TEST_MODE" }) }}
-                                <br>
+                                       {% if edit.oxpayments__fcpolivemode.value == '0' %}checked{% endif %}>
+                                {{ translate({ ident: "FCPO_TEST_MODE" }) }}<br>
                             </td>
                             <td>
                                 {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_OPERATIONMODE"), 'sHelpText': help_text("FCPO_HELP_OPERATIONMODE")} %}

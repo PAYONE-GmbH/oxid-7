@@ -2,7 +2,13 @@
   "name": "payone-gmbh/oxid-7",
   "description": "The PAYONE module for Oxid 7",
   "type": "oxideshop-module",
-  "keywords": ["oxid", "modules", "eShop", "payment", "creditcard"],
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "payment",
+    "creditcard"
+  ],
   "homepage": "https://www.payone.com/",
   "license": [
     "LGPL-3.0-only"

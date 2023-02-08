@@ -1,5 +1,9 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Model;
+
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,16 +18,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
-class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPoRequestLog extends BaseModel
 {
 
+    public $fcporequestlog__fcpo_request;
+    public $fcporequestlog__fcpo_response;
     /**
      * Object core table name
      *
@@ -36,7 +39,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @var string
      */
-    protected $_sClassName = FcPoRequestLog::class;
+    protected $_sClassName = 'fcporequestlog';
 
 
     /**
@@ -44,8 +47,7 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function __construct()
     {
-        parent::__construct();
-        $this->init(FcPoRequestLog::class);
+        $this->init('fcporequestlog');
     }
 
 
@@ -59,6 +61,17 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
         return $this->getArray($this->fcporequestlog__fcpo_request->rawValue);
     }
 
+    /**
+     * Get a array from a serialized array or false if not unserializable
+     *
+     * @return array
+     */
+    protected function getArray($sParam)
+    {
+        $aArray = unserialize($sParam);
+
+        return (is_array($aArray)) ? $aArray : false;
+    }
 
     /**
      * Get response as array
@@ -68,17 +81,5 @@ class FcPoRequestLog extends \OxidEsales\Eshop\Core\Model\BaseModel
     public function getResponseArray()
     {
         return $this->getArray($this->fcporequestlog__fcpo_response->rawValue);
-    }
-
-
-    /**
-     * Get a array from a serialized array or false if not unserializable
-     *
-     * @return array
-     */
-    protected function getArray($sParam)
-    {
-        $aArray     = unserialize($sParam);
-        return (is_array($aArray)) ? $aArray : false;
     }
 }

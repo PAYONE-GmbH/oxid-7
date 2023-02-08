@@ -1,4 +1,12 @@
 <?php
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+
+use Fatchip\PayOne\Application\Model\FcPoMapping;
+use OxidEsales\Eshop\Application\Model\Payment;
+use stdClass;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -13,17 +21,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoMapping;
-use OxidEsales\Eshop\Application\Model\Payment;
-use stdClass;
-
 class FcPayOneStatusMapping extends FcPayOneAdminDetails
 {
 
@@ -42,20 +43,29 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     public function getMappings()
     {
         $aMappings = $this->_fcpoGetExistingMappings();
-        $aMappings = $this->_fcpoAddNewMapping($aMappings);
 
-        return $aMappings;
+        return $this->_fcpoAddNewMapping($aMappings);
+    }
+
+    /**
+     * Requests database for existing mappings and returns an array of mapping objects
+     *
+     * @return array
+     */
+    protected function _fcpoGetExistingMappings()
+    {
+        return $this->_oFcPoMapping->fcpoGetExistingMappings();
     }
 
     /**
      * Adds a new entry if flag has been set
      *
-     * @param  array $aMappings
+     * @param array $aMappings
      * @return array
      */
     protected function _fcpoAddNewMapping($aMappings)
     {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('add')) {
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter('add')) {
             $oMapping = new stdClass();
             $oMapping->sOxid = 'new';
             $oMapping->sPaymentType = '';
@@ -68,18 +78,6 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     }
 
     /**
-     * Requests database for existing mappings and returns an array of mapping objects
-     *
-     * @return array
-     */
-    protected function _fcpoGetExistingMappings()
-    {
-        $aExistingStatusMappings = $this->_oFcpoMapping->fcpoGetExistingMappings();
-
-        return $aExistingStatusMappings;
-    }
-
-    /**
      * Returns a list of payment types
      *
      * @return array
@@ -87,25 +85,24 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     public function getPaymentTypeList()
     {
         $oPayment = oxNew(Payment::class);
-        $aPaymentTypes = $oPayment->fcpoGetPayonePaymentTypes();
 
-        return $aPaymentTypes;
+        return $oPayment->fcpoGetPayonePaymentTypes();
     }
 
     /**
      * Returns a list of payone status list
      *
-     * @return array
+     * @return stdClass[]
      */
-    public function getPayoneStatusList()
+    public function getPayoneStatusList(): array
     {
-        $aPayoneStatusList = $this->_oFcpoHelper->fcpoGetPayoneStatusList();
+        $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
 
-        $aNewList = [];
-        foreach ($aPayoneStatusList as $sStatusId) {
+        $aNewList = array();
+        foreach ($aPayoneStatusList as $aPayoneRectorPrefix202302StatusList) {
             $oStatus = new stdClass();
-            $oStatus->sId = $sStatusId;
-            $oStatus->sTitle = $this->_oFcpoHelper->fcpoGetLang()->translateString('fcpo_status_' . $sStatusId, null, true);
+            $oStatus->sId = $aPayoneRectorPrefix202302StatusList;
+            $oStatus->sTitle = $this->_oFcPoHelper->fcpoGetLang()->translateString('fcpo_status_' . $aPayoneRectorPrefix202302StatusList, null, true);
             $aNewList[] = $oStatus;
         }
 
@@ -119,21 +116,21 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      */
     public function getShopStatusList()
     {
-        $aFolders = $this->_oFcpoHelper->fcpoGetConfig()->getConfigParam('aOrderfolder');
-        return $aFolders;
+        return $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('aOrderfolder');
     }
 
     /**
-     * Updating settings into database
+     * Updating mappings into database
      *
      * @return void
      */
-    public function save()
+    public function save(): void
     {
         $oMapping = $this->fcpoGetInstance(FcPoMapping::class);
-        $aMappings = $this->_oFcpoHelper->fcpoGetRequestParameter("editval");
-        if (is_array($aMappings) && count($aMappings) > 0) {
+        $aMappings = $this->_oFcPoHelper->fcpoGetRequestParameter("editval");
+        if (is_array($aMappings) && $aMappings !== []) {
             $oMapping->fcpoUpdateMappings($aMappings);
         }
     }
+
 }

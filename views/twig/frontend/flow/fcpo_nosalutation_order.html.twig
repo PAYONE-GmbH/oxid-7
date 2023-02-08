@@ -1,3 +1,6 @@
+{% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
+{% set sFcPoTemplatePath = sFcPoTemplatePath|cat('/fcpo_nosalutation_address.html.twig') %}
+
 <div id="orderAddress" class="row">
     <div class="col-xs-12 col-md-6">
         <form action="{{ oViewConf.getSslSelfLink() }}" method="post">

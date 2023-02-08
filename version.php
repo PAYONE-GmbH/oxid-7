@@ -13,15 +13,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
- 
+
 namespace Fatchip\PayOne;
 
+use Fatchip\PayOne\Lib\FcPoHelper;
+
 $mKey = filter_input(INPUT_GET, 'key', FILTER_NULL_ON_FAILURE);
-$blIsValidCall = ($mKey && md5($mKey) == '5fce785e30dbf6e1181d452c6057bfd3');
+$blIsValidCall = ($mKey && md5((string)$mKey) === '5fce785e30dbf6e1181d452c6057bfd3');
 
 if ($blIsValidCall) {
     if (!function_exists('getShopBasePath')) {
@@ -32,7 +34,7 @@ if ($blIsValidCall) {
          */
         function getShopBasePath()
         {
-            return dirname(__FILE__).'/../../../';
+            return dirname(__FILE__) . '/../../../';
         }
     }
 
@@ -44,7 +46,7 @@ if ($blIsValidCall) {
      * @return bool
      */
     if (!function_exists('isAdmin')) {
-        function isAdmin()
+        function isAdmin(): bool
         {
             return true;
         }

@@ -30,8 +30,7 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading"><h3 class="panel-title">{{ translate({ ident: "FCPO_AMAZON_SELECT_PAYMENT" }) }}</h3>
-        </div>
+        <div class="panel-heading"><h3 class="panel-title">{{ translate({ ident: "FCPO_AMAZON_SELECT_PAYMENT" }) }}</h3></div>
         <div class="panel-body">
             <div id="walletWidgetDiv"></div>
             <hr>
@@ -53,10 +52,9 @@
                 scope: 'profile payments:widget payments:shipping_address payments:billing_address',
                 amazonOrderReferenceId: '{{ oViewConf.fcpoGetAmazonPayReferenceId() }}',
                 onPaymentSelect: function (orderReference) {
-                    console.log('triggered onPaymentSelect');
-
-                    $("[id^=paymentNextStepBottom]").each(function () {
-                        $(this).attr("disabled", true);
+                    var paymentNextStepBottom = $("button[id^=paymentNextStepBottom]");
+                    paymentNextStepBottom.each(function () {
+                        this.setAttribute('disabled', true);
                     });
 
                     var formParams = '{"fcpoAmazonReferenceId":"{{ oViewConf.fcpoGetAmazonPayReferenceId() }}"}';
@@ -67,8 +65,8 @@
                         dataType: 'text',
                         data: {paymentid: "fcpoamazonpay", action: "get_amazon_reference_details", params: formParams},
                         success: function (Response) {
-                            $("[id^=paymentNextStepBottom]").each(function () {
-                                $(this).attr("disabled", false);
+                            paymentNextStepBottom.each(function () {
+                                this.removeAttribute('disabled');
                             });
                         }
                     });
@@ -84,15 +82,14 @@
     <script async="async" src='{{ oViewConf.fcpoGetAmazonWidgetsUrl() }}'></script>
 
     {% block checkout_payment_nextstep %}
-        <div class="well well-sm">
-            <a href="{{ seo_url({ ident: oViewConf.getOrderLink() }) }}"
-               class="btn btn-default pull-left prevStep submitButton largeButton" id="paymentBackStepBottom"><i
-                        class="fa fa-caret-left"></i> {{ translate({ ident: "PREVIOUS_STEP" }) }}</a>
-            <button disabled type="submit" name="userform"
-                    class="btn btn-primary pull-right submitButton nextStep largeButton"
-                    id="paymentNextStepBottom">{{ translate({ ident: "CONTINUE_TO_NEXT_STEP" }) }} <i
-                        class="fa fa-caret-right"></i></button>
-            <div class="clearfix"></div>
-        </div>
+    <div class="well well-sm">
+        <a href="{{ seo_url({ ident: oViewConf.getOrderLink() }) }}"
+           class="btn btn-default pull-left prevStep submitButton largeButton" id="paymentBackStepBottom"><i
+                    class="fa fa-caret-left"></i> {{ translate({ ident: "PREVIOUS_STEP" }) }}</a>
+        <button disabled type="submit" name="userform"
+                class="btn btn-primary pull-right submitButton nextStep largeButton" id="paymentNextStepBottom">
+            {{ translate({ ident: "CONTINUE_TO_NEXT_STEP" }) }} <i class="fa fa-caret-right"></i></button>
+        <div class="clearfix"></div>
+    </div>
     {% endblock %}
 </form>

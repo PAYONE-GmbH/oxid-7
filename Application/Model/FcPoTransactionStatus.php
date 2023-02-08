@@ -1,5 +1,14 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use stdClass;
+
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,34 +23,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Order;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use stdClass;
-
-class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
+class FcPoTransactionStatus extends BaseModel
 {
 
+    public $fcpotransactionstatus__fcpo_txaction;
+    public $fcpotransactionstatus__fcpo_txreceivable;
+    public $fcpotransactionstatus__fcpo_balance;
+    public $fcpotransactionstatus__fcpo_txid;
+    public $fcpotransactionstatus__fcpo_clearingtype;
+    public $fcpotransactionstatus__fcpo_cardtype;
     /**
      * Helper object for dealing with different shop versions
      *
      * @var FcPoHelper
      */
-    protected $_oFcpoHelper = null;
+    protected $_oFcPoHelper = null;
 
     /**
      * Instance of oxid database
      *
      * @var object
      */
-    protected $_oFcpoDb = null;
+    protected $_oFcPoDb = null;
 
     /**
      * Object core table name
@@ -55,17 +62,16 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      *
      * @var string
      */
-    protected $_sClassName = FcPoTransactionStatus::class;
+    protected $_sClassName = 'fcpotransactionstatus';
 
     /**
      * Class constructor
      */
     public function __construct()
     {
-        parent::__construct();
         $this->init('fcpotransactionstatus');
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
@@ -75,10 +81,10 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getAction()
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sAction = $this->fcpotransactionstatus__fcpo_txaction->value;
-        $dReceivable = (double) $this->fcpotransactionstatus__fcpo_txreceivable->value;
-        $dBalance = (double) $this->fcpotransactionstatus__fcpo_balance->value;
+        $dReceivable = (double)$this->fcpotransactionstatus__fcpo_txreceivable->value;
+        $dBalance = (double)$this->fcpotransactionstatus__fcpo_balance->value;
 
         if ($sAction == 'paid' && ($dReceivable + $dBalance) < 0) {
             $sAction = 'overpaid';
@@ -94,15 +100,29 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getClearingtype()
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sTxid = $this->fcpotransactionstatus__fcpo_txid->value;
         $sClearingType = $this->fcpotransactionstatus__fcpo_clearingtype->value;
         $oOrder = $this->_fcpoGetOrderByTxid($sTxid);
         $sPaymentType = $oOrder->oxorder__oxpaymenttype->value;
         $sTransSuffix = ($sClearingType == 'fnc') ? $sPaymentType : $sClearingType;
-        $sReturn = $oLang->translateString('fcpo_clearingtype_' . $sTransSuffix, null, true);
 
-        return $sReturn;
+        return $oLang->translateString('fcpo_clearingtype_' . $sTransSuffix, null, true);
+    }
+
+    /**
+     * Returns order object by txid
+     *
+     * @param string $sTxid
+     * @return object
+     */
+    protected function _fcpoGetOrderByTxid($sTxid)
+    {
+        $sOxid = $this->_oFcPoDb->getOne("SELECT oxid FROM oxorder WHERE fcpotxid = '{$sTxid}'");
+        $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
+        $oOrder->load($sOxid);
+
+        return $oOrder;
     }
 
     /**
@@ -124,7 +144,7 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getCardtype()
     {
-        $aMatchMap = [
+        $aMatchMap = array(
             'V' => 'Visa',
             'M' => 'Mastercard',
             'A' => 'Amex',
@@ -133,9 +153,10 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             'O' => 'Maestro International',
             'U' => 'Maestro UK',
             'B' => 'Carte Bleue',
-        ];
+        );
 
         $sCardType = $this->fcpotransactionstatus__fcpo_cardtype->value;
+
         return (isset($aMatchMap[$sCardType])) ? $aMatchMap[$sCardType] : $sCardType;
     }
 
@@ -148,25 +169,50 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getDisplayNameReceivable($dReceivable)
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sLangAppointed = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_appointed1', 'fcpo_receivable_appointed2');
         $sLangReminder = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_reminder', '');
         $sLangDebit = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_debit1', 'fcpo_receivable_debit2');
 
-        $aMatchMap = [
+        $aMatchMap = array(
             'cancelation' => 'fcpo_receivable_cancelation',
             'appointed' => $sLangAppointed,
             'capture' => 'fcpo_receivable_capture',
             'refund' => $sLangDebit,
             'debit' => $sLangDebit,
             'reminder' => $sLangReminder,
-        ];
+        );
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'FCPO_RECEIVABLE');
-        $sTranslatedString = $oLang->translateString($sLangIdent, null, true);
 
-        return $sTranslatedString;
+        return $oLang->translateString($sLangIdent, null, true);
+    }
+
+    /**
+     * This method decides if given option1 or 2 will be used by checking if given value
+     *
+     * @param double $dValue
+     * @param string $sOption1
+     * @param string $sOption2
+     * @return string
+     */
+    protected function _fcpoGetLangIdent($dValue, $sOption1, $sOption2)
+    {
+        return ($dValue > 0) ? $sOption1 : $sOption2;
+    }
+
+    /**
+     * Returns a certain action of a given map
+     *
+     * @param string $sTxAction
+     * @param array  $aMatchMap
+     * @param string $sDefault
+     * @return string
+     */
+    protected function _fcpoGetMapAction($sTxAction, $aMatchMap, $sDefault)
+    {
+        return (isset($aMatchMap[$sTxAction])) ? $aMatchMap[$sTxAction] : $sDefault;
     }
 
     /**
@@ -178,14 +224,14 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
      */
     public function getDisplayNamePayment($dPayment)
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
         $sLangCapture = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_capture1', 'fcpo_payment_capture2');
         $sLangPaid = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_paid1', 'fcpo_payment_paid2');
         $sLangUnderpaid = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_underpaid1', 'fcpo_payment_underpaid2');
         $sLangDebit = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_debit1', 'fcpo_payment_debit2');
 
-        $aMatchMap = [
+        $aMatchMap = array(
             'capture' => $sLangCapture,
             'cancelation' => $sLangPaid,
             'paid' => $sLangPaid,
@@ -193,21 +239,18 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             'refund' => $sLangDebit,
             'debit' => $sLangDebit,
             'transfer' => 'fcpo_payment_transfer',
-        ];
+        );
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'fcpo_payment');
-        $sTranslatedString = $oLang->translateString($sLangIdent, null, true);
 
-        return $sTranslatedString;
+        return $oLang->translateString($sLangIdent, null, true);
     }
 
     /**
      * Template getter for returning forward redirects
-     *
-     * @return array|false
      */
-    public function fcpoGetForwardRedirects()
+    public function fcpoGetForwardRedirects(): array|false
     {
         $sStatusmessageId = $this->getId();
         $sQuery = "
@@ -224,12 +267,12 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             WHERE sfq.FCSTATUSMESSAGEID='{$sStatusmessageId}'  
         ";
 
-        $aRows = $this->_oFcpoDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->GetAll($sQuery);
 
         if (!is_array($aRows) || count($aRows) == 0) {
             return false;
         }
-        $aForwardRedirects = [];
+        $aForwardRedirects = array();
         foreach ($aRows as $aRow) {
             $oForwardRedirect = new stdClass();
             $oForwardRedirect->targetUrl = $aRow['FCPO_URL'];
@@ -237,12 +280,12 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
             $oForwardRedirect->lastTry = $aRow['FCLASTTRY'];
             $oForwardRedirect->fulfilled = $aRow['FCFULFILLED'];
             $sDetails =
-                "REQUEST\n=======\n".
-                $aRow['FCLASTREQUEST']."\n\n".
-                "RESPONSE\n========\n".
-                $aRow['FCLASTRESPONSE']."\n\n".
-                "REQUESTINFO\n===========\n".
-                $aRow['FCRESPONSEINFO']."\n\n";
+                "REQUEST\n=======\n" .
+                $aRow['FCLASTREQUEST'] . "\n\n" .
+                "RESPONSE\n========\n" .
+                $aRow['FCLASTRESPONSE'] . "\n\n" .
+                "REQUESTINFO\n===========\n" .
+                $aRow['FCRESPONSEINFO'] . "\n\n";
             $oForwardRedirect->details = $sDetails;
 
             $aForwardRedirects[] = $oForwardRedirect;
@@ -251,48 +294,4 @@ class FcPoTransactionStatus extends \OxidEsales\Eshop\Core\Model\BaseModel
         return $aForwardRedirects;
     }
 
-    /**
-     * This method decides if given option1 or 2 will be used by checking if given value
-     *
-     * @param  double $dValue
-     * @param  string $sOption1
-     * @param  string $sOption2
-     * @return string
-     */
-    protected function _fcpoGetLangIdent($dValue, $sOption1, $sOption2)
-    {
-        $sReturn = ($dValue > 0) ? $sOption1 : $sOption2;
-
-        return $sReturn;
-    }
-
-    /**
-     * Returns a certain action of a given map
-     *
-     * @param  string $sTxAction
-     * @param  array  $aMatchMap
-     * @param  string $sDefault
-     * @return string
-     */
-    protected function _fcpoGetMapAction($sTxAction, $aMatchMap, $sDefault)
-    {
-        $sReturn = (isset($aMatchMap[$sTxAction])) ? $aMatchMap[$sTxAction] : $sDefault;
-
-        return $sReturn;
-    }
-
-    /**
-     * Returns order object by txid
-     *
-     * @param  string $sTxid
-     * @return object
-     */
-    protected function _fcpoGetOrderByTxid($sTxid)
-    {
-        $sOxid = $this->_oFcpoDb->GetOne("SELECT oxid FROM oxorder WHERE fcpotxid = '{$sTxid}'");
-        $oOrder = $this->_oFcpoHelper->getFactoryObject(Order::class);
-        $oOrder->load($sOxid);
-
-        return $oOrder;
-    }
 }

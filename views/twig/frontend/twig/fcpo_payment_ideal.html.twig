@@ -2,8 +2,8 @@
     <dt>
         <input id="payment_{{ sPaymentID }}" type="radio" name="paymentid" value="{{ sPaymentID }}"
                {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %}>
-        <label for="payment_{{ sPaymentID }}"><b>{{ paymentmethod.oxpayments__oxdesc.value }}</b> {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}
-        </label>
+        <label for="payment_{{ sPaymentID }}"><b>{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</b>
+            {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</label>
     </dt>
     <dd>
         <div class="form-group" id="fcpo_ou_idl">
@@ -13,42 +13,42 @@
                     <option value="ABN_AMRO_BANK"
                             {% if dynvalue.fcpo_so_bankgrouptype_idl == "ABN_AMRO_BANK" %}selected{% endif %}>ABN Amro
                     </option>
-                    <option value="BUNQ_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "BUNQ_BANK" %}selected{% endif %}>Bunq
+                    <option value="BUNQ_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "BUNQ_BANK" %}selected{% endif %}>
+                        Bunq
                     </option>
-                    <option value="ING_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>ING Bank
+                    <option value="RABOBANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>
+                        Rabobank
                     </option>
-                    <option value="RABOBANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>Rabobank
+                    <option value="ASN_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>ASN
+                        Bank
                     </option>
-                    <option value="SNS_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>SNS Bank
-                    </option>
-                    <option value="ASN_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>ASN Bank
-                    </option>
-                    <option value="SNS_REGIO_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>Regio
+                    <option value="SNS_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>SNS
                         Bank
                     </option>
                     <option value="TRIODOS_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>Triodos
+                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>Triodos Bank
+                    </option>
+                    <option value="SNS_REGIO_BANK"
+                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>Regio Bank
+                    </option>
+                    <option value="ING_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>ING
                         Bank
                     </option>
-                    <option value="KNAB_BANK"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "KNAB_BANK" %}selected{% endif %}>Knab
+                    <option value="KNAB_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "KNAB_BANK" %}selected{% endif %}>
+                        Knab
                     </option>
                     <option value="VAN_LANSCHOT_BANKIERS"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "VAN_LANSCHOT_BANKIERS" %}selected{% endif %}>
-                        van Lanschot
-                    </option>
-                    <option value="MONEYOU" {% if dynvalue.fcpo_so_bankgrouptype_idl == "MONEYOU" %}selected{% endif %}>
-                        Moneyou
+                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "VAN_LANSCHOT_BANKIERS" %}selected{% endif %}>van
+                        Lanschot
                     </option>
                     <option value="HANDELSBANKEN"
-                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "HANDELSBANKEN" %}selected{% endif %}>
-                        Handelsbanken
+                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "HANDELSBANKEN" %}selected{% endif %}>Handelsbanken
+                    </option>
+                    <option value="FRIESLAND_BANK"
+                            {% if dynvalue.fcpo_so_bankgrouptype_idl == "FRIESLAND_BANK" %}selected{% endif %}>Friesland Bank
+                    </option>
+                    <option value="REVOLUT" {% if dynvalue.fcpo_so_bankgrouptype_idl == "REVOLUT" %}selected{% endif %}>
+                        Revolut
                     </option>
                 </select>
             </div>
@@ -56,11 +56,11 @@
         <div class="clearfix"></div>
 
         {% block checkout_payment_longdesc %}
-            {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
-                <div class="alert alert-info col-lg-offset-3 desc">
-                    {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
-                </div>
-            {% endif %}
+        {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+        <div class="alert alert-info col-lg-offset-3 desc">
+            {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
+        </div>
+        {% endif %}
         {% endblock %}
     </dd>
 </dl>

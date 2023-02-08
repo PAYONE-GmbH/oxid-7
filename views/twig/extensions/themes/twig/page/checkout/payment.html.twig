@@ -53,7 +53,7 @@
             {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_amazonpay_wrong_address.html.twig" %}
         {% endif %}
     {% else %}
-        {{ style({ include: oViewConf.fcpoGetModuleCssPath('fcpayone.css') }) }}
+        {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
         {{ parent() }}
     {% endif %}
 {% endblock %}

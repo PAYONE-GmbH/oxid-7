@@ -2,9 +2,9 @@
 
 {% if readonly %}
     {% set readonly = "readonly disabled" %}
-{% else %}
+    {% else %}
     {% set readonly = "" %}
-{% endif %}
+    {% endif %}
 
 <form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
     {{ oViewConf.getHiddenSid()|raw }}
@@ -16,7 +16,7 @@
 
     {{ translate({ ident: "FCPO_NO_TRANSACTION" }) }}
 
-{% else %}
+    {% else %}
     <table>
         <tr>
             <td>
@@ -26,7 +26,7 @@
                             TXACTION
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_txaction.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_txaction.value|raw }}
                         </td>
                     </tr>
 
@@ -35,7 +35,7 @@
                             PORTALID
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_portalid.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_portalid.value|raw }}
                         </td>
                     </tr>
 
@@ -44,7 +44,7 @@
                             AID
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_aid.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_aid.value|raw }}
                         </td>
                     </tr>
 
@@ -53,7 +53,7 @@
                             CLEARINGTYPE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearingtype.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearingtype.value|raw }}
                         </td>
                     </tr>
 
@@ -62,7 +62,7 @@
                             TXTIME
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_txtime.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_txtime.value|raw }}
                         </td>
                     </tr>
 
@@ -71,7 +71,7 @@
                             CURRENCY
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_currency.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_currency.value|raw }}
                         </td>
                     </tr>
 
@@ -80,7 +80,7 @@
                             USERID
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_userid.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_userid.value|raw }}
                         </td>
                     </tr>
 
@@ -89,7 +89,7 @@
                             ACCESSNAME
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_accessname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_accessname.value|raw }}
                         </td>
                     </tr>
 
@@ -98,7 +98,7 @@
                             ACCESSCODE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_accesscode.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_accesscode.value|raw }}
                         </td>
                     </tr>
 
@@ -107,7 +107,7 @@
                             MODE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_mode.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_mode.value|raw }}
                         </td>
                     </tr>
 
@@ -116,7 +116,7 @@
                             PRICE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_price.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_price.value|raw }}
                         </td>
                     </tr>
 
@@ -125,7 +125,7 @@
                             CLEARING_BANKACCOUNTHOLDER
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankaccountholder.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankaccountholder.value|raw }}
                         </td>
                     </tr>
 
@@ -134,7 +134,7 @@
                             CLEARING_BANKACCOUNT
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankaccount.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankaccount.value|raw }}
                         </td>
                     </tr>
 
@@ -143,7 +143,7 @@
                             CLEARING_BANKCODE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankcode.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankcode.value|raw }}
                         </td>
                     </tr>
 
@@ -152,7 +152,7 @@
                             CLEARING_BANKNAME
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankname.value|raw }}
                         </td>
                     </tr>
 
@@ -161,7 +161,7 @@
                             CLEARING_BANKBIC
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankbic.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankbic.value|raw }}
                         </td>
                     </tr>
 
@@ -170,7 +170,7 @@
                             CLEARING_BANKIBAN
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankiban.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_bankiban.value|raw }}
                         </td>
                     </tr>
 
@@ -179,7 +179,7 @@
                             CLEARING_LEGALNOTE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_legalnote.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_legalnote.value|raw }}
                         </td>
                     </tr>
 
@@ -188,7 +188,7 @@
                             CLEARING_DUEDATE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_duedate.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_duedate.value|raw }}
                         </td>
                     </tr>
 
@@ -197,7 +197,7 @@
                             CLEARING_REFERENCE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_reference.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_reference.value|raw }}
                         </td>
                     </tr>
 
@@ -206,7 +206,7 @@
                             CLEARING_INSTRUCTIONNOTE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_clearing_instructionnote.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_clearing_instructionnote.value|raw }}
                         </td>
                     </tr>
 
@@ -215,7 +215,7 @@
                             TXID
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_txid.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_txid.value|raw }}
                         </td>
                     </tr>
 
@@ -224,7 +224,7 @@
                             REFERENCE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_reference.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_reference.value|raw }}
                         </td>
                     </tr>
 
@@ -233,7 +233,7 @@
                             SEQUENCENUMBER
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_sequencenumber.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_sequencenumber.value|raw }}
                         </td>
                     </tr>
 
@@ -242,7 +242,7 @@
                             COMPANY
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_company.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_company.value|raw }}
                         </td>
                     </tr>
 
@@ -251,7 +251,7 @@
                             FIRSTNAME
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_firstname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_firstname.value|raw }}
                         </td>
                     </tr>
 
@@ -260,7 +260,7 @@
                             LASTNAME
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_lastname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_lastname.value|raw }}
                         </td>
                     </tr>
 
@@ -269,7 +269,7 @@
                             STREET
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_street.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_street.value|raw }}
                         </td>
                     </tr>
 
@@ -278,7 +278,7 @@
                             ZIP
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_zip.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_zip.value|raw }}
                         </td>
                     </tr>
 
@@ -287,7 +287,7 @@
                             CITY
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_city.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_city.value|raw }}
                         </td>
                     </tr>
 
@@ -296,7 +296,7 @@
                             EMAIL
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_email.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_email.value|raw }}
                         </td>
                     </tr>
 
@@ -305,7 +305,7 @@
                             COUNTRY
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_country.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_country.value|raw }}
                         </td>
                     </tr>
 
@@ -314,7 +314,7 @@
                             SHIPPING_COMPANY
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_company.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_company.value|raw }}
                         </td>
                     </tr>
 
@@ -323,7 +323,7 @@
                             SHIPPING_FIRSTNAME
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_firstname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_firstname.value|raw }}
                         </td>
                     </tr>
 
@@ -332,7 +332,7 @@
                             SHIPPING_LASTNAME
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_lastname.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_lastname.value|raw }}
                         </td>
                     </tr>
 
@@ -341,7 +341,7 @@
                             SHIPPING_STREET
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_street.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_street.value|raw }}
                         </td>
                     </tr>
 
@@ -350,7 +350,7 @@
                             SHIPPING_ZIP
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_zip.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_zip.value|raw }}
                         </td>
                     </tr>
 
@@ -359,7 +359,7 @@
                             SHIPPING_CITY
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_city.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_city.value|raw }}
                         </td>
                     </tr>
 
@@ -368,7 +368,7 @@
                             SHIPPING_COUNTRY
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_shipping_country.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_shipping_country.value|raw }}
                         </td>
                     </tr>
 
@@ -377,7 +377,7 @@
                             BANKCOUNTRY
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_bankcountry.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_bankcountry.value|raw }}
                         </td>
                     </tr>
 
@@ -386,7 +386,7 @@
                             BANKACCOUNT
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_bankaccount.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_bankaccount.value|raw }}
                         </td>
                     </tr>
 
@@ -395,7 +395,7 @@
                             BANKCODE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_bankcode.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_bankcode.value|raw }}
                         </td>
                     </tr>
 
@@ -404,7 +404,7 @@
                             BANKACCOUNTHOLDER
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_bankaccountholder.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_bankaccountholder.value|raw }}
                         </td>
                     </tr>
 
@@ -413,7 +413,7 @@
                             CARDEXPIREDATE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_cardexpiredate.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_cardexpiredate.value|raw }}
                         </td>
                     </tr>
 
@@ -422,7 +422,7 @@
                             CARDTYPE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_cardtype.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_cardtype.value|raw }}
                         </td>
                     </tr>
 
@@ -431,7 +431,7 @@
                             CARDPAN
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_cardpan.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_cardpan.value|raw }}
                         </td>
                     </tr>
 
@@ -440,7 +440,7 @@
                             CUSTOMERID
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_customerid.value }}
+                            {{ edit.fcpotransactionstatus__fcpo_customerid.value|raw }}
                         </td>
                     </tr>
 
@@ -449,8 +449,7 @@
                             BALANCE
                         </td>
                         <td class="listitem2">
-                            {{ edit.fcpotransactionstatus__fcpo_balance.value|number_format(2, ',',
-    '') }}
+                            {{ edit.fcpotransactionstatus__fcpo_balance.value|number_format(2, ',', '') }}
                         </td>
                     </tr>
 
@@ -459,59 +458,56 @@
                             RECEIVABLE
                         </td>
                         <td class="listitem">
-                            {{ edit.fcpotransactionstatus__fcpo_receivable.value|number_format(2, ',',
-    '') }}
+                            {{ edit.fcpotransactionstatus__fcpo_receivable.value|number_format(2, ',', '') }}
                         </td>
                     </tr>
                 </table>
             </td>
             <td valign="top">
                 {% if edit.fcpoGetForwardRedirects() %}
-                    <h3>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" }) }}</h3>
-                    <form name="myedit" id="myedit" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
-                        {{ oViewConf.getHiddenSid()|raw }}
-                        <input type="hidden" name="cl" value="FcPayOneLog">
-                        <input type="hidden" name="fnc" value="fcpoTriggerForwardRedirects">
-                        <input type="hidden" name="oxid" value="{{ oxid }}">
-                        <table border="1" cellpadding="4">
-                            <tr>
-                                <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TARGETURL" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TRIES" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_LASTTRY" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_DETAILS" }) }}</th>
-                            </tr>
-                            {% for oForwardRedirect in edit.fcpoGetForwardRedirects() %}
-                                <tr style="border: 1px solid #C8C8C8;">
-                                    <td>{{ oForwardRedirect.targetUrl }}</td>
-                                    <td>{{ oForwardRedirect.tries }}</td>
-                                    <td>{{ oForwardRedirect.lastTry }}</td>
-                                    <td style="background:{% if oForwardRedirect.fulfilled %}green{% else %}red{% endif %};">
-                                        {% if oForwardRedirect.fulfilled %}
-                                            {{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED_YES" }) }}
-                                        {% else %}
-                                            {{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED_NO" }) }}
-                                        {% endif %}
-                                    </td>
-                                    <td><textarea cols="30" rows="5">{{ oForwardRedirect.details }}</textarea></td>
-                                </tr>
-                            {% endfor %}
-                            <tr>
-                                <td colspan="5" align="center">
-                                    <input type="submit"
-                                           value="{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TRIGGER" }) }}">
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
+                <h3>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" }) }}</h3>
+                <form name="myedit" id="myedit" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+                    {{ oViewConf.getHiddenSid()|raw }}
+                    <input type="hidden" name="cl" value="FcPayOneLog">
+                    <input type="hidden" name="fnc" value="fcpoTriggerForwardRedirects">
+                    <input type="hidden" name="oxid" value="{{ oxid }}">
+                    <table border="1" cellpadding="4">
+                        <tr>
+                            <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TARGETURL" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TRIES" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_LASTTRY" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_FORWARD_REDIRECT_DETAILS" }) }}</th>
+                        </tr>
+                        {% for oForwardRedirect in edit.fcpoGetForwardRedirects() %}
+                        <tr style="border: 1px solid #C8C8C8;">
+                            <td>{{ oForwardRedirect.targetUrl }}</td>
+                            <td>{{ oForwardRedirect.tries }}</td>
+                            <td>{{ oForwardRedirect.lastTry }}</td>
+                            <td style="background:{% if oForwardRedirect.fulfilled %}green{% else %}red{% endif %};">
+                                {% if oForwardRedirect.fulfilled %}
+                                {{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED_YES" }) }}
+                                {% else %}
+                                {{ translate({ ident: "FCPO_FORWARD_REDIRECT_FULFILLED_NO" }) }}
+                                {% endif %}
+                            </td>
+                            <td><textarea cols="30" rows="5">{{ oForwardRedirect.details }}</textarea></td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="5" align="center">
+                                <input type="submit" value="{{ translate({ ident: "FCPO_FORWARD_REDIRECT_TRIGGER" }) }}">
+                            </td>
+                        </tr>
+                    </table>
+                </form>
                 {% endif %}
             </td>
         </tr>
     </table>
 
 
-
-{% endif %}
+    {% endif %}
 
 {% include "bottomnaviitem.html.twig" %}
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,13 +16,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
 class FcPayOneProtocol extends FcPayOneAdminView
 {
 
@@ -30,4 +29,5 @@ class FcPayOneProtocol extends FcPayOneAdminView
      * @var string
      */
     protected $_sThisTemplate = '@fcpayone/admin/fcpayone_protocol';
+
 }

@@ -13,9 +13,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 $sLangName = "Dutch";
@@ -132,9 +132,9 @@ $aLang = array(
     'FCPO_PAYOLUTION_MONTH' => 'Month',
     'FCPO_PAYOLUTION_DAY' => 'Day',
     'FCPO_PAYOLUTION_AGREEMENT_PART_1' => 'Ik aanvaard de overdracht van de benodigde gegevens voor de afwikkeling van %s en een controle van mijn identiteit en kredietwaardigheid.<br>Deze',
-    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_DEBITNOTE'             => 'de debetbetaling',
-    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_INSTALLMENT'           => 'de termijnbetaling',
-    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_BILL'                  => 'de aankoop op factuur',
+    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_DEBITNOTE' => 'de debetbetaling',
+    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_INSTALLMENT' => 'de termijnbetaling',
+    'FCPO_PAYOLUTION_AGREEMENT_PART_1_FCPOPO_BILL' => 'de aankoop op factuur',
     'FCPO_PAYOLUTION_AGREEMENT_PART_2' => 'kan ik op elk gewenst moment met onmiddellijke ingang herroepen.',
     'FCPO_PAYOLUTION_AGREE' => 'inwilliging',
     'FCPO_PAYOLUTION_EMAIL_CLEARING' => 'Payolution Reference code:',
@@ -169,9 +169,27 @@ $aLang = array(
     'FCPO_PAYOLUTION_BIRTHDATE_INVALID' => 'Your date of birth was not entered correctly',
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
 
-    'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
-    'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
-    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete'
+    'FCPO_CC_HOSTED_ERROR_CARDTYPE' => 'Please select a cardtype',
+    'FCPO_CC_HOSTED_ERROR_CVC' => 'Please check CVC',
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE' => 'Input incomplete',
+
+    'FCPO_CONFIG_GROUP_APPLE_PAY' => "Apple Pay",
+    'FCPO_HELP_APPLE_PAY_MERCHANT_ID' => "Merchant ID",
+    'FCPO_APPLE_PAY_MERCHANT_ID' => "Merchant ID",
+    'FCPO_HELP_APPLE_PAY_CERTIFICATE' => "The name of the certificate is taken from the text field. It can be changed to any wished name. If empty when saving uploaded file, it will by default take the file\'s initial name.<br/>The text field can also be used to name an existing certificate file on the server, without uploading a new file.",
+    'FCPO_APPLE_PAY_CERTIFICATE' => "Merchant Identification Certificate file",
+    'FCPO_APPLE_PAY_CONFIG_CERTIFICATE_MISSING' => "The current configured certificate file doesn't exist.<br/>Apple Pay cannot be used as payment method.",
+    'FCPO_HELP_APPLE_PAY_KEY' => "This is a multiple field. You can upload a file containing the key, or type the content of the key directly into the text area below. Priority goes to uploaded file if both options are used !<br/><br/>
+    The smaller text field is used to name the destination file, or path to an existing key file on server.<br/>
+    - If empty while saving uploaded file, it will take the uploaded file's initial name.<br/>
+    - If empty while saving direct input, it will take the default name 'merchant_id.key'.<br/>
+    - If empty while not doing any of those, it will take an empty value.",
+    'FCPO_APPLE_PAY_KEY' => "Certificate private key",
+    'FCPO_HELP_APPLE_PAY_PASSWORD' => "Certificate key password",
+    'FCPO_APPLE_PAY_PASSWORD' => "Certificate key password",
+    'FCPO_APPLE_PAY_CREDITCARD' => "Allowed credit cards to use with Apple Pay",
+    'FCPO_APPLE_PAY_CREATE_SESSION_ERROR' => "Error while establishing connection to Apple Pay service.",
+    'FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS' => "No valid credit cards type is allowed in the configuration. Apple Pay session cannot be initialized.",
 );
 
 /*
