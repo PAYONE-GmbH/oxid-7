@@ -98,7 +98,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $sFcpoMandateCheckbox = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
-        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+        $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
 
         $blConfirmMandateError = (
             (!$sFcpoMandateCheckbox || $sFcpoMandateCheckbox == 'false') &&

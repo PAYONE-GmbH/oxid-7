@@ -167,7 +167,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         $sPaymentId = $oBasket->getPaymentId();
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+        $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
         $blIsRedirectAfterSave = $this->_isRedirectAfterSave($oOrder);
         $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
 
@@ -255,9 +255,9 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     protected function _fcpoIsPayonePaymentType(string $sId, bool $blIFrame = false): bool
     {
         if ($blIFrame) {
-            $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
+            $blReturn = FcPayOnePayment::fcIsPayOnePaymentType($sId);
         } else {
-            $blReturn = fcPayOnePayment::fcIsPayOneIframePaymentType($sId);
+            $blReturn = FcPayOnePayment::fcIsPayOneIframePaymentType($sId);
         }
 
         return $blReturn;

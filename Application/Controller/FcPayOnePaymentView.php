@@ -4105,7 +4105,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcIsPayOnePaymentType($sId)
     {
-        $blIsPayonePaymentType = (bool)fcPayOnePayment::fcIsPayOnePaymentType($sId);
+        $blIsPayonePaymentType = (bool)FcPayOnePayment::fcIsPayOnePaymentType($sId);
         return $blIsPayonePaymentType;
     }
 

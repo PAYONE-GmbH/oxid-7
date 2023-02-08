@@ -1373,7 +1373,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         return (
             $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
-            fcPayOnePayment::fcIsPayOneOnlinePaymentType($this->oxorder__oxpaymenttype->value)
+            FcPayOnePayment::fcIsPayOneOnlinePaymentType($this->oxorder__oxpaymenttype->value)
         );
     }
 
@@ -1389,7 +1389,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $this->oxorder__oxpaymenttype->value == 'fcpoinvoice' ||
             $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
             $this->oxorder__oxpaymenttype->value == 'fcpocashondel' ||
-            fcPayOnePayment::fcIsPayOneOnlinePaymentType($this->oxorder__oxpaymenttype->value)
+            FcPayOnePayment::fcIsPayOneOnlinePaymentType($this->oxorder__oxpaymenttype->value)
         );
     }
 
@@ -2082,7 +2082,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sPaymentId = $this->oxorder__oxpaymenttype->value;
         $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
-        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+        $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
 
         if ($blReduceStockBefore && $blIsRedirectPayment) {
             $aOrderArticles = $this->getOrderArticles();
