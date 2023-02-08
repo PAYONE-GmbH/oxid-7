@@ -69,7 +69,7 @@
                                 }, {},
                                 function (res) {
                                     document.getElementById('fcpo_klarna_auth_token').value = res.authorization_token;
-                                    if (res.show_form == true && res.approved != true && typeof (res.error) == 'undefined') {
+                                    if (res.show_form == true && res.approved != true && typeof res.error == 'undefined') {
                                         // user canceled, so redirect back to payment and show error
                                         window.location.replace(klarna_cancel_url);
                                     } else if (res.show_form == false) {

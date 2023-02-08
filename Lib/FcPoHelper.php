@@ -173,10 +173,10 @@ class FcPoHelper extends BaseModel
     /**
      * Wrapper method for setting a session variable
      *
-     * @param string $sVariable
-     * @param string $sValue
+     * @param string      $sVariable
+     * @param string|null $sValue
      */
-    public function fcpoSetSessionVariable(string $sVariable, string $sValue)
+    public function fcpoSetSessionVariable(string $sVariable, string $sValue = null)
     {
         $this->getSession()->setVariable($sVariable, $sValue);
     }
@@ -330,7 +330,10 @@ class FcPoHelper extends BaseModel
      */
     public function fcpoGetModuleVersion(): string
     {
-        include_once __DIR__ . "/../metadata.php";
+        include_once $this->getModulesDir() . "fc/fcpayone/metadata.php";
+        if(!$aModule['version']) {
+            return self::fcpoGetStaticModuleVersion();
+        }
         return $aModule['version'];
     }
 

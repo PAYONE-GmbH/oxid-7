@@ -71,9 +71,9 @@
 
         var sFcpoAccessToken = fcpoGetCookie('amazon_Login_accessToken');
 
-        if (typeof sFcpoAccessToken is same as('string' && sFcpoAccessToken === '') {)
+        if (typeof sFcpoAccessToken == 'string' && sFcpoAccessToken === '') {
             var sFcpoAccessToken = fcpoGetURLParameter("access_token", location.hash);
-            if (typeof sFcpoAccessToken is same as('string' && sFcpoAccessToken.match(/^Atza/)) {)
+            if (typeof sFcpoAccessToken == 'string' && sFcpoAccessToken.match(/^Atza/)) {
                 document.cookie = "amazon_Login_accessToken=" + sFcpoAccessToken +
                     ";secure";
             }
