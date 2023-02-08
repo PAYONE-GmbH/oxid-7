@@ -16,14 +16,14 @@ them, [contact PAYONE](https://payone.com).
 
 Software requirements:
 
-- installed Oxid eShop >= v6.0.0
+- installed Oxid eShop >= v7.0.0
 
 ### Install
 
 Just go to the directory of your Oxid composer.json file and perform the following command:
 
 ```
-composer require payone-gmbh/oxid-6
+composer require payone-gmbh/oxid-7
 ```
 
 After that, just activate the module in the Oxid backend.
@@ -40,7 +40,7 @@ After that, just activate the module in the Oxid backend.
 
 ## Documentation
 
-You can check [the documentation on our website here](https://docs.payone.com/display/public/INT/Oxid+6+Extension).
+You can check [the documentation on our website here](https://docs.payone.com/display/public/INT/Oxid+7+Extension).
 
 More information can be found [on FATCHIP site](https://www.fatchip.de/Plugins/OXID-eShop/OXID-PAYONE-Connector.html).
 
