@@ -272,7 +272,7 @@ class FcPoTransactionStatus extends BaseModel
         if (!is_array($aRows) || count($aRows) == 0) {
             return false;
         }
-        $aForwardRedirects = array();
+        $aForwardRedirects = [];
         foreach ($aRows as $aRow) {
             $oForwardRedirect = new stdClass();
             $oForwardRedirect->targetUrl = $aRow['FCPO_URL'];

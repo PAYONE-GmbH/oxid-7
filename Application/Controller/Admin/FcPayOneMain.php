@@ -352,7 +352,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aCurrencyArray = $oConfig->getCurrencyArray();
-        $aReturn = array();
+        $aReturn = [];
         foreach ($aCurrencyArray as $oCur) {
             $aReturn[] = $oCur->name;
         }
@@ -838,7 +838,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function fcGetLanguages(): array
     {
-        $aReturn = array();
+        $aReturn = [];
         $oFcLang = $this->_oFcPoHelper->fcpoGetLang();
 
         foreach ($oFcLang->getLanguageArray() as $oLang) {
@@ -856,7 +856,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function fcGetCurrencies(): array
     {
-        $aReturn = array();
+        $aReturn = [];
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
         foreach ($oConfig->getCurrencyArray() as $iKey => $oCurr) {
@@ -882,12 +882,12 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function getCCFields(): array
     {
-        return array(
+        return [
             'Number',
             'CVC',
             'Month',
             'Year',
-        );
+        ];
     }
 
     /**
@@ -898,7 +898,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function getCCTypes($sField): array
     {
-        $aTypes = array();
+        $aTypes = [];
         if ($sField == 'Month' || $sField == 'Year') {
             $aTypes['select'] = $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_SELECT');
         }
@@ -916,10 +916,10 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     public function getCCStyles(): array
     {
-        return array(
+        return [
             'standard' => $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_STANDARD'),
             'custom' => $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_CUSTOM'),
-        );
+        ];
     }
 
     /**
@@ -1089,7 +1089,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $sMessage = $oLang->translateString($sTranslationString);
 
         if (!is_array($this->_aConfErrors)) {
-            $this->_aConfErrors = array();
+            $this->_aConfErrors = [];
         }
         $this->_aConfErrors[] = $sMessage;
     }

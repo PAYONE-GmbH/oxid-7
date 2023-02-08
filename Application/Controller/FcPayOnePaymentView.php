@@ -81,19 +81,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aCheckedSubPayments = array();
+    protected $_aCheckedSubPayments = [];
     /**
      * Array of isoalpha2-countries for which birthday is needed
      *
      * @var array
      */
-    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT', 'CH');
+    protected $_aKlarnaBirthdayNeededCountries = ['DE', 'NL', 'AT', 'CH'];
     /**
      * Datacontainer for all cc payment meta data
      *
      * @var array
      */
-    protected $_aPaymentCCMetaData = array();
+    protected $_aPaymentCCMetaData = [];
     /**
      * Base link for payolution agreement overlay
      *
@@ -111,7 +111,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aInstallmentCalculation = array();
+    protected $_aInstallmentCalculation = [];
     /**
      * Flag which indicates, that functionality is called from outside via ajax
      *
@@ -123,7 +123,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var array
      */
-    protected $_aAjaxPayolutionParams = array();
+    protected $_aAjaxPayolutionParams = [];
     /**
      * Contains profile which matched for ratepay payment
      *
@@ -306,7 +306,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $this->_oFcPoHelper->fcpoSetSessionVariable("dynvalue", $aDynData);
         }
 
-        $aParameters = array(
+        $aParameters = [
             'fcpo_kktype',
             'fcpo_kknumber',
             'fcpo_kkname',
@@ -314,13 +314,22 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'fcpo_kkyear',
             'fcpo_kkpruef',
             'fcpo_kkcsn'
-        );
+        ];
 
         foreach ($aParameters as $sParameter) {
             unset($_REQUEST['dynvalue'][$sParameter]);
             unset($_POST['dynvalue'][$sParameter]);
             unset($_GET['dynvalue'][$sParameter]);
         }
+    }
+
+    /**
+     * Returns array of years for credit cards
+     *
+     * @return array
+     */
+    public function getCreditYears(): array {
+        return range( date('Y'), date('Y', strtotime('+10 year')) );
     }
 
     /**
@@ -693,7 +702,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoGetMatchingProfile($sPaymentId)
     {
         $aRatePayProfiles = $this->_fcpoFetchRatePayProfilesByPaymentType($sPaymentId);
-        $aReturn = array();
+        $aReturn = [];
 
         foreach ($aRatePayProfiles as $aCurrentRatePayProfile) {
             $sPaymentStringAddition = $this->_fcpoGetRatePayStringAdditionByPaymentId($sPaymentId);
@@ -1077,7 +1086,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetCCPaymentMetaData()
     {
-        $this->_aPaymentCCMetaData = array();
+        $this->_aPaymentCCMetaData = [];
         $sPaymentId = 'fcpocreditcard';
 
         $oPayment = oxNew(Payment::class);
@@ -1420,7 +1429,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetOnlinePaymentMetaData()
     {
-        $aPaymentMetaData = array();
+        $aPaymentMetaData = [];
 
         if ($this->getSofortUeberweisung()) {
             $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('PNT');
@@ -2810,7 +2819,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoGetPayolutionBankData($sPaymentId)
     {
         $aParams = $this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
-        $aBankData = array();
+        $aBankData = [];
 
         if (is_array($aParams) && count($aParams) > 0) {
             foreach ($aParams as $sKey => $sParam) {
@@ -3037,7 +3046,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     protected function _fcpoSetInstallmentOptionsByResponse($aResponse)
     {
         // cleanup before atempt
-        $this->_aInstallmentCalculation = array();
+        $this->_aInstallmentCalculation = [];
         foreach ($aResponse as $sKey => $sValue) {
             $iInstallmentIndex = $this->_fcpoFetchCurrentRatepayInstallmentIndex($sKey);
             if ($iInstallmentIndex === false) {
@@ -3407,7 +3416,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetUserFlagMessages()
     {
-        $aMessages = array();
+        $aMessages = [];
         $oUser = $this->getUser();
         $aUserFlags = $oUser->fcpoGetFlagsOfUser();
         foreach ($aUserFlags as $oUserFlag) {
@@ -3717,7 +3726,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetDebitCountries()
     {
-        $aCountries = array();
+        $aCountries = [];
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aFCPODebitCountries = $oConfig->getConfigParam('aFCPODebitCountries');
 
@@ -3900,7 +3909,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
-        $aRange = ($blChooseString) ? array($sChooseString) : array();
+        $aRange = ($blChooseString) ? array($sChooseString) : [];
 
         for ($iCurrentNumber = $iFrom; $iCurrentNumber <= $iTo; $iCurrentNumber++) {
             $aRange[] = str_pad($iCurrentNumber, $iPositions, '0', STR_PAD_LEFT);

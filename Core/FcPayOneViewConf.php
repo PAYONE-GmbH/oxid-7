@@ -592,7 +592,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
-        $sPath = "modules/fc/fcpayone/application/models/fcpayone_ajax.php";
+        $sPath = "modules/fc/fcpayone/Application/Model/FcPayOneAjax.php";
         return $sShopUrl . $sPath;
     }
 

@@ -189,7 +189,7 @@ class FcPoRatepay extends BaseModel
     public function fcpoGetRatePayProfiles($sPaymentId = null): array
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
-        $aReturn = array();
+        $aReturn = [];
 
         $sFilterPaymentId = "";
         if (is_string($sPaymentId)) {
@@ -298,7 +298,7 @@ class FcPoRatepay extends BaseModel
     {
         $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=" . $this->_oFcPoDb->quote($sPaymentId) . " LIMIT 1";
         $sOxid = $this->_oFcPoDb->getOne($sQuery);
-        $aProfile = array();
+        $aProfile = [];
         if ($sOxid) {
             $aProfile = $this->fcpoGetProfileData($sOxid);
         }
@@ -316,7 +316,7 @@ class FcPoRatepay extends BaseModel
         $sQuery = "SHOW FIELDS FROM fcporatepay";
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $aRow = $oDb->getRow($sQuery);
-        $aReturn = array();
+        $aReturn = [];
 
         if (count($aRow) > 0) {
             $aReturn = $aRow;

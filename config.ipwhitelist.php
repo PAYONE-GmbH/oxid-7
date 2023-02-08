@@ -37,4 +37,4 @@ $aWhitelist = array(
  * which are allowed to forward from. If not set, no call will go through this param.
  * It's recommended that no ranges will be used here
  */
-$aWhitelistForwarded = array();
+$aWhitelistForwarded = [];

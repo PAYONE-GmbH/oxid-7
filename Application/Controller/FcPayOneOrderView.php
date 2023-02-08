@@ -360,10 +360,10 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
                     $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
                 break;
             default:
-                $aStreetAndNumber = array(
+                $aStreetAndNumber = [
                     $aResponse['add_paydata[' . $sPrefix . '_streetname]'],
                     $aResponse['add_paydata[' . $sPrefix . '_streetnumber]'],
-                );
+                ];
         }
 
         return $aStreetAndNumber;
@@ -505,9 +505,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
 
-        $aMap = array(
+        $aMap = [
             'fcpopaypal_express' => 'basket'
-        );
+        ];
 
         $sReturn = (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :
@@ -526,9 +526,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
 
-        $aMap = array(
+        $aMap = [
             'fcpopaypal_express' => 'fcpoUsePayPalExpress'
-        );
+        ];
 
         $sReturn = (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :

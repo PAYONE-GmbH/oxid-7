@@ -69,7 +69,7 @@ class FcPoErrorMapping extends BaseModel
      */
     public function fcpoGetExistingMappings($sType = 'general'): array
     {
-        $aMappings = array();
+        $aMappings = [];
 
         $sWhere = $this->_fcpoGetMappingWhere($sType);
 
@@ -161,7 +161,7 @@ class FcPoErrorMapping extends BaseModel
         $oUBase = $this->_oFcPoHelper->getFactoryObject(FrontendController::class);
         $sAbbr = $oUBase->getActiveLangAbbr();
         $sMessageEntry = "error_message_" . $sAbbr;
-        $aEntries = array();
+        $aEntries = [];
 
         foreach ($oXml->entry as $oXmlEntry) {
             $sErrorCode = (string)$oXmlEntry->error_code;

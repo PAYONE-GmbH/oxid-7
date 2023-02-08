@@ -91,7 +91,7 @@ class FcPayOneStatusForwarding extends FcPayOneAdminDetails
     {
         $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
 
-        $aNewList = array();
+        $aNewList = [];
         foreach ($aPayoneStatusList as $aPayoneRectorPrefix202302StatusList) {
             $oStatus = new stdClass();
             $oStatus->sId = $aPayoneRectorPrefix202302StatusList;

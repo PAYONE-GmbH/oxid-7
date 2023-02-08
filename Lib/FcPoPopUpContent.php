@@ -139,7 +139,7 @@ class FcPopopUpContent extends BaseModel
     protected function _fcpoGetPayolutionCredentials()
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $aCredentials = array();
+        $aCredentials = [];
         $aCredentials['user'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthUser');
         $aCredentials['pass'] = (string)$oConfig->getConfigParam('sFCPOPayolutionAuthSecret');
 

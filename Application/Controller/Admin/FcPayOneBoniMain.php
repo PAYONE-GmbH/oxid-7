@@ -39,17 +39,17 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      *
      * @var array
      */
-    protected $_aMultiLangFields = array(
+    protected $_aMultiLangFields = [
         'sFCPOApprovalText',
         'sFCPODenialText',
-    );
+    ];
 
     /**
      * Boni default values
      *
      * @var array
      */
-    protected $_aDefaultValues = array(
+    protected $_aDefaultValues = [
         'sFCPOMalusPPB' => '0',
         'sFCPOMalusPHB' => '150',
         'sFCPOMalusPAB' => '300',
@@ -57,21 +57,21 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
         'sFCPOMalusPNZ' => '400',
         'sFCPOMalusPPV' => '500',
         'sFCPOMalusPPF' => '400',
-    );
+    ];
 
     /**
      * Assignment of validation messages
      *
      * @var array
      */
-    protected $_aValidateCode2Message = array(
+    protected $_aValidateCode2Message = [
         '1' => 'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON',
         '2' => 'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK',
         '3' => 'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET',
         '4' => 'FCPO_BONI_ERROR_DEACTIVATED_BONI_ADDRESSCHECK',
         '5' => 'FCPO_BONI_ERROR_SET_TO_BASIC',
         '6' => 'FCPO_BONI_ERROR_SET_TO_PERSON'
-    );
+    ];
 
     /**
      * Collection of validation codes processed via saving
@@ -161,7 +161,7 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
      */
     protected function _fcpoValidateAddresscheckType()
     {
-        $this->_aValidationCodes = array();
+        $this->_aValidationCodes = [];
         $this->_fcpoCheckIssetBoniAddresscheck();
         $this->_fcpoValidateDuplicateAddresscheck();
         $this->_fcpoValidateAddresscheckBasic();
@@ -297,8 +297,8 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confstrs");
-        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
-        $aMatchingAddressChecks = array('BB');
+        $aMatchingBoniChecks = ['IH', 'IA', 'IB'];
+        $aMatchingAddressChecks = ['BB'];
         $blSwitchToBasic = (
             isset($aConfStrs['sFCPOBonicheck']) &&
             isset($aConfStrs['sFCPOConsumerAddresscheck']) &&
@@ -321,8 +321,8 @@ class FcPayOneBoniMain extends FcPayOneAdminDetails
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confstrs");
-        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
-        $aMatchingAddressChecks = array('PB');
+        $aMatchingBoniChecks = ['IH', 'IA', 'IB'];
+        $aMatchingAddressChecks = ['PB'];
 
         $blSwitchToPerson = (
             isset($aConfStrs['sFCPOBonicheck']) &&

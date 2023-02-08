@@ -57,7 +57,7 @@ class FcPayOneLogList extends FcPayOneAdminList
             $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort');
 
             if (!$this->_aCurrSorting && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
-                $this->_aCurrSorting[$baseModel->getCoreTableName()] = array($this->_sDefSortField => "asc");
+                $this->_aCurrSorting[$baseModel->getCoreTableName()] = [$this->_sDefSortField => "asc"];
             }
         }
 

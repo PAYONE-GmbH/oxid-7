@@ -279,7 +279,7 @@ class FcPoParamsParser
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
 
-        $aOrderlines = array();
+        $aOrderlines = [];
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
 
@@ -373,7 +373,7 @@ class FcPoParamsParser
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-        $aOrderData = array();
+        $aOrderData = [];
 
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();

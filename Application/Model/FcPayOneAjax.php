@@ -42,7 +42,7 @@ use OxidEsales\Eshop\Core\ViewConfig;
 if (!function_exists('getShopBasePath')) {
     function getShopBasePath()
     {
-        return dirname(__FILE__) . '/../../../../htdocs/';
+        return dirname(__FILE__) . '/../../../../../';
     }
 }
 
@@ -304,13 +304,15 @@ class FcPayOneAjax extends BaseModel
     /**
      * Performs a precheck for payolution installment
      *
-     * @param type $sPaymentId
-     * @return bool
+     * @param string $sPaymentId
+     * @param string $sParamsJson
+     * @return bool|string
+     * @throws \JsonException
      */
-    public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson)
+    public function fcpoTriggerPrecheck(string $sPaymentId, string $sParamsJson): bool|string
     {
         $oPaymentController = $this->_oFcPoHelper->getFactoryObject(Payment::class);
-        $oPaymentController->setPayolutionAjaxParams(json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR));
+        $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson));
         $mPreCheckResult = $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
 
         return ($mPreCheckResult === true) ? 'SUCCESS' : $mPreCheckResult;
@@ -322,7 +324,7 @@ class FcPayOneAjax extends BaseModel
      * @param string $sPaymentId
      * @return mixed
      */
-    public function fcpoTriggerInstallmentCalculation($sPaymentId)
+    public function fcpoTriggerInstallmentCalculation(string $sPaymentId)
     {
         $oPaymentController = $this->_oFcPoHelper->getFactoryObject(Payment::class);
 
@@ -570,7 +572,11 @@ class FcPayOneAjax extends BaseModel
         }
     }
 
-    public function fcpoAplPayment($sParamsJson)
+    /**
+     * @param $sParamsJson
+     * @return bool|string
+     */
+    public function fcpoAplPayment($sParamsJson): bool|string
     {
         $aCreditCardMapping = array(
             'visa' => 'V',
@@ -580,7 +586,7 @@ class FcPayOneAjax extends BaseModel
         );
 
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson);
 
         $paymentData = $aParams['token']['paymentData'];
         $methodData = $aParams['token']['paymentMethod'];
@@ -665,9 +671,13 @@ class FcPayOneAjax extends BaseModel
         return json_encode($response);
     }
 
-    public function fcpoRatepayCalculation($sParamsJson)
+    /**
+     * @param string $sParamsJson
+     * @return string
+     */
+    public function fcpoRatepayCalculation(string $sParamsJson): string
     {
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson);
         $sOxid = $aParams['sPaymentMethodOxid'];
 
         $oRatePay = oxNew(FcPoRatepay::class);

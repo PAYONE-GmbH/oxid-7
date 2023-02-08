@@ -608,9 +608,9 @@ function fcSetPayoneInput(oForm, sName, sValue) {
  * @returns {undefined}
  */
 function fcSetPayoneInputFields(oForm) {
-    for (var sInput in oFcPayoneData.inputs) {
+    for (var sInput in oFcPayOneData.inputs) {
         var sInputName = sInput;
-        var sInputValue = oFcPayoneData.inputs[sInput];
+        var sInputValue = oFcPayOneData.inputs[sInput];
         if (sInput.indexOf('dynvalue') != -1) {
             sInputName = sInputName.replace('dynvalue_', '');
             sInputName = 'dynvalue[' + sInputName + ']';

@@ -174,14 +174,14 @@ class FcPayOneOrder extends FcPayOneAdminDetails
      */
     public function getCaptureDebitEntries(): array
     {
-        $aEntries = array(
-            'capture' => array(),
-            'debit' => array(),
-            'paid' => array(),
+        $aEntries = [
+            'capture' => [],
+            'debit' => [],
+            'paid' => [],
             'totalCapture' => 0,
             'totalDebit' => 0,
             'totalBalance' => 0
-        );
+        ];
 
         $dLastReceivable = 0.0;
         $dLastPayment = 0.0;
@@ -243,7 +243,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     public function getStatus()
     {
         if (!$this->_aStatus) {
-            $this->_aStatus = array();
+            $this->_aStatus = [];
             $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
             if ($sOxid != "-1" && isset($sOxid)) {
                 $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
@@ -318,7 +318,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
 
             $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
 
-            if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpopl_secinvoice', 'fcpopl_secinstallment'))) {
+            if (in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
                 $oPORequest->addParameter('addPayData[cancellation_reason]', $sCancellationReason);
             }
 

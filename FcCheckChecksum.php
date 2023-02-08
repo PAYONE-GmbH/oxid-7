@@ -42,7 +42,7 @@ class FcCheckChecksum
 
     protected function _getFilesToCheck()
     {
-        $aFiles = array();
+        $aFiles = [];
         if (file_exists($this->_getBasePath() . 'metadata.php')) {
             $this->_handleMetadata($this->_getBasePath() . 'metadata.php');
         }
@@ -112,7 +112,7 @@ class FcCheckChecksum
      */
     protected function _checkFiles($aFiles): array
     {
-        $aChecksums = array();
+        $aChecksums = [];
         foreach ($aFiles as $aFile) {
             $sFullFilePath = $this->_getShopBasePath() . $aFile;
             if (file_exists($sFullFilePath)) {

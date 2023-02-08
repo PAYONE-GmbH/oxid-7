@@ -1923,7 +1923,7 @@ class FcPoRequest extends Base
      */
     protected function _getResponseForParsedRequest($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         if (function_exists("curl_init")) {
             // php native curl exists so we gonna use it for requesting
@@ -1948,7 +1948,7 @@ class FcPoRequest extends Base
      */
     protected function _getCurlPhpResponse($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         $oCurl = curl_init($aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path']);
         curl_setopt($oCurl, CURLOPT_POST, 1);
@@ -1980,7 +1980,7 @@ class FcPoRequest extends Base
      */
     protected function _getCurlCliResponse($aUrlArray, $sCurlPath)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         $sPostUrl = $aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path'];
         $sPostData = $aUrlArray['query'];
@@ -2003,7 +2003,7 @@ class FcPoRequest extends Base
      */
     protected function _getSocketResponse($aUrlArray)
     {
-        $aResponse = array();
+        $aResponse = [];
 
         switch ($aUrlArray['scheme']) {
             case 'https':
@@ -2053,7 +2053,7 @@ class FcPoRequest extends Base
      */
     protected function _getResponseOutput($aResponse)
     {
-        $aOutput = array();
+        $aOutput = [];
         foreach ($aResponse as $iLinenum => $sLine) {
             $iPos = strpos($sLine, "=");
             if ($iPos > 0) {
@@ -3250,7 +3250,7 @@ class FcPoRequest extends Base
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
         $sResponsePersonstatus = $aResponse['personstatus'];
 
-        $aBlockingPersonStatus = array();
+        $aBlockingPersonStatus = [];
         $aPersonStatusToCheck = array('PPF', 'UKN', 'PUG', 'PNZ', 'PNP');
 
         foreach ($aPersonStatusToCheck as $sPersonstatusToCheck) {
@@ -3617,7 +3617,7 @@ class FcPoRequest extends Base
     {
         $this->_aParameters['targetwindow'] = 'parent';
 
-        $aHashParams = array();
+        $aHashParams = [];
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (array_search($sKey, $this->_aFrontendUnsetParams) !== false) {
                 unset($this->_aParameters[$sKey]);

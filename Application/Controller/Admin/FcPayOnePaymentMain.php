@@ -19,7 +19,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
      *
      * @var array
      */
-    protected $_aConfBools = array();
+    protected $_aConfBools = [];
 
     /**
      * fcpoconfigexport instance

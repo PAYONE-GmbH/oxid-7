@@ -97,7 +97,7 @@ class FcPayOneTransactionStatusBase extends BaseModel
     protected function _getConfigParams($sParam): array
     {
         $aShops = $this->_getShopList();
-        $aParams = array();
+        $aParams = [];
         foreach ($aShops as $aShop) {
             $mValue = $this->_oFcPoHelper->fcpoGetConfig()->getShopConfVar($sParam, $aShop);
             if ($mValue) {
@@ -111,7 +111,7 @@ class FcPayOneTransactionStatusBase extends BaseModel
     protected function _getShopList()
     {
         if ($this->_aShopList === null) {
-            $aShops = array();
+            $aShops = [];
 
             $sQuery = "SELECT oxid FROM oxshops";
             $aRows = DatabaseProvider::getDb()->getAll($sQuery);

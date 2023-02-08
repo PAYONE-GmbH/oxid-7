@@ -5,7 +5,7 @@
         {{ oView.fcpoGetBarzahlenHtml()|raw }}
     {% else %}
         {{ parent() }}
-        {% if oView.fcpoIsAppointedError() %}
+        {% if oView.fcpoOrderHasProblems() %}
             <br><br>
             {{ translate({ ident: "FCPO_THANKYOU_APPOINTED_ERROR" }) }}
         {% endif %}

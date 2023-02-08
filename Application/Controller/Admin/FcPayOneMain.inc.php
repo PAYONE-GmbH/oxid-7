@@ -27,21 +27,21 @@ use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
 
-$aColumns = array('container1' => array(    // field , table,         visible, multilanguage, ident
-    array('oxtitle', 'oxcountry', 1, 1, 0),
-    array('oxisoalpha2', 'oxcountry', 1, 0, 0),
-    array('oxisoalpha3', 'oxcountry', 0, 0, 0),
-    array('oxunnum3', 'oxcountry', 0, 0, 0),
-    array('oxid', 'oxcountry', 0, 0, 1)
-),
-    'container2' => array(
-        array('oxtitle', 'oxcountry', 1, 1, 0),
-        array('oxisoalpha2', 'oxcountry', 1, 0, 0),
-        array('oxisoalpha3', 'oxcountry', 0, 0, 0),
-        array('oxunnum3', 'oxcountry', 0, 0, 0),
-        array('oxid', 'fcpopayment2country', 0, 0, 1)
-    )
-);
+$aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
+    ['oxtitle', 'oxcountry', 1, 1, 0],
+    ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+    ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+    ['oxunnum3', 'oxcountry', 0, 0, 0],
+    ['oxid', 'oxcountry', 0, 0, 1]
+],
+    'container2' => [
+        ['oxtitle', 'oxcountry', 1, 1, 0],
+        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+        ['oxunnum3', 'oxcountry', 0, 0, 0],
+        ['oxid', 'fcpopayment2country', 0, 0, 1]
+    ]
+];
 
 /**
  * Class manages payment countries

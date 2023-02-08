@@ -42,21 +42,21 @@ class FcPayOneMainAjax extends ListComponentAjax
      *
      * @var array
      */
-    protected $_aColumns = array('container1' => array(    // field , table,         visible, multilanguage, ident
-        array('oxtitle', 'oxcountry', 1, 1, 0),
-        array('oxisoalpha2', 'oxcountry', 1, 0, 0),
-        array('oxisoalpha3', 'oxcountry', 0, 0, 0),
-        array('oxunnum3', 'oxcountry', 0, 0, 0),
-        array('oxid', 'oxcountry', 0, 0, 1)
-    ),
-        'container2' => array(
-            array('oxtitle', 'oxcountry', 1, 1, 0),
-            array('oxisoalpha2', 'oxcountry', 1, 0, 0),
-            array('oxisoalpha3', 'oxcountry', 0, 0, 0),
-            array('oxunnum3', 'oxcountry', 0, 0, 0),
-            array('oxid', 'fcpopayment2country', 0, 0, 1)
-        )
-    );
+    protected $_aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
+        ['oxtitle', 'oxcountry', 1, 1, 0],
+        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+        ['oxunnum3', 'oxcountry', 0, 0, 0],
+        ['oxid', 'oxcountry', 0, 0, 1]
+    ],
+        'container2' => [
+            ['oxtitle', 'oxcountry', 1, 1, 0],
+            ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+            ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+            ['oxunnum3', 'oxcountry', 0, 0, 0],
+            ['oxid', 'fcpopayment2country', 0, 0, 1]
+        ]
+    ];
 
     /**
      * Class constructor, sets all required parameters for requests.

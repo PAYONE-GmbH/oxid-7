@@ -62,7 +62,7 @@ class FcPoForwarding extends BaseModel
      */
     public function fcpoGetExistingForwardings(): array
     {
-        $aForwardings = array();
+        $aForwardings = [];
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_payonestatus, fcpo_url, fcpo_timeout FROM fcpostatusforwarding ORDER BY oxid ASC";

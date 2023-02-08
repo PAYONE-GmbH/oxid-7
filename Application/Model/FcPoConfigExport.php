@@ -253,7 +253,7 @@ class FcPoConfigExport extends BaseModel
             }
         }
 
-        $aConfigs = array();
+        $aConfigs = [];
         $aConfigs['strs'] = $this->_aConfStrs;
         $aConfigs['bools'] = $this->_aConfBools;
         $aConfigs['arrs'] = $this->_aConfArrs;
@@ -391,7 +391,7 @@ class FcPoConfigExport extends BaseModel
      */
     protected function _getMappings(): array
     {
-        $aMappings = array();
+        $aMappings = [];
 
         $oMapping = oxNew(FcPoMapping::class);
         $aExistingMappings = $oMapping->fcpoGetExistingMappings();
@@ -401,7 +401,7 @@ class FcPoConfigExport extends BaseModel
             $sSubType = $this->_getPaymentSubType($aExistingMapping->sPaymentType);
             $aSubTypes = explode(',', $sSubType);
             if (!array_key_exists($sAbbr, $aMappings)) {
-                $aMappings[$sAbbr] = array();
+                $aMappings[$sAbbr] = [];
             }
             foreach ($aSubTypes as $aSubType) {
                 $aMappings[$sAbbr][$aSubType][] = array(
@@ -568,7 +568,7 @@ class FcPoConfigExport extends BaseModel
      */
     protected function _getPaymentTypes(): array
     {
-        $aPayments = array();
+        $aPayments = [];
 
         $sQuery = "SELECT oxid FROM oxpayments WHERE fcpoispayone = 1";
         $this->_oFcPoDb->setFetchMode(DatabaseInterface::FETCH_MODE_NUM);
@@ -683,7 +683,7 @@ class FcPoConfigExport extends BaseModel
      */
     protected function _getForwardings(): array
     {
-        $aForwardings = array();
+        $aForwardings = [];
         $oForwarding = $this->_oFcPoHelper->getFactoryObject(FcPoForwarding::class);
         $aForwardingsList = $oForwarding->fcpoGetExistingForwardings();
 

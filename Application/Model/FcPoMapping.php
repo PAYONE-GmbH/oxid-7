@@ -59,7 +59,7 @@ class FcPoMapping extends BaseModel
      */
     public function fcpoGetExistingMappings(): array
     {
-        $aMappings = array();
+        $aMappings = [];
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, fcpo_paymentid, fcpo_payonestatus, fcpo_folder FROM fcpostatusmapping ORDER BY oxid ASC";

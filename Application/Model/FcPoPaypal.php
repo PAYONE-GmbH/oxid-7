@@ -33,7 +33,7 @@ class FcPoPaypal extends BaseModel
      *
      * @var array
      */
-    protected $_aAdminMessages = array();
+    protected $_aAdminMessages = [];
 
     /**
      * Helper object for dealing with different shop versions
@@ -85,7 +85,7 @@ class FcPoPaypal extends BaseModel
         $sQuery = "SELECT oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default FROM fcpopayoneexpresslogos";
         $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $aRows = $oDb->getAll($sQuery);
-        $aLogos = array();
+        $aLogos = [];
 
         foreach ($aRows as $aRow) {
             $sOxid = $aRow[0];
@@ -94,7 +94,7 @@ class FcPoPaypal extends BaseModel
             $sPoLogo = $aRow[3];
             $sPoDefault = $aRow[4];
 
-            $aLogo = array();
+            $aLogo = [];
             $aLogo['oxid'] = $sOxid;
             $aLogo['active'] = (bool)$sPoActive;
             $aLogo['langid'] = $sPoLangId;

@@ -54,14 +54,14 @@ class FcPayOneUser extends FcPayOneUser_parent
      *
      * @var array
      */
-    protected array $_aBlockedPaymentIds = array();
+    protected array $_aBlockedPaymentIds = [];
 
     /**
      * Forbidden payments for user (validated)
      *
      * @var array
      */
-    protected array $_aForbiddenPaymentIds = array();
+    protected array $_aForbiddenPaymentIds = [];
 
     /**
      * init object construction
@@ -132,7 +132,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoSetUserFlags(): void
     {
-        $this->_aUserFlags = array();
+        $this->_aUserFlags = [];
         $aUserFlagInfos = $this->_fcpoGetUserFlagInfos();
         foreach ($aUserFlagInfos as $oUserFlagInfo) {
             $sOxid = $oUserFlagInfo->sOxid;
@@ -157,7 +157,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoGetUserFlagInfos(): array
     {
-        $aUserFlagInfos = array();
+        $aUserFlagInfos = [];
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $sUserId = $this->getId();
         $sQuery = "

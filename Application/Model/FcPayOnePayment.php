@@ -291,7 +291,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         if ((bool)$oConfig->getConfigParam('sFCPOSaveBankdata') === true) {
             if ($this->getId() == 'fcpodebitnote') {
                 if (!is_array($aDynValues)) {
-                    $aDynValues = array();
+                    $aDynValues = [];
                 }
                 $oDynValue = new stdClass();
                 $oDynValue->name = 'fcpo_elv_blz';
@@ -462,7 +462,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      */
     public function fcpoGetPayonePaymentTypes(): array
     {
-        $aPaymentTypes = array();
+        $aPaymentTypes = [];
 
         $sQuery = "SELECT oxid, oxdesc FROM oxpayments WHERE fcpoispayone = 1";
         $aRows = $this->_oFcPoDb->getAll($sQuery);

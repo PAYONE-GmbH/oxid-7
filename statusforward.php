@@ -328,7 +328,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      */
     protected function _cleanParams($aParams): array
     {
-        $aCleanedParams = array();
+        $aCleanedParams = [];
         foreach ($aParams as $sKey => $sValue) {
             $blValid = (
                 isset($this->_aDbFields2Params[$sKey]) &&

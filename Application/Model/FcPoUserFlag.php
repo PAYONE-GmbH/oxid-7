@@ -60,7 +60,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @var array
      */
-    protected $_aBlockedPaymentIds = array();
+    protected $_aBlockedPaymentIds = [];
 
     /**
      * ID of n:m table assigned to this flag
@@ -295,7 +295,7 @@ class FcPoUserFlag extends BaseModel
      */
     public function fcpoGetBlockedPaymentIds()
     {
-        $aReturn = array();
+        $aReturn = [];
         $blFlagActive = $this->_fcpoFlagIsActive();
 
         if ($blFlagActive) {
