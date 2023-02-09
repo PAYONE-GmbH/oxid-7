@@ -4,7 +4,7 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
-use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Address;
@@ -440,7 +440,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     {
         if (is_null($this->_aCachedRatepayProfileData[$sPaymentId])) {
             $sOxid = $this->fcpoGetRatePayMatchedProfile($sPaymentId);
-            $oRatePay = oxNew(FcPoRatepay::class);
+            $oRatePay = oxNew(FcPoRatePay::class);
             $aProfileData = $oRatePay->fcpoGetProfileData($sOxid);
             $this->_aCachedRatepayProfileData[$sPaymentId] = $aProfileData;
         }
@@ -743,7 +743,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _fcpoFetchRatePayProfilesByPaymentType($sPaymentId)
     {
-        $oRatePay = oxNew(FcPoRatepay::class);
+        $oRatePay = oxNew(FcPoRatePay::class);
         $aProfiles = $oRatePay->fcpoGetRatePayProfiles($sPaymentId);
 
         return $aProfiles;

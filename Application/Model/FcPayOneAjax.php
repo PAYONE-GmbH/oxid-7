@@ -680,7 +680,7 @@ class FcPayOneAjax extends BaseModel
         $aParams = json_decode($sParamsJson);
         $sOxid = $aParams['sPaymentMethodOxid'];
 
-        $oRatePay = oxNew(FcPoRatepay::class);
+        $oRatePay = oxNew(FcPoRatePay::class);
         $aRatepayData = $oRatePay->fcpoGetProfileData($sOxid);
 
         if ($aParams['sMode'] == 'runtime') {

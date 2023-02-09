@@ -95,7 +95,7 @@ $aModule = [
         'FcPoKlarna' => Fatchip\PayOne\Application\Model\FcPoKlarna::class,
         'FcPoPaypal' => Fatchip\PayOne\Application\Model\FcPoPaypal::class,
         'FcPayOneAjax' => Fatchip\PayOne\Application\Model\FcPayOneAjax::class,
-        'FcPoRatepay' => Fatchip\PayOne\Application\Model\FcPoRatepay::class,
+        'FcPoRatePay' => Fatchip\PayOne\Application\Model\FcPoRatePay::class,
     ],
     'events' => [
         'onActivate' => Fatchip\PayOne\Core\FcPayOneEvents::class . '::onActivate',

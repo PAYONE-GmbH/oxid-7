@@ -27,7 +27,7 @@ use Fatchip\PayOne\Application\Model\FcPoForwarding;
 use Fatchip\PayOne\Application\Model\FcPoKlarna;
 use Fatchip\PayOne\Application\Model\FcPoMapping;
 use Fatchip\PayOne\Application\Model\FcPoPaypal;
-use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
@@ -115,7 +115,7 @@ class FcPayOneAdminDetails extends AdminDetailsController
         $this->_oFcPoMapping = oxNew(FcPoMapping::class);
         $this->_oFcPoErrorMapping = oxNew(FcPoErrorMapping::class);
         $this->_oFcPoForwarding = oxNew(FcPoForwarding::class);
-        $this->_oFcPoRatePay = oxNew(FcPoRatepay::class);
+        $this->_oFcPoRatePay = oxNew(FcPoRatePay::class);
     }
 
     /**

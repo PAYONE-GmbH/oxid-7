@@ -3,7 +3,7 @@
 namespace Fatchip\PayOne\Lib;
 
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
-use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\BasketItem;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -1103,7 +1103,7 @@ class FcPoRequest extends Base
     {
         // needed objects and data
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $oRatePay = oxNew(FcPoRatepay::class);
+        $oRatePay = oxNew(FcPoRatePay::class);
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $oUser = $oOrder->getOrderUser();
         $sProfileId = $this->_oFcPoHelper->fcpoGetSessionVariable('ratepayprofileid');

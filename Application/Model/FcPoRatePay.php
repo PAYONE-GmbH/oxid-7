@@ -26,7 +26,7 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
-class FcPoRatepay extends BaseModel
+class FcPoRatePay extends BaseModel
 {
     /**
      * Helper object for dealing with different shop versions
