@@ -438,8 +438,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $aConfStrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confstrs");
         $aConfArrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confarrs");
 
-        print_r($aConfArrs);
-
         if (is_array($aConfBools)) {
             foreach ($aConfBools as $sVarName => $sVarVal) {
                 $oConfig->saveShopConfVar("bool", $sVarName, $sVarVal);

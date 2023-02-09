@@ -133,7 +133,7 @@ class FcPayOneTransactionStatusBase extends BaseModel
      */
     protected function _logException($sMessage)
     {
-        $sBasePath = dirname(__FILE__) . "/../../../";
+        $sBasePath = dirname(__FILE__) . "/../../source/";
         $sLogFilePath = $sBasePath . $this->_sExceptionLog;
         $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
         $sFullMessage = $sPrefix . $sMessage . "\n";
@@ -210,7 +210,7 @@ class FcPayOneTransactionStatusBase extends BaseModel
         $blLoggingAllowed = $this->_fcCheckLoggingAllowed();
         if (!$blLoggingAllowed) return;
 
-        $sBasePath = dirname(__FILE__) . "/../../../";
+        $sBasePath = dirname(__FILE__) . "/../../source/";
         $sLogFilePath = $sBasePath . $this->_sLogFile;
         $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
         $sFullMessage = $sPrefix . $sMessage . "\n";

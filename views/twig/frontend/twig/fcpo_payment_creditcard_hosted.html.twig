@@ -102,8 +102,8 @@
                     </div>
                 </div>
 
-                [{oxid_include_dynamic file=oViewConf.fcpoGetAbsModuleTemplateFrontendPath('fcpo_payment_creditcard_script.html.twig')}
-                ]
+                {% include "@fcpayone/frontend/fcpo_payment_creditcard_script.html.twig" %}
+
                 {% block checkout_payment_longdesc %}
                 {% if paymentmethod.oxpayments__oxlongdesc.value %}
                 <div class="alert alert-info col-lg-offset-3 desc">

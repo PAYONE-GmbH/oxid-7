@@ -101,7 +101,6 @@ class FcPayOneLog extends FcPayOneAdminDetails
     public function getCaptureMessage()
     {
         $sReturn = "";
-
         if ($this->_aResponse) {
             $oLang = $this->_oFcPoHelper->fcpoGetLang();
             if ($this->_aResponse['status'] == 'APPROVED') {
@@ -110,7 +109,6 @@ class FcPayOneLog extends FcPayOneAdminDetails
                 $sReturn = '<span style="color: red;">' . $oLang->translateString('FCPO_CAPTURE_ERROR', null, true) . $this->_aResponse['errormessage'] . '</span>';
             }
         }
-
         return $sReturn;
     }
 

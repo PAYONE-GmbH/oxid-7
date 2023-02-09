@@ -26,10 +26,10 @@
     <input type="hidden" name="fnc" value="">
     <input type="hidden" name="oxid" value="{{ oxid }}">
 
-    {{ translate({ ident: "FCPO_MAIN_CONFIG_INFOTEXT" }) }}<br><br>
-    {{ translate({ ident: "FCPO_MAIN_CONFIG_TESTACCOUNT_LINK" }) }}<br><br>
+    {{ translate({ ident: "FCPO_MAIN_CONFIG_INFOTEXT" })|raw }}<br><br>
+    {{ translate({ ident: "FCPO_MAIN_CONFIG_TESTACCOUNT_LINK" })|raw }}<br><br>
 
-    {{ translate({ ident: "FCPO_MODULE_VERSION" }) }} {{ oView.fcpoGetModuleVersion() }}<br><br>
+    {{ translate({ ident: "FCPO_MODULE_VERSION" })|raw }} {{ oView.fcpoGetModuleVersion() }}<br><br>
 
     {% if oView.fcpoGetConfigErrors() %}
     {% for sErrorMessage in oView.fcpoGetConfigErrors() %}
@@ -41,7 +41,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CONN" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CONN" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOMerchantID]"
@@ -49,7 +49,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_MERCHANTID"), 'sHelpText': help_text("FCPO_HELP_MERCHANTID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_MERCHANT_ID" }) }}
+                    {{ translate({ ident: "FCPO_MERCHANT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -60,7 +60,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PORTALID"), 'sHelpText': help_text("FCPO_HELP_PORTALID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PORTAL_ID" }) }}
+                    {{ translate({ ident: "FCPO_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -71,7 +71,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PORTALKEY"), 'sHelpText': help_text("FCPO_HELP_PORTALKEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PORTAL_KEY" }) }}
+                    {{ translate({ ident: "FCPO_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -82,7 +82,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SUBACCOUNTID"), 'sHelpText': help_text("FCPO_HELP_SUBACCOUNTID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SUBACCOUNT_ID" }) }}
+                    {{ translate({ ident: "FCPO_SUBACCOUNT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -93,7 +93,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REFPREFIX"), 'sHelpText': help_text("FCPO_HELP_REFPREFIX")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_REFPREFIX" }) }}
+                    {{ translate({ ident: "FCPO_REFPREFIX" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -108,7 +108,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_HASH_METHOD"), 'sHelpText': help_text("FCPO_HELP_HASH_METHOD")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_HASH_METHOD" }) }}
+                    {{ translate({ ident: "FCPO_HASH_METHOD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -118,7 +118,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GENERAL" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GENERAL" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="hidden" name="confbools[blFCPOSendArticlelist]" value="false">
@@ -127,7 +127,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SEND_ARTICLELIST"), 'sHelpText': help_text("FCPO_HELP_SEND_ARTICLELIST")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SEND_ARTICLELIST" }) }}
+                    {{ translate({ ident: "FCPO_SEND_ARTICLELIST" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -140,20 +140,20 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PRESAVE_ORDER"), 'sHelpText': help_text("FCPO_HELP_PRESAVE_ORDER")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PRESAVE_ORDER" }) }}
+                    {{ translate({ ident: "FCPO_PRESAVE_ORDER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl id="reduce_stock" {% if not (confbools.blFCPOPresaveOrder) %}style="display: none;" {% endif %}>
                 <dt></dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_REDUCE_STOCK" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REDUCE_STOCK"), 'sHelpText': help_text("FCPO_HELP_REDUCE_STOCK")} %}<br>
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK" })|raw }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REDUCE_STOCK"), 'sHelpText': help_text("FCPO_HELP_REDUCE_STOCK")} %}<br>
                     <input type="radio" name="confbools[blFCPOReduceStock]" value="0"
                            {% if confbools.blFCPOReduceStock == '0' or not confbools.blFCPOReduceStock %}checked{% endif %}>
-                    {{ translate({ ident: "FCPO_REDUCE_STOCK_BEFORE" }) }}<br>
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK_BEFORE" })|raw }}<br>
                     <input type="radio" name="confbools[blFCPOReduceStock]" value="1"
                            {% if confbools.blFCPOReduceStock == '1' %}checked{% endif %}>
-                    {{ translate({ ident: "FCPO_REDUCE_STOCK_AFTER" }) }}
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK_AFTER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -163,11 +163,11 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_ACTIVE_CREDITCARD_TYPES" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_ACTIVE_CREDITCARD_TYPES" })|raw }}</b></a>
             <dl>
                 <dt></dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CREDITCARDBRANDS_INFOTEXT" }) }}
+                    {{ translate({ ident: "FCPO_CREDITCARDBRANDS_INFOTEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -179,7 +179,7 @@
                            {% if (confbools.blFCPOVisaActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=V&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCVLive]" value="1"
                            {% if confbools.blFCPOCCVLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -196,7 +196,7 @@
                            {% if (confbools.blFCPOMastercardActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=M&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCMLive]" value="1"
                            {% if confbools.blFCPOCCMLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -213,7 +213,7 @@
                            {% if (confbools.blFCPOAmexActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=A&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCALive]" value="1"
                            {% if confbools.blFCPOCCALive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -230,7 +230,7 @@
                            {% if (confbools.blFCPODinersActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=D&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCDLive]" value="1"
                            {% if confbools.blFCPOCCDLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -247,7 +247,7 @@
                            {% if (confbools.blFCPOJCBActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=J&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCJLive]" value="1"
                            {% if confbools.blFCPOCCJLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -264,7 +264,7 @@
                            {% if (confbools.blFCPOMaestroIntActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=O&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCOLive]" value="1"
                            {% if confbools.blFCPOCCOLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -281,7 +281,7 @@
                            {% if (confbools.blFCPOMaestroUKActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=U&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCULive]" value="1"
                            {% if confbools.blFCPOCCULive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -298,7 +298,7 @@
                            {% if (confbools.blFCPOCarteBleueActivated) %}checked{% endif %}>
                     <input type="button"
                            onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=B&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCBLive]" value="1"
                            {% if confbools.blFCPOCCBLive == '1' %}checked{% endif %}> <strong>Live</strong>
@@ -313,7 +313,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CREDITCARD" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CREDITCARD" })|raw }}</b></a>
             <dl>
                 <dt>
                     <select name="confstrs[sFCPOCCType]">
@@ -324,26 +324,26 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_CC_TYPE"), 'sHelpText': help_text("FCPO_HELP_CC_TYPE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CC_TYPE" }) }}
+                    {{ translate({ ident: "FCPO_CC_TYPE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dd>
                     <a href="#" onclick="fcpoToggleHostedTemplate();"
-                       style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_CUSTOM_TEMPLATE" }) }}</a>
+                       style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_CUSTOM_TEMPLATE" })|raw }}</a>
                     <div id="fcpoHostedCCTemplate" style="display:none;padding-top:10px;">
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_CONFIG" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_TYPE" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_COUNT" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_MAX" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_IFRAME" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_STYLE" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_CSS" }) }}</th>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_CONFIG" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_TYPE" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_COUNT" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_MAX" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_IFRAME" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_STYLE" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_CSS" })|raw }}</th>
                             </tr>
                             {% for sField in oView.getCCFields() %}
                             <tr>
@@ -414,7 +414,7 @@
                                     &nbsp;
                                 <input type="hidden" name="confbools[blFCPOCCUseCvc]" value="false">
                                 <input type="checkbox" name="confbools[blFCPOCCUseCvc]" value="true"
-                                       {% if (confbools.blFCPOCCUseCvc) %}checked{% endif %}> {{ translate({ ident: "FCPO_CC_USE_CVC" }) }}
+                                       {% if (confbools.blFCPOCCUseCvc) %}checked{% endif %}> {{ translate({ ident: "FCPO_CC_USE_CVC" })|raw }}
                                     {% endif %}
                                 </td>
                             </tr>
@@ -423,24 +423,24 @@
                         <br>
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_STANDARD_STYLE" }) }}</th>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_INPUT" }) }}</td>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_SELECTION" }) }}</td>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_STANDARD_STYLE" })|raw }}</th>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_INPUT" })|raw }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_SELECTION" })|raw }}</td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_FIELDS" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_FIELDS" })|raw }}</td>
                                 <td><input type="text" class="txt" size="50" name="confstrs[sFCPOCCStandardInput]"
                                            value="{{ confstrs.sFCPOCCStandardInput }}" {{ readonly }}></td>
                                 <td><input type="text" class="txt" size="50" name="confstrs[sFCPOCCStandardOutput]"
                                            value="{{ confstrs.sFCPOCCStandardOutput }}" {{ readonly }}></td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_IFRAME" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_IFRAME" })|raw }}</td>
                                 <td colspan="2">
                                     <table>
                                         <tr>
-                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" }) }}</td>
-                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" }) }}</td>
+                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" })|raw }}</td>
+                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" })|raw }}</td>
                                         </tr>
                                         <tr>
                                             <td><input type="text" class="txt" size="4"
@@ -457,11 +457,11 @@
                         <br>
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_ERRORS" }) }}</th>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_ERRORS" })|raw }}</th>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_ACTIVE" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_ACTIVE" })|raw }}</td>
                                 <td>
                                     <input type="hidden" name="confbools[blFCPOCCErrorsActive]" value="false">
                                     <input type="checkbox" name="confbools[blFCPOCCErrorsActive]" value="true"
@@ -469,14 +469,14 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_LANGUAGE" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_LANGUAGE" })|raw }}</td>
                                 <td>
                                     <select name="confstrs[sFCPOCCErrorsLang]">
                                         <option value="de" {% if confstrs.sFCPOCCErrorsLang == "de" %}selected{% endif %}>
-                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_DE" }) }}
+                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_DE" })|raw }}
                                         </option>
                                         <option value="en" {% if confstrs.sFCPOCCErrorsLang == "en" %}selected{% endif %}>
-                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_EN" }) }}
+                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_EN" })|raw }}
                                         </option>
                                     </select>
                                 </td>
@@ -484,7 +484,7 @@
                         </table>
                         <br>
                         <a href="#" onclick="fcpoTogglePreview();"
-                           style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_PREVIEW" }) }}</a>
+                           style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_PREVIEW" })|raw }}</a>
                         <div id="fcpoHostedCCPreview" style="display:none;padding-top:10px;">
                             {% include "@fcpayone/admin/fcpayone_cc_preview" %}
                         </div>
@@ -498,9 +498,9 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_DEBITNOTE" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_DEBITNOTE" })|raw }}</b></a>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_BANKDATA" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_BANKDATA" })|raw }}</dt>
             </dl>
             <dl style="border-top:0px;">
                 <dt>
@@ -513,16 +513,16 @@
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MULTISELECT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MULTISELECT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_GER" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_GER" })|raw }}</dt>
             </dl>
             <dl style="border-top:0px;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_SHOW_OLD_FIELDS" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_SHOW_OLD_FIELDS" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -533,16 +533,16 @@
                            {% if (confbools.blFCPODebitBICMandatory) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_BIC_MANDATORY" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_BIC_MANDATORY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE" })|raw }}</dt>
             </dl>
             <dl style="border-top:0px;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_TEXT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -553,16 +553,16 @@
                            {% if (confbools.blFCPOMandateIssuance) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_ACTIVE" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_ACTIVE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD" })|raw }}</dt>
             </dl>
             <dl style="border-top:0px;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_TEXT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -573,7 +573,7 @@
                            {% if (confbools.blFCPOMandateDownload) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_ACTIVE" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_ACTIVE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -584,7 +584,7 @@
         <div
         {% if oView.fcpoIsLogoAdded() %} class="exp"{% endif %}>
         <a href="#" onclick="_groupExp(this);return false;"
-           class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" }) }}</b></a>
+           class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" })|raw }}</b></a>
         <dl>
             <dt>
                 <input type="hidden" name="confbools[blFCPOPayPalDelAddress]" value="false">
@@ -593,14 +593,14 @@
                 {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPAL_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPAL_DELADDRESS")} %}
             </dt>
             <dd>
-                {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" }) }}
+                {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" })|raw }}
             </dd>
             <div class="spacer"></div>
         </dl>
         <dl>
             <dt></dt>
             <dd>
-                {{ translate({ ident: "FCPO_PAYPAL_LOGOS" }) }}
+                {{ translate({ ident: "FCPO_PAYPAL_LOGOS" })|raw }}
             </dd>
             <div class="spacer"></div>
         </dl>
@@ -609,11 +609,11 @@
             <dd>
                 <table border="1" cellspacing="0" cellpadding="2">
                     <tr>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" }) }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" }) }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" }) }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" }) }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" }) }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" })|raw }}</th>
                     </tr>
                     {% for aLogo in oView.fcpoGetPayPalLogos() %}
                     <tr>
@@ -633,7 +633,7 @@
                         </td>
                         <td>
                             {% if aLogo.logo == '' %}
-                            {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" }) }}
+                            {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" })|raw }}
                             {% else %}
                         <img src="{{ aLogo.logo }}">
                             {% endif %}
@@ -650,7 +650,7 @@
                 </table>
                 <br>
                 <input type="submit" class="edittext" name="addPayPalLogo"
-                       value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" }) }}"
+                       value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" })|raw }}"
                        onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
             </dd>
             <div class="spacer"></div>
@@ -661,7 +661,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYOLUTION" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYOLUTION" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="hidden" name="confbools[blFCPOPayolutionB2BMode]" value="false">
@@ -670,7 +670,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_B2BMODE"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_B2BMODE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_B2BMODE" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_B2BMODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -681,7 +681,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_COMPANY"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_COMPANY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_COMPANY" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_COMPANY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -692,7 +692,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_USER"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_USER")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_USER" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_USER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -703,7 +703,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_SECRET"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_SECRET")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_SECRET" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_SECRET" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -713,11 +713,11 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_RATEPAY" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_RATEPAY" })|raw }}</b></a>
             <dl>
                 <dt></dt>
                 <dd>
-                    <h3>{{ translate({ ident: "FCPO_RATEPAY_GENERAL_SETTINGS" }) }}</h3>
+                    <h3>{{ translate({ ident: "FCPO_RATEPAY_GENERAL_SETTINGS" })|raw }}</h3>
                 </dd>
             </dl>
             <dl>
@@ -728,7 +728,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_RATEPAY_B2BMODE"), 'sHelpText': help_text("FCPO_HELP_RATEPAY_B2BMODE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_RATEPAY_B2BMODE" }) }}
+                    {{ translate({ ident: "FCPO_RATEPAY_B2BMODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -746,7 +746,7 @@
             <dl>
                 <dt></dt>
                 <dd>
-                    <h3>{{ translate({ ident: "FCPO_PROFILES_RATEPAY" }) }}</h3>
+                    <h3>{{ translate({ ident: "FCPO_PROFILES_RATEPAY" })|raw }}</h3>
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -756,7 +756,7 @@
                 <dd>
                     Shop-ID: <input type="text" class="edittext" name="aRatepayProfiles[{{ sOxid }}][shopid]"
                                     value="{{ aRatePayProfile.shopid }}">&nbsp;
-                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_CURRENCY" }) }}:
+                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_CURRENCY" })|raw }}:
                     <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][currency]">
                         {% for sCurrentCurrencyIso in oView.fcpoGetCurrencyIso() %}
                         <option value="{{ sCurrentCurrencyIso }}"
@@ -765,7 +765,7 @@
                         </option>
                         {% endfor %}
                     </select>&nbsp;
-                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_PAYMENT" }) }}:
+                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_PAYMENT" })|raw }}:
                     <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][paymentid]">
                         <option value="fcporp_bill" {% if aRatePayProfile.OXPAYMENTID == 'fcporp_bill' %}selected{% endif %}>
                             Ratepay Rechnung
@@ -780,11 +780,11 @@
                         </option>
                     </select>
                     <input type="submit" class="edittext" name="aRatepayProfiles[{{ sOxid }}][delete]"
-                           value="{{ translate({ ident: "FCPO_RATEPAY_DELETE_PROFILE" }) }}"
+                           value="{{ translate({ ident: "FCPO_RATEPAY_DELETE_PROFILE" })|raw }}"
                            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}><br>
                     {% if aRatePayProfile.merchant_name != '' %}
                 <input type="checkbox" value="{{ sOxid }}"
-                       onclick="fcpoHandleRatePayShowDetails(this)"> {{ translate({ ident: "FCPO_RATEPAY_PROFILE_TOGGLE_DETAILS" }) }}
+                       onclick="fcpoHandleRatePayShowDetails(this)"> {{ translate({ ident: "FCPO_RATEPAY_PROFILE_TOGGLE_DETAILS" })|raw }}
                     {% endif %}
                 </dd>
                 <div class="spacer"></div>
@@ -792,7 +792,7 @@
             <dl id="ratepay_profile_details_{{ sOxid }}" style="display: none;">
                 <dt></dt>
                 <dd>
-                    <h3>{{ translate({ ident: "FCPO_RATEPAY_PROFILE_DETAILS_FOR_ID" }) }} {{ aRatePayProfile.shopid }}</h3>
+                    <h3>{{ translate({ ident: "FCPO_RATEPAY_PROFILE_DETAILS_FOR_ID" })|raw }} {{ aRatePayProfile.shopid }}</h3>
                     <table>
                         {% for sFieldName, sFieldValue in aRatePayProfile %}
                         <tr>
@@ -808,7 +808,7 @@
             {% endfor %}
             <dl>
                 <dt><input type="submit" class="edittext" name="addRatePayProfile"
-                           value="{{ translate({ ident: "FCPO_RATEPAY_ADD_PROFILE" }) }}"
+                           value="{{ translate({ ident: "FCPO_RATEPAY_ADD_PROFILE" })|raw }}"
                            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
                 <dd></dd>
                 <div class="spacer"></div>
@@ -819,7 +819,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_AMAZONPAY" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_AMAZONPAY" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOAmazonPaySellerId]"
@@ -827,7 +827,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_AMAZONPAY_SELLERID"), 'sHelpText': help_text("FCPO_HELP_AMAZONPAY_SELLERID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_SELLERID" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_SELLERID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -838,13 +838,13 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_AMAZONPAY_CLIENTID"), 'sHelpText': help_text("FCPO_HELP_AMAZONPAY_CLIENTID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_CLIENTID" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_CLIENTID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt><input type="submit" class="edittext" name="getAmazonPayConfiguration"
-                           value="{{ translate({ ident: "FCPO_AMAZONPAY_GET_CONFIG" }) }}"
+                           value="{{ translate({ ident: "FCPO_AMAZONPAY_GET_CONFIG" })|raw }}"
                            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
                 <dd></dd>
                 <div class="spacer"></div>
@@ -853,18 +853,18 @@
                 <dt>
                     <select name="confstrs[sFCPOAmazonButtonType]">
                         <option value="PwA" {% if confstrs.sFCPOAmazonButtonType == "PwA" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_PwA" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_PwA" })|raw }}
                         </option>
                         <option value="Pay" {% if confstrs.sFCPOAmazonButtonType == "Pay" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_Pay" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_Pay" })|raw }}
                         </option>
                         <option value="A" {% if confstrs.sFCPOAmazonButtonType == "A" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_A" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_A" })|raw }}
                         </option>
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -872,18 +872,18 @@
                 <dt>
                     <select name="confstrs[sFCPOAmazonButtonColor]">
                         <option value="Gold" {% if confstrs.sFCPOAmazonButtonColor == "Gold" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR_GOLD" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR_GOLD" })|raw }}
                         </option>
                         <option value="LightGray" {% if confstrs.sFCPOAmazonButtonColor == "LightGray" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY" })|raw }}
                         </option>
                         <option value="DarkGray" {% if confstrs.sFCPOAmazonButtonColor == "DarkGray" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY" })|raw }}
                         </option>
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -891,16 +891,16 @@
                 <dt>
                     <select name="confstrs[sFCPOAmazonMode]">
                         <option value="alwayssync" {% if confstrs.sFCPOAmazonMode == "alwayssync" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_MODE_ALWAYSSYNC" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_MODE_ALWAYSSYNC" })|raw }}
                         </option>
                         <option value="firstsyncthenasync"
                                 {% if confstrs.sFCPOAmazonMode == "firstsyncthenasync" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC" })|raw }}
                         </option>
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_MODE" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_MODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -908,18 +908,18 @@
                 <dt>
                     <select name="confstrs[sFCPOAmazonLoginMode]">
                         <option value="auto" {% if confstrs.sFCPOAmazonLoginMode == "auto" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_AUTO" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_AUTO" })|raw }}
                         </option>
                         <option value="popup" {% if confstrs.sFCPOAmazonLoginMode == "popup" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_POPUP" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_POPUP" })|raw }}
                         </option>
                         <option value="redirect" {% if confstrs.sFCPOAmazonLoginMode == "redirect" %}selected{% endif %}>
-                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_REDIRECT" }) }}
+                            {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_REDIRECT" })|raw }}
                         </option>
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE" }) }}
+                    {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -929,7 +929,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_APPLE_PAY" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_APPLE_PAY" })|raw }}</b></a>
 
             <dl>
                 <dt>
@@ -938,7 +938,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_MERCHANT_ID"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_MERCHANT_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_APPLE_PAY_MERCHANT_ID" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_MERCHANT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -958,9 +958,9 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_CERTIFICATE"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_CERTIFICATE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_APPLE_PAY_CERTIFICATE" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_CERTIFICATE" })|raw }}
                     {% if not oViewConf.fcpoCertificateExists() %}
-                    <p class="warning">{{ translate({ ident: "FCPO_APPLE_PAY_CONFIG_CERTIFICATE_MISSING" }) }}</p>
+                    <p class="warning">{{ translate({ ident: "FCPO_APPLE_PAY_CONFIG_CERTIFICATE_MISSING" })|raw }}</p>
                     {% endif %}
                 </dd>
                 <div class="spacer"></div>
@@ -983,7 +983,7 @@
                     <textarea name="fcpoAplKeyText"></textarea>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_APPLE_PAY_KEY" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -995,7 +995,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_PASSWORD"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_PASSWORD")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_APPLE_PAY_PASSWORD" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_PASSWORD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1011,7 +1011,7 @@
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_APPLE_PAY_CREDITCARD" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_CREDITCARD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1021,7 +1021,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_SECINVOICE" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_SECINVOICE" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOSecinvoicePortalId]"
@@ -1029,7 +1029,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SECINVOICE_PORTAL_ID"), 'sHelpText': help_text("FCPO_HELP_SECINVOICE_PORTAL_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_ID" }) }}
+                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1040,7 +1040,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SECINVOICE_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_SECINVOICE_PORTAL_KEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_KEY" }) }}
+                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1050,7 +1050,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_BNPL" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_BNPL" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPLPortalId]"
@@ -1058,7 +1058,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_PORTAL_ID"), 'sHelpText': help_text("FCPO_HELP_BNPL_PORTAL_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_BNPL_PORTAL_ID" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1069,7 +1069,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_BNPL_PORTAL_KEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_BNPL_PORTAL_KEY" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1083,7 +1083,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_ALLOW_DIFF_ADDRESS"), 'sHelpText': help_text("FCPO_HELP_BNPL_ALLOW_DIFF_ADDRESS")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_BNPL_ALLOW_DIFF_ADDRESS" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_ALLOW_DIFF_ADDRESS" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1093,7 +1093,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYDIREKT" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYDIREKT" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sPaydirektShippingTermsUrl]"
@@ -1101,7 +1101,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYDIREKT_SHIPPING_TERMS_URL" }) }}
+                    {{ translate({ ident: "FCPO_PAYDIREKT_SHIPPING_TERMS_URL" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1111,21 +1111,21 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" })|raw }}</b></a>
             <dl>
                 <dt>
                     <select name="confstrs[sTransactionRedirectLogging]">
                         <option value="none" {% if confstrs.sTransactionRedirectLogging == "none" %}SELECTED{% endif %}>
-                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_NONE" }) }}
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_NONE" })|raw }}
                         </option>
                         <option value="all" {% if confstrs.sTransactionRedirectLogging == "all" %}SELECTED{% endif %}>
-                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_ALL" }) }}
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_ALL" })|raw }}
                         </option>
                     </select>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECTLOGGING"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECTLOGGING")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1133,16 +1133,16 @@
                 <dt>
                     <select name="confstrs[sTransactionRedirectMethod]">
                         <option value="direct" {% if confstrs.sTransactionRedirectMethod == "direct" %}SELECTED{% endif %}>
-                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_DIRECT" }) }}
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_DIRECT" })|raw }}
                         </option>
                         <option value="cronjob" {% if confstrs.sTransactionRedirectMethod == "cronjob" %}SELECTED{% endif %}>
-                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_CRONJOB" }) }}
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_CRONJOB" })|raw }}
                         </option>
                     </select>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECTMETHOD"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECTMETHOD")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1153,7 +1153,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECT_TIMEOUT"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECT_TIMEOUT")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTION_TIMEOUT" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTION_TIMEOUT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1162,9 +1162,9 @@
 
 
     <br>
-    <input type="submit" class="edittext" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"
+    <input type="submit" class="edittext" name="save" value="{{ translate({ ident: "GENERAL_SAVE" })|raw }}"
            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-    <input type="submit" class="edittext" name="export" value="{{ translate({ ident: "FCPO_EXPORT_CONFIG" }) }}"
+    <input type="submit" class="edittext" name="export" value="{{ translate({ ident: "FCPO_EXPORT_CONFIG" })|raw }}"
            target="_blank" onClick="Javascript:document.myedit.fnc.value='export'" {{ readonly }}>
 </form>
 
