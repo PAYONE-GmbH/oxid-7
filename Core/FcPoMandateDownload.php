@@ -18,7 +18,7 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne;
+namespace Fatchip\PayOne\Core;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
@@ -31,14 +31,12 @@ ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
 ini_set('error_log', 'error.log');
 
-include_once dirname(__FILE__) . "/../../../bootstrap.php";
-
 /**
  * Description of fcPayOneMandateDownload
  *
  * @author Robert
  */
-class FcPayOneMandateDownload extends FrontendController
+class FcPoMandateDownload extends FrontendController
 {
     /**
      * Helper object for dealing with different shop versions
@@ -180,6 +178,3 @@ class FcPayOneMandateDownload extends FrontendController
         $oPORequest->sendRequestGetFile($sOrderId, $sMandateIdentification, $sMode);
     }
 }
-
-$oDownload = oxNew(FcPayOneMandateDownload::class);
-$oDownload->render();

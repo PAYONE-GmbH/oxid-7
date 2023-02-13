@@ -18,14 +18,17 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne;
+namespace Fatchip\PayOne\Core;
 
 use Exception;
+use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\UtilsObject;
 
-class FcPayOneTransactionStatusBase extends BaseModel
+class FcPoTransactionStatusBase extends BaseModel
 {
 
     protected $_aShopList = null;
@@ -39,12 +42,26 @@ class FcPayOneTransactionStatusBase extends BaseModel
     protected $_oUtilsObject = null;
 
     /**
+     * @var bool|mixed|string|null
+     */
+    protected mixed $_oFcPoHelper;
+
+    /**
+     * Initializing needed things
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+    }
+
+    /**
      * Check if key is available and valid. Throw exception if not
      *
      * @return void
      * @throws Exception
      */
-    protected function _isKeyValid()
+    protected function _isKeyValid(): void
     {
         if (defined('STDIN')) {
             return;
@@ -76,7 +93,7 @@ class FcPayOneTransactionStatusBase extends BaseModel
      * @param string $sKey
      * @return string
      */
-    public function fcGetPostParam($sKey)
+    public function fcGetPostParam(string $sKey): string
     {
         $sReturn = '';
         $mValue = filter_input(INPUT_GET, $sKey, FILTER_SANITIZE_SPECIAL_CHARS);
@@ -108,7 +125,11 @@ class FcPayOneTransactionStatusBase extends BaseModel
         return $aParams;
     }
 
-    protected function _getShopList()
+    /**
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
+     */
+    protected function _getShopList(): array
     {
         if ($this->_aShopList === null) {
             $aShops = [];
@@ -128,12 +149,12 @@ class FcPayOneTransactionStatusBase extends BaseModel
     /**
      * Logs exception for later analysis
      *
-     * @param $sMessage
+     * @param string $sMessage
      * @return void
      */
-    protected function _logException($sMessage)
+    protected function _logException(string $sMessage): void
     {
-        $sBasePath = dirname(__FILE__) . "/../../source/";
+        $sBasePath = dirname(__FILE__) . "/../../../../";
         $sLogFilePath = $sBasePath . $this->_sExceptionLog;
         $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
         $sFullMessage = $sPrefix . $sMessage . "\n";
@@ -146,11 +167,11 @@ class FcPayOneTransactionStatusBase extends BaseModel
     /**
      * Adding param
      *
-     * @param $sKey
-     * @param $mValue
+     * @param string $sKey
+     * @param mixed $mValue
      * @return string
      */
-    protected function _addParam($sKey, $mValue)
+    protected function _addParam(string $sKey, mixed $mValue): string
     {
         $sParams = '';
         if (is_array($mValue)) {
@@ -166,12 +187,13 @@ class FcPayOneTransactionStatusBase extends BaseModel
     /**
      * Method collects redirect targets and add them to statusforward queue
      *
-     * @param $sStatusmessageId
-     * @param $sPayoneStatus
+     * @param string      $sStatusmessageId
+     * @param string|null $sPayoneStatus
      * @return void
-     * @throws
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    protected function _addQueueEntries($sStatusmessageId, $sPayoneStatus = null)
+    protected function _addQueueEntries(string $sStatusmessageId, string $sPayoneStatus = null): void
     {
         try {
             if ($sPayoneStatus === null) {

@@ -25,12 +25,12 @@
  * Please don't touch this if you don't know what you are doing - the pre-configured IPs are the IPs from PAYONEs responsible servers
  */
 
-$aWhitelist = array(
+$aWhitelist = [
     '185.60.20.*',
     '213.178.72.196',
     '213.178.72.197',
-    '217.70.200.*',
-);
+    '217.70.200.*'
+];
 
 /**
  * If plugin is used in a loadbalanced setup, you need to define ips

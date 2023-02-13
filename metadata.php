@@ -63,11 +63,11 @@ $aModule = [
         OxidEsales\Eshop\Core\ViewConfig::class => Fatchip\PayOne\Core\FcPayOneViewConf::class
     ],
     'controllers' => [
-        // controllers -> admin
+        // Controller
         'FcPayOneAdminView' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneAdminView::class,
         'FcPayOneAdminDetails' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneAdminDetails::class,
         'FcPayOneAdminList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneAdminList::class,
-        'FcPayOneAdmin'                    => Fatchip\PayOne\Application\Controller\Admin\FcPayOneAdmin::class,
+        'FcPayOneAdmin' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneAdmin::class,
         'FcPayOneMainAjax' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneMainAjax::class,
         'FcPayOneApiLog' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLog::class,
         'FcPayOneApiLogList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLogList::class,
@@ -96,6 +96,11 @@ $aModule = [
         'FcPoPaypal' => Fatchip\PayOne\Application\Model\FcPoPaypal::class,
         'FcPayOneAjax' => Fatchip\PayOne\Application\Model\FcPayOneAjax::class,
         'FcPoRatePay' => Fatchip\PayOne\Application\Model\FcPoRatePay::class,
+        //Core
+        'FcPoTransactionStatusHandler' => Fatchip\PayOne\Core\FcPoTransactionStatusHandler::class,
+        'FcPoTransactionStatusBase' => Fatchip\PayOne\Core\FcPoTransactionStatusBase::class,
+        'FcPoMandateDownload' => Fatchip\PayOne\Core\FcPoMandateDownload::class,
+        'FcPoTransactionStatusForwarder' => Fatchip\PayOne\Core\FcPoTransactionStatusForwarder::class,
     ],
     'events' => [
         'onActivate' => Fatchip\PayOne\Core\FcPayOneEvents::class . '::onActivate',

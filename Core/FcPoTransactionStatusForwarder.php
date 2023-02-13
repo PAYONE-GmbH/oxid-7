@@ -18,9 +18,10 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne;
+namespace Fatchip\PayOne\Core;
 
 use Exception;
+use Fatchip\PayOne\Core\FcPoTransactionStatusBase;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 set_time_limit(0);
@@ -28,10 +29,7 @@ ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
 ini_set('error_log', '../../../log/fcpoErrors.log');
 
-include_once dirname(__FILE__) . "/../../../bootstrap.php";
-include_once dirname(__FILE__) . "/statusbase.php";
-
-class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
+class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
 {
 
     final const STATE_STARTING = 'starting';
@@ -99,8 +97,9 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     /**
      * Central handling of forward request
      */
-    public function handleForwarding(): void
+    public function __construct()
     {
+        parent::__construct();
         try {
             $this->_isJobAlreadyRunning();
             $this->_isKeyValid();
@@ -473,6 +472,3 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
         }
     }
 }
-
-$oScript = oxNew(FcPayOneTransactionStatusForwarder::class);
-$oScript->handleForwarding();

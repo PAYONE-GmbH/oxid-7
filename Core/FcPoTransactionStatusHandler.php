@@ -18,7 +18,7 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne;
+namespace Fatchip\PayOne\Core;
 
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
@@ -28,10 +28,13 @@ use OxidEsales\Eshop\Core\Language;
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
-ini_set('error_log', '../../../log/fcpoErrors.log');
+ini_set('error_log', '../../../log/fcPoErrors.log');
 
-if (file_exists(dirname(__FILE__) . "/config.ipwhitelist.php")) {
-    include_once dirname(__FILE__) . "/config.ipwhitelist.php";
+
+$aWhitelist = [];
+$aWhitelistForwarded = [];
+if (file_exists(dirname(__FILE__) . "/../config.ipwhitelist.php")) {
+    include_once dirname(__FILE__) . "/../config.ipwhitelist.php";
 } else {
     echo 'Config file missing!';
     exit;
@@ -47,7 +50,8 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     }
 }
 
-$sRemoteIp = isset($sClientIp) ? $sClientIp : $_SERVER['REMOTE_ADDR'];
+$sRemoteIp = $sClientIp ?? $_SERVER['REMOTE_ADDR'];
+
 if (!in_array($sRemoteIp, $aWhitelist)) {
     $blMatch = false;
     foreach ($aWhitelist as $sIP) {
@@ -71,16 +75,14 @@ if (!in_array($sRemoteIp, $aWhitelist)) {
     }
 }
 
-include_once dirname(__FILE__) . "/../../../bootstrap.php";
-include_once dirname(__FILE__) . "/statusbase.php";
-
-class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
+class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
 {
     /**
      * Central point for handling an incoming status message call
      */
-    public function handle(): void
+    public function __construct()
     {
+        parent::__construct();
         try {
             $this->_isKeyValid();
             $sStatusmessageId = $this->log();
@@ -503,9 +505,4 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         curl_close($oCurl);
 
     }
-
-
 }
-
-$oScript = oxNew(FcPayOneTransactionStatusHandler::class);
-$oScript->handle();
