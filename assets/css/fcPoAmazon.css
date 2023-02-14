@@ -6,3 +6,12 @@
 .payone_basket_amazon_btn_flow_minibasket {
     padding-bottom: 6px;
 }
+
+.payone_basket_amazon_btn_twig {
+    padding-right: 12px;
+    float: right;
+}
+
+.payone_basket_amazon_btn_twig_minibasket {
+    padding-bottom: 6px;
+}

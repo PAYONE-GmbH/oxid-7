@@ -36,12 +36,10 @@
                     <label for="cardpanInput">{{ translate({ ident: "FCPO_NUMBER" }) }}:</label>
                     <span class="inputIframe" id="cardpan"></span>
                 </li>
-                {% if oView.fcpoUseCVC() %}
                 <li>
                     <label for="cvcInput">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}:</label>
                     <span id="cardcvc2" class="inputIframe"></span>
                 </li>
-                {% endif %}
                 <li>
                     <label for="expireInput">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}:</label>
                     <span id="expireInput" class="inputIframe">

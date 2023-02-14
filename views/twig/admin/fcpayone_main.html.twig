@@ -410,12 +410,6 @@
                                     <input id="input_css_{{ sField }}" type="text" class="txt" size="50"
                                            name="confstrs[{{ sFieldIdent }}]" value="{{ confstrs.sFieldIdent }}"
                                            {{ readonly }} {% if confstrs.sFieldIdentCSS != "custom" %}disabled{% endif %}>
-                                    {% if sFieldIdent=='sFCPOCCCVCCSS' %}
-                                    &nbsp;
-                                <input type="hidden" name="confbools[blFCPOCCUseCvc]" value="false">
-                                <input type="checkbox" name="confbools[blFCPOCCUseCvc]" value="true"
-                                       {% if (confbools.blFCPOCCUseCvc) %}checked{% endif %}> {{ translate({ ident: "FCPO_CC_USE_CVC" })|raw }}
-                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

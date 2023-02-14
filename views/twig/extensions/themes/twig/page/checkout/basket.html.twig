@@ -14,7 +14,7 @@
     {% endif %}
 
     {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonUp', sAmazonButtonClass: 'payone_basket_amazon_btn_flow'} %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonUp', sAmazonButtonClass: 'payone_basket_amazon_btn_twig'} %}
     {% endif %}
 {% endblock %}
 
@@ -30,7 +30,7 @@
     {% endif %}
 
     {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonBottom', sAmazonButtonClass: 'payone_basket_amazon_btn_flow'} %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonBottom', sAmazonButtonClass: 'payone_basket_amazon_btn_twig'} %}
     {% endif %}
 {% endblock %}
 

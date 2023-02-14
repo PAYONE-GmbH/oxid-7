@@ -360,8 +360,7 @@ class FcPoParamsParser
     protected function _fcpoGetKlarnaWidgetPath()
     {
         $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
-        $sPath = $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
-        return $sPath;
+        return $oViewConf->getModulePath('fcpayone') . '/snippets/fcpoKlarnaWidget.txt';
     }
 
     /**

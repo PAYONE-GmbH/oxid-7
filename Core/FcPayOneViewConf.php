@@ -550,7 +550,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $this->_oFcPoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', $iCurrentIncludeCount);
 
         $iExpectedButtonAmount = $this->_fcpoGetExpectedButtonAmount();
-
         $blReturn = $iCurrentIncludeCount >= $iExpectedButtonAmount;
         if ($blReturn) {
             // reset counter
@@ -569,7 +568,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
         $aController2Amount = [
-            'basket' => 3,
+            'basket' => 2,//3,
             'user' => 2,
         ];
 

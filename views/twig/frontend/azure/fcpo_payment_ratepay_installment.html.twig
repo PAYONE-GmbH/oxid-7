@@ -151,7 +151,7 @@
                     <div id="fcporp_installment_calculation_details"></div>
                 </li>
 
-                {% if (in_array(sSettlementType, array('both', 'debit'))) %}
+                {% if sSettlementType == 'both' or sSettlementType == 'debit' %}
                 <div id="fcporp_installment_sepa_container">
                     {% if (sSettlementType == 'both') %}
                     <strong class="rp-installment-header">{{ translate({ ident: "FCPO_RATEPAY_INSTALLMENT_TYPE_DEBIT_TITLE" }) }}</strong>

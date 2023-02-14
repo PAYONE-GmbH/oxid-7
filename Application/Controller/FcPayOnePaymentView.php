@@ -1596,19 +1596,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Returns if CVC
-     *
-     * @return bool
-     */
-    public function fcpoUseCVC()
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $blUseCVC = $oConfig->getConfigParam('blFCPOCCUseCvc');
-
-        return $blUseCVC;
-    }
-
-    /**
      * Returns if option for BIC is set mandatory as string to handle it with javascript checks
      *
      * @return string

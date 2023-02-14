@@ -104,8 +104,14 @@
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_ratepay_bill.html.twig" %}
     {% elseif sPaymentID == "fcporp_debitnote" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_ratepay_debitnote.html.twig" %}
+    {% elseif sPaymentID == "fcporp_installment" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_ratepay_installment.html.twig" %}
     {% elseif sPaymentID == "fcpo_secinvoice" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_secinvoice.html.twig" %}
+    {% elseif sPaymentID == "fcpopl_secinvoice" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_bnpl_secinvoice.html.twig" %}
+    {% elseif sPaymentID == "fcpopl_secinstallment" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_bnpl_secinstallment.html.twig" %}
     {% elseif sPaymentID == "fcpo_sofort" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_sofort.html.twig" %}
     {% elseif sPaymentID == "fcpo_trustly" %}
@@ -119,6 +125,10 @@
     {% elseif oView.fcpoIsKlarnaCombined(sPaymentID) %}
         {% if oView.fcpoShowKlarnaCombined(sPaymentID) %}
             {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_klarna_combined.html.twig" %}
+        {% endif %}
+    {% elseif sPaymentID == "fcpo_apple_pay" %}
+        {% if oView.fcpoAplGetDeviceCheck() and oView.fcpoAplCertificateCheck() %}
+            {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_default.html.twig" %}
         {% endif %}
     {% elseif oViewConf.fcpoIsPayonePayment(sPaymentID) %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_default.html.twig" %}

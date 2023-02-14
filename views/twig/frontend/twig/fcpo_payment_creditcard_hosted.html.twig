@@ -9,7 +9,9 @@
                         {{ oView.fcpoGetFormattedPaymentCosts(paymentmethod) }}</b></label>
             </dt>
             <dd class="{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% endif %}">
+
                 <script type="text/javascript" src="{{ oViewConf.fcpoGetHostedPayoneJs() }}"></script>
+
                 <input type="hidden" name="dynvalue[fcpo_kknumber]" value="">
                 <input type="hidden" name="fcpo_cc_type" value="hosted">
                 <input type="hidden" name="fcpo_mode_{{ sPaymentID }}"
@@ -44,7 +46,6 @@
                     </div>
                 </div>
 
-                {% if oView.fcpoUseCVC() %}
                 <div class="form-group fcpo_kkpruef">
                     <label for="cvcInput"
                            class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}:</label>
@@ -52,7 +53,6 @@
                         <span id="cardcvc2" class="inputIframe"></span>
                     </div>
                 </div>
-                {% endif %}
                 <div class="form-group fcpo_kkexpire">
                     <label for="expireInput" class="req control-label col-lg-3">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}:</label>
                     <div class="col-lg-9">

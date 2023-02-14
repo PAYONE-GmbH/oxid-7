@@ -460,23 +460,24 @@ function fcpoProcessPayoneResponseELV(response) {
 }
 
 function fcpoProcessPayoneResponseCC(response) {
-    var cardholderError = fcpoValidateCardholder();
+    const cardholderError = fcpoValidateCardholder();
     if (cardholderError) {
         return false;
     }
-    if (response.get('status') == 'VALID') {
-        var oForm = fcpoGetPaymentForm();
+    if (response.get('status') === 'VALID') {
+        const oForm = fcpoGetPaymentForm();
+        console.log(oForm);
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.get('pseudocardpan');
         oForm["dynvalue[fcpo_ccmode]"].value = fcpoGetOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.get('truncatedcardpan');
         oForm["dynvalue[fcpo_kkpruef]"].value = 'xxx';
         oForm.submit();
-    } else if (response.get('status') != 'VALID') {
-        if (response.get('errorcode') == '1078' || response.get('errorcode') == '877') {
+    } else if (response.get('status') !== 'VALID') {
+        if (response.get('errorcode') === '1078' || response.get('errorcode') === '877') {
             document.getElementById('fcpo_cc_number_invalid').style.display = 'block';
-        } else if (response.get('errorcode') == '1079') {
+        } else if (response.get('errorcode') === '1079') {
             document.getElementById('fcpo_cc_cvc2_invalid').style.display = 'block';
-        } else if (response.get('errorcode') == '33') {
+        } else if (response.get('errorcode') === '33') {
             document.getElementById('fcpo_cc_date_invalid').style.display = 'block';
         } else {
             document.getElementById('fcpo_cc_error_content').innerHTML = '"' + response.get('customermessage') + '"';
@@ -782,7 +783,7 @@ function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) 
 }
 
 function fcpoAplCheckDevice() {
-    var allowedDevice = 0;
+    /*var allowedDevice = 0;
     if (window.ApplePaySession) {
         var canMakePayments = ApplePaySession.canMakePayments();
         if (canMakePayments) {
@@ -801,7 +802,7 @@ function fcpoAplCheckDevice() {
         },
         success: fcpoAplCheckDeviceSuccess,
         error: fcpoAplCheckDeviceFailure
-    });
+    });*/
 }
 
 function fcpoAplCheckDeviceSuccess(response) {
@@ -1213,13 +1214,13 @@ function fcpoValidateCardExpireDate(response) {
  *
  */
 function fcpoValidateCCHostedInputs() { // Function called by submitting PAY-button
-    if (oFcpoIframes.isComplete()) {
+    if (oFcPoIframes.isComplete()) {
         return 1;
     } else {
-        if (oFcpoIframes.isCardTypeComplete() &&
-            oFcpoIframes.isCardpanComplete() &&
-            oFcpoIframes.isExpireMonthComplete() &&
-            oFcpoIframes.isExpireYearComplete()) {
+        if (oFcPoIframes.isCardTypeComplete() &&
+            oFcPoIframes.isCardpanComplete() &&
+            oFcPoIframes.isExpireMonthComplete() &&
+            oFcPoIframes.isExpireYearComplete()) {
             return 2;
         }
     }
@@ -1236,7 +1237,7 @@ function fcpoProcessPayoneResponseCCHosted(response) {
     response = fcpoValidateCardExpireDate(response);
     console.log(response);
     if (response.status === "VALID") {
-        var oForm = fcpoGetPaymentForm();
+        const oForm = fcpoGetPaymentForm();
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.pseudocardpan;
         oForm["dynvalue[fcpo_ccmode]"].value = fcpoGetOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.truncatedcardpan;
@@ -1300,7 +1301,7 @@ function fcpoValidateInputCCHosted(e) {
             // halt here if response returns valid but data is not valid (expiry date e.g.)
             e.preventDefault();
             //perform request for validation
-            oFcpoIframes.creditCardCheck('fcpoProcessPayoneResponseCCHosted');
+            oFcPoIframes.creditCardCheck('fcpoProcessPayoneResponseCCHosted');
         }
     }
 }
@@ -1326,7 +1327,7 @@ function fcpoResetCardTypeCCHosted() {
  * handles form submission if method is credit card hosted iframe
  */
 $(document).ready(function () {
-    var paymentForm = $('[id="payment"]');
+    const paymentForm = $('[id="payment"]');
 
     fcpoResetCardTypeCCHosted();
 
@@ -1364,6 +1365,6 @@ $(document).ready(function () {
     }
 
     $('#cardtype').on('change', function (e) {
-        oFcpoIframes.setCardType(this.value);
+        oFcPoIframes.setCardType(this.value);
     });
 });

@@ -1,7 +1,8 @@
 {% extends 'widget/minibasket/minibasket.html.twig' %}
 
 {% block widget_minibasket_total %}
-    {{ parent() }}
+   TEST
+    {#{ parent() }}
 
     {% set sAmazonButtonId = _prefix|cat("LoginWithAmazonMiniBasket") %}
 
@@ -9,5 +10,5 @@
         <p class="functions clear text-right">
             {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: sAmazonButtonId, sAmazonButtonClass: "payone_basket_amazon_btn_flow_minibasket"} %}
         </p>
-    {% endif %}
+    {% endif %#}
 {% endblock %}

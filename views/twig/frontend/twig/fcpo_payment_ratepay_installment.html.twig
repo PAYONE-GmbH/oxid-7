@@ -17,8 +17,8 @@
             <input type="hidden" id="fcporp_installment_settlement_type"
                    name="dynvalue[fcporp_installment_settlement_type]"
                    value="{% if sSettlementType=='both' %}debit{% else %}{{ sSettlementType }}{% endif %}">
-            <script language="JavaScript">
-                var di = {
+            <script>
+                let di = {
                     t: '{{ oView.fcpoGetRatePayDeviceFingerprint() }}',
                     v: '{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}',
                     l: 'Checkout'
@@ -160,7 +160,7 @@
                 <div id="fcporp_installment_calculation_details"></div>
             </div>
 
-            {% if (in_array(sSettlementType, array('both', 'debit'))) %}
+            {% if sSettlementType == 'both' or sSettlementType == 'debit' %}
                 <div id="fcporp_installment_sepa_container">
                     {% if (sSettlementType == 'both') %}
                         <strong class="rp-installment-header">{{ translate({ ident: "FCPO_RATEPAY_INSTALLMENT_TYPE_DEBIT_TITLE" }) }}</strong>

@@ -42,7 +42,7 @@
 
     // fill array with amazon pay button
     window.onAmazonPaymentsReadyArray.push(function () {
-        var authRequest, loginOptions;
+        let authRequest, loginOptions;
         OffAmazonPayments.Button('{{ sAmazonButtonId }}{{ iAmzButtonIncluded }}', '{{ oViewConf.fcpoGetAmazonPaySellerId() }}', {
             type: '{{ oViewConf.fcpoGetAmazonPayButtonType() }}',
             color: '{{ oViewConf.fcpoGetAmazonPayButtonColor() }}',
@@ -61,4 +61,4 @@
 </script>
 {% if oViewConf.fcpoGetAllowIncludeAmazonWidgetUrl() %}
     <script async="async" src='{{ oViewConf.fcpoGetAmazonWidgetsUrl() }}'></script>
-    {% endif %}
+{% endif %}

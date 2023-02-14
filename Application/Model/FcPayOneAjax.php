@@ -39,32 +39,6 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-if (!function_exists('getShopBasePath')) {
-    function getShopBasePath()
-    {
-        return dirname(__FILE__) . '/../../../../../';
-    }
-}
-
-if (file_exists(getShopBasePath() . "bootstrap.php")) {
-    include_once getShopBasePath() . "bootstrap.php";
-} else {
-    // global variables which are important for older OXID.
-    $_SERVER['REQUEST_METHOD'] = 'POST';
-    $_SERVER['HTTP_USER_AGENT'] = 'payone_ajax';
-    $_SERVER['HTTP_ACCEPT_LANGUAGE'] = '';
-    $_SERVER['HTTP_REFERER'] = '';
-    $_SERVER['QUERY_STRING'] = '';
-
-    include getShopBasePath() . 'modules/functions.php';
-    include_once getShopBasePath() . 'core/oxfunctions.php';
-    include_once getShopBasePath() . 'views/oxubase.php';
-}
-
-// receive params
-$sPaymentId = filter_input(INPUT_POST, 'paymentid');
-$sAction = filter_input(INPUT_POST, 'action');
-$sParamsJson = filter_input(INPUT_POST, 'params');
 
 /**
  * Class for receiving ajax calls and delivering needed data
@@ -79,17 +53,83 @@ class FcPayOneAjax extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * init object construction
      *
      * @return null
+     * @throws \JsonException
      */
     public function __construct()
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+
+        // receive params
+        $sPaymentId = filter_input(INPUT_POST, 'paymentid');
+        $sAction = filter_input(INPUT_POST, 'action');
+        $sParamsJson = filter_input(INPUT_POST, 'params');
+
+        if ($sPaymentId) {
+            $oPayoneAjax = new FcPayOneAjax();
+            if ($sAction == 'precheck') {
+                $sResult = $oPayoneAjax->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
+                if ($sResult == 'SUCCESS') {
+                    $sAction = 'calculation';
+                } else {
+                    echo $oPayoneAjax->fcpoReturnErrorMessage($sResult);
+                }
+            }
+
+            if ($sAction == 'calculation') {
+                $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
+                if (is_array($mResult) && $mResult !== []) {
+                    // we have got a calculation result. Parse it to needed html
+                    echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
+                }
+            }
+
+            if ($sAction == 'get_amazon_reference_details' && $sPaymentId == 'fcpoamazonpay') {
+                $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
+            }
+
+            if ($sAction == 'fcpoapl_register_device' && $sPaymentId == 'fcpo_apple_pay') {
+                echo $oPayoneAjax->fcpoAplRegisterDevice($sParamsJson);
+            }
+            if ($sAction == 'fcpoapl_create_session' && $sPaymentId == 'fcpo_apple_pay') {
+                echo $oPayoneAjax->fcpoAplCreateSession($sParamsJson);
+            }
+            if ($sAction == 'fcpoapl_payment' && $sPaymentId == 'fcpo_apple_pay') {
+                echo $oPayoneAjax->fcpoAplPayment($sParamsJson);
+            }
+            if ($sAction == 'fcpoapl_get_order_info' && $sPaymentId == 'fcpo_apple_pay') {
+                echo $oPayoneAjax->fcpoAplOrderInfo();
+            }
+
+            if ($sAction == 'fcporp_calculation' && $sPaymentId == 'fcporp_installment') {
+                echo $oPayoneAjax->fcpoRatepayCalculation($sParamsJson);
+            }
+
+
+            $blConfirmAmazonOrder = (
+                $sAction == 'confirm_amazon_pay_order' &&
+                $sPaymentId == 'fcpoamazonpay'
+            );
+            if ($blConfirmAmazonOrder) {
+                $oPayoneAjax->fcpoConfirmAmazonPayOrder($sParamsJson);
+            }
+
+            $aKlarnaPayments = [
+                'fcpoklarna_invoice',
+                'fcpoklarna_installments',
+                'fcpoklarna_directdebit',
+            ];
+
+            if (in_array($sPaymentId, $aKlarnaPayments)) {
+                echo $oPayoneAjax->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
+            }
+        }
     }
 
     /**
@@ -105,6 +145,8 @@ class FcPayOneAjax extends BaseModel
         if ($sAction === 'start_session') {
             return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
         }
+
+        return '';
     }
 
     /**
@@ -890,65 +932,5 @@ class FcPayOneAjax extends BaseModel
         $sHtml .= '<input type="hidden" name="dynvalue[fcporp_installment_number_of_rate]" value="' . $aInstallmentDetails['numberOfRate'] . '">';
 
         return $sHtml . '</div>';
-    }
-}
-
-
-if ($sPaymentId) {
-    $oPayoneAjax = new FcPayOneAjax();
-    if ($sAction == 'precheck') {
-        $sResult = $oPayoneAjax->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
-        if ($sResult == 'SUCCESS') {
-            $sAction = 'calculation';
-        } else {
-            echo $oPayoneAjax->fcpoReturnErrorMessage($sResult);
-        }
-    }
-
-    if ($sAction == 'calculation') {
-        $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
-        if (is_array($mResult) && $mResult !== []) {
-            // we have got a calculation result. Parse it to needed html
-            echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
-        }
-    }
-
-    if ($sAction == 'get_amazon_reference_details' && $sPaymentId == 'fcpoamazonpay') {
-        $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
-    }
-
-    if ($sAction == 'fcpoapl_register_device' && $sPaymentId == 'fcpo_apple_pay') {
-        echo $oPayoneAjax->fcpoAplRegisterDevice($sParamsJson);
-    }
-    if ($sAction == 'fcpoapl_create_session' && $sPaymentId == 'fcpo_apple_pay') {
-        echo $oPayoneAjax->fcpoAplCreateSession($sParamsJson);
-    }
-    if ($sAction == 'fcpoapl_payment' && $sPaymentId == 'fcpo_apple_pay') {
-        echo $oPayoneAjax->fcpoAplPayment($sParamsJson);
-    }
-    if ($sAction == 'fcpoapl_get_order_info' && $sPaymentId == 'fcpo_apple_pay') {
-        echo $oPayoneAjax->fcpoAplOrderInfo();
-    }
-
-    if ($sAction == 'fcporp_calculation' && $sPaymentId == 'fcporp_installment') {
-        echo $oPayoneAjax->fcpoRatepayCalculation($sParamsJson);
-    }
-
-
-    $blConfirmAmazonOrder = (
-        $sAction == 'confirm_amazon_pay_order' &&
-        $sPaymentId == 'fcpoamazonpay'
-    );
-    if ($blConfirmAmazonOrder) {
-        $oPayoneAjax->fcpoConfirmAmazonPayOrder($sParamsJson);
-    }
-
-    $aKlarnaPayments = array(
-        'fcpoklarna_invoice',
-        'fcpoklarna_installments',
-        'fcpoklarna_directdebit',
-    );
-    if (in_array($sPaymentId, $aKlarnaPayments)) {
-        echo $oPayoneAjax->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
     }
 }

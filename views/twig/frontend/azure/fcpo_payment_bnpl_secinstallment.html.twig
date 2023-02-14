@@ -81,11 +81,11 @@
             </li>
         </ul>
 
-        {% include_dynamic oViewConf.fcpoGetAbsModuleTemplateFrontendPath('fcpo_payment_bnpl_snippet.html.twig') %}
+        {% include "@fcpayone/frontend/fcpo_payment_bnpl_snippet.html.twig" %}
 
         {% block checkout_payment_longdesc %}
         {% if paymentmethod.oxpayments__oxlongdesc.value %}
-    <div desc">
+    <div>
         {{ paymentmethod.oxpayments__oxlongdesc.getRawValue() }}
         </div>
         {% endif %}

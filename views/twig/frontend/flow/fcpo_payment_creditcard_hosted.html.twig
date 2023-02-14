@@ -44,7 +44,6 @@
                     </div>
                 </div>
 
-                {% if oView.fcpoUseCVC() %}
                 <div class="form-group fcpo_kkpruef">
                     <label for="cvcInput"
                            class="req control-label col-lg-3">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}:</label>
@@ -52,7 +51,6 @@
                         <span id="cardcvc2" class="inputIframe"></span>
                     </div>
                 </div>
-                {% endif %}
                 <div class="form-group fcpo_kkexpire">
                     <label for="expireInput" class="req control-label col-lg-3">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}:</label>
                     <div class="col-lg-9">
