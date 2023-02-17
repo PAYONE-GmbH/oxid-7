@@ -23,19 +23,20 @@
  * load OXID Framework
  */
 
-namespace Fatchip\PayOne\Application\Model;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoParamsParser;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use JsonException;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Curl;
 use OxidEsales\Eshop\Core\Field;
-use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\ViewConfig;
 
@@ -45,7 +46,7 @@ use OxidEsales\Eshop\Core\ViewConfig;
  *
  * @author andre
  */
-class FcPayOneAjax extends BaseModel
+class FcPayOneAjax extends Base
 {
 
     /**
@@ -58,8 +59,8 @@ class FcPayOneAjax extends BaseModel
     /**
      * init object construction
      *
-     * @return null
-     * @throws \JsonException
+     * @return void
+     * @throws JsonException
      */
     public function __construct()
     {
@@ -72,52 +73,38 @@ class FcPayOneAjax extends BaseModel
         $sParamsJson = filter_input(INPUT_POST, 'params');
 
         if ($sPaymentId) {
-            $oPayoneAjax = new FcPayOneAjax();
             if ($sAction == 'precheck') {
-                $sResult = $oPayoneAjax->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
+                $sResult = $this->fcpoTriggerPrecheck($sPaymentId, $sParamsJson);
                 if ($sResult == 'SUCCESS') {
                     $sAction = 'calculation';
                 } else {
-                    echo $oPayoneAjax->fcpoReturnErrorMessage($sResult);
+                    echo $this->fcpoReturnErrorMessage($sResult);
                 }
             }
 
             if ($sAction == 'calculation') {
-                $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
+                $mResult = $this->fcpoTriggerInstallmentCalculation($sPaymentId);
                 if (is_array($mResult) && $mResult !== []) {
                     // we have got a calculation result. Parse it to needed html
-                    echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
+                    echo $this->fcpoParseCalculation2Html($mResult);
                 }
             }
 
-            if ($sAction == 'get_amazon_reference_details' && $sPaymentId == 'fcpoamazonpay') {
-                $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
-            }
-
             if ($sAction == 'fcpoapl_register_device' && $sPaymentId == 'fcpo_apple_pay') {
-                echo $oPayoneAjax->fcpoAplRegisterDevice($sParamsJson);
+                echo $this->fcpoAplRegisterDevice($sParamsJson);
             }
             if ($sAction == 'fcpoapl_create_session' && $sPaymentId == 'fcpo_apple_pay') {
-                echo $oPayoneAjax->fcpoAplCreateSession($sParamsJson);
+                echo $this->fcpoAplCreateSession($sParamsJson);
             }
             if ($sAction == 'fcpoapl_payment' && $sPaymentId == 'fcpo_apple_pay') {
-                echo $oPayoneAjax->fcpoAplPayment($sParamsJson);
+                echo $this->fcpoAplPayment($sParamsJson);
             }
             if ($sAction == 'fcpoapl_get_order_info' && $sPaymentId == 'fcpo_apple_pay') {
-                echo $oPayoneAjax->fcpoAplOrderInfo();
+                echo $this->fcpoAplOrderInfo();
             }
 
             if ($sAction == 'fcporp_calculation' && $sPaymentId == 'fcporp_installment') {
-                echo $oPayoneAjax->fcpoRatepayCalculation($sParamsJson);
-            }
-
-
-            $blConfirmAmazonOrder = (
-                $sAction == 'confirm_amazon_pay_order' &&
-                $sPaymentId == 'fcpoamazonpay'
-            );
-            if ($blConfirmAmazonOrder) {
-                $oPayoneAjax->fcpoConfirmAmazonPayOrder($sParamsJson);
+                echo $this->fcpoRatepayCalculation($sParamsJson);
             }
 
             $aKlarnaPayments = [
@@ -127,7 +114,7 @@ class FcPayOneAjax extends BaseModel
             ];
 
             if (in_array($sPaymentId, $aKlarnaPayments)) {
-                echo $oPayoneAjax->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
+                echo $this->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
             }
         }
     }
@@ -232,124 +219,12 @@ class FcPayOneAjax extends BaseModel
     }
 
     /**
-     * Triggers a call on payoneapi for handling ajax calls for referencedetails
-     *
-     * @param $sParamsJson
-     */
-    public function fcpoGetAmazonReferenceId($sParamsJson): void
-    {
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
-        $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
-        $oSession->deleteVariable('fcpoAmazonReferenceId');
-        $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
-        $sAmazonLoginAccessToken = $oSession->getVariable('sAmazonLoginAccessToken');
-
-        // do the call cascade
-        $this->_fcpoHandleGetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
-        $this->_fcpoHandleSetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
-    }
-
-    /**
-     * Triggers call getorderreferencedetails
-     *
-     * @param $sAmazonReferenceId
-     * @param $sAmazonLoginAccessToken
-     * @return void
-     */
-    protected function _fcpoHandleGetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken)
-    {
-        $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
-        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-
-        $aResponse = $oRequest->sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
-
-        if ($aResponse['status'] == 'OK') {
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoAmazonWorkorderId', $aResponse['workorderid']);
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('paymentid');
-            $this->_oFcPoHelper->fcpoSetSessionVariable('paymentid', 'fcpoamazonpay');
-        } else {
-            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-            $sShopUrl = $oConfig->getShopUrl();
-            $oUtils->redirect($sShopUrl . "index.php?cl=basket");
-        }
-    }
-
-    /**
-     * Triggers call setorderreferencedetails
-     *
-     * @param $sAmazonReferenceId
-     * @param $sAmazonLoginAccessToken
-     * @return void
-     */
-    protected function _fcpoHandleSetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken)
-    {
-        $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
-        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-        $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-
-        $aResponse = $oRequest->sendRequestSetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken, $sWorkorderId);
-
-        if ($aResponse['status'] == 'OK') {
-            $oUser = $this->_oFcPoHelper->getFactoryObject(User::class);
-            $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
-        } else {
-            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-            $sShopUrl = $oConfig->getShopUrl();
-            $oUtils->redirect($sShopUrl . "index.php?cl=basket");
-        }
-    }
-
-    /**
-     *
-     *
-     * @param $sParamsJson
-     */
-    public function fcpoConfirmAmazonPayOrder($sParamsJson): void
-    {
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
-        $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
-        $sToken = $aParams['fcpoAmazonStoken'];
-        $sDeliveryMD5 = $aParams['fcpoAmazonDeliveryMD5'];
-
-        $oSession->deleteVariable('fcpoAmazonReferenceId');
-        $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
-
-        $this->_fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5);
-    }
-
-    /**
-     * Calls confirmorderreference call. Sends a 404 on invalid state
-     *
-     * @param $sAmazonReferenceId
-     * @param $sToken
-     */
-    protected function _fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5)
-    {
-        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-
-        $aResponse =
-            $oRequest->sendRequestGetConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5);
-
-        $blSend400 = (
-            isset($aResponse['status']) &&
-            $aResponse['status'] != 'OK'
-        );
-
-        if ($blSend400) header("HTTP/1.0 404 Not Found");
-
-        header("HTTP/1.0 200 Ok");
-    }
-
-    /**
      * Performs a precheck for payolution installment
      *
      * @param string $sPaymentId
      * @param string $sParamsJson
      * @return bool|string
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function fcpoTriggerPrecheck(string $sPaymentId, string $sParamsJson): bool|string
     {
@@ -620,12 +495,7 @@ class FcPayOneAjax extends BaseModel
      */
     public function fcpoAplPayment($sParamsJson): bool|string
     {
-        $aCreditCardMapping = array(
-            'visa' => 'V',
-            'mastercard' => 'M',
-            'amex' => 'M',
-            'discover' => 'D'
-        );
+        $aCreditCardMapping = ['visa' => 'V', 'mastercard' => 'M', 'amex' => 'M', 'discover' => 'D'];
 
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $aParams = json_decode($sParamsJson);

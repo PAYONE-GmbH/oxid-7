@@ -15,20 +15,6 @@
             <a href="{{ sMandatePdfUrl }}" class="link"
                target="_blank">{{ translate({ ident: "FCPO_THANKYOU_PDF_LINK" }) }}</a>
         {% endif %}
-        {% if oView.fcpoIsAmazonOrder() %}
-            <script async="async" src='{{ oViewConf.fcpoGetAmazonWidgetsUrl() }}'></script>
-            <script>
-                window.onAmazonLoginReady = function () {
-                    amazon.Login.logout();
-                };
-            </script>
-            {% if oViewConf.fcpoIsAmazonAsyncMode() %}
-                <br><br>
-                <div>
-                    {{ translate({ ident: "FCPO_AMAZON_THANKYOU_MESSAGE" }) }}
-                </div>
-            {% endif %}
-        {% endif %}
         {% if oView.fcpoShowClearingData() %}
             <h3>
                 {{ translate({ ident: "FCPO_EMAIL_BANK_DETAILS" }) }}

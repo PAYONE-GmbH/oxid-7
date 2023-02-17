@@ -34,13 +34,6 @@
 {% endblock %}
 
 {% block checkout_order_address %}
-    {% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
-
-    {% if oViewConf.fcpoAmazonLoginSessionActive() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_amazonpay_order.html.twig" %}
-
-    {% endif %}
-
     {% if oViewConf.fcpoUserHasSalutation() %}
         {{ parent() }}
         {% if oViewConf.fcpoIsKlarnaPaynow() %}

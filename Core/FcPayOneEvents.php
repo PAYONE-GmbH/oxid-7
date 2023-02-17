@@ -49,7 +49,10 @@ class FcPayOneEvents
         'fcpobillsafe',
         'fcpoonlineueberweisung',
         'fcpoklarna',
-        'fcpopaydirekt_express'
+        'fcpopaydirekt_express',
+        'fcpo_giropay',
+        'fcpoamazonpay',
+        'fcpopaydirekt'
     ];
     public static $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
@@ -370,7 +373,7 @@ class FcPayOneEvents
     public static $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
     public static $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
     public static $sQueryAlterFcpoShadowBasketFcbasketChangeToBlob = "ALTER TABLE fcposhadowbasket MODIFY FCPOBASKET BLOB;";
-    public static $aPaymentMethods = array(
+    public static $aPaymentMethods = [
         'fcpoinvoice' => 'PAYONE Rechnungskauf',
         'fcpopayadvance' => 'PAYONE Vorkasse',
         'fcpodebitnote' => 'PAYONE Lastschrift',
@@ -382,15 +385,12 @@ class FcPayOneEvents
         'fcpoklarna_installments' => 'PAYONE Klarna Ratenkauf',
         'fcpoklarna_directdebit' => 'PAYONE Klarna Sofort bezahlen',
         'fcpobarzahlen' => 'PAYONE Barzahlen',
-        'fcpopaydirekt' => 'PAYONE paydirekt',
         'fcpopo_bill' => 'PAYONE Unzer Rechnungskauf',
         'fcpopo_debitnote' => 'PAYONE Unzer Lastschrift',
         'fcpopo_installment' => 'PAYONE Unzer Ratenkauf',
         'fcporp_bill' => 'PAYONE Ratepay Rechnungskauf',
-        'fcpoamazonpay' => 'PAYONE Amazon Pay',
         'fcpo_secinvoice' => 'PAYONE Gesicherter Rechnungskauf',
         'fcpo_sofort' => 'PAYONE Sofort Überweisung',
-        'fcpo_giropay' => 'PAYONE Giropay',
         'fcpo_eps' => 'PAYONE eps Überweisung',
         'fcpo_pf_finance' => 'PAYONE PostFinance E-Finance',
         'fcpo_pf_card' => 'PAYONE PostFinance Card',
@@ -406,7 +406,7 @@ class FcPayOneEvents
         'fcpopl_secinvoice' => 'PAYONE Gesicherter Rechnungskauf (neu)',
         'fcpopl_secinstallment' => 'PAYONE Gesicherter Ratenkauf',
 
-    );
+    ];
     /**
      * Database object
      *
@@ -567,10 +567,10 @@ class FcPayOneEvents
         self::dropIndexIfExists('fcporefnr', 'FCPO_REFNR');
 
         //ADD PAYPAL EXPRESS LOGOS
-        self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '1'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(1, 1, 0, 'btn_xpressCheckout_de.gif', 1);");
-        self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '2'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(2, 1, 1, 'btn_xpressCheckout_en.gif', 0);");
+        self::insertRowIfNotExists('fcpopayoneexpresslogos', ['OXID' => '1'], "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(1, 1, 0, 'btn_xpressCheckout_de.gif', 1);");
+        self::insertRowIfNotExists('fcpopayoneexpresslogos', ['OXID' => '2'], "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(2, 1, 1, 'btn_xpressCheckout_en.gif', 0);");
         // add available user flags
-        self::insertRowIfNotExists('fcpouserflags', array('OXID' => 'fcporatepayrejected'), "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
+        self::insertRowIfNotExists('fcpouserflags', ['OXID' => 'fcporatepayrejected'], "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
 
         // OX6-127: CHANGE SHADOW BASKET TYPE
         self::changeColumnTypeIfWrong('fcposhadowbasket', 'FCPOBASKET', 'BLOB', self::$sQueryAlterFcpoShadowBasketFcbasketChangeToBlob);
@@ -764,12 +764,12 @@ class FcPayOneEvents
 
         foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
             //INSERT PAYMENT METHOD
-            $blMethodCreated = self::insertRowIfNotExists('oxpayments', array('OXID' => $sPaymentOxid), "INSERT INTO oxpayments(OXID,OXACTIVE,OXDESC,OXADDSUM,OXADDSUMTYPE,OXFROMBONI,OXFROMAMOUNT,OXTOAMOUNT,OXVALDESC,OXCHECKED,OXDESC_1,OXVALDESC_1,OXDESC_2,OXVALDESC_2,OXDESC_3,OXVALDESC_3,OXLONGDESC,OXLONGDESC_1,OXLONGDESC_2,OXLONGDESC_3,OXSORT,FCPOISPAYONE,FCPOAUTHMODE,FCPOLIVEMODE) VALUES ('{$sPaymentOxid}', 0, '{$sPaymentName}', 0, 'abs', 0, 0, 1000000, '', 0, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0, 1, 'preauthorization', 0);");
+            $blMethodCreated = self::insertRowIfNotExists('oxpayments', ['OXID' => $sPaymentOxid], "INSERT INTO oxpayments(OXID,OXACTIVE,OXDESC,OXADDSUM,OXADDSUMTYPE,OXFROMBONI,OXFROMAMOUNT,OXTOAMOUNT,OXVALDESC,OXCHECKED,OXDESC_1,OXVALDESC_1,OXDESC_2,OXVALDESC_2,OXDESC_3,OXVALDESC_3,OXLONGDESC,OXLONGDESC_1,OXLONGDESC_2,OXLONGDESC_3,OXSORT,FCPOISPAYONE,FCPOAUTHMODE,FCPOLIVEMODE) VALUES ('{$sPaymentOxid}', 0, '{$sPaymentName}', 0, 'abs', 0, 0, 1000000, '', 0, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0, 1, 'preauthorization', 0);");
 
             // If method go created, user groups are assigned, otherwise we keep what is already set
             if ($blMethodCreated) {
                 //INSERT PAYMENT METHOD CONFIGURATION
-                $blInserted = self::insertRowIfNotExists('oxobject2group', array('OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid), "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
+                $blInserted = self::insertRowIfNotExists('oxobject2group', ['OXSHOPID' => $sShopId, 'OXOBJECTID' => $sPaymentOxid], "INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidadmin');");
                 if ($blInserted === true) {
                     $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxidcustomer');");
                     $oDb->execute("INSERT INTO oxobject2group(OXID,OXSHOPID,OXOBJECTID,OXGROUPSID) values (REPLACE(UUID(),'-',''), '{$sShopId}', '{$sPaymentOxid}', 'oxiddealer');");
@@ -787,7 +787,7 @@ class FcPayOneEvents
                 }
             }
 
-            self::insertRowIfNotExists('oxobject2payment', array('OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'), "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (REPLACE(UUID(),'-',''), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
+            self::insertRowIfNotExists('oxobject2payment', ['OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'], "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (REPLACE(UUID(),'-',''), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
         }
     }
 
@@ -799,9 +799,9 @@ class FcPayOneEvents
     public static function removeDeprecated()
     {
         foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
-            self::dropRowIfExists("oxpayments", array('OXID' => $sRemovedPaymentMethod), "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2group", array('OXOBJECTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2payment", array('OXPAYMENTID' => $sRemovedPaymentMethod), "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
+            self::dropRowIfExists("oxpayments", ['OXID' => $sRemovedPaymentMethod], "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
+            self::dropRowIfExists("oxobject2group", ['OXOBJECTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
+            self::dropRowIfExists("oxobject2payment", ['OXPAYMENTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
         }
     }
 
@@ -953,9 +953,7 @@ class FcPayOneEvents
         $sCompareOperator = ($blEqualOrGreater) ? '>=' : '>';
         $sCurrVersion = self::getCurrentVersion();
 
-        $blReturn = (version_compare($sCurrVersion, $sMinVersion, $sCompareOperator)) ? true : false;
-
-        return $blReturn;
+        return (version_compare($sCurrVersion, $sMinVersion, $sCompareOperator)) ? true : false;
     }
 
     /**
@@ -975,12 +973,11 @@ class FcPayOneEvents
      *
      * @return boolean true or false
      */
-    public static function isUnderVersion($sMaxVersion)
+    public static function isUnderVersion($sMaxVersion): bool
     {
         $sCurrVersion = self::getCurrentVersion();
-        $blReturn = (version_compare($sCurrVersion, $sMaxVersion, '<')) ? true : false;
 
-        return $blReturn;
+        return (version_compare($sCurrVersion, $sMaxVersion, '<')) ? true : false;
     }
 
     /**

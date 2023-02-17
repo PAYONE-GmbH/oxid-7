@@ -127,7 +127,7 @@ class FcPoMandateDownload extends FrontendController
             $sOrderBy = "";
         }
 
-        $sQuery = "
+        return "
             SELECT 
                 a.fcpo_filename,
                 b.oxid,
@@ -139,8 +139,6 @@ class FcPoMandateDownload extends FrontendController
                 oxorder AS b ON a.oxorderid = b.oxid
             WHERE {$sWhere} {$sOrderBy} LIMIT 1        
         ";
-
-        return $sQuery;
     }
 
     /**

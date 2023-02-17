@@ -300,7 +300,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Triggers debit request to PAYONE API and displays the result
      *
-     * @return null
+     * @return void
      */
     public function debit(): void
     {
@@ -312,14 +312,14 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             $sBankCountry = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcountry');
             $sBankAccount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccount');
             $sBankCode = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcode');
-            $sBankaccountholder = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccountholder');
+            $sBankAccountHolder = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccountholder');
             $sAmount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_amount');
             $sCancellationReason = $this->_oFcPoHelper->fcpoGetRequestParameter('bnpl_cancellation_reason');
 
-            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-
+            $oPoRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+            $oResponse = null;
             if (in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
-                $oPORequest->addParameter('addPayData[cancellation_reason]', $sCancellationReason);
+                $oPoRequest->addParameter('addPayData[cancellation_reason]', $sCancellationReason);
             }
 
             if ($sAmount) {
@@ -331,7 +331,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
                 }
 
                 if ($dAmount < 0) {
-                    $oResponse = $oPORequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankaccountholder);
+                    $oResponse = $oPoRequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankAccountHolder);
                 }
             } elseif ($aPositions = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_positions')) {
                 $dAmount = 0;
@@ -342,7 +342,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
                     }
                     $dAmount += (double)$aOrderArt['price'];
                 }
-                $oResponse = $oPORequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankaccountholder, $aPositions);
+                $oResponse = $oPoRequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankAccountHolder, $aPositions);
             }
 
             $this->_sResponsePrefix = 'FCPO_DEBIT_';

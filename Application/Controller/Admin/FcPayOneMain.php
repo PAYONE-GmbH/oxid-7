@@ -3,6 +3,7 @@
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
 
+use JsonException;
 use Exception;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Application\Model\FcPoPaypal;
@@ -210,7 +211,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      * init object construction
      *
      * @return null
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function __construct()
     {
@@ -467,9 +468,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $this->_fcpoCheckAndAddRatePayProfile();
         $this->_fcpoInsertProfiles();
 
-        // request and add amazonpay configuration if triggered
-        $this->_fcpoCheckRequestAmazonPayConfiguration();
-
         $this->_handlePayPalExpressLogos();
 
         $this->handleApplePayCredentials(
@@ -567,64 +565,6 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Checks if button for fetching configuration settings for amazon from payone api has been triggered
-     * Initiates requesting api if true
-     *
-     * @return void
-     */
-    protected function _fcpoCheckRequestAmazonPayConfiguration()
-    {
-        if ($this->_oFcPoHelper->fcpoGetRequestParameter('getAmazonPayConfiguration')) {
-            $oLang = $this->_oFcPoHelper->fcpoGetLang();
-            $blSuccess = $this->_fcpoRequestAndAddAmazonConfig();
-            $sMessage = 'FCPO_AMAZONPAY_ERROR_GETTING_CONFIG';
-            if ($blSuccess) {
-                $this->_aAdminMessages["blAmazonPayConfigFetched"] = true;
-                $sMessage = 'FCPO_AMAZONPAY_SUCCESS_GETTING_CONFIG';
-            }
-            $sTranslatedMessage = $oLang->translateString($sMessage);
-            $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
-            $oUtilsView->addErrorToDisplay($sTranslatedMessage, false, true);
-        }
-    }
-
-    /**
-     * Triggers requesting payone api for amazon configuration and returns
-     * if succeeded
-     *
-     * @return bool
-     */
-    protected function _fcpoRequestAndAddAmazonConfig()
-    {
-        $oFcpoRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-        $aResponse = $oFcpoRequest->sendRequestGetAmazonPayConfiguration();
-
-        return $this->_fcpoSaveAmazonConfigFromResponse($aResponse);
-    }
-
-    /**
-     * Analyzes response tries to save config and returns if everything succeeded
-     *
-     * @param $aResponse
-     * @return bool
-     */
-    protected function _fcpoSaveAmazonConfigFromResponse($aResponse)
-    {
-        $sStatus = $aResponse['status'];
-        $blReturn = false;
-        if ($sStatus == 'OK') {
-            $sSellerId = $aResponse['add_paydata[seller_id]'];
-            $sClientId = $aResponse['add_paydata[client_id]'];
-            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-            $oConfig->saveShopConfVar('str', 'sFCPOAmazonPaySellerId', $sSellerId);
-            $oConfig->saveShopConfVar('str', 'sFCPOAmazonPayClientId', $sClientId);
-            $blReturn = true;
-        }
-
-        return $blReturn;
-    }
-
-    /**
      * Handling of paypal express logos
      *
      * @return void
@@ -650,7 +590,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     {
         $aFiles = $this->_oFcPoHelper->fcpoGetFiles();
         $sCertDir = getShopBasePath() . 'modules/fc/fcpayone/cert/';
-
+dir($sCertDir);
         foreach ($aFiles as $sInputName => $aFile) {
             if (!in_array($sInputName, ['fcpoAplCertificateFile', 'fcpoAplKeyFile'])) {
                 continue;
@@ -1056,7 +996,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
 
         if ($blFCPOCCErrorsActive) {
             $sJsCode .= "\t\t" . 'error: "errorOutput",' . "\n";
-            $sJsCode .= "\t\t\t" . 'language: language: Payone.ClientApi.Language.' . $sLangConcat . "\n";
+            $sJsCode .= "\t\t\t" . 'language: Payone.ClientApi.Language.' . $sLangConcat . "\n";
         }
 
         return $sJsCode;
@@ -1096,7 +1036,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      * Method returns the checksum result
      *
      * @return string
-     * @throws \JsonException
+     * @throws JsonException
      */
     protected function _fcpoGetCheckSumResult()
     {

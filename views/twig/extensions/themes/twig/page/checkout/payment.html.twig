@@ -45,7 +45,7 @@
             };
     </script>
 
-    {#{ script({ add: "const oFcPayOneData = oFcPayOneData || [];
+    {# { script({ add: "const oFcPayOneData = oFcPayOneData || [];
         oFcPayOneData.inputs =
             {
                 fcpo_mid: '" ~ {{ oView.getMerchantId()|raw }}  ~ "',
@@ -64,18 +64,10 @@
                 fcpo_integratorid: '" ~ {{ oView.getIntegratorid()|raw }}  ~ "',
                 fcpo_integratorver: '" ~ {{ oView.getIntegratorver()|raw }}  ~ "',
                 fcpo_integratorextver: '" ~ {{ oView.getIntegratorextver()|raw }}  ~ "'
-            };" }) }#}
-    {% if oViewConf.fcpoAmazonLoginSessionActive() %}
-        {% set sFcPoTemplatePath = oView.fcpoGetActiveThemePath() %}
-        {% if oView.getAllSets() %}
-            {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_amazonpay_payment.html.twig" %}
-        {% else %}
-            {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_amazonpay_wrong_address.html.twig" %}
-        {% endif %}
-    {% else %}
-        {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
-        {{ parent() }}
-    {% endif %}
+            };" }) } #}
+
+    {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
+    {{ parent() }}
 {% endblock %}
 
 {% block select_payment %}
@@ -116,8 +108,6 @@
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_sofort.html.twig" %}
     {% elseif sPaymentID == "fcpo_trustly" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_trustly.html.twig" %}
-    {% elseif sPaymentID == "fcpo_giropay" %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_giropay.html.twig" %}
     {% elseif sPaymentID == "fcpo_eps" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_eps.html.twig" %}
     {% elseif sPaymentID == "fcpo_ideal" %}

@@ -11,6 +11,7 @@ use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
 
 /**
@@ -34,17 +35,6 @@ use OxidEsales\Eshop\Core\Field;
 class FcPayOneOrderView extends FcPayOneOrderView_parent
 {
 
-    const FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT = 980;
-    const FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD = 981;
-    const FCPO_AMAZON_ERROR_REJECTED = 982;
-    const FCPO_AMAZON_ERROR_PROCESSING_FAILURE = 983;
-    const FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER = 984;
-    const FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED = 985;
-    const FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET = 986;
-    const FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET = 987;
-    const FCPO_AMAZON_ERROR_900 = 900;
-
-
     /**
      * Helper object for dealing with different shop versions
      *
@@ -66,11 +56,11 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected $_blFcpoConfirmMandateError = null;
 
-
     /**
      * init object construction
      *
      * @return null
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -509,11 +499,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             'fcpopaypal_express' => 'basket'
         ];
 
-        $sReturn = (isset($aMap[$sPaymentId])) ?
+        return (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :
             'user';
-
-        return $sReturn;
     }
 
     /**
@@ -530,11 +518,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             'fcpopaypal_express' => 'fcpoUsePayPalExpress'
         ];
 
-        $sReturn = (isset($aMap[$sPaymentId])) ?
+        return (isset($aMap[$sPaymentId])) ?
             $aMap[$sPaymentId] :
             '';
-
-        return $sReturn;
     }
 
     /**
@@ -635,79 +621,10 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     protected function _fcpoIsSamePayPalUser($oUser, $aResponse)
     {
 
-        $blIsSamePayPalUser = (
-            $oUser->oxuser__oxfname->value == $aResponse['add_paydata[shipping_firstname]'] ||
+        return $oUser->oxuser__oxfname->value == $aResponse['add_paydata[shipping_firstname]'] ||
             $oUser->oxuser__oxlname->value == $aResponse['add_paydata[shipping_lastname]'] ||
             $oUser->oxuser__oxcity->value == $aResponse['add_paydata[shipping_city]'] ||
-            stripos($aResponse['add_paydata[shipping_street]'], $oUser->oxuser__oxstreet->value) !== false
-        );
-
-        return $blIsSamePayPalUser;
-    }
-
-    /**
-     * Overwriting next step action if there is some special redirect needed
-     *
-     * @param $iSuccess
-     * @return string
-     */
-    protected function _getNextStep($iSuccess)
-    {
-        $sNextStep = parent::_getNextStep($iSuccess);
-
-        $sCustomStep = $this->_fcpoGetRedirectAction($iSuccess);
-        if ($sCustomStep) {
-            $sNextStep = $sCustomStep;
-        }
-
-        return $sNextStep;
-    }
-
-    /**
-     * Returns action that shall be performed on order::_getNextStep
-     *
-     * @param $iSuccess
-     * @return mixed int|bool
-     */
-    protected function _fcpoGetRedirectAction($iSuccess)
-    {
-        $iSuccess = (int)$iSuccess;
-        $mReturn = false;
-        $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
-
-        switch ($iSuccess) {
-            case self::FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD:
-            case self::FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED:
-            case self::FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET:
-            case self::FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT:
-            case self::FCPO_AMAZON_ERROR_REJECTED:
-            case self::FCPO_AMAZON_ERROR_PROCESSING_FAILURE:
-            case self::FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER:
-            case self::FCPO_AMAZON_ERROR_900:
-                $this->_fcpoAmazonLogout();
-                $sMessage = $oOrder->fcpoGetAmazonErrorMessage($iSuccess);
-                $mReturn = 'basket?fcpoerror=' . urlencode($sMessage);
-                break;
-            case self::FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET:
-                $sMessage = $oOrder->fcpoGetAmazonErrorMessage($iSuccess);
-                $mReturn = 'user?fcpoerror=' . urlencode($sMessage);
-                break;
-        }
-
-        return $mReturn;
-    }
-
-    /**
-     * Logs out amazon user
-     *
-     * @return void
-     */
-    protected function _fcpoAmazonLogout()
-    {
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
-        $this->_fcpoDeleteCurrentUser();
+            stripos($aResponse['add_paydata[shipping_street]'], $oUser->oxuser__oxstreet->value) !== false;
     }
 
     protected function _fcpoDeleteCurrentUser()

@@ -22,7 +22,7 @@ $sLangName = "Dutch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset' => 'ISO-8859-15',
     'FCPO_IBAN_INVALID' => 'Please enter a valid IBAN.',
     'FCPO_BIC_INVALID' => 'Please enter a valid BIC.',
@@ -190,7 +190,7 @@ $aLang = array(
     'FCPO_APPLE_PAY_CREDITCARD' => "Allowed credit cards to use with Apple Pay",
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR' => "Error while establishing connection to Apple Pay service.",
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS' => "No valid credit cards type is allowed in the configuration. Apple Pay session cannot be initialized.",
-);
+];
 
 /*
 [{oxmultilang ident="GENERAL_YOUWANTTODELETE"}]

@@ -15,7 +15,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCNumberWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCNumberHeight') }}"
                 }
-                    {% endif %}
+                {% endif %}
             },
             cardcvc2: {
                 selector: "cardcvc2", // put name of your div-container here
@@ -46,7 +46,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCMonthWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCMonthHeight') }}"
                 }
-                    {% endif %}
+                {% endif %}
             },
             cardexpireyear: {
                 selector: "cardexpireyear", // put name of your div-container here
@@ -61,7 +61,7 @@
                     width: "{{ oView.getConfigParam('sFCPOCCYearWidth') }}",
                     height: "{{ oView.getConfigParam('sFCPOCCYearHeight') }}"
                 }
-                    {% endif %}
+                {% endif %}
             }
         },
         defaultStyle: {
@@ -75,11 +75,11 @@
         {% if oView.getConfigParam('blFCPOCCErrorsActive') %}
         error: "errorOutput", // area to display error-messages (optional)
         {% if oView.getConfigParam('sFCPOCCErrorsLang') == "de" %}
-        language: Payone.ClientApi.Language.de // Language to display error-messages
-            {% else %}
-        language: Payone.ClientApi.Language.en
-            {% endif %}
-            {% endif %}
+        language: Payone.ClientApi.Language.de, // Language to display error-messages
+        {% else %}
+        language: Payone.ClientApi.Language.en,
+        {% endif %}
+        {% endif %}
     };
 </script>
 {% capture assign = "fcpoCCIframes" %}

@@ -72,9 +72,6 @@ $aModule = [
         'FcPayOneApiLog' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLog::class,
         'FcPayOneApiLogList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLogList::class,
         'FcPayOneApiLogMain' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLogMain::class,
-        'FcPayOneBoni' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneBoni::class,
-        'FcPayOneBoniList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneBoniList::class,
-        'FcPayOneBoniMain' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneBoniMain::class,
         'FcPayOneList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneList::class,
         'FcPayOneLog' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneLog::class,
         'FcPayOneLogList' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneLogList::class,
@@ -84,6 +81,7 @@ $aModule = [
         'FcPayOneStatusForwarding' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneStatusForwarding::class,
         'FcPayOneStatusMapping' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneStatusMapping::class,
         'FcPayOneErrorMapping' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneErrorMapping::class,
+        'FcPayOneAjax' => Fatchip\PayOne\Application\Controller\FcPayOneAjax::class,
         // Model
         'FcPoUserFlag' => Fatchip\PayOne\Application\Model\FcPouserflag::class,
         'FcPoRequestLog' => Fatchip\PayOne\Application\Model\FcPoRequestLog::class,
@@ -94,7 +92,6 @@ $aModule = [
         'FcPoConfigExport' => Fatchip\PayOne\Application\Model\FcPoConfigExport::class,
         'FcPoKlarna' => Fatchip\PayOne\Application\Model\FcPoKlarna::class,
         'FcPoPaypal' => Fatchip\PayOne\Application\Model\FcPoPaypal::class,
-        'FcPayOneAjax' => Fatchip\PayOne\Application\Model\FcPayOneAjax::class,
         'FcPoRatePay' => Fatchip\PayOne\Application\Model\FcPoRatePay::class,
         //Core
         'FcPoTransactionStatusHandler' => Fatchip\PayOne\Core\FcPoTransactionStatusHandler::class,

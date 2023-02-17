@@ -22,7 +22,7 @@ $sLangName = "Deutsch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset' => 'UTF-8',
     'FCPO_IBAN_INVALID' => 'Bitte geben Sie eine korrekte IBAN ein.',
     'FCPO_BIC_INVALID' => 'Bitte geben Sie eine korrekte BIC ein.',
@@ -173,22 +173,6 @@ $aLang = array(
     'FCPO_RATEPAY_ADD_TERMS3' => 'sowie mit der Durchführung einer ',
     'FCPO_RATEPAY_ADD_TERMS4' => 'Risikoprüfung durch unseren Zahlungspartner ',
     'FCPO_RATEPAY_ADD_TERMS5' => 'einverstanden.',
-    'FCPO_AMAZON_SELECT_ADDRESS' => 'Adresse aus dem Amazon-Adressbuch auswählen',
-    'FCPO_AMAZON_SELECT_PAYMENT' => 'Zahlungsart aus der Amazon-Brieftasche auswählen',
-    'FCPO_AMAZON_LOGOFF' => 'Den Amazon Pay Bestellprozess beenden und zurück zum Standard-Checkout',
-    'FCPO_AMAZON_PROBLEM' => 'Es gibt ein Problem',
-    'FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY' => 'Für das Land Ihrer angegebene Adresse existiert keine Versandmöglichkeit. Bitte klicken Sie <a href="index.php?cl=user" style="color:green;">hier</a> um zur Adressauswahl zurückzukehren.',
-    'FCPO_AMAZON_THANKYOU_MESSAGE' => 'Ihre Zahlung mit Amazon Pay ist derzeit noch in Prüfung.Bitte beachten Sie, dass wir uns mit Ihnen in Kürze per Email in Verbindung setzen werden, falls noch Unklarheiten bestehen sollten.',
-    'FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte Überprüfen Sie Ihre Daten und wählen Sie eine anderen Zahlungsart.',
-    'FCPO_AMAZON_ERROR_REJECTED' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_PROCESSING_FAILURE' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET' => 'Bitte wählen Sie eine Adresse.',
-    'FCPO_AMAZON_ERROR_900' => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
-    'FCPO_AMAZON_LOGIN' => 'Mit Amazon einloggen.',
     'FCPO_SECINVOICE_BIRTHDATE' => 'Geburtsdatum',
     'FCPO_SECINVOICE_USTID' => 'Umsatzsteueridentifiationsnummer',
     'FCPO_SECINVOICE_NO_COMPANY' => 'Keine Firma? Klicken Sie <a href="index.php?cl=account_user" style="color:green;">hier</a> um Ihre Addresse zu ändern.',
@@ -245,7 +229,6 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS' => "In der Konfiguration ist kein gültiger Kreditkartentyp zulässig. Die Apple Pay-Sitzung kann nicht initialisiert werden.",
 
     'PAYONE Alipay' => 'PAYONE Alipay',
-    'PAYONE Amazon Pay' => 'PAYONE Amazon Pay',
     'PAYONE Apple Pay' => 'PAYONE Apple Pay',
     'PAYONE Bancontact' => 'PAYONE Bancontact',
     'PAYONE Barzahlen' => 'PAYONE Barzahlen',
@@ -253,7 +236,6 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'PAYONE Gesicherter Rechnungskauf' => 'PAYONE Gesicherter Rechnungskauf',
     'PAYONE Gesicherter Rechnungskauf (neu)' => 'PAYONE Gesicherter Rechnungskauf',
     'PAYONE Gesicherter Ratenkauf' => 'PAYONE Gesicherter Ratenkauf',
-    'PAYONE Giropay' => 'PAYONE Giropay',
     'PAYONE iDEAL' => 'PAYONE iDEAL',
     'PAYONE Klarna Ratenkauf' => 'PAYONE Klarna Ratenkauf',
     'PAYONE Klarna Rechnung' => 'PAYONE Klarna Rechnung',
@@ -329,7 +311,7 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_DEBIT_LINK' => 'Ich m&ouml;chte die Ratenzahlungen bequem per Lastschrift begleichen',
 
 
-);
+];
 
 /*
 [{oxmultilang ident="GENERAL_YOUWANTTODELETE"}]

@@ -2,8 +2,6 @@
 
 {% block basket_btn_next_top %}
     {{ parent() }}
-    {% set sFcPoTemplatePath = oViewConf.fcpoGetActiveThemePath() %}
-
     {% if oView.fcpoGetPayPalExpressPic() %}
         <form autocomplete="off" action="{{ oViewConf.getSslSelfLink() }}" method="post">
             {{ oViewConf.getHiddenSid()|raw }}
@@ -11,10 +9,6 @@
             <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
             <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
         </form>
-    {% endif %}
-
-    {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonUp', sAmazonButtonClass: 'payone_basket_amazon_btn_twig'} %}
     {% endif %}
 {% endblock %}
 
@@ -27,10 +21,6 @@
             <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
             <input type="image" src="{{ oView.fcpoGetPayPalExpressPic() }}" style="float: right;margin-right:10px;">
         </form>
-    {% endif %}
-
-    {% if oViewConf.fcpoCanDisplayAmazonPayButton() %}
-        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpayone_amazon_paybutton.html.twig" with {sAmazonButtonId: 'LoginWithAmazonButtonBottom', sAmazonButtonClass: 'payone_basket_amazon_btn_twig'} %}
     {% endif %}
 {% endblock %}
 

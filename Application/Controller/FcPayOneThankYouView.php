@@ -56,14 +56,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     protected $_sBarzahlenHtml = null;
 
     /**
-     * Flag indicates if current order is/was of type amazon
-     *
-     * @var bool
-     */
-    protected $_blIsAmazonOrder = false;
-
-
-    /**
      * init object construction
      *
      * @return null
@@ -131,13 +123,9 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         $oOrder = $this->getOrder();
         $blIsPayone = $oOrder->isPayOnePaymentType();
 
-        $blReturn = (
-            $blIsPayone &&
-            $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
-            $oOrder->oxorder__oxtransstatus->value == 'ERROR'
-        );
-
-        return $blReturn;
+        return $blIsPayone &&
+        $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
+        $oOrder->oxorder__oxtransstatus->value == 'ERROR';
     }
 
 
@@ -153,48 +141,9 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
             $this->_oFcPoHelper->fcpoSetSessionVariable('sFcpoUserId', $oUser->getId());
         }
 
-        $this->_fcpoHandleAmazonThankyou();
         $this->_fcpoDeleteSessionVariablesOnOrderFinish();
 
-        $sReturn = parent::render();
-
-        return $sReturn;
-    }
-
-    /**
-     * Loggs off Amazon if this is an Amazon order
-     *
-     * @return void
-     */
-    protected function _fcpoHandleAmazonThankyou()
-    {
-        $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();
-        if ($blIsAmazonOrder) {
-            $this->_blIsAmazonOrder = true;
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('amazonRefNr');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('usr');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayOrderIsPending');
-        }
-    }
-
-    /**
-     * Checks if current order is of type amazon
-     *
-     * @return bool
-     */
-    protected function _fcpoDetermineAmazonOrder()
-    {
-        $blReturn = false;
-        $sAmazonLoginAccessToken = $this->_oFcPoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
-        if ($sAmazonLoginAccessToken) {
-            $blReturn = true;
-        }
-
-        return $blReturn;
+        return parent::render();
     }
 
     /**
@@ -207,16 +156,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_client_token');
-    }
-
-    /**
-     * Returns if current order is of type amazon
-     *
-     * @return bool
-     */
-    public function fcpoIsAmazonOrder()
-    {
-        return $this->_blIsAmazonOrder;
     }
 
     /**
@@ -244,9 +183,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     {
         $oOrder = $this->getOrder();
 
-        $blShowClearingData =
-            $oOrder->fcpoShowClearingData($oOrder);
-
-        return $blShowClearingData;
+        return $oOrder->fcpoShowClearingData($oOrder);
     }
 }

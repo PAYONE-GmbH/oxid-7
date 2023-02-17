@@ -59,36 +59,6 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Overloading render method for checking on amazon logoff
-     *
-     * @return string
-     */
-    public function render()
-    {
-        $this->_fcpoCheckForAmazonLogoff();
-        return parent::render();
-    }
-
-    /**
-     * Method checks for param fcpoamzaction and logoff from Amazon Session if
-     * value is set to logoff
-     *
-     * @return void
-     */
-    protected function _fcpoCheckForAmazonLogoff()
-    {
-        $sAmzAction = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoamzaction');
-        if ($sAmzAction == 'logoff') {
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('amazonRefNr');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
-            $this->_oFcPoHelper->fcpoDeleteSessionVariable('usr');
-        }
-    }
-
-    /**
      * Returns basket error message if there is some. false if none
      *
      * @return mixed string|bool

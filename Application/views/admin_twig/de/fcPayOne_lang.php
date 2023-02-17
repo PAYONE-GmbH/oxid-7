@@ -23,7 +23,7 @@ $sLangName = "Deutsch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset' => 'UTF-8',
     'fcpo_admin_title' => 'PAYONE',
     'fcpo_main_title' => 'Konfiguration',
@@ -145,7 +145,6 @@ $aLang = array(
     'FCPO_ONLY_PAYONE' => 'Nur PAYONE',
     'ORDER_LIST_YOUWANTTOSTORNO' => 'Wollen Sie diese Bestellung wirklich stornieren?\n ACHTUNG: ggf. offene PAYONE Vorgänge zu dieser Bestellung bitte vor dem Stornieren abschliessen.',
     'FCPO_ORDER_LIST_YOUWANTTODELETE' => 'Wollen Sie diesen Eintrag wirklich löschen?\n ACHTUNG: ggf. offene PAYONE Vorgänge zu dieser Bestellung bitte vor dem Löschen abschliessen.',
-    'fcpo_admin_config_bonicheck' => 'Protect',
     'FCPO_ADDRESSCHECKTYPE' => 'Adressprüfung',
     'FCPO_NO_ADDRESSCHECK' => 'Keine Adressprüfung durchführen',
     'FCPO_BASIC_ADDRESSCHECK' => 'AdressCheck Basic',
@@ -421,34 +420,6 @@ $aLang = array(
     'FCPO_CREDITRATING_BONIVERSUM_YELLOW' => 'Gelb',
     'FCPO_CREDITRATING_BONIVERSUM_GREEN' => 'Grün',
     'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON' => '<b>Bitte beachten Sie:</b><br>Der Adresschecktyp wurde auf "Boniversum Adresscheck Person" gesetzt, da ihre Bonitätsprüfung auf "Boniversum VERITA Score" gestellt ist.',
-    'FCPO_CONFIG_GROUP_AMAZONPAY' => 'AmazonPay',
-    'FCPO_AMAZONPAY_SELLERID' => 'Amazon Seller-ID',
-    'FCPO_AMAZONPAY_CLIENTID' => 'Amazon Client-ID',
-    'FCPO_AMAZONPAY_GET_CONFIG' => 'Amazon-Konfiguration von PAYONE abrufen',
-    'FCPO_AMAZONPAY_ERROR_GETTING_CONFIG' => 'Es gab ein Problem beim Abrufen der AmazonPay-Konfigurationseinstellungen. Nähere Infos finden Sie im Admin unter PAYONE Protokolle/Logs->API Logs.',
-    'FCPO_AMAZONPAY_SUCCESS_GETTING_CONFIG' => 'Die AmazonPay-Konfiguration wurde erfolgreich abgerufen',
-    'FCPO_AMAZONPAY_BUTTON_TYPE' => 'Amazon Button Typ',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_PwA' => 'Amazon Pay (Standard)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_Pay' => 'Pay (Etwas kleiner)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_A' => 'Amazon Logo (Klein)',
-    'FCPO_AMAZONPAY_BUTTON_COLOR' => 'Amazon Button Farbe',
-    'FCPO_AMAZONPAY_BUTTON_COLOR_GOLD' => 'Gold (standard)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY' => 'Hellgrau',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY' => 'Dunkelgrau',
-    'FCPO_AMAZONPAY_BUTTON_LANG' => 'Sprache des Amazon Buttons',
-    'FCPO_AMAZONPAY_BUTTON_LANG_NONE' => 'Automatisch',
-    'FCPO_AMAZONPAY_BUTTON_LANG_ENGLISH_UK' => 'Englisch (Großbritannien)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_GERMAN_GERMANY' => 'Deutsch (Deutschland)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_FRENCH_FRANCE' => 'Französisch (Frankreich)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_ITALIAN_ITALY' => 'Italienisch (Italien)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_SPANISH_SPAIN' => 'Spanisch (Spanien)',
-    'FCPO_AMAZONPAY_MODE' => 'Amazon-Modus',
-    'FCPO_AMAZONPAY_MODE_ALWAYSSYNC' => 'Immer Synchron',
-    'FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC' => 'Erst Synchron, dann Asynchron versuchen',
-    'FCPO_AMAZONPAY_LOGINMODE' => 'Loginmethode',
-    'FCPO_AMAZONPAY_LOGINMODE_AUTO' => 'Automatisch (Bei SSL "Popup" und ohne "Redirect")',
-    'FCPO_AMAZONPAY_LOGINMODE_POPUP' => 'Popup (Funktioniert nur mit SSL)',
-    'FCPO_AMAZONPAY_LOGINMODE_REDIRECT' => 'Redirect',
     'FCPO_CONFIG_GROUP_SECINVOICE' => 'Gesicherter Rechnungskauf (rec/POV)',
     'FCPO_CONFIG_GROUP_BNPL' => 'BNPL Zahlarten (fnc/PIV, fnc/PIN)',
     'FCPO_SECINVOICE_PORTAL_ID' => 'PAYONE Portal ID (für Zahlart Gesicherter Rechnungskauf)',
@@ -526,7 +497,6 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'FCPO_GENERAL_SHADOWBASKET_NETTO' => 'Nettosumme des Prüfwarenkorbs',
 
     'PAYONE Alipay' => 'PAYONE Alipay',
-    'PAYONE Amazon Pay' => 'PAYONE Amazon Pay',
     'PAYONE Apple Pay' => 'PAYONE Apple Pay',
     'PAYONE Bancontact' => 'PAYONE Bancontact',
     'PAYONE Barzahlen' => 'PAYONE Barzahlen',
@@ -534,7 +504,6 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'PAYONE Gesicherter Rechnungskauf' => 'PAYONE Gesicherter Rechnungskauf',
     'PAYONE Gesicherter Rechnungskauf (neu)' => 'PAYONE Gesicherter Rechnungskauf (neu)',
     'PAYONE Gesicherter Ratenkauf' => 'PAYONE Gesicherter Ratenkauf',
-    'PAYONE Giropay' => 'PAYONE Giropay',
     'PAYONE iDEAL' => 'PAYONE iDEAL',
     'PAYONE Klarna Ratenkauf' => 'PAYONE Klarna Ratenkauf',
     'PAYONE Klarna Rechnung' => 'PAYONE Klarna Rechnung',
@@ -560,7 +529,7 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'PAYONE Vorkasse' => 'PAYONE Vorkasse',
     'PAYONE WeChat Pay' => 'PAYONE WeChat Pay',
     'FCPO_KLARNA' => 'PAYONE Klarna Payments',
-);
+];
 
 /*
 [{ oxmultilang ident="GENERAL_YOUWANTTODELETE" }]

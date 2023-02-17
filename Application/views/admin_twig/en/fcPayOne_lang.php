@@ -23,7 +23,7 @@ $sLangName = "English";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset' => 'UTF-8',
     'fcpo_admin_title' => 'PAYONE',
     'fcpo_main_title' => 'PAYONE Configuration',
@@ -145,7 +145,6 @@ $aLang = array(
     'FCPO_ONLY_PAYONE' => 'PAYONE Payment Methods only',
     'ORDER_LIST_YOUWANTTOSTORNO' => 'Do you really want to cancel this order?\n CAUTION: Eventually open PAYONE transactions should be completed before performing this action.',
     'FCPO_ORDER_LIST_YOUWANTTODELETE' => 'Do you really want to delete this order?\n \n CAUTION: Eventually open PAYONE transactions should be completed before deleting this order.',
-    'fcpo_admin_config_bonicheck' => 'Protect',
     'FCPO_ADDRESSCHECKTYPE' => 'Addresscheck',
     'FCPO_NO_ADDRESSCHECK' => 'Do not perform addresscheck',
     'FCPO_BASIC_ADDRESSCHECK' => 'AddressCheck Basic',
@@ -272,34 +271,6 @@ $aLang = array(
     'FCPO_CONFIG_GROUP_CREDITCARD' => "Creditcard",
     'FCPO_CONFIG_GROUP_PAYOLUTION' => 'Payolution',
     'FCPO_CONFIG_GROUP_RATEPAY' => 'Ratepay',
-    'FCPO_CONFIG_GROUP_AMAZONPAY' => 'AmazonPay',
-    'FCPO_AMAZONPAY_SELLERID' => 'Amazon Seller-ID',
-    'FCPO_AMAZONPAY_CLIENTID' => 'Amazon Client-ID',
-    'FCPO_AMAZONPAY_GET_CONFIG' => 'Retrieve Amazon-Configuration from PAYONE',
-    'FCPO_AMAZONPAY_ERROR_GETTING_CONFIG' => 'An error occurred retrieving configuration. Check API-Logs for further information.',
-    'FCPO_AMAZONPAY_SUCCESS_GETTING_CONFIG' => 'AmazonPay-Configuration successfully retrieved',
-    'FCPO_AMAZONPAY_BUTTON_TYPE' => 'Amazon Button Type',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_PwA' => 'Amazon Pay (Standard)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_Pay' => 'Pay (smaller)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_A' => 'Amazon Logo (small)',
-    'FCPO_AMAZONPAY_BUTTON_COLOR' => 'Amazon Button Color',
-    'FCPO_AMAZONPAY_BUTTON_COLOR_GOLD' => 'Gold (standard)',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY' => 'Light Grey',
-    'FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY' => 'Dark grey',
-    'FCPO_AMAZONPAY_BUTTON_LANG' => 'Amazon Button Language',
-    'FCPO_AMAZONPAY_BUTTON_LANG_NONE' => 'automatically',
-    'FCPO_AMAZONPAY_BUTTON_LANG_ENGLISH_UK' => 'English (UK)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_GERMAN_GERMANY' => 'German (Germany)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_FRENCH_FRANCE' => 'French (France)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_ITALIAN_ITALY' => 'Italian (Italy)',
-    'FCPO_AMAZONPAY_BUTTON_LANG_SPANISH_SPAIN' => 'Spanish (Spain)',
-    'FCPO_AMAZONPAY_MODE' => 'Amazon-Mode',
-    'FCPO_AMAZONPAY_MODE_ALWAYSSYNC' => 'Always synchronous',
-    'FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC' => 'Synchronous, asynchronous as fallback',
-    'FCPO_AMAZONPAY_LOGINMODE' => 'Login method',
-    'FCPO_AMAZONPAY_LOGINMODE_AUTO' => 'Automatically (SSL "Popup" and no "Redirect")',
-    'FCPO_AMAZONPAY_LOGINMODE_POPUP' => 'Popup (requires SSL)',
-    'FCPO_AMAZONPAY_LOGINMODE_REDIRECT' => 'Redirect',
 
     'FCPO_PROFILES_RATEPAY' => 'Ratepay Profile',
     'FCPO_RATEPAY_DELETE_PROFILE' => 'Delete profile',
@@ -535,7 +506,6 @@ The smaller text field is used to name the destination file, or path to an exist
     'FCPO_GENERAL_SHADOWBASKET_NETTO' => 'Netsum of Shadowbasket',
 
     'PAYONE Alipay' => 'PAYONE Alipay',
-    'PAYONE Amazon Pay' => 'PAYONE Amazon Pay',
     'PAYONE Apple Pay' => 'PAYONE Apple Pay',
     'PAYONE Bancontact' => 'PAYONE Bancontact',
     'PAYONE Barzahlen' => 'PAYONE Barzahlen',
@@ -543,7 +513,6 @@ The smaller text field is used to name the destination file, or path to an exist
     'PAYONE Gesicherter Rechnungskauf' => 'PAYONE Secure Invoice',
     'PAYONE Gesicherter Rechnungskauf (neu)' => 'PAYONE Secured Invoice (new)',
     'PAYONE Gesicherter Ratenkauf' => 'PAYONE Secured Installment',
-    'PAYONE Giropay' => 'PAYONE Giropay',
     'PAYONE iDEAL' => 'PAYONE iDEAL',
     'PAYONE Klarna Ratenkauf' => 'PAYONE Klarna Ratenkauf',
     'PAYONE Klarna Rechnung' => 'PAYONE Klarna Rechnung',
@@ -569,7 +538,7 @@ The smaller text field is used to name the destination file, or path to an exist
     'PAYONE Vorkasse' => 'PAYONE prepayment',
     'PAYONE WeChat Pay' => 'PAYONE WeChat Pay',
     'FCPO_KLARNA' => 'PAYONE Klarna Payments',
-);
+];
 
 /*
 [{ oxmultilang ident="GENERAL_YOUWANTTODELETE" }]

@@ -26,7 +26,7 @@
     {% if oxcmp_user.oxuser__oxzip.value or oxcmp_user.oxuser__oxcity.value %}{{ oxcmp_user.oxuser__oxzip.value|raw }}&nbsp;{{ oxcmp_user.oxuser__oxcity.value|raw }}
 <br>{% endif %}
     {% if oxcmp_user.oxuser__oxcountry.value %}{{ oxcmp_user.oxuser__oxcountry.value|raw }}<br><br>{% endif %}
-    {% if oxcmp_user.oxuser__oxusername.value %}<strong>{{ translate({ ident: "EMAIL" }) }}</strong> {{ oViewConf.fcpoAmazonEmailDecode(oxcmp_user.oxuser__oxusername.value) }}<br><br>{% endif %}
+    {% if oxcmp_user.oxuser__oxusername.value %}<strong>{{ translate({ ident: "EMAIL" }) }}</strong> {{ oxcmp_user.oxuser__oxusername.value|raw }}<br><br>{% endif %}
     {% if oxcmp_user.oxuser__oxfon.value %}<strong>{{ translate({ ident: "PHONE" }) }}</strong> {{ oxcmp_user.oxuser__oxfon.value|raw }}<br>{% endif %}
     {% if oxcmp_user.oxuser__oxfax.value %}<strong>{{ translate({ ident: "FAX" }) }}</strong> {{ oxcmp_user.oxuser__oxfax.value|raw }}<br>{% endif %}
     {% if oxcmp_user.oxuser__oxmobfon.value %}<strong>{{ translate({ ident: "CELLUAR_PHONE" }) }}</strong> {{ oxcmp_user.oxuser__oxmobfon.value|raw }}<br>{% endif %}

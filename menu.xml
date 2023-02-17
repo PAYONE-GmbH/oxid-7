@@ -13,9 +13,6 @@
             <SUBMENU id="fcpo_admin_config_payment" cl="FcPayOneAdmin" list="FcPayOneList">
                 <TAB id="fcpo_main_title" cl="FcPayOneMain" />
             </SUBMENU>
-            <SUBMENU id="fcpo_admin_config_bonicheck" cl="FcPayOneBoni" list="FcPayOneBoniList">
-                <TAB id="fcpo_main_title" cl="FcPayOneBoniMain" />
-            </SUBMENU>
             <SUBMENU id="fcpo_admin_config_status_forwarding" cl="FcPayOneStatusForwarding"></SUBMENU>
             <SUBMENU id="fcpo_admin_config_status_mapping" cl="FcPayOneStatusMapping"></SUBMENU>
             <SUBMENU id="fcpo_admin_config_error_mapping" cl="FcPayOneErrorMapping"></SUBMENU>

@@ -43,15 +43,12 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpoklarna_installments',
         'fcpoklarna_directdebit',
         'fcpobarzahlen',
-        'fcpopaydirekt',
         'fcpopo_bill',
         'fcpopo_debitnote',
         'fcpopo_installment',
         'fcporp_bill',
-        'fcpoamazonpay',
         'fcpo_secinvoice',
         'fcpo_sofort',
-        'fcpo_giropay',
         'fcpo_eps',
         'fcpo_pf_finance',
         'fcpo_pf_card',
@@ -74,9 +71,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpoklarna_invoice',
         'fcpoklarna_installments',
         'fcpoklarna_directdebit',
-        'fcpopaydirekt',
         'fcpo_sofort',
-        'fcpo_giropay',
         'fcpo_eps',
         'fcpo_pf_finance',
         'fcpo_pf_card',
@@ -99,7 +94,6 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      */
     protected static array $_aOnlinePayments = [
         'fcpo_sofort',
-        'fcpo_giropay',
         'fcpo_eps',
         'fcpo_pf_finance',
         'fcpo_pf_card',
@@ -151,8 +145,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @var array
      */
     protected array $_aExpressPayments = [
-        'fcpomasterpass',
-        'fcpoamazonpay',
+        'fcpomasterpass'
     ];
 
 
@@ -184,8 +177,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      */
     public static function fcIsPayOnePaymentType(string $sPaymentId): bool
     {
-        $blReturn = array_search($sPaymentId, self::$_aPaymentTypes) !== false;
-        return $blReturn;
+        return array_search($sPaymentId, self::$_aPaymentTypes) !== false;
     }
 
     /**
@@ -223,8 +215,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
 
     public static function fcIsPayOneFrontendApiPaymentType($sPaymentId)
     {
-        $blReturn = array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false;
-        return $blReturn;
+        return array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false;
     }
 
     /**
@@ -441,12 +432,10 @@ class FcPayOnePayment extends FcPayOnePayment_parent
     {
         $sReturn = '';
         $sId = $this->getId();
-        $blIdAffected = in_array($sId, array('fcpocreditcard'));
+        $blIdAffected = in_array($sId, ['fcpocreditcard']);
 
         if ($blIdAffected) {
-            $aMap = array(
-                'fcpocreditcard' => $aDynvalue['fcpo_ccmode'],
-            );
+            $aMap = ['fcpocreditcard' => $aDynvalue['fcpo_ccmode']];
 
             $sReturn = $aMap[$sId];
         }

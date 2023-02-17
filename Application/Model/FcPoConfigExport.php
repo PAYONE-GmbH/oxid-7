@@ -2,6 +2,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use JsonException;
+use Exception;
 use Fatchip\PayOne\FcCheckChecksum;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -145,7 +147,7 @@ class FcPoConfigExport extends BaseModel
      * Returns xml configuration of all shops
      *
      * @return string
-     * @throws \JsonException|DatabaseErrorException
+     * @throws JsonException|DatabaseErrorException
      */
     public function fcpoGetConfigXml(): string
     {
@@ -404,11 +406,7 @@ class FcPoConfigExport extends BaseModel
                 $aMappings[$sAbbr] = [];
             }
             foreach ($aSubTypes as $aSubType) {
-                $aMappings[$sAbbr][$aSubType][] = array(
-                    'from' => $aExistingMapping->sPayoneStatusId,
-                    'to' => $aExistingMapping->sShopStatusId,
-                    'name' => $aExistingMapping->sPaymentType,
-                );
+                $aMappings[$sAbbr][$aSubType][] = ['from' => $aExistingMapping->sPayoneStatusId, 'to' => $aExistingMapping->sShopStatusId, 'name' => $aExistingMapping->sPaymentType];
             }
         }
 
@@ -438,20 +436,16 @@ class FcPoConfigExport extends BaseModel
             'fcpoklarna_directdebit' => 'fnc',
             'fcpoklarna_installments' => 'fnc',
             'fcpobarzahlen' => 'csh',
-            'fcpopaydirekt' => 'wlt',
             'fcpopo_bill' => 'fnc',
             'fcpopo_debitnote' => 'fnc',
             'fcpopo_installment' => 'fnc',
             'fcporp_bill' => 'fnc',
             'fcpocreditcard_iframe' => 'cc',
             'fcpobillsafe' => 'fnc',
-            'fcpoamazonpay' => 'wlt',
             'fcpo_secinvoice' => 'rec',
             'fcpopl_secinvoice' => 'fnc',
             'fcpopl_secinstallment' => 'fnc',
-            'fcpopaydirekt_express' => 'wlt',
             'fcpo_sofort' => 'sb',
-            'fcpo_giropay' => 'sb',
             'fcpo_eps' => 'sb',
             'fcpo_pf_finance' => 'sb',
             'fcpo_pf_card' => 'sb',
@@ -496,8 +490,6 @@ class FcPoConfigExport extends BaseModel
             'fcpoklarna_directdebit' => 'KDD',
             'fcpoklarna_installments' => 'KIS',
             'fcpobarzahlen' => 'BZN',
-            'fcpopaydirekt' => 'PDT',
-            'fcpopaydirekt_express' => 'PDT',
             'fcpopo_bill' => 'PYV',
             'fcpopo_debitnote' => 'PYD',
             'fcpopo_installment' => 'PYS',
@@ -505,12 +497,10 @@ class FcPoConfigExport extends BaseModel
             'fcporp_debitnote' => 'RPD',
             'fcporp_installment' => 'RPS',
             'fcpocreditcard_iframe' => 'V,M,A,D,J,O,U,B',
-            'fcpoamazonpay' => 'AMZ',
             'fcpo_secinvoice' => 'POV',
             'fcpopl_secinvoice' => 'PIV',
             'fcpopl_secinstallment' => 'PIN',
             'fcpo_sofort' => 'PNT',
-            'fcpo_giropay' => 'GPY',
             'fcpo_eps' => 'EPS',
             'fcpo_pf_finance' => 'PFF',
             'fcpo_pf_card' => 'PFC',
@@ -702,7 +692,7 @@ class FcPoConfigExport extends BaseModel
      * Returns shop specific checksum part of xml
      *
      * @return string
-     * @throws \JsonException
+     * @throws JsonException
      */
     protected function _fcpoGetShopXmlChecksums(): string
     {
@@ -735,7 +725,7 @@ class FcPoConfigExport extends BaseModel
      * Returns collected checksum errors if there are any
      *
      * @return mixed
-     * @throws \JsonException
+     * @throws JsonException
      */
     protected function _getChecksumErrors(): mixed
     {
@@ -759,8 +749,8 @@ class FcPoConfigExport extends BaseModel
      * Method returns the checksum result
      *
      * @return string
-     * @throws \JsonException
-     * @throws \Exception
+     * @throws JsonException
+     * @throws Exception
      */
     protected function _fcpoGetCheckSumResult()
     {

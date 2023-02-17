@@ -74,9 +74,8 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $iLangId = $oLang->getBaseLanguage();
         $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '{$iLangId}' ORDER BY fcpo_default DESC";
-        $sPic = $oDb->getOne($sQuery);
 
-        return $sPic;
+        return $oDb->getOne($sQuery);
     }
 
     /**

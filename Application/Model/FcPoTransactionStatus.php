@@ -144,16 +144,7 @@ class FcPoTransactionStatus extends BaseModel
      */
     public function getCardtype()
     {
-        $aMatchMap = array(
-            'V' => 'Visa',
-            'M' => 'Mastercard',
-            'A' => 'Amex',
-            'D' => 'Diners',
-            'J' => 'JCB',
-            'O' => 'Maestro International',
-            'U' => 'Maestro UK',
-            'B' => 'Carte Bleue',
-        );
+        $aMatchMap = ['V' => 'Visa', 'M' => 'Mastercard', 'A' => 'Amex', 'D' => 'Diners', 'J' => 'JCB', 'O' => 'Maestro International', 'U' => 'Maestro UK', 'B' => 'Carte Bleue'];
 
         $sCardType = $this->fcpotransactionstatus__fcpo_cardtype->value;
 
@@ -174,14 +165,7 @@ class FcPoTransactionStatus extends BaseModel
         $sLangReminder = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_reminder', '');
         $sLangDebit = $this->_fcpoGetLangIdent($dReceivable, 'fcpo_receivable_debit1', 'fcpo_receivable_debit2');
 
-        $aMatchMap = array(
-            'cancelation' => 'fcpo_receivable_cancelation',
-            'appointed' => $sLangAppointed,
-            'capture' => 'fcpo_receivable_capture',
-            'refund' => $sLangDebit,
-            'debit' => $sLangDebit,
-            'reminder' => $sLangReminder,
-        );
+        $aMatchMap = ['cancelation' => 'fcpo_receivable_cancelation', 'appointed' => $sLangAppointed, 'capture' => 'fcpo_receivable_capture', 'refund' => $sLangDebit, 'debit' => $sLangDebit, 'reminder' => $sLangReminder];
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'FCPO_RECEIVABLE');
@@ -231,15 +215,7 @@ class FcPoTransactionStatus extends BaseModel
         $sLangUnderpaid = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_underpaid1', 'fcpo_payment_underpaid2');
         $sLangDebit = $this->_fcpoGetLangIdent($dPayment, 'fcpo_payment_debit1', 'fcpo_payment_debit2');
 
-        $aMatchMap = array(
-            'capture' => $sLangCapture,
-            'cancelation' => $sLangPaid,
-            'paid' => $sLangPaid,
-            'underpaid' => $sLangUnderpaid,
-            'refund' => $sLangDebit,
-            'debit' => $sLangDebit,
-            'transfer' => 'fcpo_payment_transfer',
-        );
+        $aMatchMap = ['capture' => $sLangCapture, 'cancelation' => $sLangPaid, 'paid' => $sLangPaid, 'underpaid' => $sLangUnderpaid, 'refund' => $sLangDebit, 'debit' => $sLangDebit, 'transfer' => 'fcpo_payment_transfer'];
 
         $sTxAction = $this->fcpotransactionstatus__fcpo_txaction->value;
         $sLangIdent = $this->_fcpoGetMapAction($sTxAction, $aMatchMap, 'fcpo_payment');

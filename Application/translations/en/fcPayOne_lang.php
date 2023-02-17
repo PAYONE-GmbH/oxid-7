@@ -22,7 +22,7 @@ $sLangName = "Deutsch";
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
-$aLang = array(
+$aLang = [
     'charset' => 'ISO-8859-15',
     'FCPO_IBAN_INVALID' => 'Please enter a valid IBAN.',
     'FCPO_BIC_INVALID' => 'Please enter a valid BIC.',
@@ -181,21 +181,6 @@ $aLang = array(
     'FCPO_RATEPAY_ADD_TERMS3' => 'as well as to the performance of a ',
     'FCPO_RATEPAY_ADD_TERMS4' => 'risk check by our payment partner ',
     'FCPO_RATEPAY_ADD_TERMS5' => '',
-    'FCPO_AMAZON_SELECT_ADDRESS' => 'Choose Shipping-Address from Amazon-Addressbook',
-    'FCPO_AMAZON_SELECT_PAYMENT' => 'Choose Payment from Amazon-Wallet',
-    'FCPO_AMAZON_LOGOFF' => 'Stop AmazonPay and go back to standard checkout',
-    'FCPO_AMAZON_PROBLEM' => 'There is a problem',
-    'FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY' => 'There is no shipping possibility for your selected delivery country. Please click <a href="index.php?cl=user" style="color:green;">here</a> for returning to address selection.',
-    'FCPO_AMAZON_THANKYOU_MESSAGE' => 'Your transaction with Amazon Pay is currently beeing validated. Please be aware that we wil inform you shortly as needed.',
-    'FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT' => 'Sorry, your transaction with Amazon Pay was not successful. Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD' => 'Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_REJECTED' => 'Sorry, your transaction with Amazon Pay was not successful. Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_PROCESSING_FAILURE' => 'Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER' => 'Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED' => 'Please choose another payment method.',
-    'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET' => 'Please choose payment method.',
-    'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET' => 'Please choose an address',
-    'FCPO_AMAZON_ERROR_900' => 'Please choose another payment method.',
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
     'FCPO_SECINVOICE_USTID' => 'Tax Identification Number',
     'FCPO_SECINVOICE_NO_COMPANY' => 'Not a company? Click <a href="index.php?cl=account_user" style="color:green;">here</a> for changing your address.',
@@ -253,7 +238,6 @@ The smaller text field is used to name the destination file, or path to an exist
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS' => "No valid credit cards type is allowed in the configuration. Apple Pay session cannot be initialized.",
 
     'PAYONE Alipay' => 'PAYONE Alipay',
-    'PAYONE Amazon Pay' => 'PAYONE Amazon Pay',
     'PAYONE Apple Pay' => 'PAYONE Apple Pay',
     'PAYONE Bancontact' => 'PAYONE Bancontact',
     'PAYONE Barzahlen' => 'PAYONE Barzahlen',
@@ -261,7 +245,6 @@ The smaller text field is used to name the destination file, or path to an exist
     'PAYONE Gesicherter Rechnungskauf' => 'PAYONE Secure Invoice',
     'PAYONE Gesicherter Rechnungskauf (neu)' => 'PAYONE Secured Invoice',
     'PAYONE Gesicherter Ratenkauf' => 'PAYONE Secured Installment',
-    'PAYONE Giropay' => 'PAYONE Giropay',
     'PAYONE iDEAL' => 'PAYONE iDEAL',
     'PAYONE Klarna Ratenkauf' => 'PAYONE Klarna Ratenkauf',
     'PAYONE Klarna Rechnung' => 'PAYONE Klarna Rechnung',
@@ -335,7 +318,7 @@ The smaller text field is used to name the destination file, or path to an exist
     'FCPO_RATEPAY_INSTALLMENT_TYPE_DEBIT_TITLE' => 'Installment by debit',
     'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_TRANSFER_LINK' => 'I would like to make the installment payments myself and not pay by direct debit',
     'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_DEBIT_LINK' => 'I would like to conveniently pay the installments by direct debit',
-);
+];
 
 /*
 [{oxmultilang ident="GENERAL_YOUWANTTODELETE"}]

@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpDocSignatureIsNotCompleteInspection */
+
+/** @noinspection ALL */
 
 namespace Fatchip\PayOne\Lib;
 
@@ -14,7 +16,9 @@ use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\ViewConfig;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
@@ -160,6 +164,7 @@ class FcPoRequest extends Base
      */
     public function __construct()
     {
+        parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
 
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -209,15 +214,11 @@ class FcPoRequest extends Base
         $this->addParameter('request', $sType); //Request method
         $this->addParameter('mode', $this->getOperationMode($oOrder->oxorder__oxpaymenttype->value)); //PayOne Portal Operation Mode (live or test)
 
-        $blIsPreAuth = $sType == 'preauthorization' ? true : false;
+        $blIsPreAuth = $sType == 'preauthorization';
 
         $blPayMethodIsKnown = $this->setAuthorizationParameters($oOrder, $oUser, $aDynvalue, $sRefNr, $blIsPreAuth);
         if ($blPayMethodIsKnown === true) {
-            $mOutput = $this->send();
-            if ($oOrder->oxorder__oxpaymenttype->value == 'fcpoamazonpay') {
-                $mOutput = $this->_fcpoHandleAmazonAuthorizationResponse($mOutput);
-            }
-            return $mOutput;
+            return $this->send();
         } else {
             return false;
         }
@@ -265,9 +266,7 @@ class FcPoRequest extends Base
             $this->addParameter('ip', $sIp);
         }
 
-        $blIsWalletTypePaymentWithDelAddress = (
-            $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
-            $oOrder->fcIsPayPalOrder() === true &&
+        $blIsWalletTypePaymentWithDelAddress = ($oOrder->fcIsPayPalOrder() === true &&
             $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
@@ -335,6 +334,8 @@ class FcPoRequest extends Base
      * @param bool   $blIsUpdateUser is update user request? Default is false
      *
      * @return null
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     protected function _addUserDataParameters($oOrder, $oUser, $blIsUpdateUser = false)
     {
@@ -363,12 +364,12 @@ class FcPoRequest extends Base
             $this->addParameter('telephonenumber', $oOrder->oxorder__oxbillfon->value, $blIsUpdateUser);
         }
 
-        if ((in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'))
-                && in_array($oCountry->oxcountry__oxisoalpha2->value, array('DE', 'NL', 'AT'))) || ($blIsUpdateUser || ($oUser->oxuser__oxbirthdate != '0000-00-00' && $oUser->oxuser__oxbirthdate != ''))
+        if ((in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'])
+                && in_array($oCountry->oxcountry__oxisoalpha2->value, ['DE', 'NL', 'AT'])) || ($blIsUpdateUser || ($oUser->oxuser__oxbirthdate != '0000-00-00' && $oUser->oxuser__oxbirthdate != ''))
         ) {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value), $blIsUpdateUser);
         }
-        if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'))) {
+        if (in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'])) {
             if ($blIsUpdateUser || $oUser->oxuser__fcpopersonalid->value != '') {
                 $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value, $blIsUpdateUser);
             }
@@ -381,12 +382,15 @@ class FcPoRequest extends Base
 
     protected function _stateNeeded($sIso2Country)
     {
-        if (array_search($sIso2Country, $this->_aStateNeededCountries) !== false) {
+        if (in_array($sIso2Country, $this->_aStateNeededCountries)) {
             return true;
         }
         return false;
     }
 
+    /**
+     * @throws DatabaseConnectionException
+     */
     protected function _getShortState($sStateId)
     {
         if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4800) {
@@ -403,9 +407,7 @@ class FcPoRequest extends Base
     protected function _fcpoGetRemoteAddress()
     {
         $oUtilsServer = $this->_oFcPoHelper->fcpoGetUtilsServer();
-        $sIpAddress = $oUtilsServer->getRemoteAddress();
-
-        return $sIpAddress;
+        return $oUtilsServer->getRemoteAddress();
     }
 
     /**
@@ -442,10 +444,6 @@ class FcPoRequest extends Base
                 break;
             case 'fcpo_sofort':
                 $this->addParametersOnlineSofort($oOrder, $aDynvalue);
-                $blAddRedirectUrls = true;
-                break;
-            case 'fcpo_giropay':
-                $this->addParametersOnlineGiropay($aDynvalue);
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpo_eps':
@@ -490,23 +488,6 @@ class FcPoRequest extends Base
                 $this->addParameter('cashtype', 'BZN');
                 $this->addParameter('api_version', '3.10');
                 break;
-            case 'fcpopaydirekt':
-                $this->addParameter('clearingtype', 'wlt'); //Payment method
-                $this->addParameter('wallettype', 'PDT');
-                if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
-                    $this->addParameter('narrative_text', $sRefNr);
-                }
-                $blAllowOvercapture = (
-                    $oConfig->getConfigParam('blFCPOAllowOvercapture') &&
-                    $sPaymentId == 'fcpopaydirekt'
-                );
-                if ($blAllowOvercapture) {
-                    if ($blAllowOvercapture) {
-                        $this->addParameter('add_paydata[over_capture]', 'yes');
-                    }
-                }
-                $blAddRedirectUrls = true;
-                break;
             case 'fcpopo_bill':
             case 'fcpopo_debitnote':
             case 'fcpopo_installment':
@@ -516,11 +497,6 @@ class FcPoRequest extends Base
             case 'fcporp_debitnote':
             case 'fcporp_installment':
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder, $aDynvalue);
-                break;
-            case 'fcpoamazonpay':
-                $blAddRedirectUrls = $this->_fcpoAddAmazonPayParameters($oOrder);
-                $this->addParameter('api_version', $this->_sApiVersion);
-                unset($this->_aParameters['customerid']);
                 break;
             case 'fcpo_secinvoice':
                 $blAddRedirectUrls = $this->_fcpoAddSecInvoiceParameters($oOrder);
@@ -666,21 +642,6 @@ class FcPoRequest extends Base
     }
 
     /**
-     * Add parameters needed for giropay
-     *
-     * @param $aDynvalue
-     * @return void
-     */
-    protected function addParametersOnlineGiropay($aDynvalue)
-    {
-        $this->addParameter('clearingtype', 'sb'); //Payment method
-        $this->addParameter('onlinebanktransfertype', 'GPY');
-        $this->addParameter('bankcountry', 'DE');
-        $this->addParameter('iban', $aDynvalue['fcpo_ou_iban_gpy']);
-        $this->addParameter('bic', $aDynvalue['fcpo_ou_bic_gpy']);
-    }
-
-    /**
      * Add parameters needed for eps
      *
      * @param $aDynvalue
@@ -814,22 +775,15 @@ class FcPoRequest extends Base
      */
     protected function _fcpoGetKlarnaFinancingType($sPaymentId)
     {
-        $aMap = array(
-            'fcpoklarna_installments' => 'KIS',
-            'fcpoklarna_invoice' => 'KIV',
-            'fcpoklarna_directdebit' => 'KDD',
-        );
+        $aMap = ['fcpoklarna_installments' => 'KIS', 'fcpoklarna_invoice' => 'KIV', 'fcpoklarna_directdebit' => 'KDD'];
 
-        $sFinancingType =
-            (isset($aMap[$sPaymentId])) ? $aMap[$sPaymentId] : '';
-
-        return $sFinancingType;
+        return (isset($aMap[$sPaymentId])) ? $aMap[$sPaymentId] : '';
     }
 
     /**
      * Add shipping params received by current set delivery address
      *
-     * @param string $sPaymentId optional payment id
+     * @param bool $blFallbackBillAddress
      * @return void
      */
     public function addDeliveryAddressParams($blFallbackBillAddress = false)
@@ -851,53 +805,7 @@ class FcPoRequest extends Base
             $sKey = 'bill';
         }
 
-        $aMap = array(
-            'countryid' => array(
-                'bill' => 'oxuser__oxcountryid',
-                'shipping' => 'oxaddress__oxcountryid',
-            ),
-            'shipping_firstname' => array(
-                'bill' => 'oxuser__oxfname',
-                'shipping' => 'oxaddress__oxfname',
-            ),
-            'shipping_lastname' => array(
-                'bill' => 'oxuser__oxlname',
-                'shipping' => 'oxaddress__oxlname',
-            ),
-            'shipping_company' => array(
-                'bill' => 'oxuser__oxcompany',
-                'shipping' => 'oxaddress__oxcompany',
-            ),
-            'shipping_street' => array(
-                'bill' => 'oxuser__oxstreet',
-                'shipping' => 'oxaddress__oxstreet',
-            ),
-            'shipping_streetnr' => array(
-                'bill' => 'oxuser__oxstreetnr',
-                'shipping' => 'oxaddress__oxstreetnr',
-            ),
-            'shipping_zip' => array(
-                'bill' => 'oxuser__oxzip',
-                'shipping' => 'oxaddress__oxzip',
-            ),
-            'shipping_city' => array(
-                'bill' => 'oxuser__oxcity',
-                'shipping' => 'oxaddress__oxcity',
-            ),
-            'stateid' => array(
-                'bill' => 'oxuser__oxstateid',
-                'shipping' => 'oxaddress__oxstateid',
-            ),
-            'shipping_title' => array(
-                'bill' => 'oxuser__oxsal',
-                'shipping' => 'oxaddress__oxsal',
-            ),
-            'shipping_telephonenumber' => array(
-                'bill' => 'oxuser__oxfon',
-                'shipping' => 'oxaddress__oxfon',
-            ),
-
-        );
+        $aMap = ['countryid' => ['bill' => 'oxuser__oxcountryid', 'shipping' => 'oxaddress__oxcountryid'], 'shipping_firstname' => ['bill' => 'oxuser__oxfname', 'shipping' => 'oxaddress__oxfname'], 'shipping_lastname' => ['bill' => 'oxuser__oxlname', 'shipping' => 'oxaddress__oxlname'], 'shipping_company' => ['bill' => 'oxuser__oxcompany', 'shipping' => 'oxaddress__oxcompany'], 'shipping_street' => ['bill' => 'oxuser__oxstreet', 'shipping' => 'oxaddress__oxstreet'], 'shipping_streetnr' => ['bill' => 'oxuser__oxstreetnr', 'shipping' => 'oxaddress__oxstreetnr'], 'shipping_zip' => ['bill' => 'oxuser__oxzip', 'shipping' => 'oxaddress__oxzip'], 'shipping_city' => ['bill' => 'oxuser__oxcity', 'shipping' => 'oxaddress__oxcity'], 'stateid' => ['bill' => 'oxuser__oxstateid', 'shipping' => 'oxaddress__oxstateid'], 'shipping_title' => ['bill' => 'oxuser__oxsal', 'shipping' => 'oxaddress__oxsal'], 'shipping_telephonenumber' => ['bill' => 'oxuser__oxfon', 'shipping' => 'oxaddress__oxfon']];
 
         $oDelCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
         $oDelCountry->load($oAddress->{$aMap['countryid'][$sKey]}->value);
@@ -931,6 +839,8 @@ class FcPoRequest extends Base
      *
      * @param Order $oOrder
      * @return bool
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     protected function _fcpoAddPayolutionParameters($oOrder)
     {
@@ -998,11 +908,7 @@ class FcPoRequest extends Base
      */
     protected function _fcpoGetPayolutionPaymentTypeById($sPaymentId)
     {
-        $aPayolutionPaymentMap = array(
-            'fcpopo_bill' => 'Payolution-Invoicing',
-            'fcpopo_debitnote' => 'Payolution-Debit',
-            'fcpopo_installment' => 'Payolution-Installment',
-        );
+        $aPayolutionPaymentMap = ['fcpopo_bill' => 'Payolution-Invoicing', 'fcpopo_debitnote' => 'Payolution-Debit', 'fcpopo_installment' => 'Payolution-Installment'];
 
         if (isset($aPayolutionPaymentMap[$sPaymentId])) {
             $sPaymentType = $aPayolutionPaymentMap[$sPaymentId];
@@ -1021,14 +927,7 @@ class FcPoRequest extends Base
      */
     protected function _fcpoGetFinancingTypeByPaymentId($sPaymentId)
     {
-        $aMap = array(
-            'fcpopo_bill' => 'PYV',
-            'fcpopo_debitnote' => 'PYD',
-            'fcpopo_installment' => 'PYS',
-            'fcporp_bill' => 'RPV',
-            'fcporp_debitnote' => 'RPD',
-            'fcporp_installment' => 'RPS',
-        );
+        $aMap = ['fcpopo_bill' => 'PYV', 'fcpopo_debitnote' => 'PYD', 'fcpopo_installment' => 'PYS', 'fcporp_bill' => 'RPV', 'fcporp_debitnote' => 'RPD', 'fcporp_installment' => 'RPS'];
 
         $blPaymentIdMatch = isset($aMap[$sPaymentId]);
 
@@ -1086,10 +985,8 @@ class FcPoRequest extends Base
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-        $blValidPaymentForCompanyData = in_array($sPaymentId, array('fcpopo_bill'));
-        $blReturn = ($blB2BModeActive && $oUser->oxuser__oxcompany->value && $blValidPaymentForCompanyData);
-
-        return $blReturn;
+        $blValidPaymentForCompanyData = in_array($sPaymentId, ['fcpopo_bill']);
+        return ($blB2BModeActive && $oUser->oxuser__oxcompany->value && $blValidPaymentForCompanyData);
     }
 
     /**
@@ -1391,64 +1288,6 @@ class FcPoRequest extends Base
         return $vatCosts->getVat();
     }
 
-    protected function _fcpoAddAmazonPayParameters($oOrder)
-    {
-        $oUser = $oOrder->getOrderUser();
-        $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-
-        $sAmazonWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-        $sAmazonAddressToken = $this->_oFcPoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
-        $sAmazonReferenceId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
-        $iAmazonTimeout = $this->_fcpoGetAmazonTimeout();
-        $sAmazonRefNr = $this->_oFcPoHelper->fcpoGetSessionVariable('amazonRefNr');
-
-        $this->addParameter('clearingtype', 'wlt');
-        $this->addParameter('wallettype', 'AMZ');
-        $this->addParameter('workorderid', $sAmazonWorkorderId);
-        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
-        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
-        $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeout);
-        $this->addParameter('email', $oViewConf->fcpoAmazonEmailDecode($oUser->oxuser__oxusername->value));
-        $this->addParameter('reference', $sAmazonRefNr);
-
-        $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
-        if ($sAmazonMode == 'alwayssync') {
-            $this->addParameter('add_paydata[cancel_on_timeout]', 'yes');
-        }
-
-        return true;
-    }
-
-    /**
-     * Handles the timeout that should be used wether amazon will be used
-     * in sync, async or compined mode
-     *
-     * @param $sAmazonMode
-     * @return int
-     */
-    protected function _fcpoGetAmazonTimeout($sAmazonMode = null)
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        if ($sAmazonMode === null) {
-            $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
-        }
-
-        switch ($sAmazonMode) {
-            case 'alwayssync':
-            case 'firstsyncthenasync':
-                $iAmazonTimeout = 0;
-                break;
-            case 'alwaysasync':
-                $iAmazonTimeout = 1440;
-                break;
-            default:
-                $iAmazonTimeout = 1440;
-        }
-
-        return $iAmazonTimeout;
-    }
-
     /**
      * Adds additional parameters for secure invoice payment rec/POV
      *
@@ -1481,13 +1320,14 @@ class FcPoRequest extends Base
      */
     protected function _fcpoIsOrderB2B($oOrder)
     {
-        return ($oOrder->oxorder__oxbillcompany->value) ? true : false;
+        return (bool)$oOrder->oxorder__oxbillcompany->value;
     }
 
     /**
      * Adds additional parameters for BNPL secure invoice payment fnc/PIV
      *
-     * @param $oOrder
+     * @param       $oOrder
+     * @param array $aDynvalue
      * @return  boolean
      */
     protected function _fcpoAddBNPLSecInvoiceParameters($oOrder, $aDynvalue = [])
@@ -1524,7 +1364,8 @@ class FcPoRequest extends Base
     /**
      * Adds additional parameters for BNPL secure installment payment fnc/PIN
      *
-     * @param $oOrder
+     * @param       $oOrder
+     * @param array $aDynvalue
      * @return  boolean
      */
     protected function _fcpoAddBNPLSecInstallmentParameters($oOrder, $aDynvalue = [])
@@ -1599,10 +1440,9 @@ class FcPoRequest extends Base
      * @param mixed $mRedirectFunction
      * @param bool  $sToken
      * @param bool  $sDeliveryMD5
-     * @param bool  $blAddAmazonLogoff
      * @return void
      */
-    protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $mRedirectFunction = false, $sToken = false, $sDeliveryMD5 = false, $blAddAmazonLogoff = false)
+    protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $mRedirectFunction = false, $sToken = false, $sDeliveryMD5 = false)
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -1658,10 +1498,6 @@ class FcPoRequest extends Base
         $sErrorUrl = $sShopURL . 'index.php?type=error&cl=' . $sAbortClass . $sRToken . $sPaymentErrorParam . $sPaymentErrorTextParam;
         $sBackUrl = $sShopURL . 'index.php?type=cancel&cl=' . $sAbortClass . $sRToken;
 
-        if ($blAddAmazonLogoff) {
-            $sErrorUrl .= "&fcpoamzaction=logoff";
-        }
-
         $this->addParameter('successurl', $sSuccessUrl);
         $this->addParameter('errorurl', $sErrorUrl);
         $this->addParameter('backurl', $sBackUrl);
@@ -1675,6 +1511,7 @@ class FcPoRequest extends Base
      * @param bool       $blDebit
      *
      * @return null
+     * @throws DatabaseConnectionException
      */
     public function addProductInfo($oOrder, $aPositions = false, $blDebit = false)
     {
@@ -1843,7 +1680,7 @@ class FcPoRequest extends Base
      */
     protected function fcpoGetPosPr($dInitialPr, $sPaymentId, $blDebit = false)
     {
-        if (!$blDebit || !in_array($sPaymentId, array('fcpopl_secinvoice', 'fcpopl_secinstallment'))) {
+        if (!$blDebit || !in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
             return $dInitialPr;
         }
 
@@ -2089,6 +1926,10 @@ class FcPoRequest extends Base
         return $aOutput;
     }
 
+    /**
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
+     */
     protected function _logRequest($sResponse, $sStatus = '')
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -2109,92 +1950,6 @@ class FcPoRequest extends Base
     }
 
     /**
-     * Analyze response of amazon pay authorization call and try recalling with async
-     * depending on configuration
-     *
-     * @param $mOutput
-     * @return mixed array|bool
-     */
-    protected function _fcpoHandleAmazonAuthorizationResponse($mOutput)
-    {
-        $blPassThrough = (is_bool($mOutput) || (is_array($mOutput) && $mOutput['status'] == 'APPROVED'));
-        if ($blPassThrough) {
-            return $mOutput;
-        }
-
-        $mOutput = $this->_fcpoAmazonPayCheckPending($mOutput);
-        $mOutput = $this->_fcpoAmazonPayCheckTransactionTimedOut($mOutput);
-        $mOutput = $this->_fcpoAmazonPayCheckInvalidPaymentMethod($mOutput);
-
-        return $mOutput;
-    }
-
-    /**
-     * Check if order has state pending. If this is the case set a session variable for later actions
-     *
-     * @param $mOutput
-     * @return mixed
-     */
-    protected function _fcpoAmazonPayCheckPending($mOutput)
-    {
-        $blIsPending = (
-            $mOutput['status'] == 'PENDING'
-        );
-
-        if ($blIsPending) {
-            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoAmazonPayOrderIsPending', true);
-        }
-
-        return $mOutput;
-    }
-
-    /**
-     * Check if there is a timeout. If true, method will handle this case
-     *
-     * @param $mOutput
-     * @return mixed
-     */
-    protected function _fcpoAmazonPayCheckTransactionTimedOut($mOutput)
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
-
-        $blRetryWithAsync = (
-            $mOutput['status'] == 'ERROR' &&
-            $mOutput['errorcode'] == '980' &&
-            $sAmazonMode == 'firstsyncthenasync'
-        );
-
-        if ($blRetryWithAsync) {
-            $iAmazonTimeOut = $this->_fcpoGetAmazonTimeout('alwaysasync');
-            $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeOut);
-            $mOutput = $this->send();
-        }
-
-        return $mOutput;
-    }
-
-    /**
-     * Check if invalid payment method has been selected
-     *
-     * @param $mOutput
-     * @return mixed
-     */
-    protected function _fcpoAmazonPayCheckInvalidPaymentMethod($mOutput)
-    {
-        $blRetryWithAddressLocked = (
-            $mOutput['status'] == 'ERROR' &&
-            $mOutput['errorcode'] == '981'
-        );
-
-        if ($blRetryWithAddressLocked) {
-            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoAmazonPayAddressWidgetLocked', true);
-        }
-
-        return $mOutput;
-    }
-
-    /**
      * Template getter for checking which kind of field should be shown
      *
      * @param User $oUser
@@ -2206,11 +1961,11 @@ class FcPoRequest extends Base
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
 
         if ($blB2BModeActive) {
-            $blCompany = ($oUser->oxuser__oxcompany->value) ? true : false;
+            $blCompany = (bool)$oUser->oxuser__oxcompany->value;
             $blReturn = $blCompany;
             // check if we already have ustid, then showing is not needed
             if ($blCompany) {
-                $blReturn = ($oUser->oxuser__oxustid->value) ? false : true;
+                $blReturn = !$oUser->oxuser__oxustid->value;
             }
         } else {
             $blReturn = false;
@@ -2251,10 +2006,13 @@ class FcPoRequest extends Base
      *
      * @param string $sPaymentId
      * @param User   $oUser
-     * @param array  $aBankData
+     * @param null   $aBankData
      * @param string $sAction
-     * @param string $sWorkorderId
+     * @param null   $sWorkorderId
+     * @param null   $sDuration
      * @return array
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     public function sendRequestPayolutionInstallment($sPaymentId, $oUser, $aBankData = null, $sAction = 'calculation', $sWorkorderId = null, $sDuration = null)
     {
@@ -2313,10 +2071,13 @@ class FcPoRequest extends Base
     /**
      * Sends a payolution precheck request to
      *
-     * @param string $sType
+     * @param        $sPaymentId
      * @param object $oUser
-     * @param string $sWorkorderId
+     * @param        $aBankData
+     * @param null   $sWorkorderId
      * @return array
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     public function sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkorderId = null)
     {
@@ -2378,7 +2139,6 @@ class FcPoRequest extends Base
     /**
      * Performs a installment calculation call
      *
-     * @param Order $oOrder
      * @return array
      */
     public function sendRequestBNPLInstallmentOptions()
@@ -2475,152 +2235,13 @@ class FcPoRequest extends Base
     }
 
     /**
-     * Requests amazon configuration
-     *
-     * @return array
-     */
-    public function sendRequestGetAmazonPayConfiguration()
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-
-        $this->addParameter('request', 'genericpayment'); //Request method
-        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
-        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
-
-        $this->addParameter('clearingtype', 'wlt');
-        $this->addParameter('wallettype', 'AMZ');
-
-        $this->addParameter('add_paydata[action]', 'getconfiguration');
-
-        $oCurr = $oConfig->getActShopCurrencyObject();
-        $this->addParameter('currency', $oCurr->name);
-
-        return $this->send();
-    }
-
-    /**
-     * Sends request for receiving amazon addressdata
-     *
-     * @param string $sAmazonReferenceId
-     * @param string $sAmazonAddressToken
-     * @return array
-     */
-    public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken)
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oPrice = $oBasket->getPrice();
-
-        $this->addParameter('request', 'genericpayment'); //Request method
-        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
-        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
-
-        $this->addParameter('clearingtype', 'wlt');
-        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
-        $this->addParameter('wallettype', 'AMZ');
-
-        $this->addParameter('add_paydata[action]', 'getorderreferencedetails');
-        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
-        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
-
-        // check for existing workorderid due to situation could be a re-round-trip with another payment
-        $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-        if ($sWorkorderId) {
-            $this->addParameter('workorderid', $sWorkorderId);
-        }
-
-        $oCurr = $oConfig->getActShopCurrencyObject();
-        $this->addParameter('currency', $oCurr->name);
-
-        return $this->send();
-    }
-
-    /**
-     * Sends request for receiving amazon referenceid
-     *
-     * @param string $sAmazonReferenceId
-     * @param string $sAmazonAddressToken
-     * @return array
-     */
-    public function sendRequestSetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken)
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sAmazonWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oPrice = $oBasket->getPrice();
-
-
-        $this->addParameter('request', 'genericpayment'); //Request method
-        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
-        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
-
-        $this->addParameter('clearingtype', 'wlt');
-        $this->addParameter('wallettype', 'AMZ');
-
-        $this->addParameter('add_paydata[action]', 'setorderreferencedetails');
-        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
-        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
-        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
-        $this->addParameter('add_paydata[storename]', $this->_oFcPoHelper->fcpoGetShopName());
-
-        $oCurr = $oConfig->getActShopCurrencyObject();
-        $this->addParameter('currency', $oCurr->name);
-
-        $this->addParameter('workorderid', $sAmazonWorkorderId);
-
-        return $this->send();
-    }
-
-    /**
-     * Processing amazon pay confirm call
-     *
-     * @param $sAmazonReferenceId
-     * @param $sToken
-     * @return void
-     */
-    public function sendRequestGetConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5)
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $sRefNr = $this->getRefNr();
-
-        $sAmazonWorkorderId =
-            $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
-
-        $this->addParameter('request', 'genericpayment');
-        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay'));
-        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID'));
-
-        $this->addParameter('clearingtype', 'wlt');
-        $this->addParameter('wallettype', 'AMZ');
-
-        $this->addParameter('add_paydata[action]', 'confirmorderreference');
-        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
-        $this->addParameter('add_paydata[reference]', $sRefNr);
-        $this->_oFcPoHelper->fcpoSetSessionVariable('amazonRefNr', $sRefNr);
-
-        $this->addParameter('workorderid', $sAmazonWorkorderId);
-
-        $oCurr = $oConfig->getActShopCurrencyObject();
-        $this->addParameter('currency', $oCurr->name);
-
-        $oBasket = $oSession->getBasket();
-        $oPrice = $oBasket->getPrice();
-        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
-
-        $this->_addRedirectUrls('basket', false, false, $sToken, $sDeliveryMD5, true);
-
-        return $this->send();
-    }
-
-    /**
      * Get the next reference number for the upcoming PAYONE transaction
      *
-     * @param object $oOrder order object
-     * @param bool   $blAddPrefixToSession
+     * @param bool $oOrder order object
+     * @param bool $blAddPrefixToSession
      * @return string
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getRefNr($oOrder = false, $blAddPrefixToSession = false)
     {
@@ -2628,9 +2249,8 @@ class FcPoRequest extends Base
         $sSessionRefNr = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoRefNr');
         $blUseSessionRefNr = ($sSessionRefNr && !$oOrder);
         if ($blUseSessionRefNr) {
-            $sRefNrComplete = ($blAddPrefixToSession) ?
+            return ($blAddPrefixToSession) ?
                 $sRawPrefix . $sSessionRefNr : $sSessionRefNr;
-            return $sRefNrComplete;
         }
 
         $oDb = DatabaseProvider::getDb();
@@ -2802,8 +2422,15 @@ class FcPoRequest extends Base
      *
      * @param object $oOrder  order object
      * @param double $dAmount capture amount
-     *
+     * @param bool   $blSettleAccount
+     * @param bool   $aPositions
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function sendRequestCapture($oOrder, $dAmount, $blSettleAccount = true, $aPositions = false)
     {
@@ -2928,12 +2555,14 @@ class FcPoRequest extends Base
      *
      * @param object $oOrder             order object
      * @param double $dAmount            capture amount
-     * @param string $sBankCountry       ISO2 of the country of the bank. Default is false
-     * @param string $sBankAccount       bank account number. Default is false
+     * @param bool   $sBankCountry       ISO2 of the country of the bank. Default is false
+     * @param bool   $sBankAccount       bank account number. Default is false
      * @param string $sBankCode          bank code. Default is false
      * @param string $sBankaccountholder bank account holder. Default is false
-     *
+     * @param bool   $aPositions
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function sendRequestDebit($oOrder, $dAmount, $sBankCountry = false, $sBankAccount = false, $sBankCode = '', $sBankaccountholder = '', $aPositions = false)
     {
@@ -3042,6 +2671,10 @@ class FcPoRequest extends Base
      * @param bool   $blCheckDeliveryAddress check delivery address? Default is false
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     public function sendStandardRequestAddresscheck($oUser, $blCheckDeliveryAddress = false)
     {
@@ -3055,11 +2688,11 @@ class FcPoRequest extends Base
         if ($sAddresschecktype == 'PE' && $this->getCountryIso2($oUser->oxuser__oxcountryid->value) != 'DE') {
             //AddressCheck Person nur in Deutschland
             //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
-        } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) === false) {
+            return ['fcWrongCountry' => true];
+        } elseif ($sAddresschecktype == 'BA' && !in_array($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys)) {
             //AddressCheck Basic nur in bestimmten L?ndern
             //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
+            return ['fcWrongCountry' => true];
         } else {
             $oAddress = oxNew(Address::class);
             if ($blCheckDeliveryAddress === true) {
@@ -3097,9 +2730,7 @@ class FcPoRequest extends Base
     protected function _fcpoGetAddressCheckType()
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
-
-        return $sAddressCheckType;
+        return $oConfig->getConfigParam('sFCPOAddresscheck');
     }
 
     /**
@@ -3151,13 +2782,15 @@ class FcPoRequest extends Base
      * Check and return if this exact address has been checked before
      *
      * @return bool
+     * @throws DatabaseConnectionException
+     * @throws DatabaseConnectionException
      */
     protected function _wasAddressCheckedBefore()
     {
         $sCheckHash = $this->_getAddressHash();
         $sQuery = "SELECT oxtimestamp FROM fcpocheckedaddresses WHERE fcpo_address_hash = '{$sCheckHash}'";
         $sDate = DatabaseProvider::getDb()->getOne($sQuery);
-        if ($sDate != false) {
+        if ($sDate) {
             return true;
         }
         return false;
@@ -3173,18 +2806,7 @@ class FcPoRequest extends Base
     {
         $sHash = false;
 
-        $aAddressParameters = array(
-            'firstname',
-            'lastname',
-            'company',
-            'street',
-            'streetname',
-            'streetnumber',
-            'zip',
-            'city',
-            'country',
-            'state',
-        );
+        $aAddressParameters = ['firstname', 'lastname', 'company', 'street', 'streetname', 'streetnumber', 'zip', 'city', 'country', 'state'];
 
         $sAddress = '';
         foreach ($aAddressParameters as $sParamKey) {
@@ -3198,9 +2820,7 @@ class FcPoRequest extends Base
                 $sAddress .= $sParamValue;
             }
         }
-        $sHash = md5($sAddress);
-
-        return $sHash;
+        return md5($sAddress);
     }
 
     /**
@@ -3213,13 +2833,11 @@ class FcPoRequest extends Base
      */
     protected function _fcpoCorrectAddressParam($sParamKey, $sParamValue, $aResponse)
     {
-        $blCorrectAddressParam = (
+        return (
             $aResponse !== false &&
             array_key_exists($sParamKey, $aResponse) !== false &&
             $aResponse[$sParamKey] != $sParamValue
         );
-
-        return $blCorrectAddressParam;
     }
 
     /**
@@ -3230,12 +2848,10 @@ class FcPoRequest extends Base
      */
     protected function _fcpoCheckAddressCanBeSaved($aResponse)
     {
-        $blReturn = (
+        return (
             $aResponse['status'] == 'VALID' &&
             $this->_fcpoNotBlockingPersonstatus($aResponse)
         );
-
-        return $blReturn;
     }
 
     /**
@@ -3251,7 +2867,7 @@ class FcPoRequest extends Base
         $sResponsePersonstatus = $aResponse['personstatus'];
 
         $aBlockingPersonStatus = [];
-        $aPersonStatusToCheck = array('PPF', 'UKN', 'PUG', 'PNZ', 'PNP');
+        $aPersonStatusToCheck = ['PPF', 'UKN', 'PUG', 'PNZ', 'PNP'];
 
         foreach ($aPersonStatusToCheck as $sPersonstatusToCheck) {
             $blBlocking = $oConfig->getConfigParam('blFCPOAddCheck' . $sPersonstatusToCheck);
@@ -3274,6 +2890,10 @@ class FcPoRequest extends Base
      * Save the hash of a concatenated string with all address information to the DB table fcpocheckedaddresses
      *
      * @param array $aResponse response from the address-check request
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _saveCheckedAddress($aResponse)
     {
@@ -3288,6 +2908,10 @@ class FcPoRequest extends Base
      * @param  $oUser
      * @param  $aResponse
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function setPayoneMalus($oUser, $aResponse)
     {
@@ -3327,6 +2951,8 @@ class FcPoRequest extends Base
      * @param object $oUser user object
      *
      * @return array;
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     public function sendRequestConsumerscore($oUser)
     {
@@ -3349,12 +2975,10 @@ class FcPoRequest extends Base
             $this->addParameter('language', $this->_oFcPoHelper->fcpoGetLang()->getLanguageAbbr());
 
             $aResponse = $this->send();
-            $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
-            return $aResponse;
+            return $this->_fcpoCheckUseFallbackBoniversum($aResponse);
         } else {
             // Ampel Gruen Response simulieren
-            $aResponse = array('scorevalue' => 500, 'fcWrongCountry' => true);
-            return $aResponse;
+            return ['scorevalue' => 500, 'fcWrongCountry' => true];
         }
     }
 
@@ -3372,7 +2996,7 @@ class FcPoRequest extends Base
 
         $blUseFallBack = (
             $sScore == 'U' &&
-            in_array($sAddresscheckType, array('BB', 'PB'))
+            in_array($sAddresscheckType, ['BB', 'PB'])
         );
 
         if ($blUseFallBack) {
@@ -3412,6 +3036,8 @@ class FcPoRequest extends Base
      * @param object $oUser     user object
      *
      * @return array
+     * @throws LanguageNotFoundException
+     * @throws LanguageNotFoundException
      */
     public function sendRequestManagemandate($sMode, $aDynvalue, $oUser)
     {
@@ -3458,8 +3084,7 @@ class FcPoRequest extends Base
                     ORDER BY 
                         oxtimestamp DESC 
                     LIMIT 1";
-        $sPayOneUserId = DatabaseProvider::getDb()->getOne($sQuery);
-        return $sPayOneUserId;
+        return DatabaseProvider::getDb()->getOne($sQuery);
     }
 
     /**
@@ -3470,14 +3095,12 @@ class FcPoRequest extends Base
      */
     protected function _fcpoAddIban($aDynvalue)
     {
-        $blAddIban = (
+        return (
         (
             isset($aDynvalue['fcpo_elv_iban']) &&
             $aDynvalue['fcpo_elv_iban'] != ''
         )
         );
-
-        return $blAddIban;
     }
 
     /**
@@ -3488,6 +3111,10 @@ class FcPoRequest extends Base
      * @param string $sMode                  operation-mode ( live/test )
      *
      * @return string
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function sendRequestGetFile($sOrderId, $sMandateIdentification, $sMode)
     {
@@ -3512,13 +3139,7 @@ class FcPoRequest extends Base
         $sPath = 'modules/fc/fcpayone/mandates/' . $sMandateIdentification . '.pdf';
         $sDestinationFile = getShopBasePath() . $sPath;
 
-        $aOptions = array(
-            'http' => array(
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method' => 'POST',
-                'content' => http_build_query($this->_aParameters),
-            ),
-        );
+        $aOptions = ['http' => ['header' => "Content-type: application/x-www-form-urlencoded\r\n", 'method' => 'POST', 'content' => http_build_query($this->_aParameters)]];
         $oContext = stream_context_create($aOptions);
         $oContent = file_get_contents($this->_sApiUrl, false, $oContext);
         if ($oContent !== false) {
@@ -3534,9 +3155,7 @@ class FcPoRequest extends Base
                 $sReturn = $this->_oFcPoHelper->fcpoGetConfig()->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
                 $sStatus = 'SUCCESS';
 
-                $aOutput = array(
-                    'file' => $sDestinationFile,
-                );
+                $aOutput = ['file' => $sDestinationFile];
                 $sResponse = serialize($aOutput);
             }
         }
@@ -3582,7 +3201,7 @@ class FcPoRequest extends Base
     /**
      * Returns to basket with optional custom message
      *
-     * @param null $sCustomMessage
+     * @param bool $blLogout
      * @return void
      */
     protected function _fcpoReturnToBasket($blLogout = true)
@@ -3602,12 +3221,7 @@ class FcPoRequest extends Base
     {
         $sFrontendApiUrl = $this->_getFrontendApiUrl();
 
-        $aStatus = array(
-            'status' => 'REDIRECT',
-            'txid' => '',
-            'redirecturl' => $sFrontendApiUrl,
-        );
-        return $aStatus;
+        return ['status' => 'REDIRECT', 'txid' => '', 'redirecturl' => $sFrontendApiUrl];
     }
 
     /**
@@ -3619,9 +3233,9 @@ class FcPoRequest extends Base
 
         $aHashParams = [];
         foreach ($this->_aParameters as $sKey => $sValue) {
-            if (array_search($sKey, $this->_aFrontendUnsetParams) !== false) {
+            if (in_array($sKey, $this->_aFrontendUnsetParams)) {
                 unset($this->_aParameters[$sKey]);
-            } elseif (array_search($sKey, $this->_aFrontendHashParams) !== false || stripos($sKey, '[') !== false) {
+            } elseif (in_array($sKey, $this->_aFrontendHashParams) || stripos($sKey, '[') !== false) {
                 $aHashParams[$sKey] = $sValue;
             }
         }

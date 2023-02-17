@@ -74,29 +74,9 @@ class FcPoParamsParser
         $aOrder = $this->_fcpoGetKlarnaOrderParams();
 
 
-        $aKlarnaWidgetSearch = array(
-            '%%TOKEN%%',
-            '%%PAYMENT_CONTAINER_ID%%',
-            '%%PAYMENT_CATEGORY%%',
-            '%%KLARNA_CUSTOMER%%',
-            '%%KLARNA_BILLING%%',
-            '%%KLARNA_SHIPPING%%',
-            '%%KLARNA_PURCHASE%%',
-            '%%KLARNA_ORDERLINES%%',
-            '%%KLARNA_ORDER%%',
-        );
+        $aKlarnaWidgetSearch = ['%%TOKEN%%', '%%PAYMENT_CONTAINER_ID%%', '%%PAYMENT_CATEGORY%%', '%%KLARNA_CUSTOMER%%', '%%KLARNA_BILLING%%', '%%KLARNA_SHIPPING%%', '%%KLARNA_PURCHASE%%', '%%KLARNA_ORDERLINES%%', '%%KLARNA_ORDER%%'];
 
-        $aKlarnaWidgetReplace = array(
-            $sClientToken,
-            $aParams['payment_container_id'],
-            $aParams['payment_category'],
-            json_encode($aCustomer, JSON_UNESCAPED_UNICODE),
-            json_encode($aBilling, JSON_UNESCAPED_UNICODE),
-            json_encode($aShipping, JSON_UNESCAPED_UNICODE),
-            json_encode($aPurchase, JSON_UNESCAPED_UNICODE),
-            json_encode($aOrderlines, JSON_UNESCAPED_UNICODE),
-            json_encode($aOrder, JSON_UNESCAPED_UNICODE),
-        );
+        $aKlarnaWidgetReplace = [$sClientToken, $aParams['payment_container_id'], $aParams['payment_category'], json_encode($aCustomer, JSON_UNESCAPED_UNICODE), json_encode($aBilling, JSON_UNESCAPED_UNICODE), json_encode($aShipping, JSON_UNESCAPED_UNICODE), json_encode($aPurchase, JSON_UNESCAPED_UNICODE), json_encode($aOrderlines, JSON_UNESCAPED_UNICODE), json_encode($aOrder, JSON_UNESCAPED_UNICODE)];
 
         $sKlarnaWidgetJS = file_get_contents($this->_fcpoGetKlarnaWidgetPath());
         $sKlarnaWidgetJS = str_replace($aKlarnaWidgetSearch, $aKlarnaWidgetReplace, $sKlarnaWidgetJS);
@@ -114,11 +94,7 @@ class FcPoParamsParser
         $oUser = $this->_fcpoGetUser();
         $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
 
-        return array(
-            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
-            'gender' => $sGender,
-            'national_identification_number' => $oUser->oxuser__fcpopersonalid->value,
-        );
+        return ['date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value, 'gender' => $sGender, 'national_identification_number' => $oUser->oxuser__fcpopersonalid->value];
     }
 
     /**
@@ -146,20 +122,7 @@ class FcPoParamsParser
     {
         $oUser = $this->_fcpoGetUser();
 
-        return array(
-            'given_name' => $oUser->oxuser__oxfname->value,
-            'family_name' => $oUser->oxuser__oxlname->value,
-            'email' => $oUser->oxuser__oxusername->value,
-            'title' => $this->fcpoGetTitle(),
-            'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
-            'street_address2' => $oUser->oxuser__oxaddinfo->value,
-            'postal_code' => $oUser->oxuser__oxzip->value,
-            'city' => $oUser->oxuser__oxcity->value,
-            'region' => $oUser->getStateTitle(),
-            'phone' => $oUser->oxuser__oxfon->value,
-            'country' => $oUser->fcpoGetUserCountryIso(),
-            'organization_name' => $oUser->oxuser__oxcompany->value,
-        );
+        return ['given_name' => $oUser->oxuser__oxfname->value, 'family_name' => $oUser->oxuser__oxlname->value, 'email' => $oUser->oxuser__oxusername->value, 'title' => $this->fcpoGetTitle(), 'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value, 'street_address2' => $oUser->oxuser__oxaddinfo->value, 'postal_code' => $oUser->oxuser__oxzip->value, 'city' => $oUser->oxuser__oxcity->value, 'region' => $oUser->getStateTitle(), 'phone' => $oUser->oxuser__oxfon->value, 'country' => $oUser->fcpoGetUserCountryIso(), 'organization_name' => $oUser->oxuser__oxcompany->value];
     }
 
     /**
@@ -174,12 +137,11 @@ class FcPoParamsParser
         $oUser = $oBasket->getUser();
         $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
         $sCountryIso2 = $oUser->fcpoGetUserCountryIso();
+        $sTitle = '';
         switch ($sCountryIso2) {
             case 'AT':
-            case 'DE':
-                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
-                break;
             case 'CH':
+            case 'DE':
                 $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
                 break;
             case 'GB':
@@ -210,20 +172,7 @@ class FcPoParamsParser
         $blHasShipping = (!$oShippingAddress) ? false : true;
 
         if ($blHasShipping) {
-            return array(
-                'given_name' => $oShippingAddress->oxaddress__oxfname->value,
-                'family_name' => $oShippingAddress->oxaddress__oxlname->value,
-                'email' => $oUser->oxuser__oxusername->value,
-                'title' => $this->fcpoGetTitle(),
-                'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value,
-                'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value,
-                'postal_code' => $oShippingAddress->oxaddress__oxzip->value,
-                'city' => $oShippingAddress->oxaddress__oxcity->value,
-                'region' => "",
-                'phone' => $oShippingAddress->oxaddress__oxfon->value,
-                'country' => $oShippingAddress->fcpoGetUserCountryIso(),
-                'organization_name' => $oShippingAddress->oxaddress__oxcompany->value
-            );
+            return ['given_name' => $oShippingAddress->oxaddress__oxfname->value, 'family_name' => $oShippingAddress->oxaddress__oxlname->value, 'email' => $oUser->oxuser__oxusername->value, 'title' => $this->fcpoGetTitle(), 'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value, 'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value, 'postal_code' => $oShippingAddress->oxaddress__oxzip->value, 'city' => $oShippingAddress->oxaddress__oxcity->value, 'region' => "", 'phone' => $oShippingAddress->oxaddress__oxfon->value, 'country' => $oShippingAddress->fcpoGetUserCountryIso(), 'organization_name' => $oShippingAddress->oxaddress__oxcompany->value];
         } else {
             return $this->_fcpoGetKlarnaBillingParams();
         }
@@ -261,12 +210,7 @@ class FcPoParamsParser
         $oUser = $this->_fcpoGetUser();
         $oCur = $oConfig->getActShopCurrencyObject();
 
-        $aKlarnaData = array(
-            'purchase_country' => $oUser->fcpoGetUserCountryIso(),
-            'purchase_currency' => $oCur->name,
-        );
-
-        return $aKlarnaData;
+        return ['purchase_country' => $oUser->fcpoGetUserCountryIso(), 'purchase_currency' => $oCur->name];
     }
 
     /**
@@ -283,16 +227,7 @@ class FcPoParamsParser
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
 
-            $aOrderline = array(
-                'reference' => $oArticle->oxarticles__oxartnum->value,
-                'name' => $oBasketItem->getTitle(),
-                'quantity' => $oBasketItem->getAmount(),
-                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() * 100,
-                'tax_rate' => $oBasketItem->getVatPercent() * 100,
-                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice() * 100 * $oBasketItem->getAmount(),
-                // 'product_url' => $oBasketItem->getLink(),
-                // 'image_url' => $oBasketItem->getIconUrl(),
-            );
+            $aOrderline = ['reference' => $oArticle->oxarticles__oxartnum->value, 'name' => $oBasketItem->getTitle(), 'quantity' => $oBasketItem->getAmount(), 'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() * 100, 'tax_rate' => $oBasketItem->getVatPercent() * 100, 'total_amount' => $oBasketItem->getPrice()->getBruttoPrice() * 100 * $oBasketItem->getAmount()];
             $aOrderlines[] = $aOrderline;
         }
 
@@ -304,16 +239,7 @@ class FcPoParamsParser
 
         $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
-            $aOrderlineShipping = array(
-                'reference' => 'delivery',
-                'name' => 'Standard Versand',
-                'quantity' => 1,
-                'unit_price' => $sDeliveryCosts * 100,
-                'tax_rate' => (string)$oDelivery->getVat() * 100,
-                'total_amount' => $sDeliveryCosts * 100,
-                // 'product_url' => $oBasketItem->getLink(),
-                // 'image_url' => $oBasketItem->getIconUrl(),
-            );
+            $aOrderlineShipping = ['reference' => 'delivery', 'name' => 'Standard Versand', 'quantity' => 1, 'unit_price' => $sDeliveryCosts * 100, 'tax_rate' => (string)$oDelivery->getVat() * 100, 'total_amount' => $sDeliveryCosts * 100];
             $aOrderlines[] = $aOrderlineShipping;
         }
 
@@ -324,7 +250,7 @@ class FcPoParamsParser
      * Returns delivery costs of given basket object
      *
      * @param $oBasket
-     * @return object $oDelivery
+     * @return float|object
      */
     protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
     {
@@ -346,10 +272,7 @@ class FcPoParamsParser
         $dAmount = $oBasket->getPrice()->getBruttoPrice();
         $dTaxAmount = $oBasket->getPrice()->getVat();
 
-        return array(
-            'order_amount' => $dAmount * 100,
-            'order_tax_amount' => $dTaxAmount
-        );
+        return ['order_amount' => $dAmount * 100, 'order_tax_amount' => $dTaxAmount];
     }
 
     /**
@@ -376,16 +299,7 @@ class FcPoParamsParser
 
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
-            $aOrderData['orderlines'][] = array(
-                'reference' => $oArticle->oxarticles__oxartnum->value,
-                'name' => $oBasketItem->getTitle(),
-                'quantity' => $oBasketItem->getAmount(),
-                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice(),
-                'tax_rate' => $oBasketItem->getVatPercent(),
-                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice(),
-                // 'product_url' => $oBasketItem->getLink(),
-                // 'image_url' => $oBasketItem->getIconUrl(),
-            );
+            $aOrderData['orderlines'][] = ['reference' => $oArticle->oxarticles__oxartnum->value, 'name' => $oBasketItem->getTitle(), 'quantity' => $oBasketItem->getAmount(), 'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice(), 'tax_rate' => $oBasketItem->getVatPercent(), 'total_amount' => $oBasketItem->getPrice()->getBruttoPrice()];
         }
 
         $dAmount = $oBasket->getPrice()->getBruttoPrice();

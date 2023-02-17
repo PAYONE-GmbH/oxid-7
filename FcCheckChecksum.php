@@ -141,11 +141,11 @@ class FcCheckChecksum
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curlHandle, CURLOPT_POST, true);
         curl_setopt(
-            $curlHandle, CURLOPT_POSTFIELDS, array(
+            $curlHandle, CURLOPT_POSTFIELDS, [
                 'checkdata' => json_encode($aChecksums, JSON_THROW_ON_ERROR),    // you'll have to change the name, here, I suppose
                 'module' => $this->_sModuleId,
                 'version' => $this->_sModuleVersion,
-            )
+            ]
         );
         $sResult = curl_exec($curlHandle);
         curl_close($curlHandle);

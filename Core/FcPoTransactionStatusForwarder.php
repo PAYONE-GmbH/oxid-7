@@ -40,7 +40,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      *
      * @var array
      */
-    protected $_aDbFields2Params = array(
+    protected $_aDbFields2Params = [
         'FCPO_KEY' => 'key',
         'FCPO_TXACTION' => 'txaction',
         'FCPO_PORTALID' => 'portalid',
@@ -92,7 +92,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
         'FCPO_CLEARING_DUEDATE' => 'clearing_duedate',
         'FCPO_CLEARING_REFERENCE' => 'clearing_reference',
         'FCPO_CLEARING_INSTRUCTIONNOTE' => 'clearing_instructionnote',
-    );
+    ];
 
     /**
      * Central handling of forward request
@@ -309,10 +309,10 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 $sParams .= $this->_addParam($sKey, $mValue);
             }
 
-            return array(
+            return [
                 'string' => $sParams,
                 'array' => $aRequestParams,
-            );
+            ];
         } catch (Exception $e) {
             throw $e;
         }
@@ -412,10 +412,10 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
             throw new Exception('Could not find forward data for ID ' . $sForwardId . '!');
         }
 
-        return array(
+        return [
             'url' => $aRow['FCPO_URL'],
             'timeout' => $aRow['FCPO_TIMEOUT'],
-        );
+        ];
     }
 
     /**

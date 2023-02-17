@@ -237,53 +237,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     }
 
     /**
-     * Method manages adding/merging userdata
-     *
-     * @param array $aResponse
-     * @return void
-     */
-    public function fcpoSetAmazonOrderReferenceDetailsResponse(array $aResponse): void
-    {
-        $sAmazonEmailAddress = $this->_fcpoAmazonEmailEncode($aResponse['add_paydata[email]']);
-        $aResponse['add_paydata[email]'] = $sAmazonEmailAddress;
-        $this->_fcpoAddOrUpdateAmazonUser($aResponse);
-    }
-
-    /**
-     * Makes this Email unique to be able to handle amazon users different from standard users
-     * Currently the email address simply gets a prefix
-     *
-     * @param string $sEmail
-     * @return string
-     */
-    protected function _fcpoAmazonEmailEncode(string $sEmail): string
-    {
-        $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
-
-        return $oViewConf->fcpoAmazonEmailEncode($sEmail);
-    }
-
-    /**
-     * Checks if a user should be added or updated, redirects to matching method
-     * and logs user in
-     *
-     * @param array $aResponse
-     * @return void
-     */
-    protected function _fcpoAddOrUpdateAmazonUser(array $aResponse): void
-    {
-        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
-        $blUserExists = $this->_fcpoUserExists($sAmazonEmailAddress);
-        if ($blUserExists) {
-            $sUserId = $this->_fcpoUpdateAmazonUser($aResponse);
-        } else {
-            $sUserId = $this->_fcpoAddAmazonUser($aResponse);
-        }
-        // logoff and on again
-        $this->_fcpoLogMeIn($sUserId);
-    }
-
-    /**
      * Method checks if a user WITH password exists using the given email-address
      *
      * @param string $sEmailAddress
@@ -304,59 +257,7 @@ class FcPayOneUser extends FcPayOneUser_parent
         return $blReturn;
     }
 
-    /**
-     * Method delivers OXID of a user by offering an email address or false if email does not exist
-     *
-     * @param string $sAmazonEmailAddress
-     * @return mixed
-     */
-    protected function _fcpoGetUserOxidByEmail(string $sAmazonEmailAddress): mixed
-    {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $sQuery = "SELECT OXID FROM oxuser WHERE OXUSERNAME=" . $oDb->quote($sAmazonEmailAddress);
-        return $oDb->getOne($sQuery);
-    }
 
-    /**
-     * Updating user. Checking current address, if different add new address as additional address to user
-     * iff current address is not known until now
-     *
-     * @param array $aResponse
-     * @return string
-     */
-    protected function _fcpoUpdateAmazonUser(array $aResponse): string
-    {
-        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
-        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
-
-        $oUser = $this->_oFcPoHelper->getFactoryObject(User::class);
-        $oUser->load($sUserOxid);
-
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
-
-        $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new Field($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new Field($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new Field($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new Field(trim($aResponse['add_paydata[billing_firstname]']));
-        $oUser->oxuser__oxlname = new Field(trim($aResponse['add_paydata[billing_lastname]']));
-        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcompany = new Field($aResponse['add_paydata[billing_company]']);
-        $oUser->oxuser__oxcountryid = new Field($sCountryId);
-        $oUser->addToGroup('oxidnotyetordered');
-
-        $oUser->save();
-
-        // add and set deliveryaddress
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
-
-        // handle the multi purpose address field
-        $this->_fcpoHandleAmazonPayMultiPurposeField($aResponse);
-
-        return $sUserOxid;
-    }
 
     /**
      * Method splits street and streetnr from string
@@ -484,75 +385,6 @@ class FcPayOneUser extends FcPayOneUser_parent
         }
 
         return $blReturn;
-    }
-
-    /**
-     * Method handles the multi purpose Address line 1 field from AmazonPay.
-     * Depending on the transmitted fields, and the values, the user fields are updated accordingly.
-     *
-     * @param array $aResponse
-     * @return void
-     */
-    public function _fcpoHandleAmazonPayMultiPurposeField(array $aResponse): void
-    {
-        $oDelAddr = $oAddress = $this->_oFcPoHelper->getFactoryObject(Address::class);
-        $sDelAddrId = $this->_oFcPoHelper->fcpoGetSessionVariable('deladrid');
-        if (!empty($sDelAddrId)) {
-            $oDelAddr->load($sDelAddrId);
-
-            if (isset($aResponse['add_paydata[shipping_pobox]'])) {
-                $oDelAddr->oxaddress__oxaddinfo = new Field($aResponse['add_paydata[shipping_pobox]']);
-            }
-
-            if (isset($aResponse['add_paydata[shipping_company]'])) {
-                $sCompany = $aResponse['add_paydata[shipping_company]'];
-                if (preg_match('/.*c\/o.*/i', $sCompany)) {
-                    $oDelAddr->oxaddress__oxaddinfo = new Field($sCompany);
-                } elseif (preg_match('/.*[0-9]+.*/', $sCompany)) {
-                    $oDelAddr->oxaddress__oxaddinfo = new Field($sCompany);
-                } else {
-                    $oDelAddr->oxaddress__oxcompany = new Field($sCompany);
-                }
-            }
-
-            $oDelAddr->save();
-        }
-    }
-
-    /**
-     * Method adds a new amazon user into OXIDs user system. User won't get a password
-     *
-     * @param array $aResponse
-     * @return string
-     */
-    protected function _fcpoAddAmazonUser(array $aResponse): string
-    {
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
-
-        $oUser = $this->_oFcPoHelper->getFactoryObject(User::class);
-        $sUserOxid = $oUser->getId();
-        $oUser->oxuser__oxusername = new Field($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new Field($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new Field($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new Field($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new Field($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new Field($aResponse['add_paydata[billing_firstname]']);
-        $oUser->oxuser__oxlname = new Field($aResponse['add_paydata[billing_lastname]']);
-        $oUser->oxuser__oxcity = new Field($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcompany = new Field($aResponse['add_paydata[billing_company]']);
-        $oUser->oxuser__oxcountryid = new Field($sCountryId);
-        $oUser->addToGroup('oxidnotyetordered');
-
-        $oUser->save();
-
-        // add and set deliveryaddress
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
-
-        // handle the multi purpose address field
-        $this->_fcpoHandleAmazonPayMultiPurposeField($aResponse);
-
-        return $sUserOxid;
     }
 
     /**
@@ -758,7 +590,7 @@ class FcPayOneUser extends FcPayOneUser_parent
             $boni = $this->_fcpoCalculateBoniFromScoreValue($aResponse['scorevalue']);
         } else {
             $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
-            $aMap = array('G' => 500, 'Y' => 300, 'R' => 100);
+            $aMap = ['G' => 500, 'Y' => 300, 'R' => 100];
             if (isset($aMap[$aResponse['score']])) {
                 $boni = $aMap[$aResponse['score']];
             }
@@ -809,7 +641,7 @@ class FcPayOneUser extends FcPayOneUser_parent
 
         $blUseFallBack = (
             $sScore == 'U' &&
-            in_array($sAddresscheckType, array('BB', 'PB'))
+            in_array($sAddresscheckType, ['BB', 'PB'])
         );
 
         if ($blUseFallBack) {
@@ -1022,19 +854,6 @@ class FcPayOneUser extends FcPayOneUser_parent
     public function fcpoUnsetGroups(): void
     {
         $this->_oGroups = null;
-    }
-
-    /**
-     * Returns the origin email of an amazon encoded email
-     *
-     * @param string $sEmail
-     * @return string
-     */
-    protected function _fcpoAmazonEmailDecode(string $sEmail): string
-    {
-        $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
-
-        return $oViewConf->fcpoAmazonEmailDecode($sEmail);
     }
 
 }

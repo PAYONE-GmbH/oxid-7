@@ -104,10 +104,7 @@ class FcPoErrorMapping extends BaseModel
      */
     protected function _fcpoGetMappingWhere($sType)
     {
-        $aValidTypes = array(
-            'general',
-            'iframe',
-        );
+        $aValidTypes = ['general', 'iframe'];
 
         $blValid = in_array($sType, $aValidTypes);
         $sWhere = '';
@@ -325,7 +322,7 @@ class FcPoErrorMapping extends BaseModel
      * @param array  $aOut
      * @return array
      */
-    protected function _fcpoXml2Array($oXml, $aOut = array())
+    protected function _fcpoXml2Array($oXml, $aOut = [])
     {
         foreach ((array)$oXml as $iIndex => $node) {
             $aOut[$iIndex] = (is_object($node)) ? $this->_fcpoXml2Array($node) : $node;

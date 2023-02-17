@@ -49,6 +49,7 @@ class FcPoHelper extends BaseModel
      */
     protected static $_blUseRegistry = null;
     /**
+     *
      * Config instance
      */
     private static ?Config $_oConfig = null;
@@ -73,16 +74,6 @@ class FcPoHelper extends BaseModel
     public static function fcpoGetStaticConfig(): Config
     {
         return Registry::getConfig();
-    }
-
-    /**
-     * Method returns current module version
-     *
-     * @return string
-     */
-    public static function fcpoGetStaticModuleVersion(): string
-    {
-        return '1.0.0';
     }
 
     /**
@@ -230,20 +221,6 @@ class FcPoHelper extends BaseModel
     }
 
     /**
-     * Getter for config instance
-     *
-     * @return Config
-     */
-    public function fcpoGetConfig(): Config
-    {
-        if (self::$_oConfig == null) {
-            self::$_oConfig = Registry::getConfig();
-        }
-
-        return self::$_oConfig;
-    }
-
-    /**
      * Returns a language Instance
      *
      * @return Language
@@ -330,11 +307,53 @@ class FcPoHelper extends BaseModel
      */
     public function fcpoGetModuleVersion(): string
     {
+        $aModule = [];
         include_once $this->getModulesDir() . "fc/fcpayone/metadata.php";
-        if(!$aModule['version']) {
+        if (!$aModule['version']) {
             return self::fcpoGetStaticModuleVersion();
         }
         return $aModule['version'];
+    }
+
+    /**
+     * Returns path to modules dir
+     *
+     * @param bool $absolute mode - absolute/relative path
+     *
+     * @return string
+     */
+    public function getModulesDir(bool $absolute = true): string
+    {
+        if ($absolute) {
+            $oConfig = $this->fcpoGetConfig();
+            return $oConfig->getConfigParam('sShopDir') . 'modules/';
+        } else {
+            return 'modules/';
+        }
+    }
+
+    /**
+     * Getter for config instance
+     *
+     * @return Config
+     */
+    public function fcpoGetConfig(): Config
+    {
+        if (self::$_oConfig == null) {
+            self::$_oConfig = Registry::getConfig();
+        }
+
+        return self::$_oConfig;
+    }
+
+    /**
+     * Method returns current module version
+     *
+     * @return string
+     */
+    public static function fcpoGetStaticModuleVersion(): string
+    {
+        return '1.0.0';
     }
 
     /**
@@ -541,22 +560,5 @@ class FcPoHelper extends BaseModel
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-    }
-
-    /**
-     * Returns path to modules dir
-     *
-     * @param bool $absolute mode - absolute/relative path
-     *
-     * @return string
-     */
-    public function getModulesDir(bool $absolute = true): string
-    {
-        if ($absolute) {
-            $oConfig = $this->fcpoGetConfig();
-            return $oConfig->getConfigParam('sShopDir') . 'modules/';
-        } else {
-            return 'modules/';
-        }
     }
 }

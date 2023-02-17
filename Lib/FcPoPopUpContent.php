@@ -84,6 +84,7 @@ class FcPopopUpContent extends BaseModel
      */
     public function __construct($sUrl, $sDuration, $blPdfHeader = true, $blUseLogin = false)
     {
+        parent::__construct();
         $this->_sUrl = $sUrl;
         $this->_blUseLogin = $blUseLogin;
         $this->_blPdfHeader = $blPdfHeader;
@@ -134,7 +135,7 @@ class FcPopopUpContent extends BaseModel
     /**
      * Returns configured credentials
      *
-     * @return void
+     * @return array|void
      */
     protected function _fcpoGetPayolutionCredentials()
     {
@@ -157,9 +158,8 @@ class FcPopopUpContent extends BaseModel
         $sMessage = utf8_encode($sMessage);
         $sReturn = '<p class="payolution_message_error">';
         $sReturn .= $sMessage;
-        $sReturn .= '</p>';
 
-        return $sReturn;
+        return $sReturn . '</p>';
     }
 
 }
