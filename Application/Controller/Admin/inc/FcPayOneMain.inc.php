@@ -26,6 +26,7 @@ use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Model\BaseModel;
 
 $aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
                                         ['oxtitle',     'oxcountry', 1, 1, 0],
@@ -76,7 +77,7 @@ class ajaxComponent extends ListComponentAjax
      * @group  untestable
      * @return string
      */
-    protected function _getQuery()
+    protected function getQuery()
     {
         // looking for table/view
         $sCountryTable = $this->getViewName('oxcountry');
@@ -109,16 +110,16 @@ class ajaxComponent extends ListComponentAjax
      */
     public function addpaycountry()
     {
-        $aChosenCntr = $this->_getActionIds('oxcountry.oxid');
+        $aChosenCntr = $this->getActionIds('oxcountry.oxid');
         $soxId       = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
         $sType       = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
             $sCountryTable = $this->getViewName('oxcountry');
-            $aChosenCntr = $this->_getAll($this->_addFilter("select $sCountryTable.oxid ".$this->_getQuery()));
+            $aChosenCntr = $this->_getAll($this->addFilter("select $sCountryTable.oxid ".$this->getQuery()));
         }
         if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {
             foreach ($aChosenCntr as $sChosenCntr) {
-                $oObject2Payment = oxNew(Base::class);
+                $oObject2Payment = oxNew(BaseModel::class);
                 $oObject2Payment->init('fcpopayment2country');
                 $oObject2Payment->fcpopayment2country__fcpo_paymentid  = new Field($soxId);
                 $oObject2Payment->fcpopayment2country__fcpo_countryid  = new Field($sChosenCntr);
@@ -136,9 +137,9 @@ class ajaxComponent extends ListComponentAjax
      */
     public function removepaycountry()
     {
-        $aChosenCntr = $this->_getActionIds('fcpopayment2country.oxid');
+        $aChosenCntr = $this->getActionIds('fcpopayment2country.oxid');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sQ = $this->_addFilter("delete fcpopayment2country.* ".$this->_getQuery());
+            $sQ = $this->addFilter("delete fcpopayment2country.* ".$this->getQuery());
             DatabaseProvider::getDb()->execute($sQ);
         } elseif (is_array($aChosenCntr)) {
             $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", DatabaseProvider::getDb()->quoteArray($aChosenCntr)) . ") ";

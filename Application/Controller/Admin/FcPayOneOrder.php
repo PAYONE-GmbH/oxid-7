@@ -260,7 +260,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
     /**
      * Triggers capture request to PAYONE API and displays the result
      *
-     * @return null
+     * @return void
      */
     public function capture(): void
     {
@@ -372,7 +372,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             if ($oOrder->oxorder__oxpaymenttype->value == 'fcpodebitnote' && $blFCPOMandateDownload) {
                 $sFile = $oOrder->fcpoGetMandateFilename();
                 if ($sFile) {
-                    $sPdfUrl = $this->getViewConfig()->getSelfLink() . 'cl=fcpayone_order&amp;fnc=download&amp;oxid=' . $sOxid;
+                    $sPdfUrl = $this->getViewConfig()->getSelfLink() . 'cl=FcPayOneOrder&amp;fnc=download&amp;oxid=' . $sOxid;
                 }
             }
         }

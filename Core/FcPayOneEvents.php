@@ -51,8 +51,7 @@ class FcPayOneEvents
         'fcpoklarna',
         'fcpopaydirekt_express',
         'fcpo_giropay',
-        'fcpoamazonpay',
-        'fcpopaydirekt'
+        'fcpoamazonpay'
     ];
     public static $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
@@ -385,6 +384,7 @@ class FcPayOneEvents
         'fcpoklarna_installments' => 'PAYONE Klarna Ratenkauf',
         'fcpoklarna_directdebit' => 'PAYONE Klarna Sofort bezahlen',
         'fcpobarzahlen' => 'PAYONE Barzahlen',
+        'fcpopaydirekt' => 'PAYONE paydirekt',
         'fcpopo_bill' => 'PAYONE Unzer Rechnungskauf',
         'fcpopo_debitnote' => 'PAYONE Unzer Lastschrift',
         'fcpopo_installment' => 'PAYONE Unzer Ratenkauf',

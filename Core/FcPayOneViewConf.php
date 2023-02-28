@@ -98,11 +98,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     /**
      * Returns the url to module
      *
+     * @param bool $absolute
      * @return string
      */
-    public function fcpoGetModuleUrl(): string
+    public function fcpoGetModuleUrl(bool $absolute = false): string
     {
-        return $this->_oFcPoHelper->getModulesDir(false) . $this->_sModuleFolder;
+        return $this->_oFcPoHelper->getModulesDir($absolute) . $this->_sModuleFolder;
     }
 
     /**
@@ -418,7 +419,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $certificateFilename = $oConfig->getConfigParam('sFCPOAplCertificate');
-
         return is_file($this->fcpoGetCertDirPath() . $certificateFilename);
     }
 
@@ -429,7 +429,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetCertDirPath(): string
     {
-        return $this->_oFcPoHelper->getModulesDir('fcpayone') . '/cert/';
+        return $this->fcpoGetModuleUrl(true) . '/cert/';
     }
 
     /**

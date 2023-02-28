@@ -26,15 +26,17 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
+use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoParamsParser;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use JsonException;
+use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
-use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\Config;
+use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidEsales\Eshop\Core\Curl;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Registry;
@@ -46,7 +48,7 @@ use OxidEsales\Eshop\Core\ViewConfig;
  *
  * @author andre
  */
-class FcPayOneAjax extends Base
+class FcPayOneAjax extends BaseController
 {
 
     /**
@@ -64,7 +66,6 @@ class FcPayOneAjax extends Base
      */
     public function __construct()
     {
-        parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
 
         // receive params
@@ -116,6 +117,7 @@ class FcPayOneAjax extends Base
             if (in_array($sPaymentId, $aKlarnaPayments)) {
                 echo $this->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
             }
+            die();
         }
     }
 
@@ -228,7 +230,7 @@ class FcPayOneAjax extends Base
      */
     public function fcpoTriggerPrecheck(string $sPaymentId, string $sParamsJson): bool|string
     {
-        $oPaymentController = $this->_oFcPoHelper->getFactoryObject(Payment::class);
+        $oPaymentController = $this->_oFcPoHelper->getFactoryObject(PaymentController::class);
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson));
         $mPreCheckResult = $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
 
@@ -243,7 +245,7 @@ class FcPayOneAjax extends Base
      */
     public function fcpoTriggerInstallmentCalculation(string $sPaymentId)
     {
-        $oPaymentController = $this->_oFcPoHelper->getFactoryObject(Payment::class);
+        $oPaymentController = $this->_oFcPoHelper->getFactoryObject(PaymentController::class);
 
         $oPaymentController->fcpoPerformInstallmentCalculation($sPaymentId);
         $mResult = $oPaymentController->fcpoGetInstallments();
@@ -663,11 +665,11 @@ class FcPayOneAjax extends Base
         $sHtml .= '        <div colspan="2" class="small text-right">';
         $sHtml .= '             <a class="rp-link" id="' . $sPaymentMethod . '_rp-show-installment-plan-details" onclick="fcpoRpChangeDetails(\'' . $sPaymentMethod . '\')">';
         $sHtml .= $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_SHOW');
-        $sHtml .= '                <img src="modules/fc/fcpayone/out/img/icon-enlarge.png" class="rp-details-icon" />';
+        $sHtml .= '                <img src="out/modules/fcpayone/img/icon-enlarge.png" class="rp-details-icon" />';
         $sHtml .= '            </a>';
         $sHtml .= '             <a class="rp-link" id="' . $sPaymentMethod . '_rp-hide-installment-plan-details" onclick="fcpoRpChangeDetails(\'' . $sPaymentMethod . '\')">';
         $sHtml .= $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_HIDE');
-        $sHtml .= '                <img src="modules/fc/fcpayone/out/img/icon-shrink.png" class="rp-details-icon" />';
+        $sHtml .= '                <img src="out/modules/fcpayone/img/icon-shrink.png" class="rp-details-icon" />';
         $sHtml .= '            </a>';
         $sHtml .= '        </div>';
         $sHtml .= '    </div>';

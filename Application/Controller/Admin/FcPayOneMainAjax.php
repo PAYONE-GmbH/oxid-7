@@ -7,8 +7,9 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
-use OxidEsales\Eshop\Core\Base;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Model\BaseModel;
 
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
@@ -34,21 +35,22 @@ class FcPayOneMainAjax extends ListComponentAjax
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
     /**
      * Columns array
      *
      * @var array
      */
-    protected $_aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
-        ['oxtitle', 'oxcountry', 1, 1, 0],
-        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
-        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
-        ['oxunnum3', 'oxcountry', 0, 0, 0],
-        ['oxid', 'oxcountry', 0, 0, 1]
-    ],
+    protected $_aColumns = [
+        'container1' => [    // field, table, visible, multilanguage, ident
+            ['oxtitle', 'oxcountry', 1, 1, 0],
+            ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+            ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+            ['oxunnum3', 'oxcountry', 0, 0, 0],
+            ['oxid', 'oxcountry', 0, 0, 1]
+        ],
         'container2' => [
             ['oxtitle', 'oxcountry', 1, 1, 0],
             ['oxisoalpha2', 'oxcountry', 1, 0, 0],
@@ -61,7 +63,7 @@ class FcPayOneMainAjax extends ListComponentAjax
     /**
      * Class constructor, sets all required parameters for requests.
      *
-     * @return null
+     * @return void
      */
     public function __construct()
     {
@@ -72,20 +74,20 @@ class FcPayOneMainAjax extends ListComponentAjax
     /**
      * Adds chosen country to payment
      *
-     * @return null
+     * @return void
      */
     public function addpaycountry(): void
     {
-        $aChosenCntr = $this->_getActionIds('oxcountry.oxid');
+        $aChosenCntr = $this->getActionIds('oxcountry.oxid');
         $soxId = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
         $sType = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
             $sCountryTable = $this->getViewName('oxcountry');
-            $aChosenCntr = $this->_getAll($this->_addFilter("select $sCountryTable.oxid " . $this->_getQuery()));
+            $aChosenCntr = $this->_getAll($this->addFilter("select $sCountryTable.oxid " . $this->getQuery()));
         }
         if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {
             foreach ($aChosenCntr as $sChosenCntr) {
-                $oObject2Payment = oxNew(Base::class);
+                $oObject2Payment = oxNew(BaseModel::class);
                 $oObject2Payment->init('fcpopayment2country');
                 $oObject2Payment->fcpopayment2country__fcpo_paymentid = new Field($soxId);
                 $oObject2Payment->fcpopayment2country__fcpo_countryid = new Field($sChosenCntr);
@@ -100,7 +102,7 @@ class FcPayOneMainAjax extends ListComponentAjax
      *
      * @return string
      */
-    protected function _getQuery()
+    protected function getQuery()
     {
         // looking for table/view
         $sCountryTable = $this->getViewName('oxcountry');
@@ -113,7 +115,6 @@ class FcPayOneMainAjax extends ListComponentAjax
             // which fields to load ?
             $sQAdd = " from $sCountryTable where $sCountryTable.oxactive = '1' ";
         } else {
-
             $sQAdd = " from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
             $sQAdd .= "where $sCountryTable.oxactive = '1' and fcpopayment2country.fcpo_paymentid = '$sCountryId' and fcpopayment2country.fcpo_type = '{$sType}' ";
         }
@@ -130,14 +131,15 @@ class FcPayOneMainAjax extends ListComponentAjax
     /**
      * Removes chosen country from payment
      *
-     * @return null
+     * @return void
+     * @throws DatabaseConnectionException
      */
     public function removepaycountry(): void
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $aChosenCntr = $this->_getActionIds('fcpopayment2country.oxid');
+        $aChosenCntr = $this->getActionIds('fcpopayment2country.oxid');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sQ = $this->_addFilter("delete fcpopayment2country.* " . $this->_getQuery());
+            $sQ = $this->addFilter("delete fcpopayment2country.* " . $this->getQuery());
             $oDb->execute($sQ);
         } elseif (is_array($aChosenCntr)) {
             $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", $oDb->quoteArray($aChosenCntr)) . ") ";
@@ -146,3 +148,6 @@ class FcPayOneMainAjax extends ListComponentAjax
     }
 
 }
+
+
+class_alias(\Fatchip\PayOne\Application\Controller\Admin\FcPayOneMainAjax::class, 'fcpayone_main_ajax');

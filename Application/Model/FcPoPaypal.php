@@ -54,7 +54,7 @@ class FcPoPaypal extends BaseModel
      *
      * @var string
      */
-    protected $_sPayPalExpressLogoPath = 'modules/fc/fcpayone/out/img/';
+    protected $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
 
     /**
      * Init needed data

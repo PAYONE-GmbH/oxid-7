@@ -101,7 +101,7 @@
                 <dt>
                     <select name="confstrs[sFCPOHashMethod]">
                         <option value="md5" {% if confstrs.sFCPOHashMethod == "md5" %}SELECTED{% endif %}>md5</option>
-                        <option value="sha2-384" {% if confstrs.sFCPOHashMethod == "sha2 - 384" %}SELECTED{% endif %}>sha2-384
+                        <option value="sha2-384" {% if confstrs.sFCPOHashMethod == "sha2-384" %}SELECTED{% endif %}>sha2-384
                             (empfohlen)
                         </option>
                     </select>
@@ -178,7 +178,7 @@
                     <input type="checkbox" name="confbools[blFCPOVisaActivated]" value="true"
                            {% if (confbools.blFCPOVisaActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=V&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=V&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCVLive]" value="1"
@@ -195,7 +195,7 @@
                     <input type="checkbox" name="confbools[blFCPOMastercardActivated]" value="true"
                            {% if (confbools.blFCPOMastercardActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=M&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=M&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCMLive]" value="1"
@@ -212,7 +212,7 @@
                     <input type="checkbox" name="confbools[blFCPOAmexActivated]" value="true"
                            {% if (confbools.blFCPOAmexActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=A&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=A&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCALive]" value="1"
@@ -229,7 +229,7 @@
                     <input type="checkbox" name="confbools[blFCPODinersActivated]" value="true"
                            {% if (confbools.blFCPODinersActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=D&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=D&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCDLive]" value="1"
@@ -246,7 +246,7 @@
                     <input type="checkbox" name="confbools[blFCPOJCBActivated]" value="true"
                            {% if (confbools.blFCPOJCBActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=J&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=J&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCJLive]" value="1"
@@ -263,7 +263,7 @@
                     <input type="checkbox" name="confbools[blFCPOMaestroIntActivated]" value="true"
                            {% if (confbools.blFCPOMaestroIntActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=O&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=O&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCOLive]" value="1"
@@ -280,7 +280,7 @@
                     <input type="checkbox" name="confbools[blFCPOMaestroUKActivated]" value="true"
                            {% if (confbools.blFCPOMaestroUKActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=U&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=U&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCULive]" value="1"
@@ -297,7 +297,7 @@
                     <input type="checkbox" name="confbools[blFCPOCarteBleueActivated]" value="true"
                            {% if (confbools.blFCPOCarteBleueActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=fcpayone_main&amp;aoc=1&amp;oxid=B&amp;type=cc');"
+                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=B&amp;type=cc');"
                            class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCBLive]" value="1"
@@ -843,7 +843,7 @@
                 </dt>
                 <dd>
                     {{ translate({ ident: "FCPO_APPLE_PAY_CERTIFICATE" })|raw }}
-                    {% if not oViewConf.fcpoCertificateExists() %}
+                    {% if oViewConf.fcpoCertificateExists() == false %}
                     <p class="warning">{{ translate({ ident: "FCPO_APPLE_PAY_CONFIG_CERTIFICATE_MISSING" })|raw }}</p>
                     {% endif %}
                 </dd>

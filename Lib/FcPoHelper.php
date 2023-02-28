@@ -164,12 +164,12 @@ class FcPoHelper extends BaseModel
     /**
      * Wrapper method for setting a session variable
      *
-     * @param string      $sVariable
-     * @param string|null $sValue
+     * @param string $sVariable
+     * @param mixed  $mValue
      */
-    public function fcpoSetSessionVariable(string $sVariable, string $sValue = null)
+    public function fcpoSetSessionVariable(string $sVariable, mixed $mValue = null)
     {
-        $this->getSession()->setVariable($sVariable, $sValue);
+        $this->getSession()->setVariable($sVariable, $mValue);
     }
 
     /**

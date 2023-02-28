@@ -982,7 +982,7 @@ if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
             // trigger loading animation and disable button
             var payolutionInstallmentCalculationSelection = $('[id="payolution_installment_calculation_selection"]');
             if (payolutionInstallmentCalculationSelection.length > 0) {
-                payolutionInstallmentCalculationSelection[0].innerHTML = '<div id="payolution_center_animation"><img src="modules/fc/fcpayone/out/img/ajax-loader.gif"</div>';
+                payolutionInstallmentCalculationSelection[0].innerHTML = '<div id="payolution_center_animation"><img src="out/modules/fcpayone/img/ajax-loader.gif"</div>';
             }
             var payolutionInstallmentCheckAvailability = $('[id="payolution_installment_check_availability"]');
             if (payolutionInstallmentCheckAvailability.length > 0) {

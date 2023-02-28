@@ -32,7 +32,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * init object construction
      *
-     * @return null
+     * @return void
      */
     public function __construct()
     {

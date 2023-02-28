@@ -3,6 +3,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Basket;
 
 /**
@@ -38,7 +39,7 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      *
      * @var string
      */
-    protected $_sPayPalExpressLogoPath = 'modules/fc/fcpayone/out/img/';
+    protected $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
 
     /**
      * Paypal Express picture

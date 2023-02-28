@@ -3,6 +3,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 /**

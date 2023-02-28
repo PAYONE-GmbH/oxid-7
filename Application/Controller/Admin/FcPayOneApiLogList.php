@@ -37,7 +37,7 @@ class FcPayOneApiLogList extends FcPayOneAdminList
      *
      * @var string
      */
-    protected $_sDefSort = "fcporequestlog.oxtimestamp desc";
+    protected $_sDefSortField = "oxtimestamp";
 
     /**
      * Current class template name
@@ -56,11 +56,10 @@ class FcPayOneApiLogList extends FcPayOneAdminList
         if ($this->_aCurrSorting === null) {
             $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort');
 
-            if (!$this->_aCurrSorting && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
-                $this->_aCurrSorting[$baseModel->getCoreTableName()] = [$this->_sDefSortField => "asc"];
+            if (!$this->_aCurrSorting && $this->_sDefSortField && $baseModel = $this->getItemListBaseObject()) {
+                $this->_aCurrSorting[$baseModel->getCoreTableName()] = [$this->_sDefSortField => "desc"];
             }
         }
-
         return $this->_aCurrSorting;
     }
 
@@ -137,7 +136,7 @@ class FcPayOneApiLogList extends FcPayOneAdminList
     /**
      * Get config parameter PAYONE portal ID
      *
-     * @return $string
+     * @return string
      */
     public function getPortalId()
     {
@@ -148,7 +147,7 @@ class FcPayOneApiLogList extends FcPayOneAdminList
     /**
      * Get config parameter PAYONE sub-account ID
      *
-     * @return $string
+     * @return string
      */
     public function getSubAccountId()
     {

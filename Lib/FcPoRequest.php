@@ -266,8 +266,10 @@ class FcPoRequest extends Base
             $this->addParameter('ip', $sIp);
         }
 
-        $blIsWalletTypePaymentWithDelAddress = ($oOrder->fcIsPayPalOrder() === true &&
-            $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
+        $blIsWalletTypePaymentWithDelAddress = (
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
+            $oOrder->fcIsPayPalOrder() === true &&
+            $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
         $blIsBNPLPayment = (
@@ -487,6 +489,23 @@ class FcPoRequest extends Base
                 $this->addParameter('clearingtype', 'csh'); //Payment method
                 $this->addParameter('cashtype', 'BZN');
                 $this->addParameter('api_version', '3.10');
+                break;
+            case 'fcpopaydirekt':
+                $this->addParameter('clearingtype', 'wlt'); //Payment method
+                $this->addParameter('wallettype', 'PDT');
+                if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
+                    $this->addParameter('narrative_text', $sRefNr);
+                }
+                $blAllowOvercapture = (
+                    $oConfig->getConfigParam('blFCPOAllowOvercapture') &&
+                    $sPaymentId == 'fcpopaydirekt'
+                );
+                if ($blAllowOvercapture) {
+                    if ($blAllowOvercapture) {
+                        $this->addParameter('add_paydata[over_capture]','yes');
+                    }
+                }
+                $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
             case 'fcpopo_debitnote':

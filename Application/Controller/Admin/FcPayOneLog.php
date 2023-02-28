@@ -5,6 +5,7 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
@@ -55,8 +56,9 @@ class FcPayOneLog extends FcPayOneAdminDetails
      * @param object $oOrder order object
      *
      * @return array
+     * @throws DatabaseConnectionException
      */
-    public function getStatus($oOrder)
+    public function getStatus(object $oOrder): array
     {
         if (!$this->_aStatus) {
             $oDb = $this->_oFcPoHelper->fcpoGetDb();
@@ -75,7 +77,7 @@ class FcPayOneLog extends FcPayOneAdminDetails
     /**
      * Triggers capture request to PAYONE API and displays the result
      *
-     * @return null
+     * @return void
      */
     public function capture(): void
     {
@@ -98,7 +100,7 @@ class FcPayOneLog extends FcPayOneAdminDetails
      *
      * @return string
      */
-    public function getCaptureMessage()
+    public function getCaptureMessage(): string
     {
         $sReturn = "";
         if ($this->_aResponse) {

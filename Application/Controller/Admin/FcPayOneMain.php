@@ -210,8 +210,8 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * init object construction
      *
-     * @return null
-     * @throws JsonException
+     * @return void
+     * @throws JsonException|DatabaseConnectionException
      */
     public function __construct()
     {
@@ -228,10 +228,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Loads configurations of payone and make them accessable
      *
+     * @param string $sShopId
      * @return void
      * @throws DatabaseConnectionException
      */
-    protected function _fcpoLoadConfigs($sShopId): void
+    protected function _fcpoLoadConfigs(string $sShopId): void
     {
         $aConfigs = $this->_oFcPoConfigExport->fcpoGetConfig($sShopId);
 
@@ -424,7 +425,8 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Saves changed configuration parameters.
      *
-     * @return mixed
+     * @return void
+     * @throws DatabaseConnectionException
      */
     public function save(): void
     {
@@ -438,6 +440,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $aConfBools = $this->_oFcPoHelper->fcpoGetRequestParameter("confbools");
         $aConfStrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confstrs");
         $aConfArrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confarrs");
+
 
         if (is_array($aConfBools)) {
             foreach ($aConfBools as $sVarName => $sVarVal) {

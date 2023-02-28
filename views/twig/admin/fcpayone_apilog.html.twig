@@ -28,8 +28,8 @@
                         {% for key, entry in edit.getRequestArray() %}
                             {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
-                                <td class="{{  listclass }}">{{ key }}</td>
-                                <td class="{{  listclass }}">{{ entry }}</td>
+                                <td class="{{  listclass }}">{{ key|raw }}</td>
+                                <td class="{{  listclass }}">{{ entry|raw }}</td>
                             </tr>
                             {% if blWhite == "2" %}
                                 {% set blWhite = "" %}
@@ -50,8 +50,8 @@
                         {% for key, entry in edit.getResponseArray() %}
                              {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
-                                <td class="{{  listclass }}">{{ key }}</td>
-                                <td class="{{  listclass }}">{{ entry }}</td>
+                                <td class="{{  listclass }}">{{ key|raw }}</td>
+                                <td class="{{  listclass }}">{{ entry|raw }}</td>
                             </tr>
                             {% if blWhite == "2" %}
                                 {% set blWhite = "" %}

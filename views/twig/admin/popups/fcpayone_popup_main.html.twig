@@ -1,47 +1,47 @@
 {% include "popups/headitem.html.twig" with {title: "GENERAL_ADMIN_TITLE"|translate} %}
 
+
 <script type="text/javascript">
-    initAoc = function () {
-        YAHOO.oxid.container1 = new YAHOO.oxid.aoc('container1',
-            [{% for iKey, aItem in oxajax.container1 %}
-                {{ sSep }}{% spaceless %}{
-                key: '_{{  iKey  }}', ident: {% if aItem.4  %}true{% else %}false{% endif %}
-                    {% if not aItem.4  %},
-                label: '{{ translate({ ident: "GENERAL_AJAX_SORT_"|cat(aItem.0)|upper }) }}',
-                visible: {% if aItem.2  %}true{% else %}false{% endif %}
-                    {% endif %}
-            }
-                {% endspaceless %}
+    initAoc = function()
+    {
+        YAHOO.oxid.container1 = new YAHOO.oxid.aoc( 'container1',
+            [ {% for iKey, aItem in oxajax.container1 %}
+                    {{ sSep }}{% apply spaceless %}{ key:'_{{ iKey }}', ident: {% if aItem.4 %}true{% else %}false{% endif %}
+                    {% if not aItem.4 %},
+                    label: '{{ translate({ ident: "GENERAL_AJAX_SORT_"|cat(aItem.0)|upper }) }}',
+                    visible: {% if aItem.2 %}true{% else %}false{% endif %}
+                    {% endif %}}
+                {% endapply %}
                 {% set sSep = "," %}
                 {% endfor %} ],
-                '{{  oViewConf.getAjaxLink()  }}cmpid=container1&container=fcpayone_main&synchoxid={{  oxid  }}&type={{ type }}'
+            '{{ oViewConf.getAjaxLink()|raw }}cmpid=container1&container=fcpayone_main&synchoxid={{ oxid }}'
         );
 
         {% set sSep = "" %}
 
-        YAHOO.oxid.container2 = new YAHOO.oxid.aoc('container2',
-            [{% for iKey, aItem in oxajax.container2 %}
-                {{ sSep }}{% spaceless %}{
-                key: '_{{  iKey  }}', ident: {% if aItem.4  %}true{% else %}false{% endif %}
-                    {% if not aItem.4  %},
-                label: '{{ translate({ ident: "GENERAL_AJAX_SORT_"|cat(aItem.0)|upper }) }}',
-                visible: {% if aItem.2  %}true{% else %}false{% endif %}
-                    {% endif %}
-            }
-                {% endspaceless %}
+        YAHOO.oxid.container2 = new YAHOO.oxid.aoc( 'container2',
+            [ {% for iKey, aItem in oxajax.container2 %}
+                    {{ sSep }}{% apply spaceless %}{ key:'_{{ iKey }}', ident: {% if aItem.4 %}true{% else %}false{% endif %}
+                    {% if not aItem.4 %},
+                    label: '{{ translate({ ident: "GENERAL_AJAX_SORT_"|cat(aItem.0)|upper }) }}',
+                    visible: {% if aItem.2 %}true{% else %}false{% endif %}
+                    {% endif %}}
+                {% endapply %}
                 {% set sSep = "," %}
                 {% endfor %} ],
-                '{{  oViewConf.getAjaxLink()  }}cmpid=container2&container=fcpayone_main&oxid={{  oxid  }}&type={{ type }}'
+            '{{ oViewConf.getAjaxLink()|raw }}cmpid=container2&container=fcpayone_main&oxid={{ oxid }}'
         );
 
-        YAHOO.oxid.container1.getDropAction = function () {
+        YAHOO.oxid.container1.getDropAction = function()
+        {
             return 'fnc=addpaycountry';
         }
-        YAHOO.oxid.container2.getDropAction = function () {
+        YAHOO.oxid.container2.getDropAction = function()
+        {
             return 'fnc=removepaycountry';
         }
     }
-        $E.onDOMReady(initAoc);
+    $E.onDOMReady( initAoc );
 </script>
 
 <table width="100%">
