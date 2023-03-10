@@ -2122,9 +2122,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @param mixed  $mReturn
      * @param string $sPaymentId
-     * @return bool
+     * @return mixed
      */
-    public function _fcpoBNPLSaveRequestedValues(mixed $mReturn, string $sPaymentId): bool
+    public function _fcpoBNPLSaveRequestedValues(mixed $mReturn, string $sPaymentId): mixed
     {
         $blIsBNPL = ($sPaymentId == 'fcpopl_secinvoice' || $sPaymentId == 'fcpopl_secinstallment');
         if (!$blIsBNPL) return $mReturn;

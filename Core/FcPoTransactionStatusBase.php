@@ -33,9 +33,9 @@ class FcPoTransactionStatusBase extends BaseModel
 
     protected $_aShopList = null;
 
-    protected $_sLogFile = 'log/fcpo_message_forwarding.log';
+    protected $_sLogFile = 'fcpo_message_forwarding.log';
 
-    protected $_sExceptionLog = 'log/fcpo_statusmessage_exception.log';
+    protected $_sExceptionLog = 'fcpo_statusmessage_exception.log';
 
     protected $_oFcOrder = null;
 
@@ -154,8 +154,10 @@ class FcPoTransactionStatusBase extends BaseModel
      */
     protected function _logException(string $sMessage): void
     {
-        $sBasePath = dirname(__FILE__) . "/../../../../";
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sBasePath = $oConfig->getLogsDir();
         $sLogFilePath = $sBasePath . $this->_sExceptionLog;
+
         $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
         $sFullMessage = $sPrefix . $sMessage . "\n";
 
@@ -232,7 +234,8 @@ class FcPoTransactionStatusBase extends BaseModel
         $blLoggingAllowed = $this->_fcCheckLoggingAllowed();
         if (!$blLoggingAllowed) return;
 
-        $sBasePath = dirname(__FILE__) . "/../../source/";
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sBasePath = $oConfig->getLogsDir();
         $sLogFilePath = $sBasePath . $this->_sLogFile;
         $sPrefix = "[" . date('Y-m-d H:i:s') . "] ";
         $sFullMessage = $sPrefix . $sMessage . "\n";

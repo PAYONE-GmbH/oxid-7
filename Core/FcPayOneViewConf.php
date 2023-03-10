@@ -429,7 +429,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetCertDirPath(): string
     {
-        return $this->fcpoGetModuleUrl(true) . '/cert/';
+        return $this->getModulePath('fcpayone') . 'cert/';
     }
 
     /**

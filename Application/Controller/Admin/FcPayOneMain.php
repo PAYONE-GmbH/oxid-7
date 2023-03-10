@@ -592,8 +592,9 @@ class FcPayOneMain extends FcPayOneAdminDetails
     public function handleApplePayCredentials($sCertFilename, $sKeyFileName): void
     {
         $aFiles = $this->_oFcPoHelper->fcpoGetFiles();
-        $sCertDir = getShopBasePath() . 'modules/fc/fcpayone/cert/';
-dir($sCertDir);
+        $oViewConfig = $this->_oFcPoHelper->fcpoGetViewConfig();
+        $sCertDir = $oViewConfig->getModulePath('fcpayone') . 'cert/';
+        dir($sCertDir);
         foreach ($aFiles as $sInputName => $aFile) {
             if (!in_array($sInputName, ['fcpoAplCertificateFile', 'fcpoAplKeyFile'])) {
                 continue;
