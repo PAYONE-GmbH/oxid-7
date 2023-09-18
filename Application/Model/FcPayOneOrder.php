@@ -1612,7 +1612,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $sRefNr = $oPORequest->getRefNr($this);
 
         $aResponse = $oPORequest->sendRequestAuthorization($sAuthorizationType, $this, $this->getOrderUser(), $aDynvalue, $sRefNr);
-        $sMode = $oPayment->fcpoGetMode($aDynvalue);
+        $sMode = is_array($aDynvalue) ? $oPayment->fcpoGetMode($aDynvalue) : '';
 
         return $this->_fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl);
     }

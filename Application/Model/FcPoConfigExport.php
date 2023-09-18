@@ -756,7 +756,7 @@ class FcPoConfigExport extends BaseModel
      */
     protected function _fcpoGetCheckSumResult()
     {
-        $sIncludePath = getShopBasePath() . 'modules/fc/fcpayone/FcCheckChecksum.php';
+        $sIncludePath = getShopBasePath() . '../vendor/payone-gmbh/oxid-7/FcCheckChecksum.php';
         $oScript = $this->_oFcPoHelper->fcpoGetInstance(FcCheckChecksum::class, $sIncludePath);
 
         return $oScript->checkChecksumXml();

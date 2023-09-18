@@ -127,14 +127,12 @@
 }
 
 .payolution_installment_details {
-    position: absolute;
     bottom: 40px;
     max-height: 260px;
     overflow: auto;
 }
 
 .payolution_draft_download {
-    position: absolute;
     bottom: 10px;
 }
 
@@ -298,7 +296,6 @@
 }
 
 .fcBTN-bot {
-    position: absolute;
     bottom: 5px;
 }
 

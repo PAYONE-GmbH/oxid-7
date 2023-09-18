@@ -651,7 +651,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'CH' => 'CHF',
         ];
 
-        return ($aAllowedCountryCurrencies[$sCountryIso] === $sCurrencyName);
+        return (isset($aAllowedCountryCurrencies[$sCountryIso]) && $aAllowedCountryCurrencies[$sCountryIso] === $sCurrencyName);
     }
 
     /**
@@ -1111,7 +1111,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sHashNamePrefix = "fcpo_hashcc_";
         $OperationModeNamePrefix = "fcpo_mode_";
         $aDynValue = $this->getDynValue();
-        $blSelected = ($aDynValue['fcpo_kktype'] == $sPaymentTag) ? true : false;
+        $blSelected = (isset($aDynValue['fcpo_kktype']) && $aDynValue['fcpo_kktype'] == $sPaymentTag) ? true : false;
 
         $oPaymentMetaData = new stdClass();
         $oPaymentMetaData->sHashName = $sHashNamePrefix . $sPaymentTag;
@@ -3112,12 +3112,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if ($sPaymentId != 'fcporp_debitnote' && $sPaymentId != 'fcporp_installment') {
             $blSepaAndDataUsageAgreed = true;
         } else {
-            $sFieldPrefix = ($sPaymentId == 'fcporp_debitnote') ? 'fcpo_ratepay_debitnote' : 'fcpo_ratepay_installment';
-
-            if ($aRequestedValues[$sFieldPrefix . '_agreed'] == 'agreed') {
-                if ($sPaymentId == 'fcporp_installment' && $aRequestedValues['fcporp_installment_settlement_type'] == 'banktransfer') {
-                    $blSepaAndDataUsageAgreed = true;
-                } elseif ($aRequestedValues[$sFieldPrefix . '_sepa_agreed'] == 'agreed') {
+            if ($sPaymentId == 'fcporp_installment' && $aRequestedValues['fcporp_installment_settlement_type'] == 'banktransfer') {
+                $blSepaAndDataUsageAgreed = true;
+            } else {
+                $sFieldPrefix = ($sPaymentId == 'fcporp_debitnote') ? 'fcporp_debitnote' : 'fcporp_installment';
+                if ($aRequestedValues[$sFieldPrefix . '_sepa_agreed'] == 'agreed') {
                     $blSepaAndDataUsageAgreed = true;
                 }
             }
@@ -3126,7 +3125,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (!$blSepaAndDataUsageAgreed) {
             $mReturn = false;
             $sErrorTranslateString =
-                ($aRequestedValues['fcpo_ratepay_debitnote_sepa_agreed'] != 'agreed') ?
+                ($aRequestedValues['fcporp_debitnote_sepa_agreed'] != 'agreed') ?
                     'FCPO_RATEPAY_SEPA_NOT_AGREED' :
                     'FCPO_RATEPAY_NOT_AGREED';
             $sMessage = $oLang->translateString($sErrorTranslateString);
@@ -3152,14 +3151,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         $sCurrentBirthdate = $oUser->oxuser__oxbirthdate->value;
-        $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] . "-" .
-            $aRequestedValues[$sPaymentId . '_birthdate_month'] . "-" .
-            $aRequestedValues[$sPaymentId . '_birthdate_day'];
+        if (
+            isset($aRequestedValues[$sPaymentId . '_birthdate_day']) &&
+            isset($aRequestedValues[$sPaymentId . '_birthdate_month']) &&
+            isset($aRequestedValues[$sPaymentId . '_birthdate_year'])) {
+            $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] . "-" .
+                $aRequestedValues[$sPaymentId . '_birthdate_month'] . "-" .
+                $aRequestedValues[$sPaymentId . '_birthdate_day'];
 
-        $blRefreshBirthdate = ($sCurrentBirthdate != $sRequestBirthdate && $sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
-        if ($blRefreshBirthdate) {
-            $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
-            $blSaveUser = true;
+            $blRefreshBirthdate = ($sCurrentBirthdate != $sRequestBirthdate && $sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
+            if ($blRefreshBirthdate) {
+                $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
+                $blSaveUser = true;
+            }
         }
 
         $blRefreshFon = (isset($aRequestedValues[$sPaymentId . '_fon']) && strlen($aRequestedValues[$sPaymentId . '_fon']) > 0);

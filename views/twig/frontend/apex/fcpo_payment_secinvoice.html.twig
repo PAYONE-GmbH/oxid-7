@@ -1,0 +1,76 @@
+<div class="payment-option">
+    {% set dynvalue = oView.getDynValue() %}
+    <div class="payment-option-form">
+        <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+               value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+        <label
+                for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+        <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+            <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+            {% if not  oView.fcpoIsB2BPov() %}
+                {% if oView.fcpoBNPLShowBirthdate() %}
+                    <div class="mb-3">
+                        <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
+                        <div style="display: flex">
+                            <select name="dynvalue[fcpo_secinvoice_birthdate_day]">
+                                {% for sDay in oView.fcpoGetDayRange() %}
+                                    <option value="{{ sDay }}" {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>
+                                        {{ sDay }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcpo_secinvoice_birthdate_month]">
+                                {% for sMonth in oView.fcpoGetMonthRange() %}
+                                    <option value="{{ sMonth }}" {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>
+                                        {{ sMonth }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcpo_secinvoice_birthdate_year]">
+                                {% for sYear in oView.fcpoGetYearRange() %}
+                                    <option value="{{ sYear }}" {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>
+                                        {{ sYear }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                {% if not  oView.fcpoGetUserValue('oxustid') %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpo_secinvoice_ustid]"
+                               placeholder="{{ translate({ ident: "FCPO_SECINVOICE_USTID" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxustid') }}">
+                        <label>{{ translate({ ident: "FCPO_SECINVOICE_USTID" }) }}:</label>
+                        <label class="req col-lg-12" style="padding-left: 25px">{{ translate({ ident: "FCPO_SECINVOICE_NO_COMPANY" }) }}</label>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {% block checkout_payment_longdesc %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                    <div class="alert alert-info desc">
+                        {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                    </div>
+                {% endif %}
+            {% endblock %}
+        </div>
+    </div>
+    {% if paymentmethod.getPrice() %}
+        <div class="payment-option-price">
+            {% set oPaymentPrice = paymentmethod.getPrice() %}
+            {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                {% if oPaymentPrice.getVatValue() > 0 %}
+                    {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                {% endif %}
+            {% else %}
+                {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

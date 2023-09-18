@@ -8,7 +8,7 @@
         {% if attribute(oViewConf, 'getActiveTheme') is defined and oViewConf.getActiveTheme() == 'flow' %}
             <div class="alert alert-danger">{{ oView.getPaymentErrorText() }}</div>
         {% else %}
-            <div class="status error">{{ oView.getPaymentErrorText() }}</div>
+            <div class="status error alert-danger">{{ oView.getPaymentErrorText() }}</div>
         {% endif %}
     {% endif %}
 
@@ -44,27 +44,6 @@
                 fcpo_integratorextver: '{{ oView.getIntegratorextver()|raw }}'
             };
     </script>
-
-    {# { script({ add: "const oFcPayOneData = oFcPayOneData || [];
-        oFcPayOneData.inputs =
-            {
-                fcpo_mid: '" ~ {{ oView.getMerchantId()|raw }}  ~ "',
-                fcpo_portalid: '" ~ {{ oView.getPortalId()|raw }}  ~ "',
-                fcpo_encoding: '" ~ {{ oView.getEncoding()|raw }}  ~ "',
-                fcpo_aid: '" ~ {{ oView.getSubAccountId()|raw }}  ~ "',
-                fcpo_amount: '" ~ {{ oView.getAmount()|raw }}  ~ "',
-                fcpo_currency: '" ~ {{ currency.name }}  ~ "',
-                fcpo_tpllang: '" ~ {{ oView.getTplLang()|raw }}  ~ "',
-                fcpo_bill_country: '" ~ {{ oView.fcGetBillCountry()|raw }}  ~ "',
-                dynvalue_fcpo_pseudocardpan: '',
-                dynvalue_fcpo_ccmode: '',
-                fcpo_checktype: '" ~ {{ oView.getChecktype()|raw }}  ~ "',
-                fcpo_hashelvWith: '" ~ {{ oView.getHashELVWithChecktype()|raw }}  ~ "',
-                fcpo_hashelvWithout: '" ~ {{ oView.getHashELVWithoutChecktype()|raw }}  ~ "',
-                fcpo_integratorid: '" ~ {{ oView.getIntegratorid()|raw }}  ~ "',
-                fcpo_integratorver: '" ~ {{ oView.getIntegratorver()|raw }}  ~ "',
-                fcpo_integratorextver: '" ~ {{ oView.getIntegratorextver()|raw }}  ~ "'
-            };" }) } #}
 
     {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
     {{ parent() }}

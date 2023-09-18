@@ -16,14 +16,14 @@ them, [contact PAYONE](https://payone.com).
 
 Software requirements:
 
-- installed Oxid eShop >= v6.0.0
+- installed Oxid eShop >= v7.0.0
 
 ### Install
 
 Just go to the directory of your Oxid composer.json file and perform the following command:
 
 ```
-composer require payone-gmbh/oxid-6
+composer require payone-gmbh/oxid-7
 ```
 
 After that, just activate the module in the Oxid backend.
@@ -34,8 +34,7 @@ After that, just activate the module in the Oxid backend.
 - Seamless integration in the checkout processes
 - Centralised administration within Oxid
 - The offered portfolio of payment options can be controlled depending on the consumer's credit rating
-- The payment extension is compatible with all Oxid eShop editions of version 6: Community, Professional and Enterprise
-  edition
+- The payment extension is compatible with all Oxid eShop editions of version 6: Community, Professional and Enterprise edition
 - Supports simplified PCI DSS conformity in accordance with SAQ A
 
 ## Documentation

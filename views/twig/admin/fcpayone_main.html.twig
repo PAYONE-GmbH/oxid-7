@@ -10,7 +10,7 @@
 {% set confstrs = oView.fcpoGetConfStrs() %}
 {% set confarrs = oView.fcpoGetConfArrs() %}
 
-{{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/fcPayOneMain.js"), dynamic: __oxid_include_dynamic }) }}
+{{ script({ include: oViewConf.getModuleUrl('fcpayone', 'js/fcPayOneMain.js'), dynamic: __oxid_include_dynamic }) }}
 
 <form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
     {{ oViewConf.getHiddenSid()|raw }}

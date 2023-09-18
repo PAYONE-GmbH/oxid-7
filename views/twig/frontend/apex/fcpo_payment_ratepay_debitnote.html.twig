@@ -1,0 +1,161 @@
+{% if oView.fcpoRatePayAllowed('fcporp_debitnote') %}
+    <div class="payment-option">
+        {% set dynvalue = oView.getDynValue() %}
+        <div class="payment-option-form">
+            <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+                   value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+            <label
+                    for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+            <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+                <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+                <input type="hidden" name="dynvalue[fcporp_debitnote_profileid]" value="{{ oView.fcpoGetRatePayMatchedProfile('fcporp_debitnote') }}">
+                <input type="hidden" name="dynvalue[fcporp_debitnote_device_fingerprint]" value="{{ oView.fcpoGetRatePayDeviceFingerprint() }}">
+                <script language="JavaScript">
+                    var di = {
+                        t: '{{ oView.fcpoGetRatePayDeviceFingerprint() }}',
+                        v: '{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}',
+                        l: 'Checkout'
+                    };
+                </script>
+
+                <script type="text/javascript" src="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/di.js"></script>
+                <noscript>
+                    <link rel="stylesheet" type="text/css" href="//d.ratepay.com/di.css?t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}&l=Checkout">
+                </noscript>
+                <object type="application/x-shockwave-flash" data="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf" width="0" height="0">
+                    <param name="movie" value="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf"/>
+                    <param name="flashvars" value="t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}"/>
+                    <param name="AllowScriptAccess" value="always"/>
+                </object>
+
+                {% if oView.fcpoRatePayShowUstid() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_debitnote_ustid]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxustid') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}</label>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowBirthdate() %}
+                    <div class="mb-3">
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_BIRTHDATE" }) }}:</label>
+                        <div style="display: flex">
+                            <select name="dynvalue[fcporp_debitnote_birthdate_day]">
+                                {% for sDay in oView.fcpoGetDayRange() %}
+                                    <option value="{{ sDay }}" {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>
+                                        {{ sDay }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_debitnote_birthdate_month]">
+                                {% for sMonth in oView.fcpoGetMonthRange() %}
+                                    <option value="{{ sMonth }}" {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>
+                                        {{ sMonth }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_debitnote_birthdate_year]">
+                                {% for sYear in oView.fcpoGetYearRange() %}
+                                    <option value="{{ sYear }}" {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>
+                                        {{ sYear }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowFon() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_debitnote_fon]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxfon') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}</label>
+                    </div>
+                {% endif %}
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_debitnote_iban]"
+                           placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}"
+                           autocomplete="off" value="{{ dynvalue.fcporp_debitnote_iban }}"
+                           onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
+                           required>
+                    <div id="fcpo_ratepay_iban_invalid" class="fcpo_check_error">
+                        <span class="help-block">
+                            <ul role="alert" class="list-unstyled text-danger">
+                                <li>{{ translate({ ident: "FCPO_IBAN_INVALID" }) }}</li>
+                            </ul>
+                        </span>
+                    </div>
+                    <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}</label>
+                </div>
+                {% if oView.getConfigParam('blFCPODebitBICMandatory') %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_debitnote_bic]"
+                               placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}"
+                               autocomplete="off" value="{{ dynvalue.fcporp_debitnote_bic }}"
+                               onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
+                               required>
+                        <div id="fcpo_ratepay_bic_invalid" class="fcpo_check_error">
+                            <span class="help-block">
+                                <ul role="alert" class="list-unstyled text-danger">
+                                    <li>{{ translate({ ident: "FCPO_BIC_INVALID" }) }}</li>
+                                </ul>
+                            </span>
+                        </div>
+                        <label>{{ translate({ ident: "FCPO_BANK_BIC" }) }}</label>
+                    </div>
+                {% endif %}
+
+                <div class="form-floating mb-3">
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS1" }) }}
+                    <a href='{{ oView.fcpoGetRatepayAgreementLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe"
+                       data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">
+                        {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS2" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS3" }) }}
+                    <a href='{{ oView.fcpoGetRatepayPrivacyLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe"
+                       data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">{{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS4" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS5" }) }}
+                </div>
+
+                <div class="form-floating mb-3">
+                    {{ translate({ ident: 'FCPO_RATEPAY_MANDATE_IDENTIFICATION' }) }}
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input name="dynvalue[fcporp_debitnote_sepa_agreed]" value="agreed" type="checkbox">&nbsp;
+                    {{ translate({ ident: "FCPO_RATEPAY_SEPA_AGREE" }) }}
+                </div>
+
+                {% block checkout_payment_longdesc %}
+                    {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                        <div class="alert alert-info desc">
+                            {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        {% if paymentmethod.getPrice() %}
+            <div class="payment-option-price">
+                {% set oPaymentPrice = paymentmethod.getPrice() %}
+                {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                    {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                    {% if oPaymentPrice.getVatValue() > 0 %}
+                        {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                    {% endif %}
+                {% else %}
+                    {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

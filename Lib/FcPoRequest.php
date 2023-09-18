@@ -269,7 +269,7 @@ class FcPoRequest extends Base
         $blIsWalletTypePaymentWithDelAddress = (
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
             $oOrder->fcIsPayPalOrder() === true &&
-            $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
+            $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
         $blIsBNPLPayment = (
@@ -277,7 +277,7 @@ class FcPoRequest extends Base
             || $oOrder->oxorder__oxpaymenttype->value == 'fcpopl_secinstallment'
         );
 
-        if ($oOrder->oxorder__oxdellname->value != '') {
+        if ($oOrder->oxorder__oxdellname && $oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew(Country::class);
             $oDelCountry->load($oOrder->oxorder__oxdelcountryid->value);
 
@@ -1081,13 +1081,13 @@ class FcPoRequest extends Base
         $this->addParameter('shipping_country', strtoupper($sShippingCountry));
 
         if ($sPaymentId == 'fcporp_debitnote') {
-            $this->addParameter('iban', $aDynvalue['fcpo_ratepay_debitnote_iban']);
-            $this->addParameter('bic', $aDynvalue['fcpo_ratepay_debitnote_bic']);
+            $this->addParameter('iban', $aDynvalue['fcporp_debitnote_iban']);
+            $this->addParameter('bic', $aDynvalue['fcporp_debitnote_bic']);
         }
 
         if ($sPaymentId == 'fcporp_installment') {
             if ($aDynvalue['fcporp_installment_settlement_type'] == 'debit') {
-                $this->addParameter('iban', $aDynvalue['fcpo_ratepay_installment_iban']);
+                $this->addParameter('iban', $aDynvalue['fcporp_installment_iban']);
                 $this->addParameter('add_paydata[debit_paytype]', 'DIRECT-DEBIT');
             } else {
                 $this->addParameter('add_paydata[debit_paytype]', 'BANK-TRANSFER');
@@ -1512,7 +1512,7 @@ class FcPoRequest extends Base
 
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sPaymentErrorTextParam = "&payerrortext=" . urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
-        $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
+        $sPaymentErrorParam = '&payerror=-20';
         $sSuccessUrl = $sShopURL . 'index.php?cl=order&fcposuccess=1&ord_agb=1&stoken=' . $sToken . $sSid . $sAddParams . $sRToken;
         $sErrorUrl = $sShopURL . 'index.php?type=error&cl=' . $sAbortClass . $sRToken . $sPaymentErrorParam . $sPaymentErrorTextParam;
         $sBackUrl = $sShopURL . 'index.php?type=cancel&cl=' . $sAbortClass . $sRToken;
@@ -1571,7 +1571,7 @@ class FcPoRequest extends Base
 
         if ($aPositions === false || $blFirstCapture === true || $blDebit === true) {
             $oLang = $this->_oFcPoHelper->fcpoGetLang();
-            if ($oOrder->oxorder__oxdelcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxdelcost', $aPositions) !== false))) {
+            if (($oOrder->oxorder__oxdelcost && $oOrder->oxorder__oxdelcost->value != 0) && ($aPositions === false || ($blDebit === false || array_key_exists('oxdelcost', $aPositions) !== false))) {
                 $sDelDesc = '';
                 if ($oOrder->oxorder__oxdelcost->value > 0) {
                     $sDelDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
@@ -1595,7 +1595,7 @@ class FcPoRequest extends Base
                 $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxdelvat->value * 100, 0, '.', ''));
                 $i++;
             }
-            if ($oOrder->oxorder__oxpaycost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxpaycost', $aPositions) !== false))) {
+            if (($oOrder->oxorder__oxpaycost && $oOrder->oxorder__oxpaycost->value != 0) && ($aPositions === false || ($blDebit === false || array_key_exists('oxpaycost', $aPositions) !== false))) {
                 $sPayDesc = '';
                 if ($oOrder->oxorder__oxpaycost->value > 0) {
                     $sPayDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
@@ -1619,7 +1619,7 @@ class FcPoRequest extends Base
                 $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxpayvat->value * 100, 0, '.', ''));
                 $i++;
             }
-            if ($oOrder->oxorder__oxwrapcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxwrapcost', $aPositions) !== false))) {
+            if (($oOrder->oxorder__oxwrapcost && $oOrder->oxorder__oxwrapcost->value != 0) && ($aPositions === false || ($blDebit === false || array_key_exists('oxwrapcost', $aPositions) !== false))) {
 
                 $dPrice = $this->fcpoGetPosPr(
                     $oOrder->oxorder__oxwrapcost->value,
@@ -1637,7 +1637,7 @@ class FcPoRequest extends Base
                 $this->addParameter('va[' . $i . ']', '0');
                 $i++;
             }
-            if ($oOrder->oxorder__oxgiftcardcost->value != 0 && ($aPositions === false || ($blDebit === false || array_key_exists('oxgiftcardcost', $aPositions) !== false))) {
+            if (($oOrder->oxorder__oxgiftcardcost && $oOrder->oxorder__oxgiftcardcost->value != 0) && ($aPositions === false || ($blDebit === false || array_key_exists('oxgiftcardcost', $aPositions) !== false))) {
 
                 $dPrice = $this->fcpoGetPosPr(
                     $oOrder->oxorder__oxgiftcardcost->value,

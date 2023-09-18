@@ -9,6 +9,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Theme;
 
 /**
@@ -59,9 +60,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @var array
      */
     protected array $_aSupportedThemes = [
-        'flow' => 'flow',
-        'azure' => 'azure',
-        'wave' => 'wave',
+        'apex' => 'apex',
         'twig' => 'twig'
     ];
 
@@ -71,6 +70,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      * @var array
      */
     protected array $_aTheme2CssPayButtonSelector = [
+        'apex' => 'nextStep',
         'twig' => 'nextStep',
     ];
 
@@ -227,7 +227,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $sShopURL = $oConfig->getCurrentShopUrl();
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sPaymentErrorTextParam = "&payerrortext=" . urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
-        $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
+        $sPaymentErrorParam = '&payerror=-20';
         return $sShopURL . 'index.php?type=error&cl=payment' . $sPaymentErrorParam . $sPaymentErrorTextParam;
     }
 
@@ -260,13 +260,13 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
     /**
      * Method returns active theme path by checking current theme and its parent
-     * If theme is not assignable, 'azure' will be the fallback
+     * If theme is not assignable, 'apex' will be the fallback
      *
      * @return string
      */
     public function fcpoGetActiveThemePath(): string
     {
-        $sReturn = 'flow';
+        $sReturn = 'apex';
         $oTheme = $this->_oFcPoHelper->getFactoryObject(Theme::class);
 
         $sCurrentActiveId = $oTheme->getActiveThemeId();
@@ -351,7 +351,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        $sAddressId = $oConfig->getRequestParameter('deladrid');
+        $sAddressId = Registry::getRequest()->getRequestParameter('deladrid');
         if (!$sAddressId) {
             $oSession = $this->_oFcPoHelper->fcpoGetSession();
             $sAddressId = $oSession->getVariable('deladrid');
@@ -372,7 +372,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetPaymentError(): mixed
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $iPayError = $oConfig->getRequestParameter('payerror');
+        $iPayError = Registry::getRequest()->getRequestParameter('payerror');
 
         if (!$iPayError) {
             $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -390,7 +390,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     public function fcpoGetPaymentErrorText(): mixed
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sPayErrorText = $oConfig->getRequestParameter('payerrortext');
+        $sPayErrorText = Registry::getRequest()->getRequestParameter('payerrortext');
 
         if (!$sPayErrorText) {
             $oSession = $this->_oFcPoHelper->fcpoGetSession();

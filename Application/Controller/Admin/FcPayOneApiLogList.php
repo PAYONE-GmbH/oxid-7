@@ -84,6 +84,9 @@ class FcPayOneApiLogList extends FcPayOneAdminList
     public function fcGetWhereValue($sTable, $sField)
     {
         $aWhere = $this->getListFilter();
+        if (empty($aWhere)) {
+            return '';
+        }
         if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
             return $aWhere[$sTable][$sField];
         }

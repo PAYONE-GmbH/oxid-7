@@ -1,0 +1,102 @@
+<div class="payment-option">
+    {% set dynvalue = oView.getDynValue() %}
+    {% set checkedPaymentId = oView.getCheckedPaymentId() %}
+    <div class="payment-option-form">
+        <input class="form-check-input" id="payment_klarna_combined" type="radio" name="paymentid" value="{{ sPaymentID }}"
+               {% if oView.fcpoIsKlarnaCombined(checkedPaymentId) %}checked{% endif %}>
+        <label for="payment_klarna_combined">{{ translate({ ident: "FCPO_KLARNA" }) }}</label>
+
+        <div class="hidden">
+            <input type="hidden" id="fcpo_klarna_auth_token" name="dynvalue[klarna_authorization_token]">
+            <input type="hidden" id="fcpo_klarna_auth_done" name="dynvalue[fcpo_klarna_auth_done]" value="false">
+        </div>
+
+        <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+            {% if oView.fcpoKlarnaIsBirthdayNeeded() %}
+                <div class="mb-3">
+                    <label>{{ translate({ ident: "FCPO_KLV_BIRTHDAY" }) }}</label>
+                    <div style="display: flex">
+                        <input class="form-control" style="width:30%" placeholder="DD" autocomplete="off" type="text" size="3" maxlength="2" name="dynvalue[fcpo_klarna_birthday][day]">
+                        &nbsp;
+                        <input class="form-control" style="width:30%" placeholder="MM" autocomplete="off" type="text" size="3" maxlength="2" name="dynvalue[fcpo_klarna_birthday][month]">
+                        &nbsp;
+                        <input class="form-control" style="width:30%" placeholder="YYYY" autocomplete="off" type="text" size="8" maxlength="4" name="dynvalue[fcpo_klarna_birthday][year]">
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if oView.fcpoKlarnaIsTelephoneNumberNeeded() %}
+                <div class="form-floating mb-3">
+                    <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_klarna_telephone]">
+                    <label>{{ translate({ ident: "FCPO_KLV_TELEPHONENUMBER" }) }}</label>
+                </div>
+            {% endif %}
+
+            {% if oView.fcpoKlarnaIsPersonalIdNeeded() %}
+                <div class="form-floating mb-3">
+                    <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_klarna_personalid]">
+                    <label>{{ translate({ ident: "FCPO_KLV_PERSONALID" }) }}</label>
+                </div>
+            {% endif %}
+
+            <div class="form-floating mb-3">
+                <select id="klarna_payment_selector" class="form-control">
+                    {% if oView.fcpoPaymentActive('fcpoklarna_installments') %}
+                        <option value="fcpoklarna_installments" {% if sPaymentID == 'fcpoklarna_installments' %}selected{% endif %}>
+                            Klarna Slice it
+                        </option>
+                    {% endif %}
+                    {% if oView.fcpoPaymentActive('fcpoklarna_directdebit') %}
+                        <option value="fcpoklarna_directdebit" {% if sPaymentID == 'fcpoklarna_directdebit' %}selected{% endif %}>Klarna
+                            Pay now
+                        </option>
+                    {% endif %}
+                    {% if oView.fcpoPaymentActive('fcpoklarna_invoice') %}
+                        <option value="fcpoklarna_invoice" {% if sPaymentID == 'fcpoklarna_invoice' %}selected{% endif %}>Klarna Pay
+                            later
+                        </option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <input id="fcpo_klarna_combined_agreed" type="checkbox" name="dynvalue[fcpo_klarna_combined_agreed]"value="agreed">
+                <label for="fcpo_klarna_combined_agreed">{{ translate({ ident: "FCPO_KLARNA_COMBINED_DATA_AGREEMENT" }) }}</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <div id="klarna_combined_js_inject"></div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <div id="klarna_widget_combined_container"></div>
+            </div>
+
+            <div class="clearfix"></div>
+
+            {% block checkout_payment_longdesc %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+
+                    <div class="alert alert-info desc">
+                        {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                    </div>
+
+                {% endif %}
+            {% endblock %}
+
+        </div>
+    </div>
+    {% if paymentmethod.getPrice() %}
+        <div class="payment-option-price">
+            {% set oPaymentPrice = paymentmethod.getPrice() %}
+            {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                {% if oPaymentPrice.getVatValue() > 0 %}
+                    {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                {% endif %}
+            {% else %}
+                {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

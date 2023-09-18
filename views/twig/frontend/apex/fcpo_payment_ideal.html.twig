@@ -1,0 +1,83 @@
+<div class="payment-option">
+    {% set dynvalue = oView.getDynValue() %}
+    <div class="payment-option-form">
+        <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+               value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+        <label
+                for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+        <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+            <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+
+            <div class="form-floating mb-3">
+                <select name="dynvalue[fcpo_so_bankgrouptype_idl]" class="form-control selectpicker">
+                    <option value="ABN_AMRO_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ABN_AMRO_BANK" %}selected{% endif %}>
+                        ABN Amro
+                    </option>
+                    <option value="BUNQ_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "BUNQ_BANK" %}selected{% endif %}>
+                        Bunq
+                    </option>
+                    <option value="RABOBANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>
+                        Rabobank
+                    </option>
+                    <option value="ASN_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>
+                        ASN Bank
+                    </option>
+                    <option value="SNS_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>
+                        SNS Bank
+                    </option>
+                    <option value="TRIODOS_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>
+                        Triodos Bank
+                    </option>
+                    <option value="SNS_REGIO_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>
+                        Regio Bank
+                    </option>
+                    <option value="ING_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>
+                        ING Bank
+                    </option>
+                    <option value="KNAB_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "KNAB_BANK" %}selected{% endif %}>
+                        Knab
+                    </option>
+                    <option value="VAN_LANSCHOT_BANKIERS" {% if dynvalue.fcpo_so_bankgrouptype_idl == "VAN_LANSCHOT_BANKIERS" %}selected{% endif %}>
+                        van Lanschot
+                    </option>
+                    <option value="HANDELSBANKEN" {% if dynvalue.fcpo_so_bankgrouptype_idl == "HANDELSBANKEN" %}selected{% endif %}>
+                        Handelsbanken
+                    </option>
+                    <option value="FRIESLAND_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "FRIESLAND_BANK" %}selected{% endif %}>
+                        Friesland Bank
+                    </option>
+                    <option value="REVOLUT" {% if dynvalue.fcpo_so_bankgrouptype_idl == "REVOLUT" %}selected{% endif %}>
+                        Revolut
+                    </option>
+                </select>
+
+                <label>{{ translate({ ident: "FCPO_BANKGROUPTYPE" }) }}</label>
+            </div>
+
+            <div class="clearfix"></div>
+
+            {% block checkout_payment_longdesc %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                    <div class="alert alert-info desc">
+                        {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                    </div>
+                {% endif %}
+            {% endblock %}
+
+        </div>
+    </div>
+    {% if paymentmethod.getPrice() %}
+        <div class="payment-option-price">
+            {% set oPaymentPrice = paymentmethod.getPrice() %}
+            {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                {% if oPaymentPrice.getVatValue() > 0 %}
+                    {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                {% endif %}
+            {% else %}
+                {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

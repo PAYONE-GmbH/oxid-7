@@ -15,18 +15,7 @@ function fcpoGetSelectedPaymentMethod() {
 }
 
 function fcpoGetPaymentForm() {
-    if (document.order) {
-        if (document.order[0].nodeName != 'FORM' && document.order.paymentid) {
-            return document.order;
-        } else {
-            for (var i = 0; i < document.order.length; i++) {
-                if (document.order[i].paymentid) {
-                    return document.order[i];
-                }
-            }
-        }
-    }
-    return false;
+    return document.getElementById('payment');
 }
 
 function fcpoGetOperationMode(sType) {
@@ -35,7 +24,6 @@ function fcpoGetOperationMode(sType) {
         sSelectedPaymentOperationMode += '_' + sType;
     }
     var oForm = fcpoGetPaymentForm();
-    console.log(sSelectedPaymentOperationMode);
     return oForm[sSelectedPaymentOperationMode].value;
 }
 
@@ -306,8 +294,8 @@ function fcpoGetElvCountry() {
 }
 
 function fcpoValidateBNPLIban() {
-    resetErrorContainers();
-    var oForm = getPaymentForm();
+    fcpoResetErrorContainers();
+    var oForm = fcpoGetPaymentForm();
 
     if (oForm['dynvalue[fcpopl_secinstallment_iban]']) {
         oForm['dynvalue[fcpopl_secinstallment_iban]'].value = fcpoGetCleanedNumberIBAN(oForm['dynvalue[fcpopl_secinstallment_iban]'].value);
@@ -466,7 +454,6 @@ function fcpoProcessPayoneResponseCC(response) {
     }
     if (response.get('status') === 'VALID') {
         const oForm = fcpoGetPaymentForm();
-        console.log(oForm);
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.get('pseudocardpan');
         oForm["dynvalue[fcpo_ccmode]"].value = fcpoGetOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.get('truncatedcardpan');
@@ -625,8 +612,8 @@ function fcSetPayoneInputFields(oForm) {
  *
  * @param void
  */
-$('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
-    function () {
+jQuery('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
+    function() {
         var payment_id = $('#klarna_payment_selector').children("option:selected").val();
         var oForm = fcpoGetPaymentForm();
 
@@ -975,7 +962,7 @@ function fcpoSelectBNPLInstallmentPlan(iIndex) {
  *
  * @param void
  */
-var fcpoPayolutionInstallmentCheckAvailability = $('[id="payolution_installment_check_availability"]');
+var fcpoPayolutionInstallmentCheckAvailability = jQuery('[id="payolution_installment_check_availability"]');
 if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
     fcpoPayolutionInstallmentCheckAvailability[0].addEventListener('click',
         function () {
@@ -1112,11 +1099,6 @@ if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
         if (oForm["dynvalue[fcpo_elv_country]"]) {
             fcCheckDebitCountry(oForm["dynvalue[fcpo_elv_country]"]);
         }
-        $(oForm).on('submit', function (e) {
-            if (fcCheckPaymentSelection() == false) {
-                e.preventDefault();
-            }
-        });
     }
     setTimeout(
         function () {
@@ -1235,7 +1217,6 @@ function fcpoValidateCCHostedInputs() { // Function called by submitting PAY-but
  */
 function fcpoProcessPayoneResponseCCHosted(response) {
     response = fcpoValidateCardExpireDate(response);
-    console.log(response);
     if (response.status === "VALID") {
         const oForm = fcpoGetPaymentForm();
         oForm["dynvalue[fcpo_pseudocardpan]"].value = response.pseudocardpan;
@@ -1262,12 +1243,12 @@ function fcpoHideCCHostedErrorsAtSubmit() {
  * @param e
  */
 function fcpoValidateCardTypeCCHosted(e) {
-    var paymentId = $('input[name=paymentid]:checked').val();
-    var cardType = $('#cardtype option:selected').attr('data-cardtype');
+    var paymentId = jQuery('input[name=paymentid]:checked').val();
+    var cardType = jQuery('#cardtype option:selected').attr('data-cardtype');
     var oForm = fcpoGetPaymentForm();
 
     if (paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType == 'none') {
-        $('[id="errorCardType"]').show();
+        jQuery('[id="errorCardType"]').show();
 
         e.preventDefault();
     }
@@ -1279,8 +1260,8 @@ function fcpoValidateCardTypeCCHosted(e) {
  * @param e
  */
 function fcpoValidateInputCCHosted(e) {
-    var paymentId = $('input[name=paymentid]:checked').val();
-    var cardType = $('#cardtype option:selected').attr('data-cardtype');
+    var paymentId = jQuery('input[name=paymentid]:checked').val();
+    var cardType = jQuery('#cardtype option:selected').attr('data-cardtype');
     var oForm = fcpoGetPaymentForm();
 
     if (paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType != 'none') {
@@ -1293,9 +1274,9 @@ function fcpoValidateInputCCHosted(e) {
         }
         if ($validateResult == 0) {
             e.preventDefault();
-            $('[id="errorIncomplete"]').show();
+            jQuery('[id="errorIncomplete"]').show();
         } else if ($validateResult == 2) {
-            $('[id="errorCVC"]').show();
+            jQuery('[id="errorCVC"]').show();
             e.preventDefault();
         } else {
             // halt here if response returns valid but data is not valid (expiry date e.g.)
@@ -1323,46 +1304,61 @@ function fcpoResetCardTypeCCHosted() {
     }
 }
 
+//check cvc, check if cardtype is selected, progress request, output errors
+function fcpoPaymentFormSubmit (e, fcpoForm) {
+    var klarna_auth_done = '';
+    if ($('[id="fcpo_klarna_auth_done"]').length > 0) {
+        klarna_auth_done = $('[id="fcpo_klarna_auth_done"]')[0].value;
+    }
+
+    var klarna_combined = $('[id="payment_klarna_combined"]');
+    var klarna_paymentid = false;
+    var klarna_combined_checked = false;
+    if (klarna_combined.length > 0) {
+        klarna_paymentid = klarna_combined[0].value;
+        klarna_combined_checked = klarna_combined[0].checked;
+    }
+
+    fcpoHideCCHostedErrorsAtSubmit();
+    fcpoValidateCardTypeCCHosted(e);
+    fcpoValidateInputCCHosted(e);
+    if (klarna_combined_checked && klarna_paymentid) {
+        if (klarna_auth_done === 'false') {
+            e.preventDefault();
+
+            var klarna_combined_agreed = $('[id="fcpo_klarna_combined_agreed"]');
+            if (klarna_combined_agreed.length > 0 && klarna_combined_agreed[0].checked == true) {
+                // defined in snippets/fcpoKlarnaWidget.txt
+                klarnaAuthorize(e);
+            }
+        }
+    }
+
+    fcpoForm.submit();
+
+    return true;
+}
+
 /**
  * handles form submission if method is credit card hosted iframe
  */
 $(document).ready(function () {
     const paymentForm = $('[id="payment"]');
 
-    fcpoResetCardTypeCCHosted();
-
-    if (paymentForm.length > 0) {
-        //check cvc, check if cardtype is selected, progress request, output errors
-        paymentForm[0].addEventListener('submit', function (e) {
-            var klarna_auth_done = '';
-            if ($('[id="fcpo_klarna_auth_done"]').length > 0) {
-                klarna_auth_done = $('[id="fcpo_klarna_auth_done"]')[0].value;
+    const fcpoPaymentNextButtons = $('.sticky-md-top button');
+    if (paymentForm[0] && fcpoPaymentNextButtons.length > 0) {
+        fcpoPaymentNextButtons[0].onclick = function (e) {
+            e.preventDefault();
+            var fcpoPreSubmitCheck = fcCheckPaymentSelection();
+            if (fcpoPreSubmitCheck == false) {
+                event.preventDefault();
+            } else {
+                fcpoPaymentFormSubmit(e, paymentForm[0]);
             }
-
-            var klarna_combined = $('[id="payment_klarna_combined"]');
-            var klarna_paymentid = false;
-            var klarna_combined_checked = false;
-            if (klarna_combined.length > 0) {
-                klarna_paymentid = klarna_combined[0].value;
-                klarna_combined_checked = klarna_combined[0].checked;
-            }
-
-            fcpoHideCCHostedErrorsAtSubmit();
-            fcpoValidateCardTypeCCHosted(e);
-            fcpoValidateInputCCHosted(e);
-            if (klarna_combined_checked && klarna_paymentid) {
-                if (klarna_auth_done === 'false') {
-                    e.preventDefault();
-
-                    var klarna_combined_agreed = $('[id="fcpo_klarna_combined_agreed"]');
-                    if (klarna_combined_agreed.length > 0 && klarna_combined_agreed[0].checked == true) {
-                        // defined in snippets/fcpoKlarnaWidget.txt
-                        klarnaAuthorize(e);
-                    }
-                }
-            }
-        });
+        }
     }
+
+    fcpoResetCardTypeCCHosted();
 
     $('#cardtype').on('change', function (e) {
         oFcPoIframes.setCardType(this.value);

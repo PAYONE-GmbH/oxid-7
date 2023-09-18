@@ -500,7 +500,7 @@ class FcPayOneAjax extends BaseController
         $aCreditCardMapping = ['visa' => 'V', 'mastercard' => 'M', 'amex' => 'M', 'discover' => 'D'];
 
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode($sParamsJson);
+        $aParams = json_decode($sParamsJson, true);
 
         $paymentData = $aParams['token']['paymentData'];
         $methodData = $aParams['token']['paymentMethod'];
@@ -591,7 +591,7 @@ class FcPayOneAjax extends BaseController
      */
     public function fcpoRatepayCalculation(string $sParamsJson): string
     {
-        $aParams = json_decode($sParamsJson);
+        $aParams = json_decode($sParamsJson, true);
         $sOxid = $aParams['sPaymentMethodOxid'];
 
         $oRatePay = oxNew(FcPoRatePay::class);

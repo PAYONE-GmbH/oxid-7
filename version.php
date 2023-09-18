@@ -46,7 +46,7 @@ if ($blIsValidCall) {
      * @return bool
      */
     if (!function_exists('isAdmin')) {
-        function isAdmin(): bool
+        function isAdmin()
         {
             return true;
         }

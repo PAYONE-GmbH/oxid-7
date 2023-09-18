@@ -308,8 +308,8 @@ class FcPoHelper extends BaseModel
     public function fcpoGetModuleVersion(): string
     {
         $aModule = [];
-        include_once $this->getModulesDir() . "fc/fcpayone/metadata.php";
-        if (!$aModule['version']) {
+        include_once VENDOR_PATH . "payone-gmbh/oxid-7/metadata.php";
+        if (empty($aModule['version'])) {
             return self::fcpoGetStaticModuleVersion();
         }
         return $aModule['version'];
