@@ -414,8 +414,7 @@ function fcpoStartELVRequest() {
     return false;
 }
 
-function fcCheckPaymentSelection() {
-    var sCheckedValue = fcpoGetSelectedPaymentMethod();
+function fcCheckPaymentSelection(sCheckedValue) {
     if (sCheckedValue != false) {
         var oForm = fcpoGetPaymentForm();
         if (sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
@@ -1305,7 +1304,7 @@ function fcpoResetCardTypeCCHosted() {
 }
 
 //check cvc, check if cardtype is selected, progress request, output errors
-function fcpoPaymentFormSubmit (e, fcpoForm) {
+function fcpoPaymentFormSubmit (e, sSelectedPaymentMethod, oPaymentForm) {
     var klarna_auth_done = '';
     if ($('[id="fcpo_klarna_auth_done"]').length > 0) {
         klarna_auth_done = $('[id="fcpo_klarna_auth_done"]')[0].value;
@@ -1334,7 +1333,15 @@ function fcpoPaymentFormSubmit (e, fcpoForm) {
         }
     }
 
-    fcpoForm.submit();
+    // If method has widget or separate process that submits the form
+    // it should be listed here to avoid prematurate or double submitting.
+    if (sSelectedPaymentMethod != 'fcpocreditcard'
+        && sSelectedPaymentMethod != 'fcpoklarna_invoice'
+        && sSelectedPaymentMethod != 'fcpoklarna_directdebit'
+        && sSelectedPaymentMethod != 'fcpoklarna_installments'
+        && sSelectedPaymentMethod != 'fcpodebitnote') {
+        oPaymentForm.submit();
+    }
 
     return true;
 }
@@ -1349,11 +1356,12 @@ $(document).ready(function () {
     if (paymentForm[0] && fcpoPaymentNextButtons.length > 0) {
         fcpoPaymentNextButtons[0].onclick = function (e) {
             e.preventDefault();
-            var fcpoPreSubmitCheck = fcCheckPaymentSelection();
+            var sCheckedValue = fcpoGetSelectedPaymentMethod();
+            var fcpoPreSubmitCheck = fcCheckPaymentSelection(sCheckedValue);
             if (fcpoPreSubmitCheck == false) {
                 event.preventDefault();
             } else {
-                fcpoPaymentFormSubmit(e, paymentForm[0]);
+                fcpoPaymentFormSubmit(e, sCheckedValue, paymentForm[0]);
             }
         }
     }

@@ -1044,7 +1044,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     protected function _fcpoGetCheckSumResult()
     {
-        $sIncludePath = getShopBasePath() . '../vendor/payone-gmbh/oxid-7/FcCheckChecksum.php';
+        $sIncludePath = VENDOR_PATH . 'payone-gmbh/oxid-7/FcCheckChecksum.php';
         $oScript = $this->_oFcPoHelper->fcpoGetInstance(FcCheckChecksum::class, $sIncludePath);
 
         return $oScript->checkChecksumXml();
