@@ -356,7 +356,7 @@
                                     <select name="confstrs[{{ sFieldIdent }}]">
                                         {% for sType, sTitle in oView.getCCTypes(sField) %}
                                         <option value="{{ sType }}"
-                                                {% if sType == confstrs.sFieldIdent %}selected{% endif %}>{{ sTitle }}
+                                                {% if sType == attribute(confstrs,sFieldIdent) %}selected{% endif %}>{{ sTitle }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -364,12 +364,12 @@
                                 <td>
                                     {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Count") %}
                                     <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
-                                           value="{{ confstrs.sFieldIdent }}" {{ readonly }}>
+                                           value="{{ attribute(confstrs,sFieldIdent) }}" {{ readonly }}>
                                 </td>
                                 <td>
                                     {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Max") %}
                                     <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
-                                           value="{{ confstrs.sFieldIdent }}" {{ readonly }}>
+                                           value="{{ attribute(confstrs,sFieldIdent) }}" {{ readonly }}>
                                 </td>
                                 <td>
                                     {% set sFieldIdentIframe = "sFCPOCC"|cat(sField)|cat("Iframe") %}
@@ -377,7 +377,7 @@
                                             onchange="fcpoHandleSizeFields(this, '{{ sField }}')">
                                         {% for sType, sTitle in oView.getCCStyles() %}
                                         <option value="{{ sType }}"
-                                                {% if sType == confstrs.sFieldIdentIframe %}selected{% endif %}>{{ sTitle }}
+                                                {% if sType == attribute(confstrs,sFieldIdentIframe) %}selected{% endif %}>{{ sTitle }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -385,14 +385,14 @@
                                 <td>
                                     {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Width") %}
                                     <input id="input_width_{{ sField }}" type="text" class="txt" size="4"
-                                           name="confstrs[{{ sFieldIdent }}]" value="{{ confstrs.sFieldIdent }}"
-                                           {{ readonly }} {% if confstrs.sFieldIdentIframe != "custom" %}disabled{% endif %}>
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ attribute(confstrs,sFieldIdent) }}"
+                                           {{ readonly }} {% if attribute(confstrs,sFieldIdentIframe) != "custom" %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Height") %}
                                     <input id="input_height_{{ sField }}" type="text" class="txt" size="4"
-                                           name="confstrs[{{ sFieldIdent }}]" value="{{ confstrs.sFieldIdent }}"
-                                           {{ readonly }} {% if confstrs.sFieldIdentIframe != "custom" %}disabled{% endif %}>
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ attribute(confstrs,sFieldIdent) }}"
+                                           {{ readonly }} {% if attribute(confstrs,sFieldIdentIframe) != "custom" %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     {% set sFieldIdentCSS = "sFCPOCC"|cat(sField)|cat("Style") %}
@@ -400,7 +400,7 @@
                                             onchange="fcpoHandleCss(this, '{{ sField }}')">
                                         {% for sType, sTitle in oView.getCCStyles() %}
                                         <option value="{{ sType }}"
-                                                {% if sType == confstrs.sFieldIdentCSS %}selected{% endif %}>{{ sTitle }}
+                                                {% if sType == attribute(confstrs,sFieldIdentCSS) %}selected{% endif %}>{{ sTitle }}
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -408,8 +408,8 @@
                                 <td>
                                     {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("CSS") %}
                                     <input id="input_css_{{ sField }}" type="text" class="txt" size="50"
-                                           name="confstrs[{{ sFieldIdent }}]" value="{{ confstrs.sFieldIdent }}"
-                                           {{ readonly }} {% if confstrs.sFieldIdentCSS != "custom" %}disabled{% endif %}>
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ attribute(confstrs,sFieldIdent) }}"
+                                           {{ readonly }} {% if attribute(confstrs,sFieldIdentCSS) != "custom" %}disabled{% endif %}>
                                 </td>
                             </tr>
                             {% endfor %}
