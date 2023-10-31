@@ -11,45 +11,20 @@
 
             <div class="form-floating mb-3">
                 <select name="dynvalue[fcpo_so_bankgrouptype_idl]" class="form-control selectpicker">
-                    <option value="ABN_AMRO_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ABN_AMRO_BANK" %}selected{% endif %}>
-                        ABN Amro
-                    </option>
-                    <option value="BUNQ_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "BUNQ_BANK" %}selected{% endif %}>
-                        Bunq
-                    </option>
-                    <option value="RABOBANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "RABOBANK" %}selected{% endif %}>
-                        Rabobank
-                    </option>
-                    <option value="ASN_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ASN_BANK" %}selected{% endif %}>
-                        ASN Bank
-                    </option>
-                    <option value="SNS_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_BANK" %}selected{% endif %}>
-                        SNS Bank
-                    </option>
-                    <option value="TRIODOS_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "TRIODOS_BANK" %}selected{% endif %}>
-                        Triodos Bank
-                    </option>
-                    <option value="SNS_REGIO_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "SNS_REGIO_BANK" %}selected{% endif %}>
-                        Regio Bank
-                    </option>
-                    <option value="ING_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "ING_BANK" %}selected{% endif %}>
-                        ING Bank
-                    </option>
-                    <option value="KNAB_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "KNAB_BANK" %}selected{% endif %}>
-                        Knab
-                    </option>
-                    <option value="VAN_LANSCHOT_BANKIERS" {% if dynvalue.fcpo_so_bankgrouptype_idl == "VAN_LANSCHOT_BANKIERS" %}selected{% endif %}>
-                        van Lanschot
-                    </option>
-                    <option value="HANDELSBANKEN" {% if dynvalue.fcpo_so_bankgrouptype_idl == "HANDELSBANKEN" %}selected{% endif %}>
-                        Handelsbanken
-                    </option>
-                    <option value="FRIESLAND_BANK" {% if dynvalue.fcpo_so_bankgrouptype_idl == "FRIESLAND_BANK" %}selected{% endif %}>
-                        Friesland Bank
-                    </option>
-                    <option value="REVOLUT" {% if dynvalue.fcpo_so_bankgrouptype_idl == "REVOLUT" %}selected{% endif %}>
-                        Revolut
-                    </option>
+                    <option value='ABNANL2A' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'ABNANL2A' %}selected{% endif %}>ABN AMRO</option>
+                    <option value='ASNBNL21' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'ASNBNL21' %}selected{% endif %}>ASN Bank</option>
+                    <option value='BUNQNL2A' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'BUNQNL2A' %}selected{% endif %}>bunq</option>
+                    <option value='INGBNL2A' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'INGBNL2A' %}selected{% endif %}>ING</option>
+                    <option value='KNABNL2H' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'KNABNL2H' %}selected{% endif %}>Knab</option>
+                    <option value='NTSBDEB1' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'NTSBDEB1' %}selected{% endif %}>N26</option>
+                    <option value='NNBANL2G' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'NNBANL2G' %}selected{% endif %}>Nationale-Nederlanden</option>
+                    <option value='RABONL2U' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'RABONL2U' %}selected{% endif %}>Rabobank</option>
+                    <option value='RBRBNL21' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'RBRBNL21' %}selected{% endif %}>RegioBank</option>
+                    <option value='REVOLT21' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'REVOLT21' %}selected{% endif %}>Revolut</option>
+                    <option value='SNSBNL2A' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'SNSBNL2A' %}selected{% endif %}>SNS</option>
+                    <option value='TRIONL2U' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'TRIONL2U' %}selected{% endif %}>Triodos Bank</option>
+                    <option value='FVLBNL22' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'FVLBNL22' %}selected{% endif %}>Van Lanschot Kempen</option>
+                    <option value='BITSNL2A' {% if dynvalue.fcpo_so_bankgrouptype_idl == 'BITSNL2A' %}selected{% endif %}>Yoursafe</option>
                 </select>
 
                 <label>{{ translate({ ident: "FCPO_BANKGROUPTYPE" }) }}</label>
