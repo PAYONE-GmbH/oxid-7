@@ -20,7 +20,6 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoForwarding;
@@ -39,66 +38,66 @@ class FcPayOneAdminDetails extends AdminDetailsController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
     protected DatabaseInterface $_oFcPoDb;
 
     /**
      * fcpoconfigexport instance
      *
-     * @var object
+     * @var FcPoConfigExport
      */
-    protected $_oFcPoConfigExport = null;
+    protected FcPoConfigExport $_oFcPoConfigExport;
 
     /**
      * fcpopaypal instance
      *
-     * @var object
+     * @var FcPoPaypal
      */
 
-    protected $_oFcPoPayPal = null;
+    protected FcPoPaypal $_oFcPoPayPal;
 
     /**
      * fcpopaypal instance
      *
-     * @var object
+     * @var FcPoKlarna
      */
-    protected $_oFcPoKlarna = null;
+    protected FcPoKlarna $_oFcPoKlarna;
 
     /**
      * fcpomapping instance
      *
-     * @var object
+     * @var FcPoMapping
      */
-    protected $_oFcPoMapping = null;
+    protected FcPoMapping $_oFcPoMapping;
 
     /**
      * fcpoforwarding instance
      *
-     * @var object
+     * @var FcPoForwarding
      */
-    protected $_oFcPoForwarding = null;
+    protected FcPoForwarding $_oFcPoForwarding;
 
     /**
      * fcporatepay instance
      *
-     * @var null|object
+     * @var FcPoRatePay
      */
-    protected $_oFcPoRatePay = null;
+    protected FcPoRatePay $_oFcPoRatePay;
 
     /**
      * fcpoerrormapping instance
      *
-     * @var null|object
+     * @var FcPoErrorMapping
      */
-    protected $_oFcPoErrorMapping = null;
+    protected FcPoErrorMapping $_oFcPoErrorMapping;
 
 
     /**
@@ -124,7 +123,7 @@ class FcPayOneAdminDetails extends AdminDetailsController
      * @param string $sClassName
      * @return object
      */
-    public function fcpoGetInstance($sClassName)
+    public function fcpoGetInstance(string $sClassName): object
     {
         return oxNew($sClassName);
     }

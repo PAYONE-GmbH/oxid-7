@@ -1,12 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Eshop\Core\UtilsServer;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,22 +17,31 @@ use OxidEsales\Eshop\Core\UtilsServer;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\UtilsServer;
+
 class FcPayOneUserView extends FcPayOneUserView_parent
 {
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
 
     /**
@@ -58,9 +59,9 @@ class FcPayOneUserView extends FcPayOneUserView_parent
     /**
      * Returns user error message if there is some. false if none
      *
-     * @return mixed string|bool
+     * @return string|bool
      */
-    public function fcpoGetUserErrorMessage()
+    public function fcpoGetUserErrorMessage(): bool|string
     {
         $mReturn = false;
         $sMessage = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoerror');

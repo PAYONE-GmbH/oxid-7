@@ -1,12 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Order;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +17,14 @@ use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+
 class FcPayOneLog extends FcPayOneAdminDetails
 {
 
@@ -33,32 +33,32 @@ class FcPayOneLog extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_log';
+    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_log';
 
     /**
      * Array with existing status of order
      *
      * @var array
      */
-    protected $_aStatus = null;
-
+    protected array $_aStatus;
 
     /**
      * Holds a current response status
      *
      * @var array
      */
-    protected $_aResponse = null;
+    protected array $_aResponse;
+
 
     /**
      * Get all transaction status for the given order
      *
-     * @param object $oOrder order object
+     * @param Order $oOrder order object
      *
      * @return array
      * @throws DatabaseConnectionException
      */
-    public function getStatus(object $oOrder): array
+    public function getStatus(Order $oOrder): array
     {
         if (!$this->_aStatus) {
             $oDb = $this->_oFcPoHelper->fcpoGetDb();
@@ -131,8 +131,7 @@ class FcPayOneLog extends FcPayOneAdminDetails
         $sShopUrl = $oConfig->getShopUrl();
         $sSslShopUrl = $oConfig->getSslShopUrl();
 
-        $sParams = '';
-        $sParams .= $this->_addParam('key', $sKey);
+        $sParams = $this->_addParam('key', $sKey);
         $sParams .= $this->_addParam('statusmessageid', $sStatusmessageId);
         $sParams = substr($sParams, 1);
         $sBaseUrl = (empty($sSslShopUrl)) ? $sShopUrl : $sSslShopUrl;
@@ -151,7 +150,12 @@ class FcPayOneLog extends FcPayOneAdminDetails
         $this->render();
     }
 
-    protected function _addParam($sKey, $mValue)
+    /**
+     * @param string $sKey
+     * @param mixed $mValue
+     * @return string
+     */
+    protected function _addParam(string $sKey, mixed $mValue): string
     {
         $sParams = '';
         if (is_array($mValue)) {
@@ -166,12 +170,12 @@ class FcPayOneLog extends FcPayOneAdminDetails
 
     /**
      * Loads selected transactions status, passes
-     * it's data to Smarty engine and returns name of template file
-     * "fcpayone_log.tpl".
+     * its data to Twig engine and returns path to a template
+     * "fcpayone_log".
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         parent::render();
 
@@ -188,4 +192,5 @@ class FcPayOneLog extends FcPayOneAdminDetails
 
         return $this->_sThisTemplate;
     }
+
 }

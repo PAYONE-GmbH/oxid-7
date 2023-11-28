@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoRequestLog;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +17,11 @@ use Fatchip\PayOne\Application\Model\FcPoRequestLog;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoRequestLog;
+
 class FcPayOneApiLogList extends FcPayOneAdminList
 {
 
@@ -30,28 +30,29 @@ class FcPayOneApiLogList extends FcPayOneAdminList
      *
      * @var string
      */
-    protected $_sListClass = FcPoRequestLog::class;
+    protected string $_sListClass = FcPoRequestLog::class;
 
     /**
      * Default SQL sorting parameter (default null).
      *
      * @var string
      */
-    protected $_sDefSortField = "oxtimestamp";
+    protected string $_sDefSortField = "oxtimestamp";
 
     /**
      * Current class template name
      *
      * @var string
      */
-    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog_list';
+    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog_list';
+
 
     /**
      * Returns sorting fields array
      *
      * @return array
      */
-    public function getListSorting()
+    public function getListSorting(): array
     {
         if ($this->_aCurrSorting === null) {
             $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort');
@@ -66,31 +67,30 @@ class FcPayOneApiLogList extends FcPayOneAdminList
     /**
      * Return input name for searchfields in list by shop-version
      *
+     * @param string $sTable
+     * @param string $sField
      * @return string
      */
-    public function fcGetInputName($sTable, $sField)
+    public function fcGetInputName(string $sTable, string $sField): string
     {
-        if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
-            return "where[{$sTable}][{$sField}]";
-        }
-        return "where[{$sTable}.{$sField}]";
+        return "where[{$sTable}][{$sField}]";
     }
 
     /**
      * Return input form value for searchfields in list by shop-version
      *
+     * @param string $sTable
+     * @param string $sField
      * @return string
      */
-    public function fcGetWhereValue($sTable, $sField)
+    public function fcGetWhereValue(string $sTable, string $sField): string
     {
         $aWhere = $this->getListFilter();
         if (empty($aWhere)) {
             return '';
         }
-        if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
-            return $aWhere[$sTable][$sField];
-        }
-        return $aWhere[$sTable . '.' . $sField];
+
+        return $aWhere[$sTable][$sField];
     }
 
     /**
@@ -98,7 +98,7 @@ class FcPayOneApiLogList extends FcPayOneAdminList
      *
      * @return array
      */
-    public function getListFilter()
+    public function getListFilter(): array
     {
         if ($this->_aListFilter === null) {
             $this->_aListFilter = $this->_oFcPoHelper->fcpoGetRequestParameter("where");
@@ -110,25 +110,24 @@ class FcPayOneApiLogList extends FcPayOneAdminList
     /**
      * Return needed javascript for sorting in list by shop-version
      *
+     * @param $sTable
+     * @param $sField
      * @return string
      */
-    public function fcGetSortingJavascript($sTable, $sField)
+    public function fcGetSortingJavascript($sTable, $sField): string
     {
-        if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
-            return "Javascript:top.oxid.admin.setSorting( document.search, '{$sTable}', '{$sField}', 'asc');document.search.submit();";
-        }
-        return "Javascript:document.search.sort.value='{$sTable}.{$sField}';document.search.submit();";
+        return "Javascript:top.oxid.admin.setSorting( document.search, '{$sTable}', '{$sField}', 'asc');document.search.submit();";
     }
 
     /**
      * Filter log entries, show only log entries of configured PAYONE account
      *
-     * @param array  $aWhere SQL condition array
+     * @param array $aWhere SQL condition array
      * @param string $sQ     SQL query string
      *
      * @return string
      */
-    protected function _prepareWhereQuery($aWhere, $sQ)
+    protected function _prepareWhereQuery(array $aWhere, string $sQ): string
     {
         $sQ = parent::prepareWhereQuery($aWhere, $sQ);
         $sPortalId = $this->getPortalId();
@@ -141,18 +140,18 @@ class FcPayOneApiLogList extends FcPayOneAdminList
      *
      * @return string
      */
-    public function getPortalId()
+    public function getPortalId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOPortalID');
     }
 
     /**
-     * Get config parameter PAYONE sub-account ID
+     * Get config parameter PAYONE subaccount ID
      *
      * @return string
      */
-    public function getSubAccountId()
+    public function getSubAccountId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOSubAccountID');

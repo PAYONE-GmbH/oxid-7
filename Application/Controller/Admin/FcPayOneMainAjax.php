@@ -1,17 +1,5 @@
 <?php
 /**
- * Handles the complete communication with the PAYONE API
- */
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-use OxidEsales\Eshop\Core\Field;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-
-/**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,6 +17,18 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
+/**
+ * Handles the complete communication with the PAYONE API
+ */
 class FcPayOneMainAjax extends ListComponentAjax
 {
 
@@ -38,6 +38,7 @@ class FcPayOneMainAjax extends ListComponentAjax
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
+
     /**
      * Columns array
      *
@@ -59,6 +60,7 @@ class FcPayOneMainAjax extends ListComponentAjax
             ['oxid', 'fcpopayment2country', 0, 0, 1]
         ]
     ];
+
 
     /**
      * Class constructor, sets all required parameters for requests.
@@ -102,7 +104,7 @@ class FcPayOneMainAjax extends ListComponentAjax
      *
      * @return string
      */
-    protected function getQuery()
+    protected function getQuery(): string
     {
         // looking for table/view
         $sCountryTable = $this->getViewName('oxcountry');

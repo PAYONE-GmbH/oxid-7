@@ -13,36 +13,37 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.payone.de
+ * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
- * @version   OXID eShop CE
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Controller\Admin\Inc;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
-use OxidEsales\Eshop\Core\Base;
+use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
-$aColumns = ['container1' => [    // field , table,         visible, multilanguage, ident
-                                        ['oxtitle',     'oxcountry', 1, 1, 0],
-                                        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
-                                        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
-                                        ['oxunnum3',    'oxcountry', 0, 0, 0],
-                                        ['oxid',        'oxcountry', 0, 0, 1]
+$aColumns = ['container1' => [    // field , table, visible, multilanguage, ident
+    ['oxtitle', 'oxcountry', 1, 1, 0],
+    ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+    ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+    ['oxunnum3', 'oxcountry', 0, 0, 0],
+    ['oxid', 'oxcountry', 0, 0, 1]
 ],
-                     'container2' => [
-                                        ['oxtitle',     'oxcountry', 1, 1, 0],
-                                        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
-                                        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
-                                        ['oxunnum3',    'oxcountry', 0, 0, 0],
-                                        ['oxid', 'fcpopayment2country', 0, 0, 1]
-                     ]
+    'container2' => [
+        ['oxtitle', 'oxcountry', 1, 1, 0],
+        ['oxisoalpha2', 'oxcountry', 1, 0, 0],
+        ['oxisoalpha3', 'oxcountry', 0, 0, 0],
+        ['oxunnum3', 'oxcountry', 0, 0, 0],
+        ['oxid', 'fcpopayment2country', 0, 0, 1]
+    ]
 ];
+
 /**
  * Class manages payment countries
  *
@@ -50,7 +51,6 @@ $aColumns = ['container1' => [    // field , table,         visible, multilangua
  */
 class ajaxComponent extends ListComponentAjax
 {
-
 
     /**
      * Helper object for dealing with different shop versions
@@ -67,9 +67,34 @@ class ajaxComponent extends ListComponentAjax
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
+    /**
+     * Adds chosen country to payment
+     *
+     * @group  untestable
+     */
+    public function addpaycountry(): void
+    {
+        $aChosenCntr = $this->getActionIds('oxcountry.oxid');
+        $soxId = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
+        $sType = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
+            $sCountryTable = $this->getViewName(Country::class);
+            $aChosenCntr = $this->_getAll($this->addFilter("select $sCountryTable.oxid " . $this->getQuery()));
+        }
+        if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {
+            foreach ($aChosenCntr as $sChosenCntr) {
+                $oObject2Payment = oxNew(BaseModel::class);
+                $oObject2Payment->init('fcpopayment2country');
+                $oObject2Payment->fcpopayment2country__fcpo_paymentid = new Field($soxId);
+                $oObject2Payment->fcpopayment2country__fcpo_countryid = new Field($sChosenCntr);
+                $oObject2Payment->fcpopayment2country__fcpo_type = new Field($sType);
+                $oObject2Payment->save();
+            }
+        }
+    }
 
     /**
      * Returns SQL query for data to fetch
@@ -80,17 +105,17 @@ class ajaxComponent extends ListComponentAjax
     protected function getQuery()
     {
         // looking for table/view
-        $sCountryTable = $this->getViewName('oxcountry');
-        $sCountryId      = $this->_oFcPoHelper->fcpoGetRequestParameter('oxid');
+        $sCountryTable = $this->getViewName(Country::class);
+        $sCountryId = $this->_oFcPoHelper->fcpoGetRequestParameter('oxid');
         $sSynchCountryId = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
-        $sType           = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
+        $sType = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
 
         // category selected or not ?
         if (!$sCountryId) {
             // which fields to load ?
             $sQAdd = " from $sCountryTable where $sCountryTable.oxactive = '1' ";
         } else {
-            $sQAdd  = " from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
+            $sQAdd = " from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
             $sQAdd .= "where $sCountryTable.oxactive = '1' and fcpopayment2country.fcpo_paymentid = '$sCountryId' and fcpopayment2country.fcpo_type = '{$sType}' ";
         }
 
@@ -104,46 +129,21 @@ class ajaxComponent extends ListComponentAjax
     }
 
     /**
-     * Adds chosen country to payment
-     *
-     * @group  untestable
-     */
-    public function addpaycountry()
-    {
-        $aChosenCntr = $this->getActionIds('oxcountry.oxid');
-        $soxId       = $this->_oFcPoHelper->fcpoGetRequestParameter('synchoxid');
-        $sType       = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
-        if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sCountryTable = $this->getViewName('oxcountry');
-            $aChosenCntr = $this->_getAll($this->addFilter("select $sCountryTable.oxid ".$this->getQuery()));
-        }
-        if ($soxId && $soxId != "-1" && is_array($aChosenCntr)) {
-            foreach ($aChosenCntr as $sChosenCntr) {
-                $oObject2Payment = oxNew(BaseModel::class);
-                $oObject2Payment->init('fcpopayment2country');
-                $oObject2Payment->fcpopayment2country__fcpo_paymentid  = new Field($soxId);
-                $oObject2Payment->fcpopayment2country__fcpo_countryid  = new Field($sChosenCntr);
-                $oObject2Payment->fcpopayment2country__fcpo_type       = new Field($sType);
-                $oObject2Payment->save();
-            }
-        }
-    }
-
-    /**
      * Removes chosen country from payment
      *
      * @group  untestable
      * @throws DatabaseConnectionException
      */
-    public function removepaycountry()
+    public function removepaycountry(): void
     {
         $aChosenCntr = $this->getActionIds('fcpopayment2country.oxid');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sQ = $this->addFilter("delete fcpopayment2country.* ".$this->getQuery());
+            $sQ = $this->addFilter("delete fcpopayment2country.* " . $this->getQuery());
             DatabaseProvider::getDb()->execute($sQ);
         } elseif (is_array($aChosenCntr)) {
-            $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", DatabaseProvider::getDb()->quoteArray($aChosenCntr)) . ") ";
+            $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", DatabaseProvider::getInstance()->quoteArray($aChosenCntr)) . ") ";
             DatabaseProvider::getDb()->execute($sQ);
         }
     }
+
 }

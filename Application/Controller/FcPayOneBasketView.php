@@ -1,11 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Model\Basket;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,6 +17,13 @@ use OxidEsales\Eshop\Application\Model\Basket;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Basket;
+
 class FcPayOneBasketView extends FcPayOneBasketView_parent
 {
 
@@ -35,18 +35,19 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * Path where paypal logos can be found
+     * Path where PayPal logos can be found
      *
      * @var string
      */
-    protected $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
+    protected string $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
 
     /**
      * Paypal Express picture
      *
      * @var string
      */
-    protected $_sPayPalExpressPic = null;
+    protected string $_sPayPalExpressPic;
+
 
     /**
      * init object construction
@@ -62,9 +63,9 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Returns basket error message if there is some. false if none
      *
-     * @return mixed string|bool
+     * @return bool|string
      */
-    public function fcpoGetBasketErrorMessage()
+    public function fcpoGetBasketErrorMessage(): bool|string
     {
         $mReturn = false;
         $sMessage = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoerror');
@@ -81,11 +82,11 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Public getter for paypal express picture
+     * Public getter for PayPal express picture
      *
-     * @return string
+     * @return bool|string
      */
-    public function fcpoGetPayPalExpressPic()
+    public function fcpoGetPayPalExpressPic(): bool|string
     {
         if ($this->_sPayPalExpressPic === null) {
             $this->_sPayPalExpressPic = false;
@@ -98,11 +99,11 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Returns wether paypal express is active or not
+     * Returns whether PayPal express is active or not
      *
-     * @return boolean
+     * @return bool
      */
-    protected function _fcpoIsPayPalExpressActive()
+    protected function _fcpoIsPayPalExpressActive(): bool
     {
         $oBasket = $this->_oFcPoHelper->getFactoryObject(Basket::class);
         return $oBasket->fcpoIsPayPalExpressActive();
@@ -111,9 +112,9 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Finally fetches needed values and set attribute value
      *
-     * @return mixed
+     * @return bool|string
      */
-    protected function _fcpoGetPayPalExpressPic()
+    protected function _fcpoGetPayPalExpressPic(): bool|string
     {
         $sPayPalExpressPic = false;
         $oBasket = $this->_oFcPoHelper->getFactoryObject(Basket::class);
@@ -132,11 +133,11 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Method will return false or redirect to paypal express if used
+     * Method will return false or redirect to PayPal express if used
      *
-     * @return boolean
+     * @return bool
      */
-    public function fcpoUsePayPalExpress()
+    public function fcpoUsePayPalExpress(): bool
     {
         $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
         $aOutput = $oRequest->sendRequestGenericPayment();
@@ -150,18 +151,8 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
             $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
             $oUtils->redirect($aOutput['redirecturl'], false);
         }
-    }
 
-    /**
-     * Logout user
-     *
-     * @return void
-     */
-    public function fcpoLogoutUser()
-    {
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oSession->deleteVariable('usr');
+        return false;
     }
-
 
 }
