@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use OxidEsales\Eshop\Core\Model\BaseModel;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,24 +17,30 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
 class FcPoRequestLog extends BaseModel
 {
 
     public $fcporequestlog__fcpo_request;
     public $fcporequestlog__fcpo_response;
+
     /**
      * Object core table name
      *
      * @var string
      */
-    protected $_sCoreTbl = 'fcporequestlog';
+    protected string $_sCoreTbl = 'fcporequestlog';
 
     /**
      * Current class name
      *
      * @var string
      */
-    protected $_sClassName = 'fcporequestlog';
+    protected string $_sClassName = 'fcporequestlog';
 
 
     /**
@@ -50,23 +51,23 @@ class FcPoRequestLog extends BaseModel
         $this->init('fcporequestlog');
     }
 
-
     /**
      * Get request as array
      *
-     * @return array
+     * @return bool|array
      */
-    public function getRequestArray()
+    public function getRequestArray(): bool|array
     {
         return $this->getArray($this->fcporequestlog__fcpo_request->rawValue);
     }
 
     /**
-     * Get a array from a serialized array or false if not unserializable
+     * Get an array from a serialized array or false if not unserializable
      *
-     * @return array
+     * @param string $sParam
+     * @return array|false
      */
-    protected function getArray($sParam)
+    protected function getArray(string $sParam): bool|array
     {
         $aArray = unserialize($sParam);
 
@@ -76,10 +77,11 @@ class FcPoRequestLog extends BaseModel
     /**
      * Get response as array
      *
-     * @return array
+     * @return bool|array
      */
-    public function getResponseArray()
+    public function getResponseArray(): bool|array
     {
         return $this->getArray($this->fcporequestlog__fcpo_response->rawValue);
     }
+
 }

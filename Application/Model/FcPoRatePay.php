@@ -1,13 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +17,15 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
 class FcPoRatePay extends BaseModel
 {
     /**
@@ -33,14 +33,15 @@ class FcPoRatePay extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
+
 
     /**
      * Init needed data
@@ -55,9 +56,10 @@ class FcPoRatePay extends BaseModel
      * Add/Update Ratepay profile
      *
      * @param string $sOxid
-     * @param array  $aRatePayData
+     * @param array $aRatePayData
+     * @return void
      */
-    public function fcpoInsertProfile($sOxid, $aRatePayData): void
+    public function fcpoInsertProfile(string $sOxid, array $aRatePayData): void
     {
         if (array_key_exists('delete', $aRatePayData)) {
             $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
@@ -82,7 +84,7 @@ class FcPoRatePay extends BaseModel
      * @param string $sOxid
      * @return void
      */
-    protected function _fcpoUpdateRatePayProfile($sOxid)
+    protected function _fcpoUpdateRatePayProfile(string $sOxid): void
     {
         $aRatePayData = $this->fcpoGetProfileData($sOxid);
         $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
@@ -98,7 +100,7 @@ class FcPoRatePay extends BaseModel
      * @param string $sOxid
      * @return array
      */
-    public function fcpoGetProfileData($sOxid)
+    public function fcpoGetProfileData(string $sOxid): array
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $sQuery = "SELECT * FROM fcporatepay WHERE OXID=" . $this->_oFcPoDb->quote($sOxid);
@@ -110,10 +112,10 @@ class FcPoRatePay extends BaseModel
      * Collects profile information and save it into profile
      *
      * @param string $sOxid
-     * @param array  $aResponse
+     * @param array $aResponse
      * @return void
      */
-    protected function _fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse)
+    protected function _fcpoUpdateRatePayProfileByResponse(string $sOxid, array $aResponse): void
     {
         $sQuery = "
             UPDATE fcporatepay SET
@@ -183,10 +185,10 @@ class FcPoRatePay extends BaseModel
     /**
      * Returns an array with Ratepay profiles
      *
-     * @param string $sPaymentId (optional)
+     * @param string|null $sPaymentId (optional)
      * @return array<int|string, mixed>
      */
-    public function fcpoGetRatePayProfiles($sPaymentId = null): array
+    public function fcpoGetRatePayProfiles(string $sPaymentId = null): array
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $aReturn = [];
@@ -209,6 +211,8 @@ class FcPoRatePay extends BaseModel
 
     /**
      * Add Ratepay shop
+     *
+     * @return void
      */
     public function fcpoAddRatePayProfile(): void
     {
@@ -294,7 +298,7 @@ class FcPoRatePay extends BaseModel
      * @param string $sPaymentId
      * @return array
      */
-    public function fcpoGetProfileDataByPaymentId($sPaymentId)
+    public function fcpoGetProfileDataByPaymentId(string $sPaymentId): array
     {
         $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=" . $this->_oFcPoDb->quote($sPaymentId) . " LIMIT 1";
         $sOxid = $this->_oFcPoDb->getOne($sQuery);
@@ -311,7 +315,7 @@ class FcPoRatePay extends BaseModel
      *
      * @return array
      */
-    public function fcpoGetFields()
+    public function fcpoGetFields(): array
     {
         $sQuery = "SHOW FIELDS FROM fcporatepay";
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);

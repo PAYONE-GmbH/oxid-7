@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use OxidEsales\Eshop\Application\Model\Order;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +17,11 @@ use OxidEsales\Eshop\Application\Model\Order;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use OxidEsales\Eshop\Application\Model\Order;
+
 class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
 {
 
@@ -31,13 +31,13 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
      *
      * Executes payment, returns true on success.
      *
-     * @param double $dAmount Goods amount
-     * @param Order &$oOrder  User ordering object
+     * @param float $dAmount Goods amount
+     * @param Order &$oOrder User ordering object
      *
      * @extend executePayment
      * @return bool
      */
-    public function executePayment($dAmount, &$oOrder): bool
+    public function executePayment(float $dAmount, Order &$oOrder): bool
     {
         // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
         if ($oOrder->isPayOnePaymentType() === false) {
@@ -50,18 +50,16 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
         return $oOrder->fcHandleAuthorization(false, $this);
     }
 
-
     /**
      * Setter for last error number
      *
      * @param int $iLastErrorNr
      * @return void
      */
-    public function fcSetLastErrorNr(int $iLastErrorNr): void
+    public function fcpoSetLastErrorNr(int $iLastErrorNr): void
     {
         $this->_iLastErrorNo = $iLastErrorNr;
     }
-
 
     /**
      * Setter for last error text
@@ -69,7 +67,7 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
      * @param string $sLastError
      * @return void
      */
-    public function fcSetLastError(string $sLastError): void
+    public function fcpoSetLastError(string $sLastError): void
     {
         $this->_sLastError = $sLastError;
     }

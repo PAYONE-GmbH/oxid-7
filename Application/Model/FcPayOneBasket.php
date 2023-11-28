@@ -1,14 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\DeliveryList;
-use OxidEsales\Eshop\Application\Model\User;
-use OxidEsales\Eshop\Core\Field;
-use OxidEsales\Eshop\Core\Price;
-use OxidEsales\Eshop\Core\Registry;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,6 +17,16 @@ use OxidEsales\Eshop\Core\Registry;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\DeliveryList;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Price;
+use OxidEsales\Eshop\Core\Registry;
+
 class FcPayOneBasket extends FcPayOneBasket_parent
 {
 
@@ -41,7 +41,6 @@ class FcPayOneBasket extends FcPayOneBasket_parent
     /**
      * init object construction
      *
-     * @return null
      */
     public function __construct()
     {
@@ -49,9 +48,8 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
-
     /**
-     * Returns wether paypal express is active or not
+     * Returns whether PayPal express is active or not
      *
      * @return bool
      */
@@ -62,18 +60,17 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         return (bool)$oDb->getOne($sQuery);
     }
 
-
     /**
      * Returns pic that is configured in database
      *
      * @return string
      */
-    public function fcpoGetPayPalExpressPic()
+    public function fcpoGetPayPalExpressPic(): string
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $iLangId = $oLang->getBaseLanguage();
-        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '{$iLangId}' ORDER BY fcpo_default DESC";
+        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '$iLangId' ORDER BY fcpo_default DESC";
 
         return $oDb->getOne($sQuery);
     }
@@ -83,7 +80,7 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      *
      * @return Price
      */
-    public function fcpoCalcDeliveryCost()
+    public function fcpoCalcDeliveryCost(): Price
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oDeliveryPrice = oxNew(Price::class);

@@ -1,12 +1,29 @@
 <?php
+/**
+ * PAYONE OXID Connector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * PAYONE OXID Connector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @link          http://www.payone.de
+ * @copyright (C) Payone GmbH
+ * @version       OXID eShop CE
+ */
 
 namespace Fatchip\PayOne\Application\Model;
 
-
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Model\BaseModel;
-use sting;
 
 /**
  * Created by PhpStorm.
@@ -20,54 +37,56 @@ class FcPoUserFlag extends BaseModel
     public $fcpouserflags__fcpoeffect;
     public $fcpouserflags__fcpoflagduration;
     public $fcpouserflags__fcpodesc;
+
     /**
      * Object core table name
      *
      * @var string
      */
-    protected $_sCoreTbl = 'fcpouserflags';
+    protected string $_sCoreTbl = 'fcpouserflags';
 
     /**
      * Current class name
      *
      * @var string
      */
-    protected $_sClassName = 'fcpouserflag';
+    protected string $_sClassName = 'fcpouserflag';
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
      * The timestamp that should be used to determine penalty times
      *
      * @var string
      */
-    protected $_sTimeStamp = null;
+    protected string $_sTimeStamp;
 
     /**
      * List of blocked paymentids
      *
      * @var array
      */
-    protected $_aBlockedPaymentIds = [];
+    protected array $_aBlockedPaymentIds = [];
 
     /**
      * ID of n:m table assigned to this flag
      *
-     * @var null
+     * @var string
      */
-    protected $_sAssignId = null;
+    protected string $_sAssignId;
+
 
     /**
      * Init needed data
@@ -82,10 +101,10 @@ class FcPoUserFlag extends BaseModel
     /**
      * Loads userflag by error code
      *
-     * @param $sErrorCode
+     * @param string $sErrorCode
      * @return mixed
      */
-    public function fcpoLoadByErrorCode($sErrorCode)
+    public function fcpoLoadByErrorCode(string $sErrorCode): mixed
     {
         $sOxid = $this->_fcpoGetIdByErrorCode($sErrorCode);
 
@@ -93,12 +112,12 @@ class FcPoUserFlag extends BaseModel
     }
 
     /**
-     * Tryes to fetch userflag by error code
+     * Tries to fetch userflag by error code
      *
-     * @param $sErrorCode
+     * @param string $sErrorCode
      * @return string
      */
-    protected function _fcpoGetIdByErrorCode($sErrorCode)
+    protected function _fcpoGetIdByErrorCode(string $sErrorCode): string
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $sQuery = "SELECT OXID FROM "
@@ -111,9 +130,10 @@ class FcPoUserFlag extends BaseModel
     /**
      * Overloaded method to automatically set effects
      *
+     * @param string $sOXID
      * @return mixed
      */
-    public function load($sOXID)
+    public function load(string $sOXID): mixed
     {
         $mReturn = null;
         if ($mReturn !== false) {
@@ -128,7 +148,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @return void
      */
-    protected function _fcpoSetEffects()
+    protected function _fcpoSetEffects(): void
     {
         $this->_fcpoSetPaymentsBlocked();
     }
@@ -138,12 +158,12 @@ class FcPoUserFlag extends BaseModel
      *
      * @return void
      */
-    protected function _fcpoSetPaymentsBlocked()
+    protected function _fcpoSetPaymentsBlocked(): void
     {
         $sEffectCode = $this->fcpouserflags__fcpoeffect->value;
 
         if ($sEffectCode === 'RPR') {
-            // case ratpay payments are blocked
+            // case Ratepay payments are blocked
             $this->_fcpoAddBlockedPayment('fcporp_bill');
         }
     }
@@ -151,10 +171,10 @@ class FcPoUserFlag extends BaseModel
     /**
      * Adds a payment id to blocked payments
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return void
      */
-    protected function _fcpoAddBlockedPayment($sPaymentId)
+    protected function _fcpoAddBlockedPayment(string $sPaymentId): void
     {
         $this->_aBlockedPaymentIds[] = $sPaymentId;
     }
@@ -164,7 +184,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @return bool
      */
-    public function fcpoGetIsActive()
+    public function fcpoGetIsActive(): bool
     {
         return $this->_fcpoFlagIsActive();
     }
@@ -172,6 +192,8 @@ class FcPoUserFlag extends BaseModel
     /**
      * Checks if this userflag is active related to timestamp of flag assigment
      * and its set duration. Setting a duration of 0 means infinite active state
+     *
+     * @return bool
      */
     protected function _fcpoFlagIsActive(): bool
     {
@@ -187,7 +209,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @return int
      */
-    protected function _fcpoGetTimeStampActiveUntil()
+    protected function _fcpoGetTimeStampActiveUntil(): int
     {
         $iDurationHours = $this->fcpouserflags__fcpoflagduration->value;
         $iTimeStampFlagAssigned = strtotime($this->_sTimeStamp);
@@ -200,10 +222,10 @@ class FcPoUserFlag extends BaseModel
     /**
      * Returns translated message, optional a customer message as fallback
      *
-     * @param $sCustomMessage
-     * @return sting
+     * @param string $sCustomMessage
+     * @return string
      */
-    public function fcpoGetTranslatedMessage($sCustomMessage = '')
+    public function fcpoGetTranslatedMessage(string $sCustomMessage = ''): string
     {
         $sFlagDesc = $this->fcpouserflags__fcpodesc->value;
         $blSaveMessageInDb = (
@@ -236,9 +258,10 @@ class FcPoUserFlag extends BaseModel
     /**
      * Sets custom display message to assigned id
      *
-     * @param $sMessage
+     * @param string $sMessage
+     * @return void
      */
-    public function fcpoSetDisplayMessage($sMessage): void
+    public function fcpoSetDisplayMessage(string $sMessage): void
     {
         if ($this->_sAssignId) {
             // mandatory for persisting the message
@@ -258,20 +281,26 @@ class FcPoUserFlag extends BaseModel
      *
      * @return string
      */
-    protected function _fcpoGetMessageFromDb()
+    protected function _fcpoGetMessageFromDb(): string
     {
         if ($this->_sAssignId) {
             $oDb = $this->_oFcPoHelper->fcpoGetDb();
             $sQuery = "
-          SELECT FCPODISPLAYMESSAGE 
-          FROM fcpouser2flag 
-          WHERE OXID=" . $oDb->quote($this->_sAssignId);
+            SELECT FCPODISPLAYMESSAGE 
+            FROM fcpouser2flag 
+            WHERE OXID=" . $oDb->quote($this->_sAssignId);
+
+            return (string)$oDb->getOne($sQuery);
         }
-        return (string)$oDb->getOne($sQuery);
+
+        return '';
     }
 
     /**
      * Setter for timestamp of when the user received the flag
+     *
+     * @param string $sTimeStamp
+     * @return void
      */
     public function fcpoSetTimeStamp(string $sTimeStamp): void
     {
@@ -281,19 +310,20 @@ class FcPoUserFlag extends BaseModel
     /**
      * Sets assign id for current flag
      *
-     * @param $sOxid
+     * @param string $sOxid
+     * @return void
      */
-    public function fcpoSetAssignId($sOxid): void
+    public function fcpoSetAssignId(string $sOxid): void
     {
         $this->_sAssignId = $sOxid;
     }
 
     /**
-     * Returns an array of paymentids which are currently
+     * Returns an array of payment ids which are currently
      *
      * @return array
      */
-    public function fcpoGetBlockedPaymentIds()
+    public function fcpoGetBlockedPaymentIds(): array
     {
         $aReturn = [];
         $blFlagActive = $this->_fcpoFlagIsActive();
@@ -304,4 +334,5 @@ class FcPoUserFlag extends BaseModel
 
         return $aReturn;
     }
+
 }

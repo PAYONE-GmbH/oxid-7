@@ -1,10 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Country;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,19 +17,24 @@ use OxidEsales\Eshop\Application\Model\Country;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Country;
+
 class FcPayOneAddress extends FcPayOneAddress_parent
 {
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
+
 
     /**
      * init object construction
-     *
-     * @return null
      */
     public function __construct()
     {
@@ -49,7 +48,7 @@ class FcPayOneAddress extends FcPayOneAddress_parent
      * @param int $iVersion
      * @return string
      */
-    public function fcpoGetUserCountryIso($iVersion = 2)
+    public function fcpoGetUserCountryIso(int $iVersion = 2): string
     {
         $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
         if (!$oCountry->load($this->oxaddress__oxcountryid->value)) {
@@ -59,4 +58,5 @@ class FcPayOneAddress extends FcPayOneAddress_parent
 
         return $oCountry->$sField->value;
     }
+
 }

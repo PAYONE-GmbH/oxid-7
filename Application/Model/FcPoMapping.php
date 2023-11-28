@@ -1,13 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-use stdClass;
-
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +17,15 @@ use stdClass;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use stdClass;
+
 class FcPoMapping extends BaseModel
 {
 
@@ -34,14 +34,15 @@ class FcPoMapping extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
+
 
     /**
      * Init needed data
@@ -88,7 +89,7 @@ class FcPoMapping extends BaseModel
      *
      * @param array $aMappings
      */
-    public function fcpoUpdateMappings($aMappings): void
+    public function fcpoUpdateMappings(array $aMappings): void
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb();
         // iterate through mappings
@@ -102,10 +103,10 @@ class FcPoMapping extends BaseModel
      * Returns the matching query for updating/adding data
      *
      * @param string $sMappingId
-     * @param array  $aData
+     * @param array $aData
      * @return string
      */
-    protected function _fcpoGetQuery($sMappingId, $aData)
+    protected function _fcpoGetQuery(string $sMappingId, array $aData): string
     {
         // quote values from outer space
         if (array_key_exists('delete', $aData)) {
@@ -120,13 +121,13 @@ class FcPoMapping extends BaseModel
     }
 
     /**
-     * Returns wether an insert or update query, depending on data
+     * Returns whether an insert or update query, depending on data
      *
      * @param string $sMappingId
-     * @param array  $aData
+     * @param array $aData
      * @return string
      */
-    protected function _fcpoGetUpdateQuery($sMappingId, $aData)
+    protected function _fcpoGetUpdateQuery(string $sMappingId, array $aData): string
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sMappingId, $aData['sPaymentType'], $aData['sPayoneStatus'], $aData['sShopStatus']);
 
@@ -161,8 +162,9 @@ class FcPoMapping extends BaseModel
      * @param string $sPaymentId
      * @param string $sPayoneStatus
      * @param string $sFolder
+     * @return bool
      */
-    protected function _fcpoIsValidNewEntry($sMappingId, $sPaymentId, $sPayoneStatus, $sFolder): bool
+    protected function _fcpoIsValidNewEntry(string $sMappingId, string $sPaymentId, string $sPayoneStatus, string $sFolder): bool
     {
         $blComplete = (!empty($sPayoneStatus) || !empty($sPaymentId) || !empty($sFolder));
 
