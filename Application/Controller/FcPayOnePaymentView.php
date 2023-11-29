@@ -2250,7 +2250,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $aDynValue = $this->_fcpoGetDynValues();
 
             $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-            $aResponse = $oPORequest->sendRequestManagemandate($oPayment->fcpoGetOperationMode(), $aDynValue, $oUser);
+            $aResponse = $oPORequest->sendRequestManageMandate($oPayment->fcpoGetOperationMode(), $aDynValue, $oUser);
 
             $this->_fcpoHandleMandateResponse($aResponse);
         }

@@ -136,7 +136,7 @@ class FcPayOneLog extends FcPayOneAdminDetails
         $sParams = substr($sParams, 1);
         $sBaseUrl = (empty($sSslShopUrl)) ? $sShopUrl : $sSslShopUrl;
 
-        $sForwarderUrl = $sBaseUrl . 'modules/fc/fcpayone/statusforward.php';
+        $sForwarderUrl = $sBaseUrl . 'index.php?cl=FcPoTransactionStatusForwarder';
 
         $oCurl = curl_init($sForwarderUrl);
         curl_setopt($oCurl, CURLOPT_POST, 1);

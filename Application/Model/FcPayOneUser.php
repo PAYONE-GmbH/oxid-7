@@ -788,7 +788,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      *
      * @param bool $blIsValidAddress
      * @param bool $blFCPOCheckDelAddress
-     * @return boolean
+     * @return bool
      */
     protected function _fcpoValidateDelAddress(bool $blIsValidAddress, bool $blFCPOCheckDelAddress): bool
     {

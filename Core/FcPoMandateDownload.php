@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Core;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use JetBrains\PhpStorm\NoReturn;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -41,9 +42,10 @@ class FcPoMandateDownload extends FrontendController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
+
 
     /**
      * init object construction
@@ -57,9 +59,8 @@ class FcPoMandateDownload extends FrontendController
     /**
      * Render overloading
      *
-     * @return void
      */
-    public function render()
+    #[NoReturn] public function render()
     {
         parent::render();
         $this->_fcpoMandateDownloadAction();
@@ -71,7 +72,7 @@ class FcPoMandateDownload extends FrontendController
      *
      * @return void
      */
-    protected function _fcpoMandateDownloadAction()
+    protected function _fcpoMandateDownloadAction(): void
     {
         $oDb = DatabaseProvider::getDb();
         $sQuery = $this->_fcpoGetMandateQuery();
@@ -98,7 +99,7 @@ class FcPoMandateDownload extends FrontendController
         }
 
         header("Content-Type: application/pdf");
-        header("Content-Disposition: attachment; filename=\"{$sFilename}\"");
+        header("Content-Disposition: attachment; filename=\"$sFilename\"");
         readfile($sPath);
     }
 
@@ -107,7 +108,7 @@ class FcPoMandateDownload extends FrontendController
      *
      * @return string
      */
-    protected function _fcpoGetMandateQuery()
+    protected function _fcpoGetMandateQuery(): string
     {
         $sOrderId = $this->_oFcPoHelper->fcpoGetRequestParameter('id');
         $sUserId = $this->_fcpoGetUserId();
@@ -137,7 +138,7 @@ class FcPoMandateDownload extends FrontendController
                 fcpopdfmandates AS a
             INNER JOIN
                 oxorder AS b ON a.oxorderid = b.oxid
-            WHERE {$sWhere} {$sOrderBy} LIMIT 1        
+            WHERE $sWhere $sOrderBy LIMIT 1        
         ";
     }
 
@@ -147,7 +148,7 @@ class FcPoMandateDownload extends FrontendController
      *
      * @return mixed
      */
-    protected function _fcpoGetUserId()
+    protected function _fcpoGetUserId(): mixed
     {
         $sUserId = $this->_oFcPoHelper->fcpoGetRequestParameter('uid');
         $oUser = $this->getUser();
@@ -159,13 +160,15 @@ class FcPoMandateDownload extends FrontendController
     }
 
     /**
-     * Redownload existing mandate from payone platform
+     * Re-download existing mandate from payone platform
      *
-     * @param $sMandateFilename
-     * @param $sOrderId
-     * @param $sPaymentId
+     * @param string $sMandateFilename
+     * @param string $sOrderId
+     * @param string $sPaymentId
+     *
+     * @return void
      */
-    protected function _redownloadMandate($sMandateFilename, $sOrderId, $sPaymentId)
+    protected function _redownloadMandate(string $sMandateFilename, string $sOrderId, string $sPaymentId): void
     {
         $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
         $oPayment = oxNew(Payment::class);
@@ -175,4 +178,5 @@ class FcPoMandateDownload extends FrontendController
         $oPORequest = oxNew(FcPoRequest::class);
         $oPORequest->sendRequestGetFile($sOrderId, $sMandateIdentification, $sMode);
     }
+
 }

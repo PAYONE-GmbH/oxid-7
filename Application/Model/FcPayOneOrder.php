@@ -1542,7 +1542,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     /**
      * Method checks via current paymenttype is of payone PayPal type
      *
-     * @return boolean
+     * @return bool
      */
     public function fcIsPayPalOrder(): bool
     {

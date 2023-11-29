@@ -47,7 +47,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_main';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_main';
 
     /**
      * List of boolean config values

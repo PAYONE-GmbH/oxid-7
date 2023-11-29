@@ -549,7 +549,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @param bool $blAdd
      * @param string $sNeedle
      * @param array $aHaystack
-     * @return boolean
+     * @return bool
      */
     protected function _fcpoCheckAddCampaign(bool $blAdd, string $sNeedle, array $aHaystack): bool
     {

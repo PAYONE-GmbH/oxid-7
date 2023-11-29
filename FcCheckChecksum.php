@@ -1,6 +1,7 @@
 <?php
 
 namespace Fatchip\PayOne;
+
 class FcCheckChecksum
 {
 

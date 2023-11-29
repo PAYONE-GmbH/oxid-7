@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,11 +36,11 @@ class FcPayOneEvents
 {
 
     /**
-     * Paymnts that were once used but now deprecated and marked for removal
+     * Payments that were once used but now deprecated and marked for removal
      *
      * @var array
      */
-    public static $_aRemovedPaymentMethods = [
+    public static array $_aRemovedPaymentMethods = [
         'fcpoyapital',
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
@@ -53,7 +52,7 @@ class FcPayOneEvents
         'fcpo_giropay',
         'fcpoamazonpay'
     ];
-    public static $sQueryTableFcporefnr = "
+    public static string $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
           FCPO_REFNR int(11) NOT NULL AUTO_INCREMENT,
           FCPO_TXID varchar(32) NOT NULL DEFAULT '',
@@ -61,7 +60,7 @@ class FcPayOneEvents
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (FCPO_REFNR, FCPO_REFPREFIX)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcporequestlog = "
+    public static string $sQueryTableFcporequestlog = "
         CREATE TABLE fcporequestlog (
           OXID int(11) NOT NULL AUTO_INCREMENT,
           FCPO_TIMESTAMP timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,7 +74,7 @@ class FcPayOneEvents
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpotransactionstatus = "
+    public static string $sQueryTableFcpotransactionstatus = "
         CREATE TABLE fcpotransactionstatus (
           OXID int(11) NOT NULL AUTO_INCREMENT,
           FCPO_TIMESTAMP timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -124,7 +123,7 @@ class FcPayOneEvents
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpopayment2country = "
+    public static string $sQueryTableFcpopayment2country = "
         CREATE TABLE IF NOT EXISTS fcpopayment2country (
           OXID char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
           FCPO_PAYMENTID char(8) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '',
@@ -136,7 +135,7 @@ class FcPayOneEvents
           KEY `FCPO_COUNTRYID` (`FCPO_COUNTRYID`),
           KEY `FCPO_TYPE` (`FCPO_TYPE`)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpoStatusForwarding = "
+    public static string $sQueryTableFcpoStatusForwarding = "
         CREATE TABLE fcpostatusforwarding(
                 OXID INT(11) NOT NULL AUTO_INCREMENT,
                 FCPO_PAYONESTATUS VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' ,
@@ -145,7 +144,7 @@ class FcPayOneEvents
                 OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
                 PRIMARY KEY (`OXID`)
         );";
-    public static $sQueryTableFcpoStatusMapping = "
+    public static string $sQueryTableFcpoStatusMapping = "
         CREATE TABLE fcpostatusmapping(
                 OXID INT(11) NOT NULL AUTO_INCREMENT ,
                 FCPO_PAYMENTID CHAR(32) CHARSET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '' ,
@@ -154,7 +153,7 @@ class FcPayOneEvents
                 OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
                 PRIMARY KEY (`OXID`)
         );";
-    public static $sQueryTableFcpoErrorMapping = "
+    public static string $sQueryTableFcpoErrorMapping = "
         CREATE TABLE fcpoerrormapping(
                 OXID INT(11) NOT NULL AUTO_INCREMENT ,
                 FCPO_ERROR_CODE VARCHAR(32) CHARSET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '' ,
@@ -165,21 +164,21 @@ class FcPayOneEvents
                 PRIMARY KEY (`OXID`),
                 KEY `FCPO_ERROR_TYPE` (`FCPO_ERROR_TYPE`)
         );";
-    public static $sQueryTableFcpoklarnastoreids = "
+    public static string $sQueryTableFcpoklarnastoreids = "
         CREATE TABLE fcpoklarnastoreids (
           OXID int(11) NOT NULL AUTO_INCREMENT,
           FCPO_STOREID varchar(32) NOT NULL DEFAULT '',
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpoPdfMandates = "
+    public static string $sQueryTableFcpoPdfMandates = "
         CREATE TABLE fcpopdfmandates (
           OXORDERID char(32) COLLATE latin1_general_ci NOT NULL,
           FCPO_FILENAME varchar(32) NOT NULL DEFAULT '',
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (OXORDERID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpoklarnacampaigns = "
+    public static string $sQueryTableFcpoklarnacampaigns = "
         CREATE TABLE fcpoklarnacampaigns (
           OXID int(11) NOT NULL AUTO_INCREMENT,
           FCPO_CAMPAIGN_CODE varchar(32) NOT NULL DEFAULT '',
@@ -187,7 +186,7 @@ class FcPayOneEvents
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpopaypalexpresslogos = "
+    public static string $sQueryTableFcpopaypalexpresslogos = "
         CREATE TABLE fcpopayoneexpresslogos (
             OXID int(11) NOT NULL AUTO_INCREMENT,
             FCPO_ACTIVE TINYINT( 1 ) NOT NULL DEFAULT '0',
@@ -197,14 +196,14 @@ class FcPayOneEvents
             OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
             PRIMARY KEY (OXID)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
-    public static $sQueryTableFcpocheckedaddresses = "
+    public static string $sQueryTableFcpocheckedaddresses = "
         CREATE TABLE fcpocheckedaddresses (
           fcpo_address_hash CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           fcpo_checkdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           OXTIMESTAMP CHAR(32) COLLATE latin1_general_ci NOT NULL DEFAULT '',
           PRIMARY KEY (fcpo_address_hash)
         ) ENGINE=INNODB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;";
-    public static $sQueryTableFcpoShadowBasket = "
+    public static string $sQueryTableFcpoShadowBasket = "
         CREATE TABLE IF NOT EXISTS `fcposhadowbasket` (
           `FCPOSESSIONID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '',
           `OXORDERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT '',
@@ -214,7 +213,7 @@ class FcPayOneEvents
           PRIMARY KEY (`FCPOSESSIONID`),
           KEY `OXORDERID` (`OXORDERID`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-    public static $sQueryTableRatePay = "
+    public static string $sQueryTableRatePay = "
         CREATE TABLE `fcporatepay` (
           `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
           `OXPAYMENTID` char(32) COLLATE latin1_general_ci NOT NULL,
@@ -280,7 +279,7 @@ class FcPayOneEvents
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     ";
-    public static $sQueryTableFcpoUserFlags = "
+    public static string $sQueryTableFcpoUserFlags = "
         CREATE TABLE IF NOT EXISTS `fcpouserflags` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
           `FCPOCODE` int(11) NOT NULL,
@@ -292,7 +291,7 @@ class FcPayOneEvents
           UNIQUE KEY `FCPOCODE` (`FCPOCODE`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     ";
-    public static $sQueryTableFcpoUser2Flag = "
+    public static string $sQueryTableFcpoUser2Flag = "
         CREATE TABLE IF NOT EXISTS `fcpouser2flag` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
           `OXUSERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -303,7 +302,7 @@ class FcPayOneEvents
           KEY `OXUSERID` (`OXUSERID`,`FCPOUSERFLAGID`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;    
     ";
-    public static $sQueryTableStatusForwardQueue = "
+    public static string $sQueryTableStatusForwardQueue = "
         CREATE TABLE `fcpostatusforwardqueue` (
           `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
           `FCSTATUSMESSAGEID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -320,59 +319,59 @@ class FcPayOneEvents
           KEY `FCFULFILLED` (`FCFULFILLED`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     ";
-    public static $sQueryAlterOxorderTxid = "ALTER TABLE oxorder ADD COLUMN FCPOTXID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxorderRefNr = "ALTER TABLE oxorder ADD COLUMN FCPOREFNR VARCHAR(32) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderAuthMode = "ALTER TABLE oxorder ADD COLUMN FCPOAUTHMODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxorderMode = "ALTER TABLE oxorder ADD COLUMN FCPOMODE VARCHAR(8) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxpaymentsAuthMode = "ALTER TABLE oxpayments ADD COLUMN FCPOAUTHMODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing1 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKACCOUNTHOLDER VARCHAR(64) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing2 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKACCOUNT VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing3 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKCODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing4 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKNAME VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing5 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKBIC VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing6 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKIBAN VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing7 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_LEGALNOTE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing8 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_DUEDATE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing9 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_REFERENCE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterTxStatusClearing10 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_INSTRUCTIONNOTE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxuserPersonalId = "ALTER TABLE oxuser ADD COLUMN FCPOPERSONALID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxuserCurrentMalus = "ALTER TABLE oxuser ADD COLUMN FCPOCURRMALUS INT(11) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxuserRealBoni = "ALTER TABLE oxuser ADD COLUMN FCPOREALBONI INT(11) DEFAULT NULL;";
-    public static $sQueryAlterFcporefnr = "ALTER TABLE fcporefnr ADD COLUMN FCPO_REFPREFIX VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL, DROP PRIMARY KEY, ADD PRIMARY KEY(FCPO_REFNR, FCPO_REFPREFIX);";
-    public static $sQueryChangeFcporequestlog = "ALTER TABLE fcporequestlog CHANGE FCPO_REFNR FCPO_REFNR VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterCampaign1 = "ALTER TABLE fcpoklarnacampaigns ADD FCPO_CAMPAIGN_LANGUAGE VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';";
-    public static $sQueryAlterCampaign2 = "ALTER TABLE fcpoklarnacampaigns ADD FCPO_CAMPAIGN_CURRENCY VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';";
-    public static $sQueryAlterOxuser = "ALTER TABLE oxuser ADD COLUMN FCPOBONICHECKDATE DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL;";
-    public static $sQueryAlterOxpaymentsLiveMode = "ALTER TABLE oxpayments ADD COLUMN FCPOLIVEMODE TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxpaymentsIsPayone = "ALTER TABLE oxpayments ADD COLUMN FCPOISPAYONE TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderarticlesCapturedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderarticlesDebitedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderDelcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPODELCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderPaycostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOPAYCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderWrapcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOWRAPCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderGiftcardcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOGIFTCARDCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderVoucherdiscountDebited = "ALTER TABLE oxorder ADD COLUMN FCPOVOUCHERDISCOUNTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderDiscountDebited = "ALTER TABLE oxorder ADD COLUMN FCPODISCOUNTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderNotChecked = "ALTER TABLE oxorder ADD COLUMN FCPOORDERNOTCHECKED TINYINT(1) DEFAULT '0' NOT NULL;";
-    public static $sQueryAlterOxorderWorkOrderId = "ALTER TABLE oxorder ADD COLUMN FCPOWORKORDERID VARCHAR(16) DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxorderClearingReference = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGREFERENCE VARCHAR(32) DEFAULT '' NOT NULL;";
-    public static $sQueryAlterOxorderProfileIdent = "ALTER TABLE oxorder ADD COLUMN FCPOPROFILEIDENT VARCHAR(32) DEFAULT '' NOT NULL;";
-    public static $sQueryChangeToVarchar1 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_USERID FCPO_USERID VARCHAR(32) DEFAULT '0' NOT NULL;";
-    public static $sQueryChangeToVarchar2 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_TXID FCPO_TXID VARCHAR(32) DEFAULT '0' NOT NULL;";
-    public static $sQueryChangeToVarchar3 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_REFERENCE FCPO_REFERENCE VARCHAR( 32 ) NOT NULL DEFAULT '0'";
-    public static $sQueryAlterFcpoTransactionStatusForwardState = "ALTER TABLE fcpotransactionstatus ADD COLUMN `FCPO_FORWARD_STATE` VARCHAR(32)";
-    public static $sQueryAlterFcpoTransactionStatusForwardTries = "ALTER TABLE fcpotransactionstatus ADD COLUMN `FCPO_FORWARD_TRIES` int(11) NOT NULL DEFAULT 0";
-    public static $sQueryChangeRefNrToVarchar = "ALTER TABLE oxorder CHANGE FCPOREFNR FCPOREFNR VARCHAR( 32 ) NOT NULL DEFAULT '0'";
-    public static $sQueryAlterFcpoTransactionStatusChangeToChar = "ALTER TABLE fcpotransactionstatus CHANGE OXID OXID char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;";
-    public static $sQueryAlterFcpoTransactionForwardingChangeToChar = "ALTER TABLE fcpostatusforwarding CHANGE OXID OXID char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;";
-    public static $sQueryChangeOxtimestampType = "ALTER TABLE [REPLACE_WITH_TABLE_NAME] CHANGE OXTIMESTAMP OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
-    public static $sQueryAlterFcpopdfmandatesOxtimestamp = "ALTER TABLE fcpopdfmandates ADD COLUMN OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
-    public static $sQueryAlterFcpouser2flagFcpotimestamp = "ALTER TABLE fcpouser2flag CHANGE FCPOTIMESTAMP OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
-    public static $sQueryFcporequestlogCopyTimestampData = "UPDATE fcporequestlog SET OXTIMESTAMP = FCPO_TIMESTAMP;";
-    public static $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
-    public static $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
-    public static $sQueryAlterFcpoShadowBasketFcbasketChangeToBlob = "ALTER TABLE fcposhadowbasket MODIFY FCPOBASKET BLOB;";
-    public static $aPaymentMethods = [
+    public static string $sQueryAlterOxorderTxid = "ALTER TABLE oxorder ADD COLUMN FCPOTXID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderRefNr = "ALTER TABLE oxorder ADD COLUMN FCPOREFNR VARCHAR(32) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderAuthMode = "ALTER TABLE oxorder ADD COLUMN FCPOAUTHMODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderMode = "ALTER TABLE oxorder ADD COLUMN FCPOMODE VARCHAR(8) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxpaymentsAuthMode = "ALTER TABLE oxpayments ADD COLUMN FCPOAUTHMODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing1 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKACCOUNTHOLDER VARCHAR(64) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing2 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKACCOUNT VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing3 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKCODE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing4 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKNAME VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing5 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKBIC VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing6 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_BANKIBAN VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing7 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_LEGALNOTE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing8 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_DUEDATE VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing9 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_REFERENCE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterTxStatusClearing10 = "ALTER TABLE fcpotransactionstatus ADD COLUMN FCPO_CLEARING_INSTRUCTIONNOTE VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxuserPersonalId = "ALTER TABLE oxuser ADD COLUMN FCPOPERSONALID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxuserCurrentMalus = "ALTER TABLE oxuser ADD COLUMN FCPOCURRMALUS INT(11) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxuserRealBoni = "ALTER TABLE oxuser ADD COLUMN FCPOREALBONI INT(11) DEFAULT NULL;";
+    public static string $sQueryAlterFcporefnr = "ALTER TABLE fcporefnr ADD COLUMN FCPO_REFPREFIX VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL, DROP PRIMARY KEY, ADD PRIMARY KEY(FCPO_REFNR, FCPO_REFPREFIX);";
+    public static string $sQueryChangeFcporequestlog = "ALTER TABLE fcporequestlog CHANGE FCPO_REFNR FCPO_REFNR VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterCampaign1 = "ALTER TABLE fcpoklarnacampaigns ADD FCPO_CAMPAIGN_LANGUAGE VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';";
+    public static string $sQueryAlterCampaign2 = "ALTER TABLE fcpoklarnacampaigns ADD FCPO_CAMPAIGN_CURRENCY VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';";
+    public static string $sQueryAlterOxuser = "ALTER TABLE oxuser ADD COLUMN FCPOBONICHECKDATE DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL;";
+    public static string $sQueryAlterOxpaymentsLiveMode = "ALTER TABLE oxpayments ADD COLUMN FCPOLIVEMODE TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxpaymentsIsPayone = "ALTER TABLE oxpayments ADD COLUMN FCPOISPAYONE TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderarticlesCapturedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderarticlesDebitedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderDelcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPODELCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderPaycostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOPAYCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderWrapcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOWRAPCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderGiftcardcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOGIFTCARDCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderVoucherdiscountDebited = "ALTER TABLE oxorder ADD COLUMN FCPOVOUCHERDISCOUNTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderDiscountDebited = "ALTER TABLE oxorder ADD COLUMN FCPODISCOUNTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderNotChecked = "ALTER TABLE oxorder ADD COLUMN FCPOORDERNOTCHECKED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static string $sQueryAlterOxorderWorkOrderId = "ALTER TABLE oxorder ADD COLUMN FCPOWORKORDERID VARCHAR(16) DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderClearingReference = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGREFERENCE VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderProfileIdent = "ALTER TABLE oxorder ADD COLUMN FCPOPROFILEIDENT VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static string $sQueryChangeToVarchar1 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_USERID FCPO_USERID VARCHAR(32) DEFAULT '0' NOT NULL;";
+    public static string $sQueryChangeToVarchar2 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_TXID FCPO_TXID VARCHAR(32) DEFAULT '0' NOT NULL;";
+    public static string $sQueryChangeToVarchar3 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_REFERENCE FCPO_REFERENCE VARCHAR( 32 ) NOT NULL DEFAULT '0'";
+    public static string $sQueryAlterFcpoTransactionStatusForwardState = "ALTER TABLE fcpotransactionstatus ADD COLUMN `FCPO_FORWARD_STATE` VARCHAR(32)";
+    public static string $sQueryAlterFcpoTransactionStatusForwardTries = "ALTER TABLE fcpotransactionstatus ADD COLUMN `FCPO_FORWARD_TRIES` int(11) NOT NULL DEFAULT 0";
+    public static string $sQueryChangeRefNrToVarchar = "ALTER TABLE oxorder CHANGE FCPOREFNR FCPOREFNR VARCHAR( 32 ) NOT NULL DEFAULT '0'";
+    public static string $sQueryAlterFcpoTransactionStatusChangeToChar = "ALTER TABLE fcpotransactionstatus CHANGE OXID OXID char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;";
+    public static string $sQueryAlterFcpoTransactionForwardingChangeToChar = "ALTER TABLE fcpostatusforwarding CHANGE OXID OXID char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;";
+    public static string $sQueryChangeOxtimestampType = "ALTER TABLE [REPLACE_WITH_TABLE_NAME] CHANGE OXTIMESTAMP OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
+    public static string $sQueryAlterFcpopdfmandatesOxtimestamp = "ALTER TABLE fcpopdfmandates ADD COLUMN OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
+    public static string $sQueryAlterFcpouser2flagFcpotimestamp = "ALTER TABLE fcpouser2flag CHANGE FCPOTIMESTAMP OXTIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Timestamp';";
+    public static string $sQueryFcporequestlogCopyTimestampData = "UPDATE fcporequestlog SET OXTIMESTAMP = FCPO_TIMESTAMP;";
+    public static string $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
+    public static string $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
+    public static string $sQueryAlterFcpoShadowBasketFcbasketChangeToBlob = "ALTER TABLE fcposhadowbasket MODIFY FCPOBASKET BLOB;";
+    public static array $aPaymentMethods = [
         'fcpoinvoice' => 'PAYONE Rechnungskauf',
         'fcpopayadvance' => 'PAYONE Vorkasse',
         'fcpodebitnote' => 'PAYONE Lastschrift',
@@ -407,18 +406,20 @@ class FcPayOneEvents
         'fcpopl_secinstallment' => 'PAYONE Gesicherter Ratenkauf',
 
     ];
+
     /**
      * Database object
      *
      * @var FcPoHelper
      */
-    protected static $_oFcPoHelper = null;
+    protected static FcPoHelper $_oFcPoHelper;
+
     /**
      * Tables that have the oxtimestamp column whose type needs to be updated.
      *
      * @var string[]
      */
-    protected static $updateOxtimestampTypeTable = [
+    protected static array $updateOxtimestampTypeTable = [
         'fcporefnr',
         'fcporequestlog',
         'fcpotransactionstatus',
@@ -435,12 +436,13 @@ class FcPayOneEvents
         'fcpouser2flag',
     ];
 
+
     /**
      * Execute action on activate event.
      *
      * @return void
      */
-    public static function onActivate()
+    public static function onActivate(): void
     {
         $sMessage = "";
         self::$_oFcPoHelper = oxNew(FcPoHelper::class);
@@ -467,7 +469,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function addDatabaseStructure()
+    public static function addDatabaseStructure(): void
     {
         //CREATE NEW TABLES
         self::addTableIfNotExists('fcporefnr', self::$sQueryTableFcporefnr);
@@ -580,11 +582,11 @@ class FcPayOneEvents
      * Add a database table.
      *
      * @param string $sTableName table to add
-     * @param string $sQuery     sql-query to add table
+     * @param string $sQuery sql-query to add table
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function addTableIfNotExists($sTableName, $sQuery)
+    public static function addTableIfNotExists(string $sTableName, string $sQuery): bool
     {
         $aTables = DatabaseProvider::getDb()->getAll("SHOW TABLES LIKE '{$sTableName}'");
         if (!$aTables || count($aTables) == 0) {
@@ -597,13 +599,13 @@ class FcPayOneEvents
     /**
      * Add a column to a database table.
      *
-     * @param string $sTableName  table name
+     * @param string $sTableName table name
      * @param string $sColumnName column name
-     * @param string $sQuery      sql-query to add column to table
+     * @param string $sQuery sql-query to add column to table
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function addColumnIfNotExists($sTableName, $sColumnName, $sQuery)
+    public static function addColumnIfNotExists(string $sTableName, string $sColumnName, string $sQuery): bool
     {
         $aColumns = DatabaseProvider::getDb()->getAll("SHOW COLUMNS FROM {$sTableName} LIKE '{$sColumnName}'");
 
@@ -622,13 +624,13 @@ class FcPayOneEvents
     /**
      * Copy data from old column.
      *
-     * @param string $sTableName    database table name
+     * @param string $sTableName database table name
      * @param string $oldColumnName database old column name
      * @param string $newColumnName database new column name
      * @param string $copyDataQuery sql query to execute
      * @return bool
      */
-    public static function copyDataFromOldColumnIfExists($sTableName, $oldColumnName, $newColumnName, $copyDataQuery)
+    public static function copyDataFromOldColumnIfExists(string $sTableName, string $oldColumnName, string $newColumnName, string $copyDataQuery): bool
     {
         if (DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$oldColumnName}'") &&
             DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$newColumnName}'")
@@ -642,13 +644,13 @@ class FcPayOneEvents
     /**
      * Delete a database column if the column itself and the new replacing column exist.
      *
-     * @param string $sTable            database table name
-     * @param string $oldColumn         database old column name
+     * @param string $sTable database table name
+     * @param string $oldColumn database old column name
      * @param string $replacementColumn database replacement column name
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function dropColumnIfItAndReplacementExist($sTable, $oldColumn, $replacementColumn)
+    public static function dropColumnIfItAndReplacementExist(string $sTable, string $oldColumn, string $replacementColumn): bool
     {
         if (DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTable} WHERE FIELD = '{$oldColumn}'") &&
             DatabaseProvider::getDb()->getOne("SHOW COLUMNS FROM {$sTable} WHERE FIELD = '{$replacementColumn}'")
@@ -663,13 +665,13 @@ class FcPayOneEvents
     /**
      * Check and change database table structure.
      *
-     * @param string $sTableName  database table name
+     * @param string $sTableName database table name
      * @param string $sColumnName database column name
-     * @param string $sQuery      sql-query to execute
+     * @param string $sQuery sql-query to execute
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function changeColumnNameIfWrong($sTableName, $sColumnName, $sQuery)
+    public static function changeColumnNameIfWrong(string $sTableName, string $sColumnName, string $sQuery): bool
     {
         $checkQuery = "SHOW COLUMNS FROM {$sTableName} WHERE FIELD = '{$sColumnName}'";
         if (DatabaseProvider::getDb()->getOne($checkQuery)) {
@@ -682,15 +684,15 @@ class FcPayOneEvents
     /**
      * Check and change database table structure.
      *
-     * @param string $sTableName    database table name
-     * @param string $sColumnName   database column name
+     * @param string $sTableName database table name
+     * @param string $sColumnName database column name
      * @param string $sExpectedType column structure type for comparison
-     * @param string $sQuery        sql-query to execute
+     * @param string $sQuery sql-query to execute
      *
-     * @return boolean true or false
+     * @return bool true or false
      * @throws DatabaseConnectionException
      */
-    public static function changeColumnTypeIfWrong($sTableName, $sColumnName, $sExpectedType, $sQuery)
+    public static function changeColumnTypeIfWrong(string $sTableName, string $sColumnName, string $sExpectedType, string $sQuery): bool
     {
         $sCheckQuery = "
             SHOW COLUMNS 
@@ -711,10 +713,10 @@ class FcPayOneEvents
      * @param string $sTable database table name
      * @param string $sIndex database index name
      *
-     * @return boolean true or false
+     * @return bool true or false
      * @throws DatabaseConnectionException
      */
-    public static function dropIndexIfExists($sTable, $sIndex): bool
+    public static function dropIndexIfExists(string $sTable, string $sIndex): bool
     {
         if (DatabaseProvider::getDb()->getOne("SHOW KEYS FROM {$sTable} WHERE Key_name = '{$sIndex}'")) {
             DatabaseProvider::getDb()->execute("ALTER TABLE {$sTable} DROP INDEX {$sIndex}");
@@ -728,13 +730,13 @@ class FcPayOneEvents
      * Insert a database row to an existing table.
      *
      * @param string $sTableName database table name
-     * @param array  $aKeyValue  keys of rows to add for existance check
-     * @param string $sQuery     sql-query to insert data
+     * @param array $aKeyValue keys of rows to add for existance check
+     * @param string $sQuery sql-query to insert data
      *
-     * @return boolean true or false
+     * @return bool true or false
      * @throws DatabaseConnectionException|DatabaseErrorException
      */
-    public static function insertRowIfNotExists($sTableName, $aKeyValue, $sQuery): bool
+    public static function insertRowIfNotExists(string $sTableName, array $aKeyValue, string $sQuery): bool
     {
         $sWhere = '';
         foreach ($aKeyValue as $key => $value) {
@@ -796,7 +798,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function removeDeprecated()
+    public static function removeDeprecated(): void
     {
         foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
             self::dropRowIfExists("oxpayments", ['OXID' => $sRemovedPaymentMethod], "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
@@ -809,12 +811,14 @@ class FcPayOneEvents
      * Drop a table entry.
      *
      * @param string $sTableName database table name
-     * @param array  $aKeyValue  array of keys to drop
-     * @param string $sQuery     sql-query to execute
+     * @param array $aKeyValue array of keys to drop
+     * @param string $sQuery sql-query to execute
      *
-     * @return boolean
+     * @return bool
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public static function dropRowIfExists($sTableName, $aKeyValue, $sQuery)
+    public static function dropRowIfExists(string $sTableName, array $aKeyValue, string $sQuery): bool
     {
         $blReturn = false;
         $sWhere = '';
@@ -835,7 +839,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function regenerateViews()
+    public static function regenerateViews(): void
     {
         $oShop = oxNew(Shop::class);
         $oShop->generateViews();
@@ -846,7 +850,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function setDefaultConfigValues()
+    public static function setDefaultConfigValues(): void
     {
         $oConfig = self::$_oFcPoHelper->fcpoGetConfig();
         $blIsUpdate = self::isUpdate();
@@ -869,7 +873,7 @@ class FcPayOneEvents
      *
      * @return bool
      */
-    public static function isUpdate()
+    public static function isUpdate(): bool
     {
         $oConfig = self::$_oFcPoHelper->fcpoGetConfig();
 
@@ -881,17 +885,9 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function clearTmp()
+    public static function clearTmp(): void
     {
-        $sTmpDir = getShopBasePath() . "/tmp/";
-        $sSmartyDir = $sTmpDir . "smarty/";
-
-        foreach (glob($sTmpDir . "*.txt") as $sFileName) {
-            @unlink($sFileName);
-        }
-        foreach (glob($sSmartyDir . "*.php") as $sFileName) {
-            @unlink($sFileName);
-        }
+        $output = shell_exec(VENDOR_PATH . '/bin/oe-console oe:cache:clear');
     }
 
     /**
@@ -899,7 +895,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function onDeactivate()
+    public static function onDeactivate(): void
     {
         self::$_oFcPoHelper = oxNew(FcPoHelper::class);
         self::deactivatePaymethods();
@@ -914,7 +910,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function deactivatePaymethods()
+    public static function deactivatePaymethods(): void
     {
         $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
         $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
@@ -927,9 +923,9 @@ class FcPayOneEvents
      * @param string $sMinVersion minimum allowed version number
      * @param string $sMaxVersion maximum allowed version number
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function isBetweenVersions($sMinVersion, $sMaxVersion)
+    public static function isBetweenVersions(string $sMinVersion, string $sMaxVersion): bool
     {
         if (!self::isOverVersion($sMinVersion, true)) {
             return false;
@@ -943,17 +939,17 @@ class FcPayOneEvents
     /**
      * Checks if OXID eShop is above given version.
      *
-     * @param string  $sMinVersion      minimum allowed version
-     * @param boolean $blEqualOrGreater define if equal is allowed
+     * @param string $sMinVersion minimum allowed version
+     * @param bool $blEqualOrGreater define if equal is allowed
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function isOverVersion($sMinVersion, $blEqualOrGreater = false)
+    public static function isOverVersion(string $sMinVersion, bool $blEqualOrGreater = false): bool
     {
         $sCompareOperator = ($blEqualOrGreater) ? '>=' : '>';
         $sCurrVersion = self::getCurrentVersion();
 
-        return (version_compare($sCurrVersion, $sMinVersion, $sCompareOperator)) ? true : false;
+        return (bool)version_compare($sCurrVersion, $sMinVersion, $sCompareOperator);
     }
 
     /**
@@ -961,7 +957,7 @@ class FcPayOneEvents
      *
      * @return string versionnumber
      */
-    public static function getCurrentVersion()
+    public static function getCurrentVersion(): string
     {
         return self::$_oFcPoHelper->fcpoGetConfig()->getActiveShop()->oxshops__oxversion->value;
     }
@@ -971,24 +967,24 @@ class FcPayOneEvents
      *
      * @param string $sMaxVersion maximum allowed version
      *
-     * @return boolean true or false
+     * @return bool true or false
      */
-    public static function isUnderVersion($sMaxVersion): bool
+    public static function isUnderVersion(string $sMaxVersion): bool
     {
         $sCurrVersion = self::getCurrentVersion();
 
-        return (version_compare($sCurrVersion, $sMaxVersion, '<')) ? true : false;
+        return (bool)version_compare($sCurrVersion, $sMaxVersion, '<');
     }
 
     /**
-     * Copies a sourcefile to a destination.
+     * Copies a source file to a destination.
      *
-     * @param string $sSource      path to source-file
+     * @param string $sSource path to source-file
      * @param string $sDestination path to destination-file
      *
-     * @return boolean true or false
+     * @return void
      */
-    public static function copyFile($sSource, $sDestination)
+    public static function copyFile(string $sSource, string $sDestination): void
     {
         if (file_exists($sSource) === true) {
             self::deleteFileIfExists($sDestination);
@@ -1007,7 +1003,7 @@ class FcPayOneEvents
      *
      * @return void
      */
-    public static function deleteFileIfExists($sFile)
+    public static function deleteFileIfExists(string $sFile): void
     {
         if (file_exists($sFile)) {
             unlink($sFile);

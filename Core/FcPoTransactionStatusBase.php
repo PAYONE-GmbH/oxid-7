@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Core;
 
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
@@ -31,20 +32,36 @@ use OxidEsales\Eshop\Core\UtilsObject;
 class FcPoTransactionStatusBase extends BaseModel
 {
 
-    protected $_aShopList = null;
-
-    protected $_sLogFile = 'fcpo_message_forwarding.log';
-
-    protected $_sExceptionLog = 'fcpo_statusmessage_exception.log';
-
-    protected $_oFcOrder = null;
-
-    protected $_oUtilsObject = null;
+    /**
+     * @var array
+     */
+    protected array $_aShopList;
 
     /**
-     * @var bool|mixed|string|null
+     * @var string
      */
-    protected mixed $_oFcPoHelper;
+    protected string $_sLogFile = 'fcpo_message_forwarding.log';
+
+    /**
+     * @var string
+     */
+    protected string $_sExceptionLog = 'fcpo_statusmessage_exception.log';
+
+    /**
+     * @var Order
+     */
+    protected Order $_oFcOrder;
+
+    /**
+     * @var UtilsObject
+     */
+    protected UtilsObject $_oUtilsObject;
+
+    /**
+     * @var FcPoHelper
+     */
+    protected FcPoHelper $_oFcPoHelper;
+
 
     /**
      * Initializing needed things
@@ -74,7 +91,7 @@ class FcPoTransactionStatusBase extends BaseModel
 
         $aKeys = [...array_values($this->_getConfigParams('sFCPOPortalKey')), ...array_values($this->_getConfigParams('sFCPOSecinvoicePortalKey')), ...array_values($this->_getConfigParams('sFCPOPLPortalKey'))];
         $blValid = false;
-        foreach ($aKeys as $i => $sConfigKey) {
+        foreach ($aKeys as $sConfigKey) {
             if (md5((string)$sConfigKey) !== $sKey) {
                 continue;
             }
@@ -109,9 +126,10 @@ class FcPoTransactionStatusBase extends BaseModel
     }
 
     /**
+     * @param string $sParam
      * @return array<int|string, mixed>
      */
-    protected function _getConfigParams($sParam): array
+    protected function _getConfigParams(string $sParam): array
     {
         $aShops = $this->_getShopList();
         $aParams = [];
@@ -126,8 +144,7 @@ class FcPoTransactionStatusBase extends BaseModel
     }
 
     /**
-     * @throws DatabaseErrorException
-     * @throws DatabaseConnectionException
+     * @return array
      */
     protected function _getShopList(): array
     {
@@ -189,11 +206,10 @@ class FcPoTransactionStatusBase extends BaseModel
     /**
      * Method collects redirect targets and add them to statusforward queue
      *
-     * @param string      $sStatusmessageId
+     * @param string $sStatusmessageId
      * @param string|null $sPayoneStatus
      * @return void
-     * @throws DatabaseConnectionException
-     * @throws DatabaseErrorException
+     * @throws Exception
      */
     protected function _addQueueEntries(string $sStatusmessageId, string $sPayoneStatus = null): void
     {
@@ -208,11 +224,11 @@ class FcPoTransactionStatusBase extends BaseModel
             FROM 
                 fcpostatusforwarding 
             WHERE 
-                fcpo_payonestatus = '{$sPayoneStatus}'";
+                fcpo_payonestatus = '$sPayoneStatus'";
 
             $aRows = DatabaseProvider::getDb()->getAll($sQuery);
 
-            $this->_logForwardMessage('Add fowardings to queue: ' . print_r($aRows, true));
+            $this->_logForwardMessage('Add forwardings to queue: ' . print_r($aRows, true));
 
             foreach ($aRows as $aRow) {
                 $sForwardId = (string)$aRow[0];
@@ -226,10 +242,10 @@ class FcPoTransactionStatusBase extends BaseModel
     /**
      * Logs given message if logging is activated
      *
-     * @param $sMessage
+     * @param string $sMessage
      * @return void
      */
-    protected function _logForwardMessage($sMessage)
+    protected function _logForwardMessage(string $sMessage): void
     {
         $blLoggingAllowed = $this->_fcCheckLoggingAllowed();
         if (!$blLoggingAllowed) return;
@@ -247,6 +263,7 @@ class FcPoTransactionStatusBase extends BaseModel
 
     /**
      * Check if logging is activated by configuration
+     * @return bool
      */
     protected function _fcCheckLoggingAllowed(): bool
     {
@@ -261,16 +278,17 @@ class FcPoTransactionStatusBase extends BaseModel
      * Add certain combination of transaction and forward configuration
      * to queue
      *
-     * @param $sStatusmessageId
-     * @param $sForwardId
+     * @param string $sStatusmessageId
+     * @param string $sForwardId
+     * @return void
      * @throws Exception
      */
-    protected function _addToQueue($sStatusmessageId, $sForwardId)
+    protected function _addToQueue(string $sStatusmessageId, string $sForwardId): void
     {
         try {
             if ($this->_queueEntryExists($sStatusmessageId, $sForwardId)) {
                 $this->_logForwardMessage(
-                    'Entry already exitsts. Skipping. StatusmessageId: ' .
+                    'Entry already exists. Skipping. StatusmessageId: ' .
                     $sStatusmessageId .
                     ', ForwardId: ' .
                     $sForwardId
@@ -293,9 +311,9 @@ class FcPoTransactionStatusBase extends BaseModel
                 )
                 VALUES
                 (
-                    '{$sOxid}',
-                    '{$sStatusmessageId}',
-                    '{$sForwardId}',
+                    '$sOxid',
+                    '$sStatusmessageId',
+                    '$sForwardId',
                     '0',
                     '0000-00-00 00:00:00',
                     '',
@@ -313,32 +331,32 @@ class FcPoTransactionStatusBase extends BaseModel
      * Checks if a certain combination of statusmessageid already
      * exists
      *
-     * @param $sStatusmessageId
-     * @param $sForwardId
+     * @param string $sStatusmessageId
+     * @param string $sForwardId
      * @return bool
      */
-    protected function _queueEntryExists($sStatusmessageId, $sForwardId)
+    protected function _queueEntryExists(string $sStatusmessageId, string $sForwardId): bool
     {
         $sQuery = "
                 SELECT COUNT(*) 
                 FROM fcpostatusforwardqueue
                 WHERE
-                    FCSTATUSMESSAGEID='{$sStatusmessageId}' AND
-                    FCSTATUSFORWARDID='{$sForwardId}'
+                    FCSTATUSMESSAGEID='$sStatusmessageId' AND
+                    FCSTATUSFORWARDID='$sForwardId'
         ";
 
         $iRows = (int)DatabaseProvider::getDb()->getOne($sQuery);
 
-        return (bool)($iRows > 0);
+        return ($iRows > 0);
     }
 
     /**
      * Returns instance of oxUtilsObject
      *
-     * @return |null
+     * @return UtilsObject
      * @throws Exception
      */
-    protected function _getUtilsObject()
+    protected function _getUtilsObject(): UtilsObject
     {
         if ($this->_oUtilsObject === null) {
             try {
@@ -350,4 +368,5 @@ class FcPoTransactionStatusBase extends BaseModel
 
         return $this->_oUtilsObject;
     }
+
 }
