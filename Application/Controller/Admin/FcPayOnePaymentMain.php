@@ -22,6 +22,7 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
 {
@@ -50,7 +51,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
     /**
      * init object construction
      *
-     * @return void
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -67,6 +68,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
      *
      * @param string $sShopId
      * @return void
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoLoadConfigs(string $sShopId): void
     {
@@ -88,6 +90,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
      * Save Method overwriting
      *
      * @return void
+     * @throws DatabaseConnectionException
      */
     public function save(): void
     {

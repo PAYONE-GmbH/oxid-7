@@ -30,21 +30,21 @@ class FcPayOneLogList extends FcPayOneAdminList
      *
      * @var string
      */
-    protected string $_sListClass = FcPoTransactionStatus::class;
+    protected $_sListClass = FcPoTransactionStatus::class;
 
     /**
      * Default SQL sorting parameter (default null).
      *
      * @var string
      */
-    protected string $_sDefSortField = "oxtimestamp";
+    protected $_sDefSortField = "oxtimestamp";
 
     /**
      * Current class template name
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_log_list';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_log_list';
 
 
     /**
@@ -55,9 +55,9 @@ class FcPayOneLogList extends FcPayOneAdminList
     public function getListSorting(): array
     {
         if ($this->_aCurrSorting === null) {
-            $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort');
+            $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort') ?: [];
 
-            if (!$this->_aCurrSorting && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
+            if (empty($this->_aCurrSorting) && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
                 $this->_aCurrSorting[$baseModel->getCoreTableName()] = [$this->_sDefSortField => "asc"];
             }
         }
@@ -74,7 +74,7 @@ class FcPayOneLogList extends FcPayOneAdminList
      */
     public function fcGetInputName(string $sTable, string $sField): string
     {
-        return "where[{$sTable}][{$sField}]";
+        return "where[$sTable][$sField]";
     }
 
     /**
@@ -101,7 +101,7 @@ class FcPayOneLogList extends FcPayOneAdminList
     public function getListFilter(): array
     {
         if ($this->_aListFilter === null) {
-            $this->_aListFilter = $this->_oFcPoHelper->fcpoGetRequestParameter("where");
+            $this->_aListFilter = $this->_oFcPoHelper->fcpoGetRequestParameter("where") ?: [];
         }
 
         return $this->_aListFilter;
@@ -116,7 +116,7 @@ class FcPayOneLogList extends FcPayOneAdminList
      */
     public function fcGetSortingJavascript(string $sTable, string $sField): string
     {
-        return "Javascript:top.oxid.admin.setSorting( document.search, '{$sTable}', '{$sField}', 'asc');document.search.submit();";
+        return "Javascript:top.oxid.admin.setSorting( document.search, '$sTable', '$sField', 'asc');document.search.submit();";
     }
 
     /**
@@ -137,7 +137,7 @@ class FcPayOneLogList extends FcPayOneAdminList
             "'" . $this->getBNPLPortalId() . "'",
         ];
         $sAid = $this->getSubAccountId();
-        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = '{$sAid}' ";
+        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = '$sAid' ";
     }
 
     /**

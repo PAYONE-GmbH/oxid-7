@@ -28,6 +28,7 @@ use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Registry;
 
 /**
  * Eventhandler for module activation and deactivation.
@@ -444,21 +445,26 @@ class FcPayOneEvents
      */
     public static function onActivate(): void
     {
-        $sMessage = "";
-        self::$_oFcPoHelper = oxNew(FcPoHelper::class);
-        self::addDatabaseStructure();
-        $sMessage .= "Datenbankstruktur angepasst...<br>";
-        self::addPayonePayments();
-        $sMessage .= "Payone-Zahlarten hinzugef&uuml;gt...<br>";
-        self::removeDeprecated();
-        $sMessage .= "Veraltete Eintr&auml;ge entfernt...<br>";
-        self::regenerateViews();
-        $sMessage .= "Datenbank-Views erneuert...<br>";
-        self::setDefaultConfigValues();
-        self::clearTmp();
-        $sMessage .= "Tmp geleert...<br>";
-        $sMessage .= "Installation erfolgreich!<br>";
-        // self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        try {
+            $sMessage = "";
+            self::$_oFcPoHelper = oxNew(FcPoHelper::class);
+            self::addDatabaseStructure();
+            $sMessage .= "Datenbankstruktur angepasst...<br>";
+            self::addPayonePayments();
+            $sMessage .= "Payone-Zahlarten hinzugef&uuml;gt...<br>";
+            self::removeDeprecated();
+            $sMessage .= "Veraltete Eintr&auml;ge entfernt...<br>";
+            self::regenerateViews();
+            $sMessage .= "Datenbank-Views erneuert...<br>";
+            self::setDefaultConfigValues();
+            self::clearTmp();
+            $sMessage .= "Tmp geleert...<br>";
+            $sMessage .= "Installation erfolgreich!<br>";
+            // self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        } catch (Exception $oEx) {
+            $oLogger = Registry::getLogger();
+            $oLogger->error($oEx->getTraceAsString());
+        }
     }
 
     /**
@@ -468,6 +474,8 @@ class FcPayOneEvents
      * "change column" statement, which should be called in this method.
      *
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function addDatabaseStructure(): void
     {
@@ -585,6 +593,8 @@ class FcPayOneEvents
      * @param string $sQuery sql-query to add table
      *
      * @return bool true or false
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function addTableIfNotExists(string $sTableName, string $sQuery): bool
     {
@@ -604,6 +614,8 @@ class FcPayOneEvents
      * @param string $sQuery sql-query to add column to table
      *
      * @return bool true or false
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function addColumnIfNotExists(string $sTableName, string $sColumnName, string $sQuery): bool
     {
@@ -629,6 +641,8 @@ class FcPayOneEvents
      * @param string $newColumnName database new column name
      * @param string $copyDataQuery sql query to execute
      * @return bool
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function copyDataFromOldColumnIfExists(string $sTableName, string $oldColumnName, string $newColumnName, string $copyDataQuery): bool
     {
@@ -649,6 +663,8 @@ class FcPayOneEvents
      * @param string $replacementColumn database replacement column name
      *
      * @return bool true or false
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function dropColumnIfItAndReplacementExist(string $sTable, string $oldColumn, string $replacementColumn): bool
     {
@@ -670,6 +686,8 @@ class FcPayOneEvents
      * @param string $sQuery sql-query to execute
      *
      * @return bool true or false
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function changeColumnNameIfWrong(string $sTableName, string $sColumnName, string $sQuery): bool
     {
@@ -691,6 +709,7 @@ class FcPayOneEvents
      *
      * @return bool true or false
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function changeColumnTypeIfWrong(string $sTableName, string $sColumnName, string $sExpectedType, string $sQuery): bool
     {
@@ -715,6 +734,7 @@ class FcPayOneEvents
      *
      * @return bool true or false
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function dropIndexIfExists(string $sTable, string $sIndex): bool
     {
@@ -801,9 +821,14 @@ class FcPayOneEvents
     public static function removeDeprecated(): void
     {
         foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
-            self::dropRowIfExists("oxpayments", ['OXID' => $sRemovedPaymentMethod], "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2group", ['OXOBJECTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
-            self::dropRowIfExists("oxobject2payment", ['OXPAYMENTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
+            try {
+                self::dropRowIfExists("oxpayments", ['OXID' => $sRemovedPaymentMethod], "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
+                self::dropRowIfExists("oxobject2group", ['OXOBJECTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
+                self::dropRowIfExists("oxobject2payment", ['OXPAYMENTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
+            } catch (Exception $oEx) {
+                $oLogger = Registry::getLogger();
+                $oLogger->error($oEx->getTraceAsString());
+            }
         }
     }
 
@@ -897,18 +922,25 @@ class FcPayOneEvents
      */
     public static function onDeactivate(): void
     {
-        self::$_oFcPoHelper = oxNew(FcPoHelper::class);
-        self::deactivatePaymethods();
-        $sMessage = "Payone-Zahlarten deaktiviert!<br>";
-        self::clearTmp();
-        $sMessage .= "Tmp geleert...<br>";
-        //self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        try {
+            self::$_oFcPoHelper = oxNew(FcPoHelper::class);
+            self::deactivatePaymethods();
+            $sMessage = "Payone-Zahlarten deaktiviert!<br>";
+            self::clearTmp();
+            $sMessage .= "Tmp geleert...<br>";
+            //self::$_oFcPoHelper->fcpoGetUtilsView()->addErrorToDisplay($sMessage, false, true);
+        } catch (Exception $oEx) {
+            $oLogger = Registry::getLogger();
+            $oLogger->error($oEx->getTraceAsString());
+        }
     }
 
     /**
      * Deactivates payone paymethods on module deactivation.
      *
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public static function deactivatePaymethods(): void
     {

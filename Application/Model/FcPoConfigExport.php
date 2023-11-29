@@ -36,6 +36,8 @@ use OxidEsales\Eshop\Core\Module\Module;
 use OxidEsales\Eshop\Core\Str;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class FcPoConfigExport extends BaseModel
 {
@@ -130,6 +132,7 @@ class FcPoConfigExport extends BaseModel
      * Generates and delivers an XML export of configuration
      *
      * @throws JsonException
+     * @throws DatabaseErrorException
      */
     public function fcpoExportConfig()
     {
@@ -217,6 +220,7 @@ class FcPoConfigExport extends BaseModel
      * @param int $iLang
      * @return array{strs: array, bools: array, arrs: array}
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetConfig(string $sShopId, int $iLang = 0): array
     {
@@ -335,6 +339,8 @@ class FcPoConfigExport extends BaseModel
      * Returns a list of available modules and their versions
      *
      * @return array<int|string, mixed>
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function _getModuleInfo(): array
     {

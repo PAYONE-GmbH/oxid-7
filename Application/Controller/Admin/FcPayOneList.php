@@ -30,6 +30,6 @@ class FcPayOneList extends AdminListController
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_list';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_list';
 
 }

@@ -24,6 +24,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneAdminView extends AdminController
 {
@@ -45,6 +46,7 @@ class FcPayOneAdminView extends AdminController
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {

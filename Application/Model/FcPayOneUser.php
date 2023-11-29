@@ -27,6 +27,7 @@ use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\UtilsObject;
 use OxidEsales\Eshop\Core\ViewConfig;
@@ -45,9 +46,9 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * List of userflag ids of user
      *
-     * @var array
+     * @var array|null
      */
-    protected array $_aUserFlags;
+    protected ?array $_aUserFlags = null;
 
     /**
      * Blocked payments for user (unvalidated)
@@ -129,6 +130,8 @@ class FcPayOneUser extends FcPayOneUser_parent
      * Sets current flags of user
      *
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _fcpoSetUserFlags(): void
     {
@@ -154,6 +157,8 @@ class FcPayOneUser extends FcPayOneUser_parent
      * determining effects
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _fcpoGetUserFlagInfos(): array
     {
@@ -207,6 +212,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      * @param object $oUserFlag
      * @return void
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoAddPayoneUserFlag(object $oUserFlag): void
     {

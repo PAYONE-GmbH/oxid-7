@@ -40,7 +40,7 @@ class FcPoRequestLog extends BaseModel
      *
      * @var string
      */
-    protected string $_sClassName = 'fcporequestlog';
+    protected $_sClassName = 'fcporequestlog';
 
 
     /**
@@ -48,6 +48,8 @@ class FcPoRequestLog extends BaseModel
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->init('fcporequestlog');
     }
 

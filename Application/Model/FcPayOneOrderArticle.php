@@ -52,7 +52,6 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
     /**
      * init object construction
      *
-     * @return null
      */
     public function __construct()
     {
@@ -121,7 +120,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
 
             $this->setOrderFiles();
 
-            // marking object as "non new" disable further stock changes
+            // marking object as "non-new" disable further stock changes
             $this->setIsNewOrderItem(false);
         }
 
@@ -138,7 +137,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         $blFinishingSave = $this->_blFinishingSave;
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
-        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
 
         // evaluate answer
         return (
@@ -170,7 +169,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
 
         $blIsRedirectPayment = FcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
         $blIsRedirectAfterSave = $this->_isRedirectAfterSave($oOrder);
-        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
 
         $blReturn = false;
         if (!$blIsRedirectPayment) {
@@ -217,7 +216,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      *
      * @return bool
      */
-    public function delete(string $sOXID = null): bool
+    public function delete($sOXID = null): bool
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -234,7 +233,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
 
         $blDelete = $this->_fcpoProcessBaseDelete($sOXID);
         if ($blDelete) {
-            $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+            $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
             if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore !== false) {
                 $this->updateArticleStock($this->oxorderarticles__oxamount->value, $oConfig->getConfigParam('blAllowNegativeStock'));
             }

@@ -24,6 +24,7 @@ use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 
 class FcPayOneLog extends FcPayOneAdminDetails
 {
@@ -33,21 +34,21 @@ class FcPayOneLog extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_log';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_log';
 
     /**
      * Array with existing status of order
      *
-     * @var array
+     * @var array|null
      */
-    protected array $_aStatus;
+    protected ?array $_aStatus = null;
 
     /**
      * Holds a current response status
      *
-     * @var array
+     * @var array|null
      */
-    protected array $_aResponse;
+    protected ?array $_aResponse = null;
 
 
     /**
@@ -57,6 +58,7 @@ class FcPayOneLog extends FcPayOneAdminDetails
      *
      * @return array
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getStatus(Order $oOrder): array
     {

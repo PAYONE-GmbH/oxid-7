@@ -360,10 +360,10 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      *
      * @param string $sUserOxid
      * @param string $sPaymentType
-     * @return mixed
+     * @return string|bool
      * @throws DatabaseConnectionException
      */
-    public function fcpoGetUserPaymentId(string $sUserOxid, string $sPaymentType): mixed
+    public function fcpoGetUserPaymentId(string $sUserOxid, string $sPaymentType): string|bool
     {
         $oDb = DatabaseProvider::getDb();
         $sQ = 'select oxpaymentid from oxorder where oxpaymenttype=' . $oDb->quote($sPaymentType) . ' and

@@ -24,6 +24,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
@@ -47,18 +48,19 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      *
      * @var string
      */
-    protected string $_sMandatePdfUrl;
+    protected string $_sMandatePdfUrl = '';
 
     /**
      * Html for Barzahlen
      *
-     * @var string
+     * @var string|null
      */
-    protected string $_sBarzahlenHtml;
+    protected ?string $_sBarzahlenHtml = null;
 
 
     /**
      * init object construction
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -163,7 +165,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     public function fcpoGetBarzahlenHtml(): string
     {
         if ($this->_sBarzahlenHtml === null) {
-            $this->_sBarzahlenHtml = $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
+            $this->_sBarzahlenHtml = $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml') ?: '';
             // delete this from session after we have the result for one time displaying
             $this->_oFcPoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
         }

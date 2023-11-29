@@ -23,6 +23,8 @@ namespace Fatchip\PayOne\Application\Model;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
 /**
@@ -50,7 +52,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @var string
      */
-    protected string $_sClassName = 'fcpouserflag';
+    protected $_sClassName = 'fcpouserflag';
 
     /**
      * Helper object for dealing with different shop versions
@@ -71,7 +73,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @var string
      */
-    protected string $_sTimeStamp;
+    protected string $_sTimeStamp = '';
 
     /**
      * List of blocked paymentids
@@ -83,16 +85,19 @@ class FcPoUserFlag extends BaseModel
     /**
      * ID of n:m table assigned to this flag
      *
-     * @var string
+     * @var string|null
      */
-    protected string $_sAssignId;
+    protected ?string $_sAssignId = null;
 
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
         $this->init($this->_sCoreTbl);
@@ -116,6 +121,7 @@ class FcPoUserFlag extends BaseModel
      *
      * @param string $sErrorCode
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoGetIdByErrorCode(string $sErrorCode): string
     {
@@ -133,7 +139,7 @@ class FcPoUserFlag extends BaseModel
      * @param string $sOXID
      * @return mixed
      */
-    public function load(string $sOXID): mixed
+    public function load($sOXID): mixed
     {
         $mReturn = null;
         if ($mReturn !== false) {
@@ -260,6 +266,8 @@ class FcPoUserFlag extends BaseModel
      *
      * @param string $sMessage
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoSetDisplayMessage(string $sMessage): void
     {
@@ -280,6 +288,7 @@ class FcPoUserFlag extends BaseModel
      * Returns saved message
      *
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoGetMessageFromDb(): string
     {

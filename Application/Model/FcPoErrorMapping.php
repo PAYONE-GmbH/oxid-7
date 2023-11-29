@@ -25,6 +25,8 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use stdClass;
 
@@ -53,6 +55,7 @@ class FcPoErrorMapping extends BaseModel
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -66,6 +69,8 @@ class FcPoErrorMapping extends BaseModel
      *
      * @param string $sType
      * @return stdClass[]
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetExistingMappings(string $sType = 'general'): array
     {
@@ -181,6 +186,8 @@ class FcPoErrorMapping extends BaseModel
      *
      * @param array $aMappings
      * @param string $sType
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoUpdateMappings(array $aMappings, string $sType): void
     {
@@ -199,6 +206,7 @@ class FcPoErrorMapping extends BaseModel
      * @param array $aData
      * @param string $sType
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoGetQuery(string $sMappingId, array $aData, string $sType): string
     {

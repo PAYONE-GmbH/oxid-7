@@ -496,7 +496,7 @@
             <dl>
                 <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_BANKDATA" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <select class="select" multiple size="4" name="confarrs[aFCPODebitCountries][]" {{ readonly }}>
                         {% for oCountry in oView.fcpoGetCountryList() %}
@@ -514,13 +514,13 @@
             <dl>
                 <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_GER" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
                     {{ translate({ ident: "FCPO_CONFIG_DEBIT_SHOW_OLD_FIELDS" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPODebitBICMandatory]" value="false">
                     <input type="checkbox" name="confbools[blFCPODebitBICMandatory]" value="true"
@@ -534,13 +534,13 @@
             <dl>
                 <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
                     {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPOMandateIssuance]" value="false">
                     <input type="checkbox" name="confbools[blFCPOMandateIssuance]" value="true"
@@ -554,13 +554,13 @@
             <dl>
                 <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
                     {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPOMandateDownload]" value="false">
                     <input type="checkbox" name="confbools[blFCPOMandateDownload]" value="true"

@@ -23,6 +23,7 @@ namespace Fatchip\PayOne\Core;
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Language;
 
 set_time_limit(0);
@@ -104,10 +105,10 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
     /**
      * Log incoming entry and return its ID
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function log(): mixed
+    public function log(): string
     {
         $oUtilsObject = $this->_getUtilsObject();
         $sOxid = $oUtilsObject->generateUId();
@@ -235,6 +236,7 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
 
     /**
      * @return int
+     * @throws DatabaseConnectionException
      */
     protected function _getOrderNr(): int
     {
@@ -296,6 +298,7 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
      *
      * @param string|null $sTxid
      * @return Order
+     * @throws DatabaseConnectionException
      */
     protected function _getOrder(string $sTxid = null): Order
     {

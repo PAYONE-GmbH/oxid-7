@@ -24,6 +24,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use stdClass;
 
@@ -47,6 +48,7 @@ class FcPoForwarding extends BaseModel
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -59,6 +61,8 @@ class FcPoForwarding extends BaseModel
      * Returns an array of currently existing forwardings as an array with standard objects
      *
      * @return stdClass[]
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetExistingForwardings(): array
     {
@@ -88,6 +92,8 @@ class FcPoForwarding extends BaseModel
 
     /**
      * @param array $aForwardings
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoUpdateForwardings(array $aForwardings): void
     {
@@ -105,6 +111,7 @@ class FcPoForwarding extends BaseModel
      * @param string $sForwardingId
      * @param array $aData
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoGetQuery(string $sForwardingId, array $aData): string
     {
@@ -117,7 +124,7 @@ class FcPoForwarding extends BaseModel
 
 
         if (array_key_exists('delete', $aData)) {
-            $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = {$sOxid}";
+            $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = $sOxid";
         } else {
             $sQuery = $this->_fcpoGetUpdateQuery($sForwardingId, $sPayoneStatus, $sUrl, $iTimeout);
         }
@@ -145,18 +152,18 @@ class FcPoForwarding extends BaseModel
             $sQuery = " INSERT INTO fcpostatusforwarding (
                                 oxid, fcpo_payonestatus,  fcpo_url,   fcpo_timeout
                             ) VALUES (
-                                '{$sOxid}', {$sPayoneStatus}, {$sUrl},  {$iTimeout}
+                                '$sOxid', $sPayoneStatus, $sUrl,  $iTimeout
                             )";
         } else {
             $database = DatabaseProvider::getDb();
             $sForwardingId = $database->quote($sForwardingId);
             $sQuery = " UPDATE fcpostatusforwarding
                             SET
-                                fcpo_payonestatus = {$sPayoneStatus},
-                                fcpo_url = {$sUrl},
-                                fcpo_timeout = {$iTimeout}
+                                fcpo_payonestatus = $sPayoneStatus,
+                                fcpo_url = $sUrl,
+                                fcpo_timeout = $iTimeout
                             WHERE
-                                oxid = {$sForwardingId}";
+                                oxid = $sForwardingId";
         }
 
         return $sQuery;

@@ -31,7 +31,7 @@ class FcPayOneStatusForwarding extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_status_forwarding';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_status_forwarding';
 
 
     /**
@@ -76,26 +76,6 @@ class FcPayOneStatusForwarding extends FcPayOneAdminDetails
         }
 
         return $aForwardings;
-    }
-
-    /**
-     * Returns payone status list
-     *
-     * @return stdClass[]
-     */
-    public function getPayoneStatusList(): array
-    {
-        $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
-
-        $aNewList = [];
-        foreach ($aPayoneStatusList as $sPayoneStatusId) {
-            $oStatus = new stdClass();
-            $oStatus->sId = $sPayoneStatusId;
-            $oStatus->sTitle = $this->_oFcPoHelper->fcpoGetLang()->translateString('fcpo_status_' . $sPayoneStatusId, null, true);
-            $aNewList[] = $oStatus;
-        }
-
-        return $aNewList;
     }
 
     /**

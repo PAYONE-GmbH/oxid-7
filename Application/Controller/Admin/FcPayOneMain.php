@@ -29,7 +29,6 @@ use JsonException;
 use OxidEsales\Eshop\Application\Model\CountryList;
 use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-use OxidEsales\Eshop\Core\Exception\FileException;
 use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneMain extends FcPayOneAdminDetails
@@ -281,6 +280,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
      */
     protected function _fcpoLoadCountryList(): void
     {
+        $aCountryList = [];
         // #251A passing country list
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $oCountryList = $this->_oFcPoHelper->getFactoryObject(CountryList::class);
@@ -295,12 +295,14 @@ class FcPayOneMain extends FcPayOneAdminDetails
         if ($blValidCountryData) {
             foreach ($oCountryList as $sCountryId => $oCountry) {
                 if (in_array($oCountry->oxcountry__oxid->value, $this->_aConfArrs["aFCPODebitCountries"])) {
-                    $oCountryList[$sCountryId]->selected = "1";
+                    $oCountry->selected = "1";
                 }
+
+                $aCountryList[$sCountryId] = $oCountry;
             }
         }
 
-        $this->_aCountryList = $oCountryList;
+        $this->_aCountryList = $aCountryList;
     }
 
     /**
@@ -932,16 +934,15 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Method returns config value of a given config name or false if not existing
+     * Method returns config value of a given config name or empty string if not existing
      *
-     * @param string $sParam
-     * @return mixed
+     * @param string $sParam config parameter name
+     * @return string
      */
-    public function getConfigParam(string $sParam): mixed
+    public function getConfigParam(string $sParam): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-
-        return $oConfig->getConfigParam($sParam);
+        return $oConfig->getConfigParam($sParam) ?: '';
     }
 
     /**

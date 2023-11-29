@@ -54,7 +54,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      *
      * @var bool
      */
-    protected bool $_blFcpoConfirmMandateError;
+    protected bool $_blFcpoConfirmMandateError = false;
 
 
     /**

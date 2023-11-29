@@ -26,6 +26,8 @@ use JetBrains\PhpStorm\NoReturn;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
@@ -60,7 +62,7 @@ class FcPoMandateDownload extends FrontendController
      * Render overloading
      *
      */
-    #[NoReturn] public function render()
+    public function render()
     {
         parent::render();
         $this->_fcpoMandateDownloadAction();
@@ -71,6 +73,7 @@ class FcPoMandateDownload extends FrontendController
      * Triggers download action for mandate
      *
      * @return void
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoMandateDownloadAction(): void
     {
@@ -107,6 +110,7 @@ class FcPoMandateDownload extends FrontendController
      * Return query for fetching mandate mandatory information
      *
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoGetMandateQuery(): string
     {
@@ -167,6 +171,8 @@ class FcPoMandateDownload extends FrontendController
      * @param string $sPaymentId
      *
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _redownloadMandate(string $sMandateFilename, string $sOrderId, string $sPaymentId): void
     {

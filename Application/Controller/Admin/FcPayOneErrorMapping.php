@@ -22,6 +22,8 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Exception;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use stdClass;
 
 class FcPayOneErrorMapping extends FcPayOneAdminDetails
@@ -32,12 +34,15 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_error_mapping';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_error_mapping';
+
 
     /**
      * Returns list of former configured errors
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function getMappings(): array
     {
@@ -50,6 +55,8 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      * Returns list of all mappings
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _fcpoGetExistingMappings(): array
     {
@@ -75,7 +82,6 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
 
         return $aMappings;
     }
-
 
     /**
      * Returns list of former configured iframe errors

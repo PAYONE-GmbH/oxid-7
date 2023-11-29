@@ -37,9 +37,9 @@ class FcPoParamsParser
     protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * @var User
+     * @var User|null
      */
-    protected User $_oUser;
+    protected ?User $_oUser = null;
 
     /**
      * Class constructor, sets all required parameters for requests.
@@ -171,7 +171,7 @@ class FcPoParamsParser
         $oUser = $this->_fcpoGetUser();
 
         $oShippingAddress = $this->_fcpoGetShippingAddress();
-        $blHasShipping = (!$oShippingAddress) ? false : true;
+        $blHasShipping = !!$oShippingAddress;
 
         if ($blHasShipping) {
             return ['given_name' => $oShippingAddress->oxaddress__oxfname->value, 'family_name' => $oShippingAddress->oxaddress__oxlname->value, 'email' => $oUser->oxuser__oxusername->value, 'title' => $this->fcpoGetTitle(), 'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value, 'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value, 'postal_code' => $oShippingAddress->oxaddress__oxzip->value, 'city' => $oShippingAddress->oxaddress__oxcity->value, 'region' => "", 'phone' => $oShippingAddress->oxaddress__oxfon->value, 'country' => $oShippingAddress->fcpoGetUserCountryIso(), 'organization_name' => $oShippingAddress->oxaddress__oxcompany->value];

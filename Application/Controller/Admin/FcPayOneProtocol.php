@@ -28,6 +28,6 @@ class FcPayOneProtocol extends FcPayOneAdminView
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_protocol';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_protocol';
 
 }

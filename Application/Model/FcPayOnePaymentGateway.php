@@ -37,7 +37,7 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
      * @extend executePayment
      * @return bool
      */
-    public function executePayment(float $dAmount, Order &$oOrder): bool
+    public function executePayment($dAmount, &$oOrder): bool
     {
         // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
         if ($oOrder->isPayOnePaymentType() === false) {

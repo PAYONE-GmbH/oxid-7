@@ -473,9 +473,6 @@ function fcpoProcessPayoneResponseCC(response) {
 }
 
 function fcHandleDebitInputs(sDebitBICMandatory) {
-    if (typeof (sDebitBICMandatory) == undefined) {
-        sDebitBICMandatory = 'true';
-    }
     fcHandleDebitInputsTypeIban();
     fcHandleDebitInputsTypeBlz();
 }
@@ -992,11 +989,8 @@ if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
                         formParams += ', ';
                     }
 
-                    if (formType == 'checkbox') {
+                    if (formType == 'checkbox' && !this.checked) {
                         var inputValue = '';
-                        if (this.checked) {
-                            inputValue = this.value;
-                        }
                     } else {
                         var inputValue = this.value;
                     }

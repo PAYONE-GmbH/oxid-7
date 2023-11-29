@@ -34,6 +34,9 @@ use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
@@ -44,9 +47,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Contains dynvalue list of requested params of payment page (all)
      *
-     * @var array
+     * @var array|null
      */
-    public array $_aFcRequestedValues;
+    public ?array $_aFcRequestedValues = null;
     /**
      * Flag for checking if klarna payment combined payment widget is already present
      *
@@ -68,15 +71,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * bill country id of the user object
      *
-     * @var string
+     * @var string|null
      */
-    protected string $_sUserBillCountryId;
+    protected ?string $_sUserBillCountryId = null;
     /**
      * delivery country id if existent
      *
-     * @var string
+     * @var string|null
      */
-    protected string $_sUserDelCountryId;
+    protected ?string $_sUserDelCountryId = null;
     /**
      * Contains the sub payment methods that are available for the user ( Visa, MC, etc. )
      *
@@ -118,7 +121,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var bool
      */
-    protected bool $_blIsPayolutionInstallmentAjax;
+    protected bool $_blIsPayolutionInstallmentAjax = false;
     /**
      * Params holder for payolution installment params
      *
@@ -156,18 +159,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @var string
      */
-    protected string $_sPayolutionCurrentErrorMessage;
+    protected string $_sPayolutionCurrentErrorMessage = '';
 
 
     /**
      * init object construction
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
-        $this->_blIsPayolutionInstallmentAjax = false;
     }
 
     /**
@@ -252,16 +255,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Gets config parameter
+     * Method returns config value of a given config name or empty string if not existing
      *
      * @param string $sParam config parameter name
-     *
      * @return string
      */
     public function getConfigParam(string $sParam): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam($sParam);
+        return $oConfig->getConfigParam($sParam) ?: '';
     }
 
     /**
@@ -662,6 +664,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @param string $sPaymentId
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _fcpoFetchRatePayProfilesByPaymentType(string $sPaymentId): array
     {
@@ -984,6 +988,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Get the language the user is using in the shop
      *
      * @return string
+     * @throws LanguageNotFoundException
      */
     public function getTplLang(): string
     {
@@ -1083,17 +1088,16 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $this->_assignDebitNoteParams();
             }
         }
-        return $this->_aDynValue;
+        return $this->_aDynValue ?: [];
     }
 
     /**
      * Extends oxid standard method getPaymentList
      * Extends it with the creditworthiness check for the user
      *
-     * @return object
      * @extend getPaymentList
      */
-    public function getPaymentList(): object
+    public function getPaymentList()
     {
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
         if ($this->_oPaymentList === null) {
@@ -1548,7 +1552,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
         }
 
-        return $sPaymentId;
+        return $sPaymentId ?: '';
     }
 
     /**
@@ -1693,9 +1697,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @param mixed $mReturn
      * @param string $sPaymentId
-     * @return bool
+     * @return mixed
      */
-    protected function _fcpoSecInvoiceSaveRequestedValues(mixed $mReturn, string $sPaymentId): bool
+    protected function _fcpoSecInvoiceSaveRequestedValues(mixed $mReturn, string $sPaymentId): mixed
     {
         $blIsSecInvoice = ($sPaymentId == 'fcpo_secinvoice');
         if (!$blIsSecInvoice) return $mReturn;
@@ -1899,7 +1903,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $blRefreshBirthdate = ($sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
             if ($blRefreshBirthdate) {
                 $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
-                $blSavedData = (bool)$oUser->save();
+                $blSavedData = $oUser->save();
             }
         } elseif ($blBirthdayRequired) {
             $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BIRTHDATE_INVALID');
@@ -2268,7 +2272,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $aDynvalue = $this->_oFcPoHelper->fcpoGetSessionVariable('dynvalue');
         }
 
-        return $aDynvalue;
+        return $aDynvalue ?: [];
     }
 
     /**
@@ -3656,6 +3660,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Returns prepared link for displaying agreement as
      *
      * @return string
+     * @throws LanguageNotFoundException
      */
     public function fcpoGetPayolutionAgreementLink(): string
     {
@@ -3774,7 +3779,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     public function fcpoAplGetDeviceCheck(): int
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        return $oSession->getVariable('applePayAllowedDevice');
+        return (int)$oSession->getVariable('applePayAllowedDevice');
     }
 
     /**

@@ -44,9 +44,9 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     /**
      * Paypal Express picture
      *
-     * @var string
+     * @var string|null
      */
-    protected string $_sPayPalExpressPic;
+    protected ?string $_sPayPalExpressPic = null;
 
 
     /**

@@ -33,9 +33,9 @@ class FcPoTransactionStatusBase extends BaseModel
 {
 
     /**
-     * @var array
+     * @var array|null
      */
-    protected array $_aShopList;
+    protected ?array $_aShopList = null;
 
     /**
      * @var string
@@ -53,9 +53,9 @@ class FcPoTransactionStatusBase extends BaseModel
     protected Order $_oFcOrder;
 
     /**
-     * @var UtilsObject
+     * @var UtilsObject|null
      */
-    protected UtilsObject $_oUtilsObject;
+    protected ?UtilsObject $_oUtilsObject = null;
 
     /**
      * @var FcPoHelper
@@ -145,6 +145,8 @@ class FcPoTransactionStatusBase extends BaseModel
 
     /**
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     protected function _getShopList(): array
     {
@@ -334,6 +336,7 @@ class FcPoTransactionStatusBase extends BaseModel
      * @param string $sStatusmessageId
      * @param string $sForwardId
      * @return bool
+     * @throws DatabaseConnectionException
      */
     protected function _queueEntryExists(string $sStatusmessageId, string $sForwardId): bool
     {

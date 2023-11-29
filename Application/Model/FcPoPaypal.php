@@ -23,6 +23,9 @@ namespace Fatchip\PayOne\Application\Model;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
 class FcPoPaypal extends BaseModel
@@ -59,9 +62,12 @@ class FcPoPaypal extends BaseModel
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
     }
@@ -80,6 +86,8 @@ class FcPoPaypal extends BaseModel
      * Method requests database for fetching PayPal logos and return this data in an array
      *
      * @return array[]
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetPayPalLogos(): array
     {
@@ -144,6 +152,8 @@ class FcPoPaypal extends BaseModel
      * Updates a given set of logos into database
      *
      * @param array $aLogos
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoUpdatePayPalLogos(array $aLogos): void
     {
@@ -156,7 +166,7 @@ class FcPoPaypal extends BaseModel
                             SET
                                 FCPO_ACTIVE = " . DatabaseProvider::getDb()->quote($aLogo['active']) . ",
                                 FCPO_LANGID = " . DatabaseProvider::getDb()->quote($aLogo['langid']) . "
-                                {$sLogoQuery}
+                                $sLogoQuery
                             WHERE
                                 oxid = " . DatabaseProvider::getDb()->quote($iId);
 
@@ -205,6 +215,7 @@ class FcPoPaypal extends BaseModel
      * @param int $iId
      * @param array $aFiles
      * @return string
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoHandleFile(int $iId, array $aFiles): string
     {
@@ -226,6 +237,7 @@ class FcPoPaypal extends BaseModel
      * @param int $iId
      * @param array $aFiles
      * @return mixed
+     * @throws StandardException
      */
     protected function _fcpoFetchMediaUrl(int $iId, array $aFiles): mixed
     {
@@ -238,6 +250,8 @@ class FcPoPaypal extends BaseModel
      * Do the update on database
      *
      * @return void
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
      */
     protected function _fcpoTriggerUpdateLogos(): void
     {
@@ -253,6 +267,7 @@ class FcPoPaypal extends BaseModel
 
     /**
      * Add a new empty paypal-logo entry into database
+     * @throws DatabaseErrorException
      */
     public function fcpoAddPaypalExpressLogo(): void
     {

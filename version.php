@@ -32,7 +32,7 @@ if ($blIsValidCall) {
          *
          * @return string
          */
-        function getShopBasePath()
+        function getShopBasePath(): string
         {
             return dirname(__FILE__) . '/../../../';
         }
@@ -46,7 +46,7 @@ if ($blIsValidCall) {
      * @return bool
      */
     if (!function_exists('isAdmin')) {
-        function isAdmin()
+        function isAdmin(): bool
         {
             return true;
         }

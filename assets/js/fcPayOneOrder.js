@@ -53,8 +53,6 @@ function fcpoOnClickCapture(oElement) {
 }
 
 function fcpoOnClickDebit(oElement) {
-    var dCaptureAmount = parseFloat(document.getElementById('fc_debit_amount').value.replace(',', '.'));
-
     var sConfirmSure = document.getElementById('fc_confirm_message').value;
 
     if (confirm(sConfirmSure)) {

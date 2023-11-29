@@ -24,6 +24,8 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use stdClass;
 
@@ -63,14 +65,17 @@ class FcPoTransactionStatus extends BaseModel
      *
      * @var string
      */
-    protected string $_sClassName = 'fcpotransactionstatus';
+    protected $_sClassName = 'fcpotransactionstatus';
 
 
     /**
      * Class constructor
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->init('fcpotransactionstatus');
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
@@ -125,18 +130,6 @@ class FcPoTransactionStatus extends BaseModel
         $oOrder->load($sOxid);
 
         return $oOrder;
-    }
-
-    /**
-     * Get total order sum of connected order
-     *
-     * @return float
-     */
-    public function getCaptureAmount(): float
-    {
-        $sTxid = $this->fcpotransactionstatus__fcpo_txid->value;
-        $oOrder = $this->_fcpoGetOrderByTxid($sTxid);
-        return $oOrder->oxorder__oxtotalordersum;
     }
 
     /**
@@ -227,6 +220,7 @@ class FcPoTransactionStatus extends BaseModel
 
     /**
      * Template getter for returning forward redirects
+     * @throws DatabaseErrorException
      */
     public function fcpoGetForwardRedirects(): array|false
     {

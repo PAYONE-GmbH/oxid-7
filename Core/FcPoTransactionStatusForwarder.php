@@ -299,7 +299,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 WHERE OXID=" . $oDb->quote($sStatusmessageId);
 
             $aRow = $oDb->getRow($sQuery);
-            if ($aRow === false) {
+            if (empty($aRow)) {
                 $sExceptionMessage =
                     'Could not find transaction status message for ID ' . $sStatusmessageId . '!';
                 throw new Exception($sExceptionMessage);
@@ -410,7 +410,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 WHERE OXID=" . $oDb->quote($sForwardId);
 
         $aRow = $oDb->getRow($sQuery);
-        if ($aRow === false) {
+        if (empty($aRow)) {
             throw new Exception('Could not find forward data for ID ' . $sForwardId . '!');
         }
 

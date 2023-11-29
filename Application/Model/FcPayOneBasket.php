@@ -23,6 +23,7 @@ namespace Fatchip\PayOne\Application\Model;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\DeliveryList;
 use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Price;
 use OxidEsales\Eshop\Core\Registry;
@@ -52,6 +53,7 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      * Returns whether PayPal express is active or not
      *
      * @return bool
+     * @throws DatabaseConnectionException
      */
     public function fcpoIsPayPalExpressActive(): bool
     {
@@ -64,6 +66,7 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      * Returns pic that is configured in database
      *
      * @return string
+     * @throws DatabaseConnectionException
      */
     public function fcpoGetPayPalExpressPic(): string
     {

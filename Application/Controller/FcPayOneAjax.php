@@ -62,6 +62,8 @@ class FcPayOneAjax extends BaseController
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
 
         // receive params
@@ -197,12 +199,13 @@ class FcPayOneAjax extends BaseController
         $sHtml .= '</fieldset>';
         $sHtml .= '</div></div>';
         $sHtml .= '<div class="payolution_installment_details">';
+        $sDownloadUrl = '';
         foreach ($aCalculation as $sKey => $aCurrentInstallment) {
             $sHtml .= '<div id="payolution_rates_details_' . $sKey . '" class="payolution_rates_invisible">';
             foreach ($aCurrentInstallment['Months'] as $sMonth => $aRatesDetails) {
                 $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) . '<br>';
             }
-            $sDownloadUrl = $oConfig->getShopUrl() . '/modules/fc/fcpayone/lib/fcpopopup_content.php?login=1&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
+            $sDownloadUrl = $oConfig->getShopUrl() . '?login=1&cl=FcPoPopUpContent&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
             $sHtml .= '</div>';
 
         }
@@ -312,7 +315,7 @@ class FcPayOneAjax extends BaseController
     public function fcpoAplRegisterDevice(string $sParamsJson): bool|string
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
 
         $allowedDevice = $aParams['allowed'];
         $oSession->setVariable('applePayAllowedDevice', $allowedDevice);
@@ -328,7 +331,7 @@ class FcPayOneAjax extends BaseController
     {
         $oLogger = Registry::getLogger();
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var ViewConfig $config */
         $oViewConfig = $this->_oFcPoHelper->fcpoGetViewConfig();
@@ -734,7 +737,13 @@ class FcPayOneAjax extends BaseController
     public function fcpoTriggerKlarnaAction(string $sPaymentId, string $sAction, string $sParamsJson): string
     {
         if ($sAction === 'start_session') {
-            return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
+            try {
+                return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
+            } catch (JsonException $oEx) {
+                $oLogger = Registry::getLogger();
+                $oLogger->error($oEx->getTraceAsString());
+                return '';
+            }
         }
 
         return '';
@@ -784,7 +793,7 @@ class FcPayOneAjax extends BaseController
      */
     public function _fcpoUpdateUser(string $sParamsJson): void
     {
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();

@@ -27,6 +27,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Theme;
 
@@ -120,6 +121,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @param string $sLangId
      * @return string
+     * @throws LanguageNotFoundException
      */
     public function fcpoGetLangAbbrById(string $sLangId): string
     {

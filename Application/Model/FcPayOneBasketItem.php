@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Article;
 use OxidEsales\Eshop\Application\Model\OrderArticle;
 
 class FcPayOneBasketItem extends FcPayOneBasketItem_parent
@@ -51,16 +52,15 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      * is not buyable or visible.
      *
      * @param bool|null $blCheckProduct checks if product is buyable and visible
-     * @param string|null $sProductId product id
+     * @param null $sProductId product id
      * @param bool $blDisableLazyLoading disable lazy loading
      *
-     * @return OrderArticle
-     *
+     * @return OrderArticle|Article
      */
-    public function getArticle($blCheckProduct = false, $sProductId = null, $blDisableLazyLoading = false): OrderArticle
+    public function getArticle($blCheckProduct = false, $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
         $blSuccess = $this->_oFcPoHelper->fcpoGetRequestParameter('fcposuccess');
         $sRefNr = $this->_oFcPoHelper->fcpoGetRequestParameter('refnr');
 
@@ -79,9 +79,9 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      * @param bool $blCheckProduct
      * @param string|null $sProductId
      * @param bool $blDisableLazyLoading
-     * @return OrderArticle
+     * @return Article|OrderArticle
      */
-    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, ?string $sProductId = null, ?bool $blDisableLazyLoading = false): OrderArticle
+    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, ?string $sProductId = null, ?bool $blDisableLazyLoading = false): Article|OrderArticle
     {
         return parent::getArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);
     }

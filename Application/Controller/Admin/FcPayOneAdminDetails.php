@@ -31,6 +31,7 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneAdminDetails extends AdminDetailsController
 {
@@ -102,6 +103,7 @@ class FcPayOneAdminDetails extends AdminDetailsController
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -112,9 +114,9 @@ class FcPayOneAdminDetails extends AdminDetailsController
         $this->_oFcPoPayPal = oxNew(FcPoPayPal::class);
         $this->_oFcPoKlarna = oxNew(FcPoKlarna::class);
         $this->_oFcPoMapping = oxNew(FcPoMapping::class);
-        $this->_oFcPoErrorMapping = oxNew(FcPoErrorMapping::class);
         $this->_oFcPoForwarding = oxNew(FcPoForwarding::class);
         $this->_oFcPoRatePay = oxNew(FcPoRatePay::class);
+        $this->_oFcPoErrorMapping = oxNew(FcPoErrorMapping::class);
     }
 
     /**
@@ -126,6 +128,26 @@ class FcPayOneAdminDetails extends AdminDetailsController
     public function fcpoGetInstance(string $sClassName): object
     {
         return oxNew($sClassName);
+    }
+
+    /**
+     * Returns payone status list
+     *
+     * @return stdClass[]
+     */
+    public function getPayoneStatusList(): array
+    {
+        $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
+
+        $aNewList = [];
+        foreach ($aPayoneStatusList as $sPayoneStatusId) {
+            $oStatus = new stdClass();
+            $oStatus->sId = $sPayoneStatusId;
+            $oStatus->sTitle = $this->_oFcPoHelper->fcpoGetLang()->translateString('fcpo_status_' . $sPayoneStatusId, null, true);
+            $aNewList[] = $oStatus;
+        }
+
+        return $aNewList;
     }
 
 }

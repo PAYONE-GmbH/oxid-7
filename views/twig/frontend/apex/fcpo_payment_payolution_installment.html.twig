@@ -75,81 +75,81 @@
                     <p id="payolution_installment_overview_headline" class="payolution_installment_box_headline">3.
                         {{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_SUMMARY_AND_ACCOUNT" })|raw }}</p>
                     <p id="payolution_installment_overview_headline" class="payolution_installment_box_body">
-                    <div id="payolution_installment_overview_account_info">
-                        <input name="dynvalue[fcpo_payolution_installment_index]" type="hidden"
-                               id="payolution_selected_installment_index" value="">
-                        <table>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENTS_NUMBER" })|raw }}</td>
-                                <td><span id="payolution_sum_number_installments"></span></td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_FINANCING_AMOUNT" })|raw }}</td>
-                                <td>{{ oView.fcpoGetBasketSum() }} {{ currency.sign }}</td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_FINANCING_SUM" })|raw }}</td>
-                                <td>
-                                    <span id="payolution_financing_sum">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
-                                    {{ currency.sign }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_INTEREST_RATE" })|raw }}</td>
-                                <td>
-                                    <span id="payolution_sum_interest_rate">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
-                                    %
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_EFF_INTEREST_RATE" })|raw }}</td>
-                                <td>
-                                    <span id="payolution_sum_eff_interest_rate">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
-                                    %
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_MONTHLY_RATES" })|raw }}</strong>
-                                </td>
-                                <td><span id="payolution_sum_monthly_rate"
-                                          class="fcpoPayolutionAgreeRed">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
-                                    {{ currency.sign }}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <p>
-                        <label>{{ translate({ ident: "FCPO_PAYOLUTION_ACCOUNTHOLDER" })|raw }}:</label>
-                        <input placeholder="{{ translate({ ident: "FCPO_PAYOLUTION_ACCOUNTHOLDER" })|raw }}" autocomplete="off"
-                               type="text" size="20" maxlength="64"
-                               name="dynvalue[fcpo_payolution_installment_accountholder]"
-                               value="{{ dynvalue.fcpo_payolution_installment_accountholder }}"
-                               onkeyup="fcHandleDebitInputs();return false;">
-                    </p>
-                    <p>
-                        <label>{{ translate({ ident: "FCPO_BANK_IBAN" })|raw }}:</label>
-                        <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" })|raw }}" autocomplete="off" type="text"
-                               size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_iban]"
-                               value="{{ dynvalue.fcpo_payolution_installment_iban }}"
-                               onkeyup="fcHandleDebitInputs();return false;">
-                        <div id="fcpo_payolution_iban_invalid" class="fcpo_check_error">
-                            <p class="oxValidateError" style="display: block;">
-                                {{ translate({ ident: "FCPO_IBAN_INVALID" })|raw }}
-                            </p>
+                        <div id="payolution_installment_overview_account_info">
+                            <input name="dynvalue[fcpo_payolution_installment_index]" type="hidden"
+                                   id="payolution_selected_installment_index" value="">
+                            <table>
+                                <tr>
+                                    <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENTS_NUMBER" })|raw }}</td>
+                                    <td><span id="payolution_sum_number_installments"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_FINANCING_AMOUNT" })|raw }}</td>
+                                    <td>{{ oView.fcpoGetBasketSum() }} {{ currency.sign }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_FINANCING_SUM" })|raw }}</td>
+                                    <td>
+                                        <span id="payolution_financing_sum">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
+                                        {{ currency.sign }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_INTEREST_RATE" })|raw }}</td>
+                                    <td>
+                                        <span id="payolution_sum_interest_rate">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
+                                        %
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_EFF_INTEREST_RATE" })|raw }}</td>
+                                    <td>
+                                        <span id="payolution_sum_eff_interest_rate">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
+                                        %
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_MONTHLY_RATES" })|raw }}</strong>
+                                    </td>
+                                    <td><span id="payolution_sum_monthly_rate"
+                                              class="fcpoPayolutionAgreeRed">{{ translate({ ident: "FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED" })|raw }}</span>
+                                        {{ currency.sign }}
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-                    </p>
-                    <p>
-                        <label>{{ translate({ ident: "FCPO_BANK_BIC" })|raw }}:</label>
-                        <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" })|raw }}" autocomplete="off" type="text"
-                               size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_bic]"
-                               value="{{ dynvalue.fcpo_payolution_installment_bic }}"
-                               onkeyup="fcHandleDebitInputs();return false;">
-                        <div id="fcpo_payolution_bic_invalid" class="fcpo_check_error">
-                            <p class="oxValidateError" style="display: block;">
-                                {{ translate({ ident: "FCPO_BIC_INVALID" })|raw }}
-                            </p>
-                        </div>
-                    </p>
+                        <p>
+                            <label>{{ translate({ ident: "FCPO_PAYOLUTION_ACCOUNTHOLDER" })|raw }}:</label>
+                            <input placeholder="{{ translate({ ident: "FCPO_PAYOLUTION_ACCOUNTHOLDER" })|raw }}" autocomplete="off"
+                                   type="text" size="20" maxlength="64"
+                                   name="dynvalue[fcpo_payolution_installment_accountholder]"
+                                   value="{{ dynvalue.fcpo_payolution_installment_accountholder }}"
+                                   onkeyup="fcHandleDebitInputs();return false;">
+                        </p>
+                        <p>
+                            <label>{{ translate({ ident: "FCPO_BANK_IBAN" })|raw }}:</label>
+                            <input placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" })|raw }}" autocomplete="off" type="text"
+                                   size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_iban]"
+                                   value="{{ dynvalue.fcpo_payolution_installment_iban }}"
+                                   onkeyup="fcHandleDebitInputs();return false;">
+                            <div id="fcpo_payolution_iban_invalid" class="fcpo_check_error">
+                                <p class="oxValidateError" style="display: block;">
+                                    {{ translate({ ident: "FCPO_IBAN_INVALID" })|raw }}
+                                </p>
+                            </div>
+                        </p>
+                        <p>
+                            <label>{{ translate({ ident: "FCPO_BANK_BIC" })|raw }}:</label>
+                            <input placeholder="{{ translate({ ident: "FCPO_BANK_BIC" })|raw }}" autocomplete="off" type="text"
+                                   size="20" maxlength="64" name="dynvalue[fcpo_payolution_installment_bic]"
+                                   value="{{ dynvalue.fcpo_payolution_installment_bic }}"
+                                   onkeyup="fcHandleDebitInputs();return false;">
+                            <div id="fcpo_payolution_bic_invalid" class="fcpo_check_error">
+                                <p class="oxValidateError" style="display: block;">
+                                    {{ translate({ ident: "FCPO_BIC_INVALID" })|raw }}
+                                </p>
+                            </div>
+                        </p>
                     </p>
                 </div>
             </div>

@@ -24,6 +24,8 @@ use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
 class FcPoRatePay extends BaseModel
@@ -45,9 +47,12 @@ class FcPoRatePay extends BaseModel
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
     }
@@ -58,6 +63,8 @@ class FcPoRatePay extends BaseModel
      * @param string $sOxid
      * @param array $aRatePayData
      * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoInsertProfile(string $sOxid, array $aRatePayData): void
     {
@@ -99,6 +106,7 @@ class FcPoRatePay extends BaseModel
      *
      * @param string $sOxid
      * @return array
+     * @throws DatabaseConnectionException
      */
     public function fcpoGetProfileData(string $sOxid): array
     {
@@ -114,6 +122,7 @@ class FcPoRatePay extends BaseModel
      * @param string $sOxid
      * @param array $aResponse
      * @return void
+     * @throws DatabaseErrorException
      */
     protected function _fcpoUpdateRatePayProfileByResponse(string $sOxid, array $aResponse): void
     {
@@ -187,6 +196,8 @@ class FcPoRatePay extends BaseModel
      *
      * @param string|null $sPaymentId (optional)
      * @return array<int|string, mixed>
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetRatePayProfiles(string $sPaymentId = null): array
     {
@@ -198,7 +209,7 @@ class FcPoRatePay extends BaseModel
             $sFilterPaymentId = "WHERE OXPAYMENTID=" . $oDb->quote($sPaymentId);
         }
 
-        $sQuery = "SELECT * FROM fcporatepay {$sFilterPaymentId}";
+        $sQuery = "SELECT * FROM fcporatepay $sFilterPaymentId";
         $aRatePayProfiles = $oDb->getAll($sQuery);
 
         foreach ($aRatePayProfiles as $aRatePayProfile) {
@@ -213,6 +224,7 @@ class FcPoRatePay extends BaseModel
      * Add Ratepay shop
      *
      * @return void
+     * @throws DatabaseErrorException
      */
     public function fcpoAddRatePayProfile(): void
     {
@@ -297,6 +309,7 @@ class FcPoRatePay extends BaseModel
      *
      * @param string $sPaymentId
      * @return array
+     * @throws DatabaseConnectionException
      */
     public function fcpoGetProfileDataByPaymentId(string $sPaymentId): array
     {
@@ -314,6 +327,7 @@ class FcPoRatePay extends BaseModel
      * Helper method that returns field-names of ratepay-table
      *
      * @return array
+     * @throws DatabaseConnectionException
      */
     public function fcpoGetFields(): array
     {

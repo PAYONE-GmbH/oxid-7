@@ -46,16 +46,16 @@ class FcPoHelper extends BaseModel
     /**
      * Config instance
      *
-     * @var Config
+     * @var Config|null
      */
-    private static Config $_oConfig;
+    private static ?Config $_oConfig = null;
 
     /**
      * Session instance
      *
-     * @var Session
+     * @var Session|null
      */
-    private static Session $_oSession;
+    private static ?Session $_oSession = null;
 
 
     /**
@@ -193,11 +193,7 @@ class FcPoHelper extends BaseModel
      */
     public function fcpoGetDb(bool $blAssoc = false): DatabaseInterface
     {
-        if ($blAssoc) {
-            return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-        } else {
-            return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_NUM);
-        }
+        return DatabaseProvider::getDb($blAssoc ? DatabaseProvider::FETCH_MODE_ASSOC : DatabaseProvider::FETCH_MODE_NUM);
     }
 
     /**

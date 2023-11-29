@@ -144,8 +144,6 @@ $aLang = [
     'FCPO_PAYOLUTION_SEPA_AGREEMENT_PART_1' => 'Herewith I give ',
     'FCPO_PAYOLUTION_SEPA_AGREE' => 'SEPA direct debit mandate',
     'FCPO_PAYOLUTION_ACCOUNTHOLDER' => 'Account owner',
-    'FCPO_BANK_IBAN' => 'IBAN',
-    'FCPO_BANK_BIC' => 'BIC',
     'FCPO_PAYOLUTION_BIRTHDATE_INVALID' => 'Your date of birth was not entered correctly',
     'FCPO_PAYOLUTION_BANKDATA_INCOMPLETE' => 'Your entered account data is not complete.',
     'FCPO_PAYOLUTION_CHECK_INSTALLMENT_AVAILABILITY' => 'Check availability',
@@ -166,7 +164,6 @@ $aLang = [
     'FCPO_PAYOLUTION_INSTALLMENT_FINANCING_SUM' => 'Total',
     'FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED' => 'Please choose',
     'FCPO_PAYOLUTION_NO_INSTALLMENT_SELECTED' => 'You did not choose an installment.',
-    'FCPO_PAYOLUTION_BIRTHDATE_INVALID' => 'Your date of birth was not entered correctly',
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
 
     'FCPO_CC_HOSTED_ERROR_CARDTYPE' => 'Please select a cardtype',

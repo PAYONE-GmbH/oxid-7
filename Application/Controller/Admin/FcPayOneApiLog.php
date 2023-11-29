@@ -30,14 +30,14 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog';
 
     /**
      * Array with existing status of order
      *
-     * @var array
+     * @var array|null
      */
-    protected array $_aStatus;
+    protected ?array $_aStatus = null;
 
 
     /**

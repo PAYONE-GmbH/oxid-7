@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link          http://www.payone.de
+ * @link          https://www.payone.de
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
@@ -114,10 +114,10 @@ $aLang = [
     'FCPO_NO_TRANSACTION_STATUS_RECEIVED' => 'Kein Transaktions-Status eingegangen.',
     'FC_IS_PAYONE' => 'Dies ist eine PAYONE Zahlungsmethode',
     'FCPO_HELP_MERCHANTID' => 'Ihre PAYONE Merchant-ID (PAYONE Kundennummer) finden Sie auf allen Abrechnungen von PAYONE sowie rechts oben im PAYONE Merchant Interface (PMI).',
-    'FCPO_HELP_PORTALID' => 'Bitte tragen Sie hier die ID des PAYONE Zahlungsportals ein, über welches die Zahlungen abgewickelt werden sollen.<br>Die Portal-ID finden Sie unter <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie nach Auswahl von [editieren] unter dem Reiter [API-Parameter]',
-    'FCPO_HELP_PORTALKEY' => 'Bitte tragen Sie hier den Key zur Absicherung des Datenaustausches ein. Dieser kann bei der Konfiguration des PAYONE Zahlungsportals von Ihnen frei festgelegt werden.<br>Die Konfiguration finden Sie unter <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Handler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale > [editieren] > Reiter [Erweitert] > Key<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie nach Auswahl des Reiters [API-Parameter]',
+    'FCPO_HELP_PORTALID' => 'Bitte tragen Sie hier die ID des PAYONE Zahlungsportals ein, über welches die Zahlungen abgewickelt werden sollen.<br>Die Portal-ID finden Sie unter <a href="https://www.payone.de" target="_blank">https://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie nach Auswahl von [editieren] unter dem Reiter [API-Parameter]',
+    'FCPO_HELP_PORTALKEY' => 'Bitte tragen Sie hier den Key zur Absicherung des Datenaustausches ein. Dieser kann bei der Konfiguration des PAYONE Zahlungsportals von Ihnen frei festgelegt werden.<br>Die Konfiguration finden Sie unter <a href="https://www.payone.de" target="_blank">https://www.payone.de</a> > Handler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale > [editieren] > Reiter [Erweitert] > Key<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie nach Auswahl des Reiters [API-Parameter]',
     'FCPO_HELP_OPERATIONMODE' => 'Hier können Sie für diese Zahlungsart festlegen ob die Zahlungen im Testmodus abgewickelt werden, oder ob diese Live ausgeführt werden. Bitte beachten Sie, dass für den Testmodus die definierten Testdaten verwendet werden müssen.',
-    'FCPO_HELP_SUBACCOUNTID' => 'Bitte tragen Sie hier die ID des Sub-Accounts ein, über welchen die Zahlungen abgewickelt und zugeordnet werden sollen.<br>Die ID finden Sie unter <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Accounts<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie unter <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale > [editieren] > Reiter [API-Parameter]',
+    'FCPO_HELP_SUBACCOUNTID' => 'Bitte tragen Sie hier die ID des Sub-Accounts ein, über welchen die Zahlungen abgewickelt und zugeordnet werden sollen.<br>Die ID finden Sie unter <a href="https://www.payone.de" target="_blank">https://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Accounts<br><br>Alle relevanten Parameter zur Konfiguration erhalten Sie unter <a href="https://www.payone.de" target="_blank">https://www.payone.de</a> > Händler-Login unter dem Menüpunkt Konfiguration > Zahlungsportale > [editieren] > Reiter [API-Parameter]',
     'FCPO_HELP_POSCHECK' => 'Hier können Sie definieren ob eine Prüfung der Bankverbindung gegen die POS-Sperrdatei durchgeführt werden soll. Bitte beachten Sie, dass die das Modul "Protect" beauftragt worden sein muss und die Prüfung nur für die Zahlungsart Lastschrift Deutschland durchgeführt wird.',
     'fcpo_admin_config' => 'PAYONE Konfiguration',
     'fcpo_admin_config_payment' => 'PAYONE Zahlungseinstellungen',

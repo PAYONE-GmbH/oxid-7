@@ -32,7 +32,7 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      *
      * @var string
      */
-    protected string $_sThisTemplate = '@fcpayone/admin/fcpayone_status_mapping';
+    protected $_sThisTemplate = '@fcpayone/admin/fcpayone_status_mapping';
 
     /**
      * Returns list of former configured mappings
@@ -86,26 +86,6 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
         $oPayment = oxNew(Payment::class);
 
         return $oPayment->fcpoGetPayonePaymentTypes();
-    }
-
-    /**
-     * Returns a list of payone status list
-     *
-     * @return stdClass[]
-     */
-    public function getPayoneStatusList(): array
-    {
-        $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
-
-        $aNewList = [];
-        foreach ($aPayoneStatusList as $sPayoneStatusId) {
-            $oStatus = new stdClass();
-            $oStatus->sId = $sPayoneStatusId;
-            $oStatus->sTitle = $this->_oFcPoHelper->fcpoGetLang()->translateString('fcpo_status_' . $sPayoneStatusId, null, true);
-            $aNewList[] = $oStatus;
-        }
-
-        return $aNewList;
     }
 
     /**
