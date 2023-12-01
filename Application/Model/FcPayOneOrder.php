@@ -682,7 +682,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     protected function _fcpoCheckRefNr(): string
     {
         $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-        $sSessRefNr = $oPORequest->getRefNr(false, true);
+        $sSessRefNr = $oPORequest->getRefNr(null, true);
         $sRequestRefNr = $this->_oFcPoHelper->fcpoGetRequestParameter('refnr');
 
         $blValid = ($sRequestRefNr == $sSessRefNr);
