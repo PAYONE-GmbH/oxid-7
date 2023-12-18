@@ -522,4 +522,15 @@ class FcPoHelper extends BaseModel
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
+    /**
+     * Checks if BNPL Portal and Key are configured
+     *
+     * @return bool
+     */
+    public function fcpoIsBNPLConfigured(): bool
+    {
+        $oConfig = $this->fcpoGetConfig();
+        return !empty($oConfig->getConfigParam('sFCPOPLPortalId')) &&
+            !empty($oConfig->getConfigParam('sFCPOPLPortalKey'));
+    }
 }

@@ -281,7 +281,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetBNPLInstallment(): array
     {
+        /** @var FcPoRequest $oRequest */
         $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+
+        if (!$this->_oFcPoHelper->fcpoIsBNPLConfigured()) {
+            return ['status' => 'ERROR'];
+        }
+
         $aResponse = $oRequest->sendRequestBNPLInstallmentOptions();
 
         $aFormattedData = [];
