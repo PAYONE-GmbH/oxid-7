@@ -2662,28 +2662,27 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $aBankData = [];
 
         if (count($aParams) > 0) {
+            $aInstallmentAdditions = [
+                'fcpopo_bill' => '',
+                'fcpopo_installment' => '_installment',
+                'fcpopo_debitnote' => '_debitnote',
+            ];
+
+            $sInstallmentAddition = $aInstallmentAdditions[$sPaymentId];
+
+            $aMap = [
+                'fcpo_payolution' . $sInstallmentAddition . '_iban',
+                'fcpo_payolution' . $sInstallmentAddition . '_bic',
+                'fcpo_payolution' . $sInstallmentAddition . '_accountholder',
+            ];
             foreach ($aParams as $sKey => $sParam) {
-                $aInstallmentAdditions = [
-                    'fcpopo_bill' => '',
-                    'fcpopo_installment' => '_installment',
-                    'fcpopo_debitnote' => '_debitnote',
-                ];
-
-                $sInstallmentAddition = $aInstallmentAdditions[$sPaymentId];
-
-                $aMap = [
-                    'fcpo_payolution' . $sInstallmentAddition . '_iban',
-                    'fcpo_payolution' . $sInstallmentAddition . '_bic',
-                    'fcpo_payolution' . $sInstallmentAddition . '_accountholder',
-                ];
-
                 if (in_array($sKey, $aMap)) {
                     $aBankData[$sKey] = $sParam;
                 }
             }
         }
 
-        return (count($aBankData) != 3) ? false : $aBankData;
+        return (count($aBankData) != 3) ? [] : $aBankData;
     }
 
     /**
@@ -2861,7 +2860,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string|null $sWorkOrderId
      * @return bool
      */
-    protected function _fcpoPerformInstallmentCalculation(string $sPaymentId, string $sWorkOrderId = null): bool
+    protected function _fcpoPerformInstallmentCalculation(string $sPaymentId, string $sWorkOrderId = ''): bool
     {
         $blReturn = true;
         $oUser = $this->getUser();

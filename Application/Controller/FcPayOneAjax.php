@@ -130,7 +130,7 @@ class FcPayOneAjax extends BaseController
     public function fcpoTriggerPrecheck(string $sPaymentId, string $sParamsJson): bool|string
     {
         $oPaymentController = $this->_oFcPoHelper->getFactoryObject(PaymentController::class);
-        $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson));
+        $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult = $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
 
         return ($mPreCheckResult === true) ? 'SUCCESS' : $mPreCheckResult;
