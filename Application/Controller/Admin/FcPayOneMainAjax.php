@@ -87,7 +87,7 @@ class FcPayOneMainAjax extends ListComponentAjax
         $sType = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
             $sCountryTable = $this->getViewName('oxcountry');
-            $aChosenCntr = $this->_getAll($this->addFilter("select $sCountryTable.oxid " . $this->getQuery()));
+            $aChosenCntr = $this->getAll($this->addFilter("select $sCountryTable.oxid " . $this->getQuery()));
         }
         if ($sOxid && $sOxid != "-1" && is_array($aChosenCntr)) {
             foreach ($aChosenCntr as $sChosenCntr) {
