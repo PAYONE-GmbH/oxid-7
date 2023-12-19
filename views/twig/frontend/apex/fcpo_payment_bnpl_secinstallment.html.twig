@@ -13,7 +13,8 @@
             {% set installmentOptions = oView.fcpoGetBNPLInstallment() %}
             {% if installmentOptions.status != 'OK' or installmentOptions.plans|length < 1 %}
                 <script type="text/javascript">
-                    document.addEventListener("DOMContentLoaded", function (event) {
+                    // Disabled until Fix from Oxid to locate the submit button
+                    /*document.addEventListener("DOMContentLoaded", function (event) {
                         var aPaymentSelectionButtons = document.getElementsByName("paymentid");
                         aPaymentSelectionButtons.forEach(function (oElem) {
                             oElem.addEventListener('click', function (event) {
@@ -21,7 +22,7 @@
                                 oPaymentConfirmButton.disabled = (event.target.value === 'fcpopl_secinstallment');
                             });
                         });
-                    });
+                    });*/
                 </script>
                 <div class="form-floating mb-3">
                     <div class="help-block">
