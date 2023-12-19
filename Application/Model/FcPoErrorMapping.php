@@ -124,25 +124,25 @@ class FcPoErrorMapping extends BaseModel
      * Extracts all error codes from xml file adn returns them as array
      *
      * @param string $sType
-     * @return array|bool
+     * @return array
      * @throws Exception
      */
-    public function fcpoGetAvailableErrorCodes(string $sType = 'general'): array|bool
+    public function fcpoGetAvailableErrorCodes(string $sType = 'general'): array
     {
-        $mReturn = $sErrorXmlPath = false;
+        $mReturn = [];
+        $sErrorXmlPath = false;
         if ($sType == 'general') {
-            $sErrorXmlPath = getShopBasePath() . "/modules/fc/fcpayone/payoneerrors.xml";
+            $sErrorXmlPath = VENDOR_PATH . "payone-gmbh/oxid-7/payoneerrors.xml";
             $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
         } elseif ($sType == 'iframe') {
-            $sErrorXmlPath = getShopBasePath() . "/modules/fc/fcpayone/iframeerrors.xml";
+            $sErrorXmlPath = VENDOR_PATH . "payone-gmbh/oxid-7/iframeerrors.xml";
             $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
         }
 
         if (file_exists($sErrorXmlPath)) {
             try {
                 $oXml = simplexml_load_file($sErrorXmlPath);
-                $aReturn = $this->_fcpoParseXml($oXml);
-                $mReturn = (is_array($aReturn)) ? $aReturn : false;
+                $mReturn = $this->_fcpoParseXml($oXml);
             } catch (Exception $ex) {
                 throw $ex;
             }

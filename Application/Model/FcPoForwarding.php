@@ -120,8 +120,7 @@ class FcPoForwarding extends BaseModel
         $sOxid = $database->quote($sForwardingId);
         $sPayoneStatus = $database->quote($aData['sPayoneStatus']);
         $sUrl = $database->quote($aData['sForwardingUrl']);
-        $iTimeout = $database->quote($aData['iForwardingTimeout']);
-
+        $iTimeout = (int) ($aData['iForwardingTimeout']);
 
         if (array_key_exists('delete', $aData)) {
             $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = $sOxid";
