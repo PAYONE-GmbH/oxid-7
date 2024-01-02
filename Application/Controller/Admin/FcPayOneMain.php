@@ -286,15 +286,17 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $oCountryList = $this->_oFcPoHelper->getFactoryObject(CountryList::class);
         $oCountryList->loadActiveCountries($oLang->getTplLanguage());
 
-        $blValidCountryData = (
-            isset($this->_aConfArrs["aFCPODebitCountries"]) &&
-            count($this->_aConfArrs["aFCPODebitCountries"]) &&
-            count($oCountryList)
-        );
+        $blValidCountryData = count($oCountryList)
+            && (
+                !isset($this->_aConfArrs["aFCPODebitCountries"]) ||
+                (isset($this->_aConfArrs["aFCPODebitCountries"]) && count($this->_aConfArrs["aFCPODebitCountries"]))
+            );
 
         if ($blValidCountryData) {
             foreach ($oCountryList as $sCountryId => $oCountry) {
-                if (in_array($oCountry->oxcountry__oxid->value, $this->_aConfArrs["aFCPODebitCountries"])) {
+                if (
+                    isset($this->_aConfArrs["aFCPODebitCountries"]) &&
+                    in_array($oCountry->oxcountry__oxid->value, $this->_aConfArrs["aFCPODebitCountries"])) {
                     $oCountry->selected = "1";
                 }
 
