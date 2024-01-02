@@ -316,11 +316,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
         $this->_aAplCreditCardsList = [
             'V' => json_decode(json_encode([
                 'name' => 'Visa',
-                'selected' => $this->_aConfArrs["aFCPOAplCreditCards"] && in_array('V', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
+                'selected' => isset($this->_aConfArrs["aFCPOAplCreditCards"]) && in_array('V', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
             ], JSON_THROW_ON_ERROR), null, 512, JSON_THROW_ON_ERROR),
             'M' => json_decode(json_encode([
                 'name' => 'Mastercard',
-                'selected' => $this->_aConfArrs["aFCPOAplCreditCards"] && in_array('M', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
+                'selected' => isset($this->_aConfArrs["aFCPOAplCreditCards"]) && in_array('M', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
             ], JSON_THROW_ON_ERROR), null, 512, JSON_THROW_ON_ERROR),
         ];
     }
