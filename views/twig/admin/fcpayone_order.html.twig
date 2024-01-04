@@ -1156,7 +1156,7 @@
                                     <span>{{ translate({ ident: "FCPO_LEFT_PREAUTHORIZED_AMOUNT" }) }}</span>
                                 </td>
                                 <td style="text-align: right; padding-right: 10px">
-                                    {{ edit.oxorder__oxtotalordersum.value-captureDebitEntries.totalCapture|number_format(2, ',', '') }} {{ edit.oxorder__oxcurrency.value|raw }}
+                                    {{ (edit.oxorder__oxtotalordersum.value-captureDebitEntries.totalCapture)|number_format(2, ',', '') }} {{ edit.oxorder__oxcurrency.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
