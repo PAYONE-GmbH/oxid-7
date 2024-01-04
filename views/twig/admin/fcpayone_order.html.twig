@@ -40,10 +40,11 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if oView.fcpoGetRequestMessage() %}
+                    {% set requestMessage = oView.fcpoGetRequestMessage() %}
+                    {% if requestMessage %}
                         <tr>
                             <td class="edittext" colspan="2">
-                                <strong>{{ oView.fcpoGetRequestMessage() }}</strong>
+                                <strong>{{ requestMessage|raw }}</strong>
                             </td>
                         </tr>
                     {% endif %}
