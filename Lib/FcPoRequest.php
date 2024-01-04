@@ -621,7 +621,7 @@ class FcPoRequest extends Base
         $blFCPODebitBICMandatory = $oConfig->getConfigParam('blFCPODebitBICMandatory');
 
         $this->addParameter('clearingtype', 'elv'); //Payment method
-        $this->addParameter('bankcountry', $aDynvalue['fcpo_elv_country']);
+        $this->addParameter('bankcountry', $aDynvalue['fcpo_elv_country'] ?? '');
 
         $blBICConfirmed = (
             (
