@@ -3658,7 +3658,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function fcpoGetAccountHolder(): string
     {
-        return $this->fcpoGetUserValue('oxfname') . ' FcPayOnePaymentView.php' . $this->fcpoGetUserValue('oxlname');
+        return $this->fcpoGetUserValue('oxfname') . ' ' . $this->fcpoGetUserValue('oxlname');
     }
 
     /**
