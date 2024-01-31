@@ -67,6 +67,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcporp_installment',
         'fcpopl_secinvoice',
         'fcpopl_secinstallment',
+        'fcpopl_secdebitnote',
     ];
 
     /**

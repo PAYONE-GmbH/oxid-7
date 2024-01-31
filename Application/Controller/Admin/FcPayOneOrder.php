@@ -308,7 +308,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
 
             $oPoRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
             $oResponse = null;
-            if (in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
+            if (in_array($oOrder->oxorder__oxpaymenttype->value, ['fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'])) {
                 $oPoRequest->addParameter('addPayData[cancellation_reason]', $sCancellationReason);
             }
 

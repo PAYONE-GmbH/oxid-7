@@ -187,7 +187,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blShowAsRegularPaymentSelection =
             $oPayment->fcpoShowAsRegularPaymentSelection();
 
-        if ($blShowAsRegularPaymentSelection && in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
+        if ($blShowAsRegularPaymentSelection && in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'])) {
             $blShowAsRegularPaymentSelection = $this->fcpoShowBNPLPaymentSelection();
         }
 
@@ -1194,9 +1194,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blshowshipaddress = $this->_oFcPoHelper->fcpoGetSessionVariable('blshowshipaddress');
         $blDiffShippingAllowed = $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('blFCPOPLAllowDiffAddress');
 
-        if ((!$blDiffShippingAllowed && $blshowshipaddress == 1) || $blIsB2B) {
+        if ((!$blDiffShippingAllowed && $blshowshipaddress == 1)) {
             $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinvoice');
             $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinstallment');
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secdebitnote');
+        } elseif ($blIsB2B) {
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinstallment');
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secdebitnote');
         }
     }
 
@@ -1749,19 +1753,22 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             case 'fcpo_secinvoice':
             case 'fcpopl_secinvoice':
             case 'fcpopl_secinstallment':
+            case 'fcpopl_secdebitnote':
                 $blB2CMode = !$this->fcpoIsB2BPov();
-                $blFieldPresence = isset($aRequestedValues['fcpopl_secinvoice_birthdate_day'])
-                    && isset($aRequestedValues['fcpopl_secinvoice_birthdate_month'])
-                    && isset($aRequestedValues['fcpopl_secinvoice_birthdate_year']);
-                $blBirthdayRequired = $blB2CMode && $blFieldPresence;
+                $blFieldPresence = isset($aRequestedValues[$sPaymentId . '_birthdate_day'])
+                    && isset($aRequestedValues[$sPaymentId . '_birthdate_month'])
+                    && isset($aRequestedValues[$sPaymentId . '_birthdate_year']);
+                $blBirthdayRequired = ($blB2CMode || $sPaymentId == 'fcpopl_secinvoice') && $blFieldPresence;
                 $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues);
                 break;
         }
 
-        return [
+        $aValidationData =  [
             'blValidBirthdateData' => $blValidBirthdateData,
             'blBirthdayRequired' => $blBirthdayRequired
         ];
+
+        return $aValidationData;
     }
 
     /**
@@ -1942,6 +1949,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             case 'fcpo_secinvoice':
             case 'fcpopl_secinvoice':
             case 'fcpopl_secinstallment':
+            case 'fcpopl_secdebitnote':
                 $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] .
                     "-" . $aRequestedValues[$sPaymentId . '_birthdate_month'] .
                     "-" . $aRequestedValues[$sPaymentId . '_birthdate_day'];
@@ -1995,6 +2003,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if (isset($aRequestedValues['fcpo_secinvoice_ustid'])) {
             $mReturn = (string)$aRequestedValues['fcpo_secinvoice_ustid'];
+        }
+
+        if (isset($aRequestedValues['fcpopl_secinvoice_ustid'])) {
+            $mReturn = (string) $aRequestedValues['fcpopl_secinvoice_ustid'];
         }
 
         return $mReturn;
@@ -2067,7 +2079,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function _fcpoBNPLSaveRequestedValues(mixed $mReturn, string $sPaymentId): mixed
     {
-        $blIsBNPL = ($sPaymentId == 'fcpopl_secinvoice' || $sPaymentId == 'fcpopl_secinstallment');
+        $blIsBNPL = ($sPaymentId == 'fcpopl_secinvoice' || $sPaymentId == 'fcpopl_secinstallment' || $sPaymentId == 'fcpopl_secdebitnote');
         if (!$blIsBNPL) return $mReturn;
 
         $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
@@ -3206,7 +3218,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _fcpoAdultCheckRequired(string $sPaymentId): bool
     {
-        $aAffectedPaymentTypes = ['fcpo_secinvoice'];
+        $aAffectedPaymentTypes = ['fcpo_secinvoice', 'fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'];
         $blReturn = false;
         if (in_array($sPaymentId, $aAffectedPaymentTypes)) {
             $blReturn = true;
@@ -3808,7 +3820,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $oUser = $this->getUser();
         $blIsB2B = $oUser->oxuser__oxcompany->value != '';
 
-        return (!$blIsB2B && $oUser->oxuser__oxfon->value == '');
+        return (
+            (!$blIsB2B || $sPaymentID == 'fcpopl_secinvoice')
+            && $oUser->oxuser__oxfon->value == ''
+        );
     }
 
     /**

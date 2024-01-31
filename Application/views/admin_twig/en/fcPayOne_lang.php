@@ -74,6 +74,7 @@ $aLang = [
     'fcpo_clearingtype_fcporp_installment' => 'Ratepay Installment',
     'fcpo_clearingtype_fcpopl_secinvoice' => 'BNPL Safe Invoice',
     'fcpo_clearingtype_fcpopl_secinstallment' => 'BNPL Safe Installment',
+    'fcpo_clearingtype_fcpopl_secdebitnote' => 'BNPL Secured Direct Debit',
     'FCPO_CAPTURE_APPROVED' => 'Booking was successfull',
     'FCPO_CAPTURE_ERROR' => 'Error occured during booking: ',
     'FCPO_DEBIT_APPROVED' => 'Credit was successfull',

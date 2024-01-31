@@ -1304,7 +1304,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         $blForcedByPaymentMethod = in_array(
             $this->oxorder__oxpaymenttype->value,
-            ['fcpobillsafe', 'fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit', 'fcpo_secinvoice', 'fcporp_bill', 'fcporp_debitnote', 'fcporp_installment', 'fcpopl_secinvoice', 'fcpopl_secinstallment']
+            ['fcpobillsafe', 'fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit', 'fcpo_secinvoice', 'fcporp_bill', 'fcporp_debitnote', 'fcporp_installment', 'fcpopl_secinvoice', 'fcpopl_secinstallment','fcpopl_secdebitnote']
         );
 
         if ($blForcedByPaymentMethod) return true;
@@ -1320,6 +1320,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             [
                 'fcpopl_secinvoice',
                 'fcpopl_secinstallment',
+                'fcpopl_secdebitnote',
             ]
         );
     }

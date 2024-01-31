@@ -299,6 +299,7 @@ class FcPoRequest extends Base
         $blIsBNPLPayment = (
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopl_secinvoice'
             || $oOrder->oxorder__oxpaymenttype->value == 'fcpopl_secinstallment'
+            || $oOrder->oxorder__oxpaymenttype->value == 'fcpopl_secdebitnote'
         );
 
         if ($oOrder->oxorder__oxdellname && $oOrder->oxorder__oxdellname->value != '') {
@@ -553,6 +554,9 @@ class FcPoRequest extends Base
                 break;
             case 'fcpopl_secinstallment':
                 $this->_fcpoAddBNPLSecInstallmentParameters($oOrder, $aDynvalue);
+                break;
+            case 'fcpopl_secdebitnote':
+                $this->_fcpoAddBNPLSecDirectDebitParameters($oOrder, $aDynvalue);
                 break;
             case 'fcpo_alipay':
                 $this->addParameter('clearingtype', 'wlt'); //Payment method
@@ -1443,6 +1447,32 @@ class FcPoRequest extends Base
         return true;
     }
 
+    public function _fcpoAddBNPLSecDirectDebitParameters($oOrder, $aDynvalue = [])
+    {
+        $this->_fcpoAddBNPLPortalParameters();
+
+        $this->addParameter('clearingtype', 'fnc');
+        $this->addParameter('financingtype', 'PDD');
+
+        $blIsB2B = $this->_fcpoIsOrderB2B($oOrder);
+        $sBusinessRelation = ($blIsB2B) ? 'b2b' : 'b2c';
+        $this->addParameter('businessrelation', $sBusinessRelation);
+
+        if (isset($aDynvalue['fcpopl_secdebitnote_iban'])) {
+            $this->addParameter('iban', $aDynvalue['fcpopl_secdebitnote_iban']);
+        }
+
+        if (isset($aDynvalue['fcpopl_secdebitnote_account_holder'])) {
+            $this->addParameter('bankaccountholder', $aDynvalue['fcpopl_secdebitnote_account_holder']);
+        }
+
+        if (isset($aDynvalue['fcpopl_device_token'])) {
+            $this->addParameter('add_paydata[device_token]', $aDynvalue['fcpopl_device_token']);
+        }
+
+        return true;
+    }
+
     /**
      * Add parameters needed for Bancontact
      *
@@ -1721,7 +1751,7 @@ class FcPoRequest extends Base
      */
     protected function fcpoGetPosPr(float $dInitialPr, string $sPaymentId, bool $blDebit = false): float
     {
-        if (!$blDebit || !in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment'])) {
+        if (!$blDebit || !in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'])) {
             return $dInitialPr;
         }
 
@@ -2542,6 +2572,9 @@ class FcPoRequest extends Base
         if ($sPaymentId == 'fcpopl_secinstallment') {
             $this->_fcpoAddBNPLSecInstallmentParameters($oOrder);
         }
+        if ($sPaymentId == 'fcpopl_secdebitnote') {
+            $this->_fcpoAddBNPLSecDirectDebitParameters($oOrder);
+        }
 
         $aResponse = $this->send();
 
@@ -2577,12 +2610,13 @@ class FcPoRequest extends Base
     {
         $sPaymentId =
             (string)$oOrder->oxorder__oxpaymenttype->value;
-        $blPaymentMatches = ($sPaymentId === 'fcpo_secinvoice' || $sPaymentId === 'fcpopl_secinvoice' || $sPaymentId === 'fcpopl_secinstallment');
+        $blPaymentMatches = ($sPaymentId === 'fcpo_secinvoice'
+            || $sPaymentId === 'fcpopl_secinvoice' || $sPaymentId === 'fcpopl_secinstallment' || $sPaymentId === 'fcpopl_secdebitnote');
 
         if (!$blPaymentMatches) return;
 
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        if ($sPaymentId === 'fcpopl_secinvoice' || $sPaymentId === 'fcpopl_secinstallment') {
+        if ($sPaymentId === 'fcpopl_secinvoice' || $sPaymentId === 'fcpopl_secinstallment' || $sPaymentId === 'fcpopl_secdebitnote') {
             $sFCPOSecinvoicePortalId = $oConfig->getConfigParam('sFCPOPLPortalId');
             $sFCPOSecinvoicePortalKey = $oConfig->getConfigParam('sFCPOPLPortalKey');
         } else {
@@ -2674,6 +2708,9 @@ class FcPoRequest extends Base
         }
         if ($sPaymentId == 'fcpopl_secinstallment') {
             $this->_fcpoAddBNPLSecInstallmentParameters($oOrder);
+        }
+        if ($sPaymentId == 'fcpopl_secdebitnote') {
+            $this->_fcpoAddBNPLSecDirectDebitParameters($oOrder);
         }
 
         $aResponse = $this->send();

@@ -74,6 +74,7 @@ $aLang = [
     'fcpo_clearingtype_fcporp_installment' => 'Ratepay Ratenkauf',
     'fcpo_clearingtype_fcpopl_secinvoice' => 'BNPL Gesicherter Rechnungskauf',
     'fcpo_clearingtype_fcpopl_secinstallment' => 'BNPL Gesicherter Ratenkauf',
+    'fcpo_clearingtype_fcpopl_secdebitnote'     => 'BNPL Gesicherte Lastschrift',
     'FCPO_CAPTURE_APPROVED' => 'Buchung war erfolgreich',
     'FCPO_CAPTURE_ERROR' => 'Fehler bei Buchung: ',
     'FCPO_DEBIT_APPROVED' => 'Gutschrift war erfolgreich',
