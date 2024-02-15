@@ -290,7 +290,7 @@
 
                     {% if edit.allowDebit() %}
                         {% set blShowDebit = true %}
-                        {% capture name = "debit_block" %}
+                        {% set debit_block %}
                             <tr>
                                 <td colspan="2" style="border-bottom: 1px solid black;"></td>
                             </tr>
@@ -616,9 +616,9 @@
                                     </td>
                                 </tr>
                             {% endif %}
-                        {% endcapture %}
+                        {% endset %}
                         {% if blShowDebit == true %}
-                            {{ smarty.capture.debit_block }}
+                            {{ debit_block }}
                         {% endif %}
                     {% endif %}
 

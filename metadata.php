@@ -82,6 +82,9 @@ $aModule = [
         'FcPayOneStatusMapping' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneStatusMapping::class,
         'FcPayOneErrorMapping' => Fatchip\PayOne\Application\Controller\Admin\FcPayOneErrorMapping::class,
         'FcPayOneAjax' => Fatchip\PayOne\Application\Controller\FcPayOneAjax::class,
+        'FcPayOneTransactionStatusBase' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusBase::class,
+        'FcPayOneTransactionStatusHandler' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusHandler::class,
+        'FcPayOneTransactionStatusForwarder' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusForwarder::class,
         // Model
         'FcPoUserFlag' => Fatchip\PayOne\Application\Model\FcPouserflag::class,
         'FcPoRequestLog' => Fatchip\PayOne\Application\Model\FcPoRequestLog::class,
@@ -94,10 +97,7 @@ $aModule = [
         'FcPoPaypal' => Fatchip\PayOne\Application\Model\FcPoPaypal::class,
         'FcPoRatePay' => Fatchip\PayOne\Application\Model\FcPoRatePay::class,
         //Core
-        'FcPoTransactionStatusHandler' => Fatchip\PayOne\Core\FcPoTransactionStatusHandler::class,
-        'FcPoTransactionStatusBase' => Fatchip\PayOne\Core\FcPoTransactionStatusBase::class,
         'FcPoMandateDownload' => Fatchip\PayOne\Core\FcPoMandateDownload::class,
-        'FcPoTransactionStatusForwarder' => Fatchip\PayOne\Core\FcPoTransactionStatusForwarder::class,
     ],
     'events' => [
         'onActivate' => Fatchip\PayOne\Core\FcPayOneEvents::class . '::onActivate',

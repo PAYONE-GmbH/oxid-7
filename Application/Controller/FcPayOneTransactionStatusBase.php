@@ -18,18 +18,20 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\UtilsObject;
 
-class FcPoTransactionStatusBase extends BaseModel
+class FcPayOneTransactionStatusBase extends BaseController
 {
 
     /**
@@ -61,6 +63,11 @@ class FcPoTransactionStatusBase extends BaseModel
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * @var string
+     */
+    protected $_sThisTemplate = '@fcpayone/frontend/fcpo_txstatus_base';
 
 
     /**

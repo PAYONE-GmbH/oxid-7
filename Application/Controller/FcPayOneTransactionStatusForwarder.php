@@ -18,7 +18,7 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -26,9 +26,9 @@ use OxidEsales\Eshop\Core\DatabaseProvider;
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
-ini_set('error_log', '../../../../source/log/fcpoErrors.log');
+ini_set('error_log', '../../../../../source/log/fcpoErrors.log');
 
-class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
+class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
 {
 
     const STATE_STARTING = 'starting';

@@ -18,7 +18,7 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
@@ -29,13 +29,13 @@ use OxidEsales\Eshop\Core\Language;
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
-ini_set('error_log', '../../../../source/log/fcpoErrors.log');
+ini_set('error_log', '../../../../../source/log/fcpoErrors.log');
 
 
 $aWhitelist = [];
 $aWhitelistForwarded = [];
-if (file_exists(dirname(__FILE__) . "/../config.ipwhitelist.php")) {
-    include_once dirname(__FILE__) . "/../config.ipwhitelist.php";
+if (file_exists(dirname(__FILE__) . "/../../config.ipwhitelist.php")) {
+    include_once dirname(__FILE__) . "/../../config.ipwhitelist.php";
 } else {
     echo 'Config file missing!';
     exit;
@@ -76,7 +76,7 @@ if (!in_array($sRemoteIp, $aWhitelist)) {
     }
 }
 
-class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
+class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
 {
 
     /**
@@ -302,7 +302,7 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
      */
     protected function _getOrder(string $sTxid = null): Order
     {
-        if ($this->_oFcOrder === null) {
+        if (empty($this->_oFcOrder)) {
             if ($sTxid === null) {
                 $sTxid = $this->fcGetPostParam('txid');
             }
@@ -488,7 +488,7 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
         $sParams = substr($sParams, 1);
         $sBaseUrl = (empty($sSslShopUrl)) ? $sShopUrl : $sSslShopUrl;
 
-        $sForwarderUrl = $sBaseUrl . 'index.php?cl=FcPoTransactionStatusForwarder';
+        $sForwarderUrl = $sBaseUrl . 'index.php?cl=FcPayOneTransactionStatusForwarder';
         $this->_logForwardMessage('Forward transaction id to own controller:' . $sForwarderUrl . '...');
 
         $oCurl = curl_init($sForwarderUrl);

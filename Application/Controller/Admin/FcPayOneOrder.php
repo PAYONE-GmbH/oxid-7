@@ -299,10 +299,10 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
 
-            $sBankCountry = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcountry');
-            $sBankAccount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccount');
-            $sBankCode = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcode');
-            $sBankAccountHolder = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccountholder');
+            $sBankCountry = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcountry') ?: '';
+            $sBankAccount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccount') ?: '';
+            $sBankCode = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankcode') ?: '';
+            $sBankAccountHolder = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_bankaccountholder') ?: '';
             $sAmount = $this->_oFcPoHelper->fcpoGetRequestParameter('debit_amount');
             $sCancellationReason = $this->_oFcPoHelper->fcpoGetRequestParameter('bnpl_cancellation_reason');
 
