@@ -1260,8 +1260,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function getHashCC(string $sType = ''): string
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
         $sKey = $this->getPortalKey();
 
         $sData =
@@ -1274,11 +1272,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'JSON' .
             'yes';
 
-        $sHashMD5 = md5($sData . $sKey);
-        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
-
-        return ($sFCPOHashMethod == 'sha2-384')
-            ? $sHashSha2 : $sHashMD5;
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**
@@ -1430,8 +1424,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function getHashELVWithChecktype(): string
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
         $sKey = $this->getPortalKey();
 
         $sData =
@@ -1444,11 +1436,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'bankaccountcheck' .
             'JSON';
 
-        $sHashMD5 = md5($sData . $sKey);
-        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
-
-        return ($sFCPOHashMethod == 'sha2-384')
-            ? $sHashSha2 : $sHashMD5;
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**
@@ -1480,8 +1468,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     public function getHashELVWithoutChecktype(): string
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
         $sKey = $this->getPortalKey();
 
         $sData =
@@ -1493,11 +1479,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'bankaccountcheck' .
             'JSON';
 
-        $sHashMD5 = md5($sData . $sKey);
-        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
-
-        return ($sFCPOHashMethod == 'sha2-384')
-            ? $sHashSha2 : $sHashMD5;
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**

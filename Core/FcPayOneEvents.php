@@ -878,14 +878,7 @@ class FcPayOneEvents
     public static function setDefaultConfigValues(): void
     {
         $oConfig = self::$_oFcPoHelper->fcpoGetConfig();
-        $blIsUpdate = self::isUpdate();
-        $blHashMethodSet = (bool)$oConfig->getConfigParam('sFCPOHashMethod');
-
-        if (!$blHashMethodSet && $blIsUpdate) {
-            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'md5');
-        } else if (!$blHashMethodSet) {
-            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
-        }
+        $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
 
         if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
             $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');

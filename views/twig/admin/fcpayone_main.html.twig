@@ -97,21 +97,6 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl>
-                <dt>
-                    <select name="confstrs[sFCPOHashMethod]">
-                        <option value="md5" {% if confstrs.sFCPOHashMethod == "md5" %}SELECTED{% endif %}>md5</option>
-                        <option value="sha2-384" {% if confstrs.sFCPOHashMethod == "sha2-384" %}SELECTED{% endif %}>sha2-384
-                            (empfohlen)
-                        </option>
-                    </select>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_HASH_METHOD"), 'sHelpText': help_text("FCPO_HELP_HASH_METHOD")} %}
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_HASH_METHOD" })|raw }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
         </div>
     </div>
 
