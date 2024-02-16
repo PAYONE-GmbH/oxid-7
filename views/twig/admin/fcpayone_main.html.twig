@@ -974,6 +974,43 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
+
+            <dl>
+                <dt>
+                    <select name="confbools[blFCPOPaydirektSecuredPreorder]" onchange="fcpoTogglePaydirektGuaranteePeriod(this, 'fcpoPaydirektGuaranteePeriod')">
+                        <option value="false">
+                            {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_NO" })|raw }}
+                        </option>
+                        <option value="true" {% if confbools.blFCPOPaydirektSecuredPreorder %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_YES" })|raw }}
+                        </option>
+                    </select>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SECURED_PREORDER"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SECURED_PREORDER")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <div id="fcpoPaydirektGuaranteePeriod" style="{% if confbools.blFCPOPaydirektSecuredPreorder == false %} display:none {% endif %}">
+                <dl>
+                    <dt>
+                        <select name="confstrs[sFCPOPaydirektSecuredPreorderGuaranteePeriod]">
+                            {% for i in 1..15 %}
+                                <option value="{{ i }}" {% if confstrs.sFCPOPaydirektSecuredPreorderGuaranteePeriod == i %}SELECTED{% endif %}>
+                                    {{ i }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD")} %}
+                    </dt>
+                    <dd>
+                        {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD" })|raw }}
+                    </dd>
+                    <div class="spacer"></div>
+                </dl>
+            </div>
         </div>
     </div>
 

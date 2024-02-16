@@ -883,6 +883,10 @@ class FcPayOneEvents
         if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
             $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
         }
+
+        if (is_null($oConfig->getConfigParam('blFCPOPaydirektSecuredPreorder'))) {
+            $oConfig->saveShopConfVar('bool', 'blFCPOPaydirektSecuredPreorder', false);
+        }
     }
 
     /**

@@ -342,7 +342,7 @@ class FcPoRequest extends Base
             }
         }
 
-        $blPaymentTypeKnown = $this->setPaymentParameters($oOrder, $aDynvalue, $sRefNr);
+        $blPaymentTypeKnown = $this->setPaymentParameters($oOrder, $aDynvalue, $sRefNr, $blIsPreauthorization);
 
         $blAddProductInfo = $oOrder->isDetailedProductInfoNeeded();
 
@@ -452,7 +452,7 @@ class FcPoRequest extends Base
      * @throws DatabaseConnectionException
      * @throws LanguageNotFoundException
      */
-    protected function setPaymentParameters(Order $oOrder, array $aDynvalue, string $sRefNr): bool
+    protected function setPaymentParameters(Order $oOrder, array $aDynvalue, string $sRefNr, bool $blIsPreauthorization = false): bool
     {
         $blAddRedirectUrls = false;
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -534,6 +534,15 @@ class FcPoRequest extends Base
                 if ($blAllowOvercapture) {
                     $this->addParameter('add_paydata[over_capture]', 'yes');
                 }
+
+                $blIsSecuredPreorder = $blIsPreauthorization
+                    && $oConfig->getConfigParam('blFCPOPaydirektSecuredPreorder');
+                if ($blIsSecuredPreorder) {
+                    $iPaydirektGuaranteePeriod = (int) $oConfig->getConfigParam('sFCPOPaydirektSecuredPreorderGuaranteePeriod');
+                    $this->addParameter('add_paydata[order_secured]', 'yes');
+                    $this->addParameter('add_paydata[preauthorization_validity]', $iPaydirektGuaranteePeriod);
+                }
+
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
