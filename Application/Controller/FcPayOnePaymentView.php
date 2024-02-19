@@ -2086,6 +2086,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             }
         }
 
+        $this->_fcpoSaveUserData($sPaymentId,'oxustid');
+
         return ($blBirthdayCheckPassed && $blInstallmentPlanCheckPassed) ? $mReturn : false;
     }
 
@@ -3797,7 +3799,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return bool
      */
-    public function fcpoBNPLShowFon(): bool
+    public function fcpoBNPLShowFon($sPaymentID = ''): bool
     {
         $oUser = $this->getUser();
         $blIsB2B = $oUser->oxuser__oxcompany->value != '';
@@ -3816,9 +3818,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     public function fcpoBNPLShowBirthdate(): bool
     {
         $oUser = $this->getUser();
-        $blIsB2B = $oUser->oxuser__oxcompany->value != '';
-
-        return (!$blIsB2B && (is_null($oUser->oxuser__oxbirthdate->value) || $oUser->oxuser__oxbirthdate->value == '0000-00-00'));
+        return ((is_null($oUser->oxuser__oxbirthdate->value) || $oUser->oxuser__oxbirthdate->value == '0000-00-00'));
     }
 
     /**

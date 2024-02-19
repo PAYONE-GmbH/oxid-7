@@ -41,7 +41,7 @@
                 </div>
             {% endif %}
 
-            {% if oView.fcpoBNPLShowFon() %}
+            {% if oView.fcpoBNPLShowFon(sPaymentID) %}
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secdebitnote_fon]"
                            placeholder="{{ translate({ ident: "FCPO_BNPL_FON" }) }}"
@@ -66,6 +66,8 @@
                 </div>
                 <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}</label>
             </div>
+
+            {% include "@fcpayone/frontend/fcpo_payment_bnpl_snippet.html.twig" %}
 
             {% block checkout_payment_longdesc %}
                 {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}

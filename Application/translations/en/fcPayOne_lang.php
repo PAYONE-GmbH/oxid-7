@@ -197,6 +197,7 @@ $aLang = [
 'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET'    => 'Please choose an address',
 'FCPO_AMAZON_ERROR_900'                         => 'Please choose another payment method.',
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
+    'FCPO_SECINVOICE_BIRTHDATE_B2B' => 'Date of birth of the subscriber',
     'FCPO_SECINVOICE_USTID' => 'Tax Identification Number',
     'FCPO_SECINVOICE_NO_COMPANY' => 'Not a company? Click <a href="index.php?cl=account_user" style="color:green;">here</a> for changing your address.',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
@@ -233,6 +234,8 @@ $aLang = [
     'FCPO_BNPL_SECINSTALLMENT_OVW_MONTHLYRATE' => 'Monthly amount',
     'FCPO_BNPL_SECINSTALLMENT_OVW_DL_CREDINFO' => '&gt;&nbsp;Download Installment information',
     'FCPO_BNPL_SECINSTALLMENT_PLAN_INVALID' => 'Please select the desired installment plan',
+    'FCPO_BNPL_USTID' => 'Tax Identification Number',
+    'FCPO_BNPL_NO_COMPANY' => 'Not a company? Click <a href="index.php?cl=account_user" style="color:green;">here</a> for changing your address.',
 
     'FCPO_CONFIG_GROUP_APPLE_PAY' => "Apple Pay",
     'FCPO_HELP_APPLE_PAY_MERCHANT_ID' => "Merchant ID",

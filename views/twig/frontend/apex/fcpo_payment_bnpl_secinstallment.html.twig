@@ -63,7 +63,7 @@
                     </div>
                 {% endif %}
 
-                {% if oView.fcpoBNPLShowFon() %}
+                {% if oView.fcpoBNPLShowFon(sPaymentID) %}
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinstallment_fon]"
                                placeholder="{{ translate({ ident: "FCPO_BNPL_FON" }) }}"

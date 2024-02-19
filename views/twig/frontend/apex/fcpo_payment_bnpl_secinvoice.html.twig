@@ -11,6 +11,12 @@
 
             {% if oView.fcpoBNPLShowBirthdate() %}
                 <div class="mb-3">
+                    {% if oView.fcpoIsB2BPov() %}
+                        <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE_B2B" }) }}:</label>
+                    {% else %}
+                        <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
+                    {% endif %}
+
                     <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
                     <div style="display: flex">
                         <select style="width: 30%" name="dynvalue[fcpopl_secinvoice_birthdate_day]">
@@ -40,7 +46,7 @@
                 </div>
             {% endif %}
 
-            {% if oView.fcpoBNPLShowFon() %}
+            {% if oView.fcpoBNPLShowFon(sPaymentID) %}
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinvoice_fon]"
                            placeholder="{{ translate({ ident: "FCPO_BNPL_FON" }) }}"
@@ -49,6 +55,25 @@
                     <label>{{ translate({ ident: "FCPO_BNPL_FON" }) }}</label>
                 </div>
             {% endif %}
+
+            {% if oView.fcpoIsB2BPov() %}
+                {% if empty(oView.fcpoGetUserValue('oxustid')) %}
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinvoice_ustid]"
+                           placeholder="{{ translate({ ident: "FCPO_BNPL_USTID" }) }}"
+                           value="{{ oView.fcpoGetUserValue('oxustid') }}">
+                    <label>{{ translate({ ident: "FCPO_BNPL_USTID" }) }}</label>
+                    <p class="col-lg-12" style="padding-left: 25px">
+                        {{ translate({ ident: "FCPO_BNPL_NO_COMPANY" }) }}
+                    </p>
+                </div>
+                {% endif %}
+                <p class="col-lg-12" style="padding-left: 25px">
+                    {{ translate({ ident: "FCPO_BNPL_NO_COMPANY" }) }}
+                </p>
+            {% endif %}
+
+            {% include "@fcpayone/frontend/fcpo_payment_bnpl_snippet.html.twig" %}
 
             {% block checkout_payment_longdesc %}
                 {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
