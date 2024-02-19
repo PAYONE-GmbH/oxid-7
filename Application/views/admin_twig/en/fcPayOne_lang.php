@@ -442,7 +442,6 @@ $aLang = [
     'FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_FRD' => 'Consumer turned out to be a fraudster',
     'FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_UND' => 'The merchant cannot fulfill the Order',
     'FCPO_CONFIG_GROUP_PAYDIREKT' => 'Giropay',
-    'FCPO_PAYDIREKT_SHIPPING_TERMS_URL' => 'Webaddress (URL) to page of your shipping terms',
     'FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL' => 'Entering a webaddress is mandatory for usage of Paydirekt Express',
     'FCPO_PAYDIREKT_SECURED_PREORDER' => 'Secured pre-order',
     'FCPO_HELP_PAYDIREKT_SECURED_PREORDER' => 'In the case of a secured pre-order, the retailer is granted a payment guarantee for the selected period (maximum 15 calendar days). Captures (partial payments) must always be executed within the guarantee period.',

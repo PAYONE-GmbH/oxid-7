@@ -3374,16 +3374,4 @@ class FcPoRequest extends Base
         $this->addParameter('add_paydata[action]', 'getstatus');
         $this->addParameter('workorderid', $sWorkorderId);
     }
-
-    /**
-     * Returns url to shipping terms url
-     *
-     * @return string
-     */
-    protected function _fcpoGetPaydirektShippingTermsUrl(): string
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return (string)$oConfig->getConfigParam('sPaydirektShippingTermsUrl');
-    }
-
 }

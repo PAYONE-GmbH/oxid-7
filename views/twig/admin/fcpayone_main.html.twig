@@ -965,18 +965,6 @@
                class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYDIREKT" })|raw }}</b></a>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sPaydirektShippingTermsUrl]"
-                           value="{{ confstrs.sPaydirektShippingTermsUrl }}">
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL")} %}
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_PAYDIREKT_SHIPPING_TERMS_URL" })|raw }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-
-            <dl>
-                <dt>
                     <select name="confbools[blFCPOPaydirektSecuredPreorder]" onchange="fcpoTogglePaydirektGuaranteePeriod(this, 'fcpoPaydirektGuaranteePeriod')">
                         <option value="false">
                             {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_NO" })|raw }}
