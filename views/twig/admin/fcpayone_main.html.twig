@@ -66,7 +66,7 @@
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOPortalKey]" value="{{ confstrs.sFCPOPortalKey }}"
+                    <input type="text" class="txt" name="confstrs[sFCPOPortalKey]" value="{{ confstrs.sFCPOPortalKey|raw }}"
                            {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PORTALKEY"), 'sHelpText': help_text("FCPO_HELP_PORTALKEY")} %}
                 </dt>
@@ -88,7 +88,7 @@
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPORefPrefix]" value="{{ confstrs.sFCPORefPrefix }}"
+                    <input type="text" class="txt" name="confstrs[sFCPORefPrefix]" value="{{ confstrs.sFCPORefPrefix|raw }}"
                            {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REFPREFIX"), 'sHelpText': help_text("FCPO_HELP_REFPREFIX")} %}
                 </dt>
