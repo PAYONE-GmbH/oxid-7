@@ -656,7 +656,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionCompany]"
-                           value="{{ confstrs.sFCPOPayolutionCompany }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionCompany|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_COMPANY"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_COMPANY")} %}
                 </dt>
                 <dd>
@@ -667,7 +667,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionAuthUser]"
-                           value="{{ confstrs.sFCPOPayolutionAuthUser }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionAuthUser|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_USER"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_USER")} %}
                 </dt>
                 <dd>
@@ -678,7 +678,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionAuthSecret]"
-                           value="{{ confstrs.sFCPOPayolutionAuthSecret }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionAuthSecret|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_SECRET"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_SECRET")} %}
                 </dt>
                 <dd>
@@ -803,7 +803,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplMerchantId]"
-                           value="{{ confstrs.sFCPOAplMerchantId }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOAplMerchantId|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_MERCHANT_ID"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_MERCHANT_ID")} %}
                 </dt>
                 <dd>
@@ -815,7 +815,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplCertificate]"
-                           value="{{ confstrs.sFCPOAplCertificate }}" {{ readonly }} id="fcpoAplCertificate">
+                           value="{{ confstrs.sFCPOAplCertificate|raw }}" {{ readonly }} id="fcpoAplCertificate">
 
                     <input id="fcpoAplCertificateFile" type="file" accept=".pem" name="fcpoAplCertificateFile">
                     <script type="text/javascript">
@@ -838,7 +838,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplKey]"
-                           value="{{ confstrs.sFCPOAplKey }}" {{ readonly }} id="fcpoAplKey">
+                           value="{{ confstrs.sFCPOAplKey|raw }}" {{ readonly }} id="fcpoAplKey">
                     <input id="fcpoAplKeyFile" type="file" name="fcpoAplKeyFile">
                     <script type="text/javascript">
                         $("fcpoAplKeyFile").onchange = function (e) {
@@ -860,7 +860,7 @@
             <dl>
                 <dt>
                     <input type="password" class="txt" style="width: 210px" name="confstrs[sFCPOAplPassword]"
-                           value="{{ confstrs.sFCPOAplPassword }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOAplPassword|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_PASSWORD"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_PASSWORD")} %}
                 </dt>
                 <dd>
@@ -905,7 +905,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOSecinvoicePortalKey]"
-                           value="{{ confstrs.sFCPOSecinvoicePortalKey }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOSecinvoicePortalKey|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SECINVOICE_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_SECINVOICE_PORTAL_KEY")} %}
                 </dt>
                 <dd>
@@ -934,7 +934,7 @@
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPLPortalKey]"
-                           value="{{ confstrs.sFCPOPLPortalKey }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPLPortalKey|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_BNPL_PORTAL_KEY")} %}
                 </dt>
                 <dd>
