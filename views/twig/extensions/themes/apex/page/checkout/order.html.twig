@@ -6,20 +6,20 @@
     {% set sMandateText = payment.fcpoGetMandateText() %}
     {% if payment and attribute(payment, 'fcpoGetMandateText') is defined and payment.fcpoGetMandateText() %}
         {{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/fcPayOne.js"), dynamic: __oxid_include_dynamic }) }}
-        {{ script({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css"), dynamic: __oxid_include_dynamic }) }}
+        {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
         <div id="fcpoSEPAMandate">
-            <h3 class="section">
+            <h5 class="section">
                 <strong>SEPA-Lastschrift</strong>
-            </h3>
+            </h5>
             {{ translate({ ident: "FCPO_ORDER_MANDATE_INFOTEXT" }) }}
             <div class="fcpoSEPAMandate">
-                {{ sMandateText }}
+                {{ sMandateText|raw }}
             </div>
 
-            <div class="fcpoSEPAMandateCheckbox">
-                <label style="float:left; padding-right:10px;" for="mandate_status"
-                       class="control-label">{{ translate({ ident: "FCPO_ORDER_MANDATE_CHECKBOX" }) }}</label>
-                <input type="checkbox" onclick="fcpoHandleMandateCheckbox(this);">
+            <div class="fcpoSEPAMandateCheckbox form-check">
+                <input class="form-check-input" id="fcpo_mandate_status" type="checkbox" onclick="fcpoHandleMandateCheckbox(this);">
+                <label style="padding-right:10px;" for="fcpo_mandate_status"
+                       class="form-check-label control-label">{{ translate({ ident: "FCPO_ORDER_MANDATE_CHECKBOX" }) }}</label>
                 <div class="clear"></div>
             </div>
         </div>

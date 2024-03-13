@@ -7,6 +7,10 @@
     color: white;
 }
 
+#fcpoSEPAMandate {
+    padding: 10px;
+}
+
 .fcpoSEPAMandate {
     overflow: scroll;
     border: 1px solid #ccc;
