@@ -533,4 +533,16 @@ class FcPoHelper extends BaseModel
         return !empty($oConfig->getConfigParam('sFCPOPLPortalId')) &&
             !empty($oConfig->getConfigParam('sFCPOPLPortalKey'));
     }
+
+    /**
+     * Convert a price from cent format (xxxxxx) into precision-2 decimal format (x.xxx,xx)
+     * for display purpose
+     *
+     * @param int $iAmount
+     * @return string
+     */
+    public function fcpoPriceFromCentToDec(int $iAmount): string
+    {
+        return number_format($iAmount / 100, 2, ',', '.');
+    }
 }

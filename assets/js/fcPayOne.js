@@ -936,6 +936,41 @@ function fcpoChangeInstallmentPaymentType(payment, paymentMethod) {
 
 // >>>> BNPL INSTALLMENT
 
+function fcpoSelectBNPLLoadInstallment(targetInput) {
+    $.ajax({
+        url: payoneAjaxControllerUrl,
+        method: 'POST',
+        type: 'POST',
+        data: {
+            paymentid: 'fcpopl_secinstallment',
+            action: 'fcpopl_load_installment_form'
+        },
+        success: function(response) {
+            fcpoSelectBNPLLoadInstallmentSuccess(response, targetInput)
+        },
+        error: fcpoSelectBNPLLoadInstallmentFailure
+    });
+}
+
+function fcpoSelectBNPLLoadInstallmentSuccess(responseText, targetInput) {
+    responseData = JSON.parse(responseText);
+
+    if (responseData.status != 'OK') {
+        fcpoSelectBNPLLoadInstallmentFailure(responseText);
+    } else {
+        document.getElementById('fcpo_bnpl_available_installment_plans').innerHTML = responseData.html;
+        document.getElementById('fcpo_bnpl_unavailable_installment').style.display = "none";
+        document.getElementById('fcpo_bnpl_available_installment').style.display = "block";
+        targetInput.onclick = null;
+    }
+}
+function fcpoSelectBNPLLoadInstallmentFailure(responseText) {
+    console.log('ERROR');
+    document.getElementById('fcpo_bnpl_available_installment').style.display = "none";
+    document.getElementById('fcpo_bnpl_unavailable_installment').style.display = "block";
+    console.log(responseText);
+}
+
 function fcpoSelectBNPLInstallmentPlan(iIndex) {
     var oRadio = document.getElementById('bnplPlan_' + iIndex);
     if (oRadio) {

@@ -106,6 +106,10 @@ class FcPayOneAjax extends BaseController
                 echo $this->fcpoRatepayCalculation($sParamsJson);
             }
 
+            if ($sAction == 'fcpopl_load_installment_form' && $sPaymentId == 'fcpopl_secinstallment') {
+                echo json_encode($this->fcpoGetBNPLInstallment());
+            }
+
             $aKlarnaPayments = [
                 'fcpoklarna_invoice',
                 'fcpoklarna_installments',
@@ -545,6 +549,128 @@ class FcPayOneAjax extends BaseController
         $iCode = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
 
         return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $iCode);
+    }
+
+    /**
+     * @return array
+     */
+    public function fcpoGetBNPLInstallment(): array
+    {
+        /** @var FcPoRequest $oRequest */
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+
+        if (!$this->_oFcPoHelper->fcpoIsBNPLConfigured()) {
+            return ['status' => 'ERROR'];
+        }
+
+        $aResponse = $oRequest->sendRequestBNPLInstallmentOptions();
+
+        $aFormattedData = [];
+        $aFormattedData['status'] = $aResponse['status'];
+        $aFormattedData['workorderid'] = $aResponse['workorderid'];
+        $aFormattedData['amountValue'] = $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[amount_value]']);
+        $aFormattedData['amountCurrency'] = $aResponse['add_paydata[amount_currency]'];
+        $aFormattedData['plans'] = [];
+
+        $this->_oFcPoHelper->fcpoSetSessionVariable('fcpopl_secinstallment_workorderid', $aResponse['workorderid']);
+
+        $iCurrPlan = 0;
+        while (true) {
+            if (!isset ($aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'])) {
+                break;
+            }
+
+            $aFormattedData['plans'][$iCurrPlan] = [
+                'effectiveInterestRate' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[effective_interest_rate_' . $iCurrPlan . ']']),
+                'firstRateDate' => $aResponse['add_paydata[first_rate_date_' . $iCurrPlan . ']'],
+                'installmentOptionId' => $aResponse['add_paydata[installment_option_id_' . $iCurrPlan . ']'],
+                'lastRateAmountCurrency' => $aResponse['add_paydata[last_rate_amount_currency_' . $iCurrPlan . ']'],
+                'lastRateAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[last_rate_amount_value_' . $iCurrPlan . ']']),
+                'linkCreditInformationHref' => $aResponse['add_paydata[link_credit_information_href_' . $iCurrPlan . ']'],
+                'linkCreditInformationType' => $aResponse['add_paydata[link_credit_information_type_' . $iCurrPlan . ']'],
+                'monthlyAmountCurrency' => $aResponse['add_paydata[monthly_amount_currency_' . $iCurrPlan . ']'],
+                'monthlyAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[monthly_amount_value_' . $iCurrPlan . ']']),
+                'nominalInterestRate' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[nominal_interest_rate_' . $iCurrPlan . ']']),
+                'numberOfPayments' => $aResponse['add_paydata[number_of_payments_' . $iCurrPlan . ']'],
+                'totalAmountCurrency' => $aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'],
+                'totalAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[total_amount_value_' . $iCurrPlan . ']']),
+            ];
+
+            $iCurrPlan++;
+        }
+
+        $aFormattedData['html'] = $this->_fcpoBNPLPrepareInstallementHTML($aFormattedData);
+
+        return $aFormattedData;
+    }
+
+    /**
+     * @param array $aInstallamentOptions
+     * @return string
+     */
+    protected function _fcpoBNPLPrepareInstallementHTML(array $aInstallamentOptions) : string
+    {
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+
+        $sHtmlList = '';
+        $sHtmlDetails = '';
+        foreach ($aInstallamentOptions['plans'] as $iIndex => $aPlan) {
+            $sHtmlList .= '    <div>';
+            $sHtmlList .= '        <input id="bnplPlan_' . $iIndex . '" type="radio" name="dynvalue[fcpopl_secinstallment_plan]"'
+                                    . 'value="' . $aPlan['installmentOptionId'] . '" onclick="fcpoSelectBNPLInstallmentPlan(' . $iIndex . ')"/>';
+            $sHtmlList .= '        <a href="#" onclick="fcpoSelectBNPLInstallmentPlan(' . $iIndex . ')">'
+                                    . $aPlan['monthlyAmountValue'] . ' ' . $aPlan['monthlyAmountCurrency'] . ' ' . $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_PER_MONTH')
+                                    . ' - '
+                                    . $aPlan['numberOfPayments'] . ' ' . $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_RATES')
+                                    . '</a>';
+            $sHtmlList .= '    </div>';
+
+            $sHtmlDetails .= '    <div id="bnpl_installment_overview_' . $iIndex . '" class="bnpl_installment_overview" style="display: none">';
+            $sHtmlDetails .= '        <strong>' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TITLE') . '</strong>';
+            $sHtmlDetails .= '        <br/>';
+            $sHtmlDetails .= '        <div class="container-fluid">';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_NBRATES') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['numberOfPayments'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TOTALFINANCING') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aInstallamentOptions['amountValue'] . ' ' . $aInstallamentOptions['amountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TOTALAMOUNT') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['totalAmountValue'] . ' ' . $aPlan['totalAmountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_INTEREST') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['nominalInterestRate'] . '%</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_EFFECTIVEINTEREST') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['effectiveInterestRate'] . '%</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_MONTHLYRATE') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['monthlyAmountValue'] . ' ' . $aPlan['monthlyAmountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-12">';
+            $sHtmlDetails .= '                    <br/>';
+            $sHtmlDetails .= '                    <a target="_blank" href="' . $aPlan['linkCreditInformationHref'] . '">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_DL_CREDINFO') . '</a>';
+            $sHtmlDetails .= '                </div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '        </div>';
+            $sHtmlDetails .= '    </div>';
+        }
+        $sHtml = '<div class="form-floating mb-3">';
+        $sHtml .= '    <div></div>';
+        $sHtml .= $sHtmlList;
+        $sHtml .= '</div>';
+        $sHtml .= '<div class="form-floating mb-3">';
+        $sHtml .= $sHtmlDetails;
+        $sHtml .= ' </div> ';
+
+        return $sHtml;
     }
 
     /**

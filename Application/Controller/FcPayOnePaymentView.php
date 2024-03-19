@@ -277,69 +277,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * @return array
-     */
-    public function fcpoGetBNPLInstallment(): array
-    {
-        /** @var FcPoRequest $oRequest */
-        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-
-        if (!$this->_oFcPoHelper->fcpoIsBNPLConfigured()) {
-            return ['status' => 'ERROR'];
-        }
-
-        $aResponse = $oRequest->sendRequestBNPLInstallmentOptions();
-
-        $aFormattedData = [];
-        $aFormattedData['status'] = $aResponse['status'];
-        $aFormattedData['workorderid'] = $aResponse['workorderid'];
-        $aFormattedData['amountValue'] = $this->fcpoPriceFromCentToDec($aResponse['add_paydata[amount_value]']);
-        $aFormattedData['amountCurrency'] = $aResponse['add_paydata[amount_currency]'];
-        $aFormattedData['plans'] = [];
-
-        $this->_oFcPoHelper->fcpoSetSessionVariable('fcpopl_secinstallment_workorderid', $aResponse['workorderid']);
-
-        $iCurrPlan = 0;
-        while (true) {
-            if (!isset ($aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'])) {
-                break;
-            }
-
-            $aFormattedData['plans'][$iCurrPlan] = [
-                'effectiveInterestRate' => $this->fcpoPriceFromCentToDec($aResponse['add_paydata[effective_interest_rate_' . $iCurrPlan . ']']),
-                'firstRateDate' => $aResponse['add_paydata[first_rate_date_' . $iCurrPlan . ']'],
-                'installmentOptionId' => $aResponse['add_paydata[installment_option_id_' . $iCurrPlan . ']'],
-                'lastRateAmountCurrency' => $aResponse['add_paydata[last_rate_amount_currency_' . $iCurrPlan . ']'],
-                'lastRateAmountValue' => $this->fcpoPriceFromCentToDec($aResponse['add_paydata[last_rate_amount_value_' . $iCurrPlan . ']']),
-                'linkCreditInformationHref' => $aResponse['add_paydata[link_credit_information_href_' . $iCurrPlan . ']'],
-                'linkCreditInformationType' => $aResponse['add_paydata[link_credit_information_type_' . $iCurrPlan . ']'],
-                'monthlyAmountCurrency' => $aResponse['add_paydata[monthly_amount_currency_' . $iCurrPlan . ']'],
-                'monthlyAmountValue' => $this->fcpoPriceFromCentToDec($aResponse['add_paydata[monthly_amount_value_' . $iCurrPlan . ']']),
-                'nominalInterestRate' => $this->fcpoPriceFromCentToDec($aResponse['add_paydata[nominal_interest_rate_' . $iCurrPlan . ']']),
-                'numberOfPayments' => $aResponse['add_paydata[number_of_payments_' . $iCurrPlan . ']'],
-                'totalAmountCurrency' => $aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'],
-                'totalAmountValue' => $this->fcpoPriceFromCentToDec($aResponse['add_paydata[total_amount_value_' . $iCurrPlan . ']']),
-            ];
-
-            $iCurrPlan++;
-        }
-
-        return $aFormattedData;
-    }
-
-    /**
-     * Convert a price from cent format (xxxxxx) into precision-2 decimal format (x.xxx,xx)
-     * for display purpose
-     *
-     * @param int $iAmount
-     * @return string
-     */
-    protected function fcpoPriceFromCentToDec(int $iAmount): string
-    {
-        return number_format($iAmount / 100, 2, ',', '.');
-    }
-
-    /**
      * Prepares some parameter for the installment calculation
      *
      * @param string $sPaymentId
