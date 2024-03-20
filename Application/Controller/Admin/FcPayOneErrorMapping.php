@@ -1,10 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
-use stdClass;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +17,15 @@ use stdClass;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Exception;
+use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use stdClass;
+
 class FcPayOneErrorMapping extends FcPayOneAdminDetails
 {
 
@@ -33,12 +36,15 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      */
     protected $_sThisTemplate = '@fcpayone/admin/fcpayone_error_mapping';
 
+
     /**
      * Returns list of former configured errors
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function getMappings()
+    public function getMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingMappings();
 
@@ -49,8 +55,10 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      * Returns list of all mappings
      *
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    protected function _fcpoGetExistingMappings()
+    protected function _fcpoGetExistingMappings(): array
     {
         return $this->_oFcPoErrorMapping->fcpoGetExistingMappings();
     }
@@ -61,7 +69,7 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      * @param array $aMappings
      * @return array
      */
-    protected function _fcpoAddNewMapping($aMappings)
+    protected function _fcpoAddNewMapping(array $aMappings): array
     {
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('add')) {
             $oMapping = new stdClass();
@@ -80,7 +88,7 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    public function getIframeMappings()
+    public function getIframeMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingIframeMappings();
 
@@ -92,7 +100,7 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    protected function _fcpoGetExistingIframeMappings()
+    protected function _fcpoGetExistingIframeMappings(): array
     {
         return $this->_oFcPoErrorMapping->fcpoGetExistingMappings('iframe');
     }
@@ -103,7 +111,7 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      * @param array $aMappings
      * @return array
      */
-    protected function _fcpoAddNewIframeMapping($aMappings)
+    protected function _fcpoAddNewIframeMapping(array $aMappings): array
     {
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('addIframe')) {
             $oMapping = new stdClass();
@@ -120,9 +128,11 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
     /**
      * Requests xml base file to fetch all existing error codes and default-messages
      *
+     * @param string $sType
      * @return array
+     * @throws Exception
      */
-    public function fcpoGetPayoneErrorMessages($sType = 'general')
+    public function fcpoGetPayoneErrorMessages(string $sType = 'general'): array
     {
         return $this->_oFcPoErrorMapping->fcpoGetAvailableErrorCodes($sType);
     }
@@ -132,7 +142,7 @@ class FcPayOneErrorMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    public function getLanguages()
+    public function getLanguages(): array
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 

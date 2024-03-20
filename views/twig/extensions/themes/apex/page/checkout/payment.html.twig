@@ -83,6 +83,8 @@
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_bnpl_secinvoice.html.twig" %}
     {% elseif sPaymentID == "fcpopl_secinstallment" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_bnpl_secinstallment.html.twig" %}
+    {% elseif sPaymentID == "fcpopl_secdebitnote" %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_bnpl_secdebitnote.html.twig" %}
     {% elseif sPaymentID == "fcpo_sofort" %}
         {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_payment_sofort.html.twig" %}
     {% elseif sPaymentID == "fcpo_trustly" %}

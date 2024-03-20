@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +17,11 @@ use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
+
 class FcPayOneLogList extends FcPayOneAdminList
 {
 
@@ -46,17 +46,18 @@ class FcPayOneLogList extends FcPayOneAdminList
      */
     protected $_sThisTemplate = '@fcpayone/admin/fcpayone_log_list';
 
+
     /**
      * Returns sorting fields array
      *
      * @return array
      */
-    public function getListSorting()
+    public function getListSorting(): array
     {
         if ($this->_aCurrSorting === null) {
-            $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort');
+            $this->_aCurrSorting = $this->_oFcPoHelper->fcpoGetRequestParameter('sort') ?: [];
 
-            if (!$this->_aCurrSorting && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
+            if (empty($this->_aCurrSorting) && $this->_sDefSortField && ($baseModel = $this->getItemListBaseObject())) {
                 $this->_aCurrSorting[$baseModel->getCoreTableName()] = [$this->_sDefSortField => "asc"];
             }
         }
@@ -67,31 +68,29 @@ class FcPayOneLogList extends FcPayOneAdminList
     /**
      * Return input name for searchfields in list by shop-version
      *
+     * @param string $sTable
+     * @param string $sField
      * @return string
      */
-    public function fcGetInputName($sTable, $sField)
+    public function fcGetInputName(string $sTable, string $sField): string
     {
-        if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
-            return "where[{$sTable}][{$sField}]";
-        }
-        return "where[{$sTable}.{$sField}]";
+        return "where[$sTable][$sField]";
     }
 
     /**
      * Return input form value for searchfields in list by shop-version
      *
+     * @param string $sTable
+     * @param string $sField
      * @return string
      */
-    public function fcGetWhereValue($sTable, $sField)
+    public function fcGetWhereValue(string $sTable, string $sField): string
     {
         $aWhere = $this->getListFilter();
         if (empty($aWhere)) {
             return '';
         }
-        if ($this->_oFcPoHelper->fcpoGetIntShopVersion() >= 4500) {
-            return $aWhere[$sTable][$sField];
-        }
-        return $aWhere[$sTable . '.' . $sField];
+        return $aWhere[$sTable][$sField];
     }
 
     /**
@@ -99,10 +98,10 @@ class FcPayOneLogList extends FcPayOneAdminList
      *
      * @return array
      */
-    public function getListFilter()
+    public function getListFilter(): array
     {
         if ($this->_aListFilter === null) {
-            $this->_aListFilter = $this->_oFcPoHelper->fcpoGetRequestParameter("where");
+            $this->_aListFilter = $this->_oFcPoHelper->fcpoGetRequestParameter("where") ?: [];
         }
 
         return $this->_aListFilter;
@@ -111,22 +110,24 @@ class FcPayOneLogList extends FcPayOneAdminList
     /**
      * Return needed javascript for sorting in list by shop-version
      *
+     * @param string $sTable
+     * @param string $sField
      * @return string
      */
-    public function fcGetSortingJavascript($sTable, $sField)
+    public function fcGetSortingJavascript(string $sTable, string $sField): string
     {
-        return "Javascript:top.oxid.admin.setSorting( document.search, '{$sTable}', '{$sField}', 'asc');document.search.submit();";
+        return "Javascript:top.oxid.admin.setSorting( document.search, '$sTable', '$sField', 'asc');document.search.submit();";
     }
 
     /**
      * Filter log entries, show only log entries of configured PAYONE account
      *
-     * @param array  $aWhere SQL condition array
+     * @param array $aWhere SQL condition array
      * @param string $sQ     SQL query string
      *
      * @return string
      */
-    protected function _prepareWhereQuery($aWhere, $sQ)
+    protected function _prepareWhereQuery(array $aWhere, string $sQ): string
     {
         $sQ = parent::prepareWhereQuery($aWhere, $sQ);
 
@@ -136,15 +137,15 @@ class FcPayOneLogList extends FcPayOneAdminList
             "'" . $this->getBNPLPortalId() . "'",
         ];
         $sAid = $this->getSubAccountId();
-        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = '{$sAid}' ";
+        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = '$sAid' ";
     }
 
     /**
      * Get config parameter PAYONE portal ID
      *
-     * @return $string
+     * @return string
      */
-    public function getPortalId()
+    public function getPortalId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOPortalID');
@@ -155,7 +156,7 @@ class FcPayOneLogList extends FcPayOneAdminList
      *
      * @return string
      */
-    public function getSecInvoicePortalId()
+    public function getSecInvoicePortalId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOSecinvoicePortalId');
@@ -166,18 +167,18 @@ class FcPayOneLogList extends FcPayOneAdminList
      *
      * @return string
      */
-    public function getBNPLPortalId()
+    public function getBNPLPortalId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOPLPortalId');
     }
 
     /**
-     * Get config parameter PAYONE sub-account ID
+     * Get config parameter PAYONE subaccount ID
      *
-     * @return $string
+     * @return string
      */
-    public function getSubAccountId()
+    public function getSubAccountId(): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOSubAccountID');

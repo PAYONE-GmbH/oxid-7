@@ -1,11 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,42 +17,50 @@ use OxidEsales\Eshop\Core\DatabaseProvider;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+
 class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
-
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Instance of DatabaseProvider
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
      * Mandate pdf url
      *
      * @var string
      */
-    protected $_sMandatePdfUrl = null;
+    protected string $_sMandatePdfUrl = '';
 
     /**
      * Html for Barzahlen
      *
-     * @var string
+     * @var string|null
      */
-    protected $_sBarzahlenHtml = null;
+    protected ?string $_sBarzahlenHtml = null;
+
 
     /**
      * init object construction
-     *
-     * @return null
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
@@ -68,13 +69,12 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
         $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
-
     /**
      * Returns generated mandate pdf url and deletes it from session afterwards
      *
-     * @return string
+     * @return bool|string
      */
-    public function fcpoGetMandatePdfUrl()
+    public function fcpoGetMandatePdfUrl(): bool|string
     {
         $sPdfUrl = false;
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -92,7 +92,6 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
             if ($aMandate && array_key_exists('mandate_identification', $aMandate) !== false) {
                 $sMandateIdentification = $aMandate['mandate_identification'];
             }
-
 
             if ($sMandateIdentification && $aMandate['mandate_status'] == 'active') {
                 $oPayment->fcpoAddMandateToDb($oOrder->getId(), $sMandateIdentification);
@@ -115,27 +114,26 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 
 
     /**
-     * Method checks if any error occured (appointment-error, fraud etc.)
+     * Method checks if any error occurred (appointment-error, fraud etc.)
      *
      * @return bool
      */
-    public function fcpoOrderHasProblems()
+    public function fcpoOrderHasProblems(): bool
     {
         $oOrder = $this->getOrder();
         $blIsPayone = $oOrder->isPayOnePaymentType();
 
         return $blIsPayone &&
-        $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
-        $oOrder->oxorder__oxtransstatus->value == 'ERROR';
+            $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
+            $oOrder->oxorder__oxtransstatus->value == 'ERROR';
     }
 
-
     /**
-     * Sets userid into session berfore triggering the parent method
+     * Sets userid into session before triggering the parent method
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $oUser = $this->getUser();
         if ($oUser) {
@@ -152,7 +150,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      *
      * @return void
      */
-    protected function _fcpoDeleteSessionVariablesOnOrderFinish()
+    protected function _fcpoDeleteSessionVariablesOnOrderFinish(): void
     {
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
@@ -162,12 +160,12 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
     /**
      * Returns the html of barzahlen instructions
      *
-     * @return mixed
+     * @return string
      */
-    public function fcpoGetBarzahlenHtml()
+    public function fcpoGetBarzahlenHtml(): string
     {
         if ($this->_sBarzahlenHtml === null) {
-            $this->_sBarzahlenHtml = $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
+            $this->_sBarzahlenHtml = $this->_oFcPoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml') ?: '';
             // delete this from session after we have the result for one time displaying
             $this->_oFcPoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
         }
@@ -180,10 +178,11 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      *
      * @return bool
      */
-    public function fcpoShowClearingData()
+    public function fcpoShowClearingData(): bool
     {
         $oOrder = $this->getOrder();
 
         return $oOrder->fcpoShowClearingData($oOrder);
     }
+
 }

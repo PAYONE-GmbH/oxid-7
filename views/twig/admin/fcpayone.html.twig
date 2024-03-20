@@ -7,9 +7,9 @@
 
 <!-- frames -->
 <frameset rows="5%,*" border="0">
-    <frame src="{{ oViewConf.getSelfLink()|raw }}{{ oView.fcGetAdminSeperator() }}{{ listurl }}{% if oxid %}&oxid={{ oxid }}{% endif %}"
+    <frame src="{{ oViewConf.getSelfLink()|raw }}{{ oView.fcGetAdminSeparator() }}{{ listurl }}{% if oxid %}&oxid={{ oxid }}{% endif %}"
            name="list" marginwidth="0" marginheight="0" scrolling="off" frameborder="0">
-    <frame src="{{ oViewConf.getSelfLink()|raw }}{{ oView.fcGetAdminSeperator() }}{{ editurl }}{% if oxid %}&oxid={{ oxid }}{% endif %}"
+    <frame src="{{ oViewConf.getSelfLink()|raw }}{{ oView.fcGetAdminSeparator() }}{{ editurl }}{% if oxid %}&oxid={{ oxid }}{% endif %}"
            name="edit" marginwidth="0" marginheight="0" scrolling="auto" frameborder="0">
 </frameset>
 

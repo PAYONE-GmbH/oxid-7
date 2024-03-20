@@ -282,8 +282,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>876</error_code>
-        <error_message_en>AVS mismatch: The address provided does not match billing address of card holder.</error_message_en>
-        <error_message_de>AVS mismatch: The address provided does not match billing address of card holder.</error_message_de>
+        <error_message_en>AVS mismatch: The address provided does not match billing address of cardholder.</error_message_en>
+        <error_message_de>AVS mismatch: The address provided does not match billing address of cardholder.</error_message_de>
     </entry>
     <entry>
         <error_code>877</error_code>

@@ -18,29 +18,28 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
-use Fatchip\PayOne\Core\FcPoTransactionStatusBase;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
-ini_set('error_log', '../../../log/fcpoErrors.log');
+ini_set('error_log', '../../../../../source/log/fcpoErrors.log');
 
-class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
+class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
 {
 
-    final const STATE_STARTING = 'starting';
-    final const STATE_FINISHED = 'finished';
+    const STATE_STARTING = 'starting';
+    const STATE_FINISHED = 'finished';
 
     /**
      * Map for translating database fields to call params
      *
      * @var array
      */
-    protected $_aDbFields2Params = [
+    protected array $_aDbFields2Params = [
         'FCPO_KEY' => 'key',
         'FCPO_TXACTION' => 'txaction',
         'FCPO_PORTALID' => 'portalid',
@@ -94,6 +93,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
         'FCPO_CLEARING_INSTRUCTIONNOTE' => 'clearing_instructionnote',
     ];
 
+
     /**
      * Central handling of forward request
      */
@@ -106,9 +106,9 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
             $this->_setJobState(self::STATE_STARTING);
             $this->_forwardRequests();
             $this->_setJobState(self::STATE_FINISHED);
-        } catch (Exception $e) {
-            echo "Error occured! Please check logfile for details.\n";
-            $this->_logException($e->getMessage());
+        } catch (Exception $oEx) {
+            echo "Error occurred! Please check logfile for details.\n";
+            $this->_logException($oEx->getMessage());
             exit(1);
         }
     }
@@ -119,7 +119,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      * @return void
      * @throws Exception
      */
-    protected function _isJobAlreadyRunning()
+    protected function _isJobAlreadyRunning(): void
     {
         $blProcessFileExists = $this->_checkProcessFileExists();
         if (!$blProcessFileExists) {
@@ -128,13 +128,14 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
 
         try {
             $this->_checkProcessExists();
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
     /**
      * Checking if process file exists
+     * @return bool
      */
     protected function _checkProcessFileExists(): bool
     {
@@ -147,9 +148,9 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      *
      * @return string
      */
-    protected function _getProcessFilePath()
+    protected function _getProcessFilePath(): string
     {
-        $sTmpPath = dirname(__FILE__) . "statusforward.php/";
+        $sTmpPath = dirname(__FILE__) . "/../";
         $sFile = "forwardprocess.txt";
 
         return $sTmpPath . $sFile;
@@ -157,14 +158,14 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
 
     /**
      * Deeply checking if former process still exists. If not processfile
-     * should be cleaned up and reported so we don't run into eternal loops.
-     * Killing processes is explicitely not done here due this should be
+     * should be cleaned up and reported, so we don't run into eternal loops.
+     * Killing processes is explicitly not done here due this should be
      * handled by OS
      *
      * @return void
      * @throws Exception
      */
-    protected function _checkProcessExists()
+    protected function _checkProcessExists(): void
     {
         $sProcessFile = $this->_getProcessFilePath();
         $iPid = (int)file_get_contents($sProcessFile);
@@ -190,11 +191,11 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
     /**
      * Setting current state of job
      *
-     * @param $sState
+     * @param string $sState
      * @return void
      * @throws Exception
      */
-    protected function _setJobState($sState)
+    protected function _setJobState(string $sState): void
     {
         try {
             $sProcessFile = $this->_getProcessFilePath();
@@ -212,8 +213,8 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 unlink($sProcessFile);
                 return;
             }
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
@@ -221,18 +222,19 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      * Get requests to forward to and trigger forwarding
      *
      * @return void
-     * @throws
+     * @throws Exception
      */
-    protected function _forwardRequests()
+    protected function _forwardRequests(): void
     {
         try {
             $sLimitStatusmessageId =
                 $this->fcGetPostParam('statusmessageid');
 
+            $sQueryLimitStatusmessageId = '';
             if ($sLimitStatusmessageId !== '' && $sLimitStatusmessageId !== '0') {
                 $this->_createMissingQueueEntries($sLimitStatusmessageId);
                 $sQueryLimitStatusmessageId =
-                    " AND  FCSTATUSMESSAGEID='{$sLimitStatusmessageId}' ";
+                    " AND  FCSTATUSMESSAGEID='$sLimitStatusmessageId' ";
             }
 
             $sQuery = "
@@ -242,7 +244,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                     FCSTATUSFORWARDID
                 FROM fcpostatusforwardqueue
                 WHERE FCFULFILLED='0'
-                {$sQueryLimitStatusmessageId}
+                $sQueryLimitStatusmessageId
             ";
             $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
             $aRows = $oDb->getAll($sQuery);
@@ -255,8 +257,8 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
 
                 $this->_forwardRequest($sQueueId, $sForwardId, $sStatusmessageId);
             }
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
@@ -268,26 +270,26 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      * @return void
      * @throws Exception
      */
-    protected function _createMissingQueueEntries($sStatusmessageId)
+    protected function _createMissingQueueEntries(string $sStatusmessageId): void
     {
         try {
             $aParams = $this->_fetchPostParams($sStatusmessageId);
             $aRequest = $aParams['array'];
             $sPayoneStatus = $aRequest['txaction'];
             $this->_addQueueEntries($sStatusmessageId, $sPayoneStatus);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
     /**
      * Collects request data from database and prepare result
      *
-     * @param $sStatusmessageId
-     * @return array{string: string, array: mixed[]}
+     * @param string $sStatusmessageId
+     * @return array{string: string, array: array}
      * @throws
      */
-    protected function _fetchPostParams($sStatusmessageId)
+    protected function _fetchPostParams(string $sStatusmessageId): array
     {
         try {
             $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
@@ -297,7 +299,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 WHERE OXID=" . $oDb->quote($sStatusmessageId);
 
             $aRow = $oDb->getRow($sQuery);
-            if ($aRow === false) {
+            if (empty($aRow)) {
                 $sExceptionMessage =
                     'Could not find transaction status message for ID ' . $sStatusmessageId . '!';
                 throw new Exception($sExceptionMessage);
@@ -322,10 +324,10 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
      * Removes all empty params and translate db fields to corresponding
      * call
      *
-     * @param $aParams
+     * @param array $aParams
      * @return array<int|string, mixed>
      */
-    protected function _cleanParams($aParams): array
+    protected function _cleanParams(array $aParams): array
     {
         $aCleanedParams = [];
         foreach ($aParams as $sKey => $sValue) {
@@ -349,13 +351,13 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
     /**
      * Forward request from queue
      *
-     * @param $sQueueId
-     * @param $sForwardId
-     * @param $sStatusmessageId
+     * @param string $sQueueId
+     * @param string $sForwardId
+     * @param string $sStatusmessageId
      * @return void
      * @throws
      */
-    protected function _forwardRequest($sQueueId, $sForwardId, $sStatusmessageId)
+    protected function _forwardRequest(string $sQueueId, string $sForwardId, string $sStatusmessageId): void
     {
         try {
             $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -383,8 +385,8 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
             $mCurlInfo = curl_getinfo($oCurl);
             $blValidResult = (is_string($mResult) && trim($mResult) == 'TSOK');
             $this->_setForwardingResult($sQueueId, $blValidResult, $aRequest, $mResult, $mCurlInfo);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
 
         curl_close($oCurl);
@@ -393,11 +395,11 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
     /**
      * Returns elementary forward data
      *
-     * @param $sForwardId
-     * @return
-     * @throws
+     * @param string $sForwardId
+     * @return array
+     * @throws Exception
      */
-    protected function _getForwardData($sForwardId): array
+    protected function _getForwardData(string $sForwardId): array
     {
         $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
         $sQuery = "
@@ -408,7 +410,7 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
                 WHERE OXID=" . $oDb->quote($sForwardId);
 
         $aRow = $oDb->getRow($sQuery);
-        if ($aRow === false) {
+        if (empty($aRow)) {
             throw new Exception('Could not find forward data for ID ' . $sForwardId . '!');
         }
 
@@ -421,14 +423,15 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
     /**
      * Updates processed queue entry with current data
      *
-     * @param $sQueueId
-     * @param $blValidResult
-     * @param $aRequest
-     * @param $mResult
-     * @param $mCurlInfo
+     * @param string $sQueueId
+     * @param bool $blValidResult
+     * @param array $aRequest
+     * @param mixed $mResult
+     * @param mixed $mCurlInfo
+     * @return void
      * @throws Exception
      */
-    protected function _setForwardingResult($sQueueId, $blValidResult, $aRequest, $mResult, $mCurlInfo)
+    protected function _setForwardingResult(string $sQueueId, bool $blValidResult, array $aRequest, mixed $mResult, mixed $mCurlInfo): void
     {
         try {
             $oDb = DatabaseProvider::getDb();
@@ -467,8 +470,9 @@ class FcPoTransactionStatusForwarder extends FcPoTransactionStatusBase
             $this->_logForwardMessage("Updating transaction log with query:\n" . $sQueryUpdateTransactionlog . "\n");
             $oDb->execute($sQueryUpdateTransactionlog);
 
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
+
 }

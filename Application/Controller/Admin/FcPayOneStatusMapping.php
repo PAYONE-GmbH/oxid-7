@@ -1,12 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-
-use Fatchip\PayOne\Application\Model\FcPoMapping;
-use OxidEsales\Eshop\Application\Model\Payment;
-use stdClass;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +17,13 @@ use stdClass;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoMapping;
+use OxidEsales\Eshop\Application\Model\Payment;
+use stdClass;
+
 class FcPayOneStatusMapping extends FcPayOneAdminDetails
 {
 
@@ -40,7 +39,7 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    public function getMappings()
+    public function getMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingMappings();
 
@@ -52,7 +51,7 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    protected function _fcpoGetExistingMappings()
+    protected function _fcpoGetExistingMappings(): array
     {
         return $this->_oFcPoMapping->fcpoGetExistingMappings();
     }
@@ -63,7 +62,7 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      * @param array $aMappings
      * @return array
      */
-    protected function _fcpoAddNewMapping($aMappings)
+    protected function _fcpoAddNewMapping(array $aMappings): array
     {
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('add')) {
             $oMapping = new stdClass();
@@ -82,7 +81,7 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
      *
      * @return array
      */
-    public function getPaymentTypeList()
+    public function getPaymentTypeList(): array
     {
         $oPayment = oxNew(Payment::class);
 
@@ -90,31 +89,11 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     }
 
     /**
-     * Returns a list of payone status list
-     *
-     * @return stdClass[]
-     */
-    public function getPayoneStatusList(): array
-    {
-        $aPayoneStatusList = $this->_oFcPoHelper->fcpoGetPayoneStatusList();
-
-        $aNewList = [];
-        foreach ($aPayoneStatusList as $aPayoneRectorPrefix202302StatusList) {
-            $oStatus = new stdClass();
-            $oStatus->sId = $aPayoneRectorPrefix202302StatusList;
-            $oStatus->sTitle = $this->_oFcPoHelper->fcpoGetLang()->translateString('fcpo_status_' . $aPayoneRectorPrefix202302StatusList, null, true);
-            $aNewList[] = $oStatus;
-        }
-
-        return $aNewList;
-    }
-
-    /**
      * Returns a list of shop states
      *
      * @return array
      */
-    public function getShopStatusList()
+    public function getShopStatusList(): array
     {
         return $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('aOrderfolder');
     }

@@ -1,13 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +17,17 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+
 class FcPoRatePay extends BaseModel
 {
     /**
@@ -33,20 +35,24 @@ class FcPoRatePay extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected $_oFcPoHelper = null;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected $_oFcPoDb = null;
+    protected DatabaseInterface $_oFcPoDb;
+
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
         $this->_oFcPoDb = DatabaseProvider::getDb();
     }
@@ -55,9 +61,12 @@ class FcPoRatePay extends BaseModel
      * Add/Update Ratepay profile
      *
      * @param string $sOxid
-     * @param array  $aRatePayData
+     * @param array $aRatePayData
+     * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoInsertProfile($sOxid, $aRatePayData): void
+    public function fcpoInsertProfile(string $sOxid, array $aRatePayData): void
     {
         if (array_key_exists('delete', $aRatePayData)) {
             $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
@@ -82,7 +91,7 @@ class FcPoRatePay extends BaseModel
      * @param string $sOxid
      * @return void
      */
-    protected function _fcpoUpdateRatePayProfile($sOxid)
+    protected function _fcpoUpdateRatePayProfile(string $sOxid): void
     {
         $aRatePayData = $this->fcpoGetProfileData($sOxid);
         $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
@@ -97,8 +106,9 @@ class FcPoRatePay extends BaseModel
      *
      * @param string $sOxid
      * @return array
+     * @throws DatabaseConnectionException
      */
-    public function fcpoGetProfileData($sOxid)
+    public function fcpoGetProfileData(string $sOxid): array
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $sQuery = "SELECT * FROM fcporatepay WHERE OXID=" . $this->_oFcPoDb->quote($sOxid);
@@ -110,10 +120,11 @@ class FcPoRatePay extends BaseModel
      * Collects profile information and save it into profile
      *
      * @param string $sOxid
-     * @param array  $aResponse
+     * @param array $aResponse
      * @return void
+     * @throws DatabaseErrorException
      */
-    protected function _fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse)
+    protected function _fcpoUpdateRatePayProfileByResponse(string $sOxid, array $aResponse): void
     {
         $sQuery = "
             UPDATE fcporatepay SET
@@ -128,7 +139,7 @@ class FcPoRatePay extends BaseModel
                 `activation_status_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-prepayment]']) . ",
                 `amount_min_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[amount-min-longrun]']) . ",
                 `b2b_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-full]']) . ",
-                `b2b_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-light]']) . ",
+                `b2b_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-light]'] ?? '') . ",
                 `b2b_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-elv]']) . ",
                 `b2b_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-installment]']) . ",
                 `b2b_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-invoice]']) . ",
@@ -136,18 +147,18 @@ class FcPoRatePay extends BaseModel
                 `country_code_billing`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-billing]']) . ",
                 `country_code_delivery`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-delivery]']) . ",
                 `delivery_address_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-full]']) . ",
-                `delivery_address_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-light]']) . ",
+                `delivery_address_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-light]'] ?? '') . ",
                 `delivery_address_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-elv]']) . ",
                 `delivery_address_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-installment]']) . ",
                 `delivery_address_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-invoice]']) . ",
                 `delivery_address_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-prepayment]']) . ",
-                `device_fingerprint_snippet_id`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[device-fingerprint-snippet-id]']) . ",
-                `eligibility_device_fingerprint`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-device-fingerprint]']) . ",
+                `device_fingerprint_snippet_id`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[device-fingerprint-snippet-id]'] ?? '') . ",
+                `eligibility_device_fingerprint`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-device-fingerprint]'] ?? '') . ",
                 `eligibility_ratepay_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-elv]']) . ",
                 `eligibility_ratepay_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-installment]']) . ",
                 `eligibility_ratepay_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-invoice]']) . ",
                 `eligibility_ratepay_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-full]']) . ",
-                `eligibility_ratepay_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-light]']) . ",
+                `eligibility_ratepay_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-light]'] ?? '') . ",
                 `eligibility_ratepay_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-prepayment]']) . ",
                 `interest_rate_merchant_towards_bank`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interest-rate-merchant-towards-bank]']) . ",
                 `interestrate_default`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-default]']) . ",
@@ -183,10 +194,12 @@ class FcPoRatePay extends BaseModel
     /**
      * Returns an array with Ratepay profiles
      *
-     * @param string $sPaymentId (optional)
+     * @param string|null $sPaymentId (optional)
      * @return array<int|string, mixed>
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoGetRatePayProfiles($sPaymentId = null): array
+    public function fcpoGetRatePayProfiles(string $sPaymentId = null): array
     {
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $aReturn = [];
@@ -196,7 +209,7 @@ class FcPoRatePay extends BaseModel
             $sFilterPaymentId = "WHERE OXPAYMENTID=" . $oDb->quote($sPaymentId);
         }
 
-        $sQuery = "SELECT * FROM fcporatepay {$sFilterPaymentId}";
+        $sQuery = "SELECT * FROM fcporatepay $sFilterPaymentId";
         $aRatePayProfiles = $oDb->getAll($sQuery);
 
         foreach ($aRatePayProfiles as $aRatePayProfile) {
@@ -209,6 +222,9 @@ class FcPoRatePay extends BaseModel
 
     /**
      * Add Ratepay shop
+     *
+     * @return void
+     * @throws DatabaseErrorException
      */
     public function fcpoAddRatePayProfile(): void
     {
@@ -293,8 +309,9 @@ class FcPoRatePay extends BaseModel
      *
      * @param string $sPaymentId
      * @return array
+     * @throws DatabaseConnectionException
      */
-    public function fcpoGetProfileDataByPaymentId($sPaymentId)
+    public function fcpoGetProfileDataByPaymentId(string $sPaymentId): array
     {
         $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=" . $this->_oFcPoDb->quote($sPaymentId) . " LIMIT 1";
         $sOxid = $this->_oFcPoDb->getOne($sQuery);
@@ -310,8 +327,9 @@ class FcPoRatePay extends BaseModel
      * Helper method that returns field-names of ratepay-table
      *
      * @return array
+     * @throws DatabaseConnectionException
      */
-    public function fcpoGetFields()
+    public function fcpoGetFields(): array
     {
         $sQuery = "SHOW FIELDS FROM fcporatepay";
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);

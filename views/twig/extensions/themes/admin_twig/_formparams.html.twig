@@ -12,13 +12,9 @@
     <input type="hidden" name="delshopid" value="{{ delshopid }}">
     <input type="hidden" name="updatenav" value="{{ updatenav }}">
     {# sorting #}
-    {% if oViewConf.fcpoGetIntShopVersion() >= 4500 %}
-        {% for sTable, aField in oView.getListSorting() %}
-            {% for sField, sSorting in aField %}
-                <input type="hidden" name="sort[{{ sTable }}][{{ sField }}]" value="{{ sSorting }}">
-            {% endfor %}
+    {% for sTable, aField in oView.getListSorting() %}
+        {% for sField, sSorting in aField %}
+            <input type="hidden" name="sort[{{ sTable }}][{{ sField }}]" value="{{ sSorting }}">
         {% endfor %}
-    {% else %}
-        <input type="hidden" name="sort" value="{{ sort }}">
-    {% endif %}
+    {% endfor %}
 {% endblock %}

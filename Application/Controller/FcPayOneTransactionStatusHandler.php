@@ -18,23 +18,24 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne\Core;
+namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Language;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
 ini_set('log_errors', 1);
-ini_set('error_log', '../../../log/fcPoErrors.log');
+ini_set('error_log', '../../../../../source/log/fcpoErrors.log');
 
 
 $aWhitelist = [];
 $aWhitelistForwarded = [];
-if (file_exists(dirname(__FILE__) . "/../config.ipwhitelist.php")) {
-    include_once dirname(__FILE__) . "/../config.ipwhitelist.php";
+if (file_exists(dirname(__FILE__) . "/../../config.ipwhitelist.php")) {
+    include_once dirname(__FILE__) . "/../../config.ipwhitelist.php";
 } else {
     echo 'Config file missing!';
     exit;
@@ -75,8 +76,9 @@ if (!in_array($sRemoteIp, $aWhitelist)) {
     }
 }
 
-class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
+class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
 {
+
     /**
      * Central point for handling an incoming status message call
      */
@@ -103,10 +105,10 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
     /**
      * Log incoming entry and return its ID
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function log()
+    public function log(): string
     {
         $oUtilsObject = $this->_getUtilsObject();
         $sOxid = $oUtilsObject->generateUId();
@@ -168,8 +170,8 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
                 FCPO_CLEARING_REFERENCE,
                 FCPO_CLEARING_INSTRUCTIONNOTE
             ) VALUES (
-                '{$sOxid}',
-                '{$iOrderNr}',
+                '$sOxid',
+                '$iOrderNr',
                 '" . $this->fcGetPostParam('key') . "',
                 '" . $this->fcGetPostParam('txaction') . "',
                 '" . $this->fcGetPostParam('portalid') . "',
@@ -225,14 +227,18 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
 
         try {
             DatabaseProvider::getDb()->execute($sQuery);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
 
         return $sOxid;
     }
 
-    protected function _getOrderNr()
+    /**
+     * @return int
+     * @throws DatabaseConnectionException
+     */
+    protected function _getOrderNr(): int
     {
         $oDb = DatabaseProvider::getDb();
         $sTxid = $this->fcGetPostParam('txid');
@@ -254,20 +260,19 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
      * Checks based on the transaction status received by PAYONE whether
      * the debit request is available for this order at the moment.
      *
-     * @param void
      * @return void
-     * @throws
+     * @throws Exception
      */
-    protected function _allowDebit()
+    protected function _allowDebit(): void
     {
         $sTxid = $this->fcGetPostParam('txid');
 
         $blReturn = false;
-        $sAuthMode = DatabaseProvider::getDb()->getOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '" . $sTxid . "'");
+        $sAuthMode = DatabaseProvider::getDb()->getOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '$sTxid'");
         if ($sAuthMode == 'authorization') {
             $blReturn = true;
         } else {
-            $iCount = DatabaseProvider::getDb()->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '{$sTxid}' AND fcpo_txaction = 'capture'");
+            $iCount = DatabaseProvider::getDb()->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '$sTxid' AND fcpo_txaction = 'capture'");
             if ($iCount > 0) {
                 $blReturn = true;
             }
@@ -279,30 +284,31 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
 
         $oOrder = $this->_getOrder();
         $sOrderId = $oOrder->getId();
-        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = '{$sOrderId}'";
+        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = '$sOrderId'";
         try {
             DatabaseProvider::getDb()->execute($sQuery);
 
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
     /**
      * Returns order by posted or given txid
      *
-     * @param null $sTxid
-     * @return |null
+     * @param string|null $sTxid
+     * @return Order
+     * @throws DatabaseConnectionException
      */
-    protected function _getOrder($sTxid = null)
+    protected function _getOrder(string $sTxid = null): Order
     {
-        if ($this->_oFcOrder === null) {
+        if (empty($this->_oFcOrder)) {
             if ($sTxid === null) {
                 $sTxid = $this->fcGetPostParam('txid');
             }
 
             $oDb = DatabaseProvider::getDb();
-            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = '" . $sTxid . "'";
+            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = '$sTxid'";
             $sOrderId = $oDb->getOne($sQuery);
 
             $oOrder = oxNew(Order::class);
@@ -312,17 +318,16 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
         }
 
         return $this->_oFcOrder;
-
     }
 
     /**
-     * OXID-337
      * Check if appointed signal has been posted and handles it
+     * OXID-337
      *
      * @return void
      * @throws Exception
      */
-    protected function _handleAppointed()
+    protected function _handleAppointed(): void
     {
         if ($this->fcGetPostParam('txaction') != 'appointed') {
             return;
@@ -341,16 +346,16 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '" . $sReplacement . "', '')
+                            oxremark = REPLACE(oxremark, '$sReplacement', '')
                         WHERE 
-                            oxid = '{$sOrderId}' AND 
+                            oxid = '$sOrderId' AND 
                             oxtransstatus IN ('ERROR') AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
             DatabaseProvider::getDb()->execute($sQuery);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
@@ -358,9 +363,9 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
      * Check if paid signal has been posted and handle it
      *
      * @return void
-     * @throws
+     * @throws Exception
      */
-    protected function _handlePaid()
+    protected function _handlePaid(): void
     {
         if ($this->fcGetPostParam('txaction') != 'paid') {
             return;
@@ -379,19 +384,17 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '" . $sReplacement . "', '')
+                            oxremark = REPLACE(oxremark, '$sReplacement', '')
                         WHERE 
-                            oxid = '{$sOrderId}' AND 
+                            oxid = '$sOrderId' AND 
                             oxtransstatus IN ('INCOMPLETE', 'ERROR') AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
             DatabaseProvider::getDb()->execute($sQuery);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
-
-
     }
 
     /**
@@ -399,9 +402,9 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
      * (e. g. PENDING to NEW)
      *
      * @return void
-     * @throws
+     * @throws Exception
      */
-    protected function _handleMapping()
+    protected function _handleMapping(): void
     {
         $sTxid = $this->fcGetPostParam('txid');
         $sPayoneStatus = $this->fcGetPostParam('txaction');
@@ -418,8 +421,8 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
             SELECT fcpo_folder 
             FROM fcpostatusmapping 
             WHERE 
-                  fcpo_payonestatus = '{$sPayoneStatus}' AND 
-                  fcpo_paymentid = {$sPaymentId} 
+                  fcpo_payonestatus = '$sPayoneStatus' AND 
+                  fcpo_paymentid = $sPaymentId 
             ORDER BY oxid ASC 
             LIMIT 1
         ";
@@ -431,23 +434,23 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
         try {
             $sQuery = "
                 UPDATE oxorder 
-                SET oxfolder = '{$sFolder}' 
-                WHERE oxid = '{$oOrder->getId()}'
+                SET oxfolder = '$sFolder' 
+                WHERE oxid = '" . $oOrder->getId() . "'
             ";
             $oDb->execute($sQuery);
-        } catch (Exception $e) {
-            throw $e;
+        } catch (Exception $oEx) {
+            throw $oEx;
         }
     }
 
     /**
      * Handling configured forwarding of statusmessage to other endpoints
      *
-     * @param $sStatusmessageId
+     * @param string $sStatusmessageId
      * @return void
-     * @throws
+     * @throws Exception
      */
-    protected function _handleForwarding($sStatusmessageId)
+    protected function _handleForwarding(string $sStatusmessageId): void
     {
         $this->_logForwardMessage('Handle forwarding for statusmessage id: ' . $sStatusmessageId);
         try {
@@ -468,13 +471,13 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
     /**
      * Method directly redirects to statusforwardcontroller
      *
+     * @param string $sStatusmessageId
      * @return void
      */
-    protected function _directRedirect($sStatusmessageId)
+    protected function _directRedirect(string $sStatusmessageId): void
     {
         $sKey = $this->fcGetPostParam('key');
-        $sParams = '';
-        $sParams .= $this->_addParam('key', $sKey);
+        $sParams = $this->_addParam('key', $sKey);
         $sParams .= $this->_addParam('statusmessageid', $sStatusmessageId);
 
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -485,7 +488,7 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
         $sParams = substr($sParams, 1);
         $sBaseUrl = (empty($sSslShopUrl)) ? $sShopUrl : $sSslShopUrl;
 
-        $sForwarderUrl = $sBaseUrl . 'modules/fc/fcpayone/statusforward.php';
+        $sForwarderUrl = $sBaseUrl . 'index.php?cl=FcPayOneTransactionStatusForwarder';
         $this->_logForwardMessage('Forward transaction id to own controller:' . $sForwarderUrl . '...');
 
         $oCurl = curl_init($sForwarderUrl);
@@ -505,4 +508,5 @@ class FcPoTransactionStatusHandler extends FcPoTransactionStatusBase
         curl_close($oCurl);
 
     }
+
 }

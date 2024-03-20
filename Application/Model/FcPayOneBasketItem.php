@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +17,13 @@ use Fatchip\PayOne\Lib\FcPoHelper;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Article;
+use OxidEsales\Eshop\Application\Model\OrderArticle;
+
 class FcPayOneBasketItem extends FcPayOneBasketItem_parent
 {
 
@@ -32,10 +34,10 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      */
     protected FcPoHelper $_oFcPoHelper;
 
+
     /**
      * init object construction
      *
-     * @return null
      */
     public function __construct()
     {
@@ -43,24 +45,22 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
-
     /**
      * Overrides standard oxid getArticle method
      *
-     * Retrieves the article .Throws an execption if article does not exist,
+     * Retrieves the article .Throws an exception if article does not exist,
      * is not buyable or visible.
      *
-     * @param bool|null   $blCheckProduct       checks if product is buyable and visible
-     * @param string|null $sProductId           product id
-     * @param bool        $blDisableLazyLoading disable lazy loading
+     * @param bool|null $blCheckProduct checks if product is buyable and visible
+     * @param null $sProductId product id
+     * @param bool $blDisableLazyLoading disable lazy loading
      *
-     * @return mixed
-     *
+     * @return OrderArticle|Article
      */
-    public function getArticle($blCheckProduct = false, $sProductId = null, $blDisableLazyLoading = false)
+    public function getArticle($blCheckProduct = false, $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
         $blSuccess = $this->_oFcPoHelper->fcpoGetRequestParameter('fcposuccess');
         $sRefNr = $this->_oFcPoHelper->fcpoGetRequestParameter('refnr');
 
@@ -75,14 +75,13 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
         return $this->_fcpoParentGetArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);
     }
 
-
     /**
-     * @param bool        $blCheckProduct
+     * @param bool $blCheckProduct
      * @param string|null $sProductId
-     * @param bool        $blDisableLazyLoading
-     * @return mixed
+     * @param bool $blDisableLazyLoading
+     * @return Article|OrderArticle
      */
-    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, ?string $sProductId = null, ?bool $blDisableLazyLoading = false)
+    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, ?string $sProductId = null, ?bool $blDisableLazyLoading = false): Article|OrderArticle
     {
         return parent::getArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);
     }

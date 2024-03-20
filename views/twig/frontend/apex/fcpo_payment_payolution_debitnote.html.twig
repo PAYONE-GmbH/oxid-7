@@ -66,23 +66,22 @@
                 </div>
                 <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}</label>
             </div>
-            {% if oView.getConfigParam('blFCPODebitBICMandatory') %}
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpo_payolution_debitnote_bic]"
-                           placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}"
-                           autocomplete="off" value="{{ dynvalue.fcpo_payolution_debitnote_bic }}"
-                           onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
-                           required>
-                    <div id="fcpo_payolution_bic_invalid" class="fcpo_check_error">
-                        <span class="help-block">
-                            <ul role="alert" class="list-unstyled text-danger">
-                                <li>{{ translate({ ident: "FCPO_BIC_INVALID" }) }}</li>
-                            </ul>
-                        </span>
-                    </div>
-                    <label>{{ translate({ ident: "FCPO_BANK_BIC" }) }}</label>
+
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpo_payolution_debitnote_bic]"
+                       placeholder="{{ translate({ ident: "FCPO_BANK_BIC" }) }}"
+                       autocomplete="off" value="{{ dynvalue.fcpo_payolution_debitnote_bic }}"
+                       onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
+                       required>
+                <div id="fcpo_payolution_bic_invalid" class="fcpo_check_error">
+                    <span class="help-block">
+                        <ul role="alert" class="list-unstyled text-danger">
+                            <li>{{ translate({ ident: "FCPO_BIC_INVALID" }) }}</li>
+                        </ul>
+                    </span>
                 </div>
-            {% endif %}
+                <label>{{ translate({ ident: "FCPO_BANK_BIC" }) }}</label>
+            </div>
 
             <div class="form-floating mb-3">
                 <input name="dynvalue[fcpo_payolution_debitnote_agreed]" value="agreed" type="checkbox">&nbsp;{{ oView.fcpoGetPoAgreementInit(sPaymentID)|raw }}
