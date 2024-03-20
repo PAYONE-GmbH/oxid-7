@@ -835,7 +835,7 @@ class FcPayOneUser extends FcPayOneUser_parent
     public function fcpoDoesUserAlreadyExist(string $sEmail): false|string
     {
         $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . DatabaseProvider::getDb()->quote($sEmail) . " AND oxpassword != ''";
-        $sUserId = $this->_oFcPoDb->getOne($sQuery);
+        $sUserId = DatabaseProvider::getDb()->getOne($sQuery);
         return $sUserId ?: false;
     }
 

@@ -119,13 +119,13 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     /**
      * Handles paypal express
      *
-     * @return bool|string
+     * @return string|null
      */
-    public function fcpoHandlePayPalExpress(): bool|string
+    public function fcpoHandlePayPalExpress(): string|null
     {
         try {
             $this->_handlePayPalExpressCall();
-            return true;
+            return null;
         } catch (Exception $oEx) {
             $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
             $oUtilsView->addErrorToDisplay($oEx);
