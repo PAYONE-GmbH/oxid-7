@@ -436,6 +436,7 @@ $aLang = [
     'FCPO_SECINVOICE_PORTAL_KEY' => 'PAYONE Portal Key (for payment Secure Invoice)',
     'FCPO_BNPL_PORTAL_KEY' => 'PAYONE Portal Key (for payment BNPL)',
     'FCPO_BNPL_ALLOW_DIFF_ADDRESS' => 'Allow different shipping address',
+    'FCPO_HELP_BNPL_ALLOW_DIFF_ADDRESS' => 'Attention: has to be enabled in the PAYONE account',
     'FCPO_BNPL_ADMIN_DEBIT_REASON_TITLE' => 'Cancellation reason',
     'FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_CRQ' => 'The consumer requested a cancellation of the Order',
     'FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_DUP' => 'The Order was created twice accidentally',
