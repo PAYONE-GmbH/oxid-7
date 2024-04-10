@@ -671,6 +671,9 @@ class FcPoRequest extends Base
      */
     protected function addParametersOnlineSofort(Order $oOrder, array $aDynvalue): void
     {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $blFCPODebitBICMandatory = $oConfig->getConfigParam('blFCPODebitBICMandatory');
+
         $this->addParameter('clearingtype', 'sb'); //Payment method
         $this->addParameter('onlinebanktransfertype', 'PNT');
 
@@ -681,19 +684,16 @@ class FcPoRequest extends Base
             $aDynvalue['fcpo_ou_blz'] != ''
         );
 
-        $blUseSepaData = (
-            isset($aDynvalue['fcpo_ou_iban']) &&
-            $aDynvalue['fcpo_ou_iban'] != '' &&
-            isset($aDynvalue['fcpo_ou_bic']) &&
-            $aDynvalue['fcpo_ou_bic'] != ''
-        );
+        $blUseSepaData = (isset($aDynvalue['fcpo_ou_iban']) && $aDynvalue['fcpo_ou_iban'] != '');
 
         if ($blUseDeprecatedAccountData) {
             $this->addParameter('bankaccount', $aDynvalue['fcpo_ou_ktonr']);
             $this->addParameter('bankcode', $aDynvalue['fcpo_ou_blz']);
         } elseif ($blUseSepaData) {
             $this->addParameter('iban', $aDynvalue['fcpo_ou_iban']);
-            $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
+            if ($blFCPODebitBICMandatory && !empty($aDynvalue['fcpo_ou_bic'])) {
+                $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
+            }
         }
 
         $oBillCountry = oxNew(Country::class);
@@ -1118,7 +1118,9 @@ class FcPoRequest extends Base
 
         if ($sPaymentId == 'fcporp_debitnote') {
             $this->addParameter('iban', $aDynvalue['fcporp_debitnote_iban']);
-            $this->addParameter('bic', $aDynvalue['fcporp_debitnote_bic']);
+            if (!empty($aDynvalue['fcporp_debitnote_bic'])) {
+                $this->addParameter('bic', $aDynvalue['fcporp_debitnote_bic']);
+            }
         }
 
         if ($sPaymentId == 'fcporp_installment') {
@@ -1491,19 +1493,19 @@ class FcPoRequest extends Base
      */
     protected function fcpoAddParametersOnlineTrustly(Order $oOrder, array $aDynvalue): void
     {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $blFCPODebitBICMandatory = $oConfig->getConfigParam('blFCPODebitBICMandatory');
+
         $this->addParameter('clearingtype', 'sb'); //Payment method
         $this->addParameter('onlinebanktransfertype', 'TRL');
 
-        $blUseSepaData = (
-            isset($aDynvalue['fcpo_ou_iban']) &&
-            $aDynvalue['fcpo_ou_iban'] != '' &&
-            isset($aDynvalue['fcpo_ou_bic']) &&
-            $aDynvalue['fcpo_ou_bic'] != ''
-        );
+        $blUseSepaData = (isset($aDynvalue['fcpo_ou_iban']) && $aDynvalue['fcpo_ou_iban'] != '');
 
         if ($blUseSepaData) {
             $this->addParameter('iban', $aDynvalue['fcpo_ou_iban']);
-            $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
+            if ($blFCPODebitBICMandatory && !empty($aDynvalue['fcpo_ou_bic'])) {
+                $this->addParameter('bic', $aDynvalue['fcpo_ou_bic']);
+            }
         }
 
         $oBillCountry = oxNew(Country::class);
