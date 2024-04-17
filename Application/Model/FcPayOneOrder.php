@@ -1584,6 +1584,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $aDynvalue = $this->_oFcPoHelper->fcpoGetSessionVariable('dynvalue');
         $aDynvalue = $aDynvalue ?: $this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
 
+        if (is_null($aDynvalue)) {
+            $aDynvalue = [];
+        }
+
         $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
             $sOrderNr = $this->_fcpoGetNextOrderNr();
