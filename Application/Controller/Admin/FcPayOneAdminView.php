@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,10 +20,11 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneAdminView extends AdminController
 {
@@ -32,77 +32,78 @@ class FcPayOneAdminView extends AdminController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    private $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var DatabaseInterface
+     */
+    protected DatabaseInterface $_oFcPoDb;
 
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
-
     /**
-     * Return admin template seperator sign by shop-version
+     * Return admin template separator sign by shop-version
      *
      * @return string
      */
-    public function fcGetAdminSeperator()
+    public function fcGetAdminSeparator(): string
     {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iVersion < 4300) {
-            return '?';
-        } else {
-            return '&';
-        }
+        return '&';
     }
 
     /**
      * Returns current view identifier
+     *
+     * @return string
      */
     public function getViewId(): string
     {
         return 'dyn_fcpayone';
     }
 
-
     /**
      * Template getter for integrator ID
      *
-     *
      * @return string
      */
-    public function fcpoGetIntegratorId()
+    public function fcpoGetIntegratorId(): string
     {
-        return $this->_oFcpoHelper->fcpoGetIntegratorId();
+        return $this->_oFcPoHelper->fcpoGetIntegratorId();
     }
-
 
     /**
      * Template getter returns payone connector version
      *
-     *
      * @return string
      */
-    public function fcpoGetVersion()
+    public function fcpoGetVersion(): string
     {
-        return $this->_oFcpoHelper->fcpoGetModuleVersion();
+        return $this->_oFcPoHelper->fcpoGetModuleVersion();
     }
 
     /**
      * Template getter for Merchant ID
      *
-     *
      * @return string
      */
-    public function fcpoGetMerchantId()
+    public function fcpoGetMerchantId(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOMerchantID');
     }
+
 }

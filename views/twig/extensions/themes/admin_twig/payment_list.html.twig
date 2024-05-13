@@ -1,0 +1,35 @@
+{% extends 'payment_list.html.twig' %}
+
+{% block admin_payment_list_filter %}
+    <td valign="top" class="listfilter first" align="right">
+        <div class="r1">
+            <div class="b1">&nbsp;</div>
+        </div>
+    </td>
+    <td valign="top" class="listfilter" height="20" colspan="2">
+        <div class="r1">
+            <div class="b1">
+                <div class="find">
+                    <select name="changelang" class="editinput" onChange="Javascript:top.oxid.admin.changeLanguage();">
+                        {% for lang in languages %}
+                            <option value="{{ lang.id }}"
+                                    {% if lang.selected %}SELECTED{% endif %}>{{ lang.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input class="listedit" type="submit" name="submitit"
+                           value="{{ translate({ ident: "GENERAL_SEARCH" }) }}">
+                </div>
+
+                <input class="listedit" type="text" size="60" maxlength="128" name="where[oxpayments][oxdesc]"
+                       value="{{ where.oxpayments.oxdesc }}">
+                <!-- FCPAYONE BEGIN -->
+                | {{ translate({ ident: "FCPO_ONLY_PAYONE" }) }} <input class="listedit" onchange="this.form.submit();"
+                                                                        type="checkbox"
+                                                                        name="where[oxpayments][fcpoispayone]"
+                                                                        value='1'
+                                                                        {% if where.oxpayments.fcpoispayone == 1 %}checked{% endif %}>
+                <!-- FCPAYONE END -->
+            </div>
+        </div>
+    </td>
+{% endblock %}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,24 +20,26 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
+use Exception;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
-use Fatchip\PayOne\Application\Model\FcPoPayPal;
+use Fatchip\PayOne\Application\Model\FcPoPaypal;
+use Fatchip\PayOne\FcCheckChecksum;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
+use JsonException;
+use OxidEsales\Eshop\Application\Model\CountryList;
+use OxidEsales\Eshop\Application\Model\DeliverySetList;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneMain extends FcPayOneAdminDetails
 {
 
-    public $_oFcpoConfigExport;
-    public $_oFcpoKlarna;
-    public $_oFcpoPayPal;
-    public $_oFcpoRatePay;
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    private $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Current class template name
@@ -52,122 +53,189 @@ class FcPayOneMain extends FcPayOneAdminDetails
      *
      * @var array
      */
-    private $_aConfBools = [];
+    protected array $_aConfBools = [];
 
     /**
      * List of string config values
+     *
+     * @var array
      */
-    private array $_aConfStrs = [];
+    protected array $_aConfStrs = [];
 
     /**
      * List of array config values
      *
      * @var array
      */
-    private $_aConfArrs = [];
+    protected array $_aConfArrs = [];
 
     /**
      * List of countries
      *
      * @var array
      */
-    private $_aCountryList = [];
+    protected array $_aCountryList = [];
+
+    /**
+     * List of credit cards
+     *
+     * @var array
+     */
+    protected array $_aAplCreditCardsList = [];
 
     /**
      * List of config errors encountered
+     *
+     * @var array
      */
-    private ?array $_aConfErrors = null;
+    protected array $_aConfErrors = [];
 
     /**
      * Set of default config strings
      *
      * @var array
      */
-    private const A_FCPO_DEFAULT_STRING_CONF = ['sFCPOCCType' => 'ajax', 
-    'sFCPOCCNumberType' => 'tel', 
-    'sFCPOCCNumberCount' => '30', 
-    'sFCPOCCNumberMax' => '16', 
-    'sFCPOCCNumberIframe' => 'standard', 
-    'sFCPOCCNumberWidth' => '202px', 
-    'sFCPOCCNumberHeight' => '20px', 
-    'sFCPOCCNumberStyle' => 'standard', 
-    'sFCPOCCNumberCSS' => '', 
-    'sFCPOCCCVCType' => 'tel', 
-    'sFCPOCCCVCCount' => '30', 
-    'sFCPOCCCVCMax' => '4', 
-    'sFCPOCCCVCIframe' => 'standard', 
-    'sFCPOCCCVCWidth' => '202px', 
-    'sFCPOCCCVCHeight' => '20px', 
-    'sFCPOCCCVCStyle' => 'standard', 
-    'sFCPOCCCVCCSS' => '', 
-    'sFCPOCCMonthType' => 'select', 
-    'sFCPOCCMonthCount' => '3', 
-    'sFCPOCCMonthMax' => '2', 
-    'sFCPOCCMonthIframe' => 'custom', 
-    'sFCPOCCMonthWidth' => '50px', 
-    'sFCPOCCMonthHeight' => '20px', 
-    'sFCPOCCMonthStyle' => 'standard', 
-    'sFCPOCCMonthCSS' => '', 
-    'sFCPOCCYearType' => 'select', 
-    'sFCPOCCYearCount' => '5', 
-    'sFCPOCCYearMax' => '4', 
-    'sFCPOCCYearIframe' => 'custom', 
-    'sFCPOCCYearWidth' => '80px', 
-    'sFCPOCCYearHeight' => '20px', 
-    'sFCPOCCYearStyle' => 'standard', 
-    'sFCPOCCYearCSS' => '', 
-    'sFCPOCCIframeWidth' => '202px', 
-    'sFCPOCCIframeHeight' => '20px', 
-    'sFCPOCCStandardInput' => 'border: 1px solid #8c8989; border-radius: 2px;', 
-    'sFCPOCCStandardOutput' => ''];
+    protected array $_aFcpoDefaultStringConf = [
+        'sFCPOCCType' => 'ajax',
+        'sFCPOCCNumberType' => 'tel',
+        'sFCPOCCNumberCount' => '30',
+        'sFCPOCCNumberMax' => '16',
+        'sFCPOCCNumberIframe' => 'standard',
+        'sFCPOCCNumberWidth' => '202px',
+        'sFCPOCCNumberHeight' => '20px',
+        'sFCPOCCNumberStyle' => 'standard',
+        'sFCPOCCNumberCSS' => '',
+        'sFCPOCCCVCType' => 'tel',
+        'sFCPOCCCVCCount' => '30',
+        'sFCPOCCCVCMax' => '4',
+        'sFCPOCCCVCIframe' => 'standard',
+        'sFCPOCCCVCWidth' => '202px',
+        'sFCPOCCCVCHeight' => '20px',
+        'sFCPOCCCVCStyle' => 'standard',
+        'sFCPOCCCVCCSS' => '',
+        'sFCPOCCMonthType' => 'select',
+        'sFCPOCCMonthCount' => '3',
+        'sFCPOCCMonthMax' => '2',
+        'sFCPOCCMonthIframe' => 'custom',
+        'sFCPOCCMonthWidth' => '50px',
+        'sFCPOCCMonthHeight' => '20px',
+        'sFCPOCCMonthStyle' => 'standard',
+        'sFCPOCCMonthCSS' => '',
+        'sFCPOCCYearType' => 'select',
+        'sFCPOCCYearCount' => '5',
+        'sFCPOCCYearMax' => '4',
+        'sFCPOCCYearIframe' => 'custom',
+        'sFCPOCCYearWidth' => '80px',
+        'sFCPOCCYearHeight' => '20px',
+        'sFCPOCCYearStyle' => 'standard',
+        'sFCPOCCYearCSS' => '',
+        'sFCPOCCIframeWidth' => '202px',
+        'sFCPOCCIframeHeight' => '20px',
+        'sFCPOCCStandardInput' => 'border: 1px solid #8c8989; border-radius: 2px;',
+        'sFCPOCCStandardOutput' => '',
+    ];
 
     /**
      * Configuration for JS CC Preview generation
      *
      * @var array
      */
-    private const A_FC_JS_CC_PREVIEW_FIELD_CONFIGS = ['cardpan' => ['selector' => 'cardpan', 
-    'type' => 'sFCPOCCNumberType', 
-    'size' => 'sFCPOCCNumberCount', 
-    'maxlength' => 'sFCPOCCNumberMax', 
-    'customstyle' => 'sFCPOCCNumberStyle', 'style' => 'sFCPOCCNumberCSS', 'customiframe' => 'sFCPOCCNumberIframe', 'widht' => 'sFCPOCCNumberWidth', 'height' => 'sFCPOCCNumberHeight'], 'cardcvc2' => ['selector' => 'cardcvc2', 'type' => 'sFCPOCCCVCType', 'size' => 'sFCPOCCCVCCount', 'maxlength' => 'sFCPOCCCVCMax', 'customstyle' => 'sFCPOCCCVCStyle', 'style' => 'sFCPOCCCVCCSS', 'customiframe' => 'sFCPOCCCVCIframe', 'widht' => 'sFCPOCCCVCWidth', 'height' => 'sFCPOCCCVCHeight'], 'cardexpiremonth' => ['selector' => 'cardexpiremonth', 'type' => 'sFCPOCCMonthType', 'size' => 'sFCPOCCMonthCount', 'maxlength' => 'sFCPOCCMonthMax', 'customstyle' => 'sFCPOCCMonthStyle', 'style' => 'sFCPOCCMonthCSS', 'customiframe' => 'sFCPOCCMonthIframe', 'widht' => 'sFCPOCCMonthWidth', 'height' => 'sFCPOCCMonthHeight'], 'cardexpireyear' => ['selector' => 'cardexpireyear', 'type' => 'sFCPOCCYearType', 'size' => 'sFCPOCCYearCount', 'maxlength' => 'sFCPOCCYearMax', 'customstyle' => 'sFCPOCCYearStyle', 'style' => 'sFCPOCCYearCSS', 'customiframe' => 'sFCPOCCYearIframe', 'widht' => 'sFCPOCCYearWidth', 'height' => 'sFCPOCCYearHeight']];
+    protected array $_aFcJsCCPreviewFieldConfigs = [
+        'cardpan' => [
+            'selector' => 'cardpan',
+            'type' => 'sFCPOCCNumberType',
+            'size' => 'sFCPOCCNumberCount',
+            'maxlength' => 'sFCPOCCNumberMax',
+            'customstyle' => 'sFCPOCCNumberStyle',
+            'style' => 'sFCPOCCNumberCSS',
+            'customiframe' => 'sFCPOCCNumberIframe',
+            'width' => 'sFCPOCCNumberWidth',
+            'height' => 'sFCPOCCNumberHeight',
+        ],
+        'cardcvc2' => [
+            'selector' => 'cardcvc2',
+            'type' => 'sFCPOCCCVCType',
+            'size' => 'sFCPOCCCVCCount',
+            'maxlength' => 'sFCPOCCCVCMax',
+            'customstyle' => 'sFCPOCCCVCStyle',
+            'style' => 'sFCPOCCCVCCSS',
+            'customiframe' => 'sFCPOCCCVCIframe',
+            'width' => 'sFCPOCCCVCWidth',
+            'height' => 'sFCPOCCCVCHeight',
+        ],
+        'cardexpiremonth' => [
+            'selector' => 'cardexpiremonth',
+            'type' => 'sFCPOCCMonthType',
+            'size' => 'sFCPOCCMonthCount',
+            'maxlength' => 'sFCPOCCMonthMax',
+            'customstyle' => 'sFCPOCCMonthStyle',
+            'style' => 'sFCPOCCMonthCSS',
+            'customiframe' => 'sFCPOCCMonthIframe',
+            'width' => 'sFCPOCCMonthWidth',
+            'height' => 'sFCPOCCMonthHeight',
+        ],
+        'cardexpireyear' => [
+            'selector' => 'cardexpireyear',
+            'type' => 'sFCPOCCYearType',
+            'size' => 'sFCPOCCYearCount',
+            'maxlength' => 'sFCPOCCYearMax',
+            'customstyle' => 'sFCPOCCYearStyle',
+            'style' => 'sFCPOCCYearCSS',
+            'customiframe' => 'sFCPOCCYearIframe',
+            'width' => 'sFCPOCCYearWidth',
+            'height' => 'sFCPOCCYearHeight',
+        ],
+    ];
 
     /**
      * Configuration for JS CC Preview generation
      *
      * @var array
      */
-    private const A_FC_JS_CC_PREVIEW_DEFAULT_STYLE = ['input' => 'sFCPOCCStandardInput', 'select' => 'sFCPOCCStandardOutput', 'width' => 'sFCPOCCIframeWidth', 'height' => 'sFCPOCCIframeHeight'];
+    protected array $_aFcJsCCPreviewDefaultStyle = [
+        'input' => 'sFCPOCCStandardInput',
+        'select' => 'sFCPOCCStandardOutput',
+        'width' => 'sFCPOCCIframeWidth',
+        'height' => 'sFCPOCCIframeHeight',
+    ];
 
     /**
      * Collects messages of different types
+     *
+     * @var array
      */
-    private array $_aAdminMessages = [];
+    protected array $_aAdminMessages = [];
+
 
     /**
      * init object construction
      *
-     * @return null
+     * @throws JsonException|DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
 
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sOxid = $oConfig->getShopId();
         $this->_fcpoLoadConfigs($sOxid);
         $this->_fcpoLoadCountryList();
+        $this->_fcpoLoadAplCreditCardsList();
     }
 
     /**
-     * Loads configurations of payone and make them accessable
+     * Loads configurations of payone and make them accessible
      *
-     *
+     * @param string $sShopId
+     * @return void
+     * @throws DatabaseConnectionException
      */
-    private function _fcpoLoadConfigs($sShopId): void
+    protected function _fcpoLoadConfigs(string $sShopId): void
     {
-        $aConfigs = $this->_oFcpoConfigExport->fcpoGetConfig($sShopId);
+        $aConfigs = $this->_oFcPoConfigExport->fcpoGetConfig($sShopId);
+
+        $this->_aConfStrs = $aConfigs['strs'];
         $this->_aConfStrs = $this->_initConfigStrings();
         $this->_aConfBools = $aConfigs['bools'];
         $this->_aConfArrs = $aConfigs['arrs'];
@@ -176,27 +244,28 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Initialize config strings
      *
-     *
      * @return array
      */
-    private function _initConfigStrings()
+    protected function _initConfigStrings(): array
     {
         $aConfStrs = $this->_aConfStrs;
-        foreach (self::A_FCPO_DEFAULT_STRING_CONF as $sKey => $sValue) {
+        foreach ($this->_aFcpoDefaultStringConf as $sKey => $sValue) {
             $aConfStrs[$sKey] = $this->_fcpoSetDefault($aConfStrs, $sKey, $sValue);
         }
-
         return $aConfStrs;
     }
 
     /**
      * Set default values
      *
-     * @return array
+     * @param array $aArray
+     * @param string $sKey
+     * @param mixed $mValue
+     * @return bool|object
      */
-    private function _fcpoSetDefault(array $aArray, string $sKey, mixed $mValue)
+    protected function _fcpoSetDefault(array $aArray, string $sKey, mixed $mValue): object|bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         if (!isset($aArray[$sKey])) {
             $oConfig->saveShopConfVar("str", $sKey, $mValue);
         }
@@ -207,61 +276,81 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Loads list of countries
      *
-     *
+     * @return void
      */
-    private function _fcpoLoadCountryList(): void
+    protected function _fcpoLoadCountryList(): void
     {
+        $aCountryList = [];
         // #251A passing country list
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $oCountryList = $this->_oFcpoHelper->getFactoryObject("oxCountryList");
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+        $oCountryList = $this->_oFcPoHelper->getFactoryObject(CountryList::class);
         $oCountryList->loadActiveCountries($oLang->getTplLanguage());
 
-        $blValidCountryData = (
-            isset($this->_aConfArrs["aFCPODebitCountries"]) &&
-            (is_countable($this->_aConfArrs["aFCPODebitCountries"]) ? count($this->_aConfArrs["aFCPODebitCountries"]) : 0) &&
-            (is_countable($oCountryList) ? count($oCountryList) : 0)
-        );
+        $blValidCountryData = count($oCountryList)
+            && (
+                !isset($this->_aConfArrs["aFCPODebitCountries"]) ||
+                (isset($this->_aConfArrs["aFCPODebitCountries"]) && count($this->_aConfArrs["aFCPODebitCountries"]))
+            );
 
         if ($blValidCountryData) {
             foreach ($oCountryList as $sCountryId => $oCountry) {
-                if (in_array($oCountry->oxcountry__oxid->value, $this->_aConfArrs["aFCPODebitCountries"])) {
-                    $oCountryList[$sCountryId]->selected = "1";
+                if (
+                    isset($this->_aConfArrs["aFCPODebitCountries"]) &&
+                    in_array($oCountry->oxcountry__oxid->value, $this->_aConfArrs["aFCPODebitCountries"])) {
+                    $oCountry->selected = "1";
                 }
+
+                $aCountryList[$sCountryId] = $oCountry;
             }
         }
 
-        $this->_aCountryList = $oCountryList;
+        $this->_aCountryList = $aCountryList;
     }
 
     /**
-     * Loads PAYONE configuration and passes it to Smarty engine, returns
-     * name of template file "fcpayone_main.html.twig".
+     * Loads list of supported credit cards for Apple Pay
+     *
+     * @return void
+     * @throws JsonException
+     */
+    protected function _fcpoLoadAplCreditCardsList(): void
+    {
+        $this->_aAplCreditCardsList = [
+            'V' => json_decode(json_encode([
+                'name' => 'Visa',
+                'selected' => isset($this->_aConfArrs["aFCPOAplCreditCards"]) && in_array('V', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
+            ], JSON_THROW_ON_ERROR), null, 512, JSON_THROW_ON_ERROR),
+            'M' => json_decode(json_encode([
+                'name' => 'Mastercard',
+                'selected' => isset($this->_aConfArrs["aFCPOAplCreditCards"]) && in_array('M', $this->_aConfArrs["aFCPOAplCreditCards"]) ? 1 : 0
+            ], JSON_THROW_ON_ERROR), null, 512, JSON_THROW_ON_ERROR),
+        ];
+    }
+
+    /**
+     * Loads PAYONE configuration, passes
+     * its data to Twig engine and returns path to a template
+     * "fcpayone_main.tpl".
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $sReturn = parent::render();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
-        $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
+        $this->_aViewData['sHelpURL'] = $this->_oFcPoHelper->fcpoGetHelpUrl();
 
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter("aoc")) {
-            $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter("aoc")) {
+            $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
             $this->_aViewData["oxid"] = $sOxid;
-            $sType = $this->_oFcpoHelper->fcpoGetRequestParameter("type");
+            $sType = $this->_oFcPoHelper->fcpoGetRequestParameter("type");
             $this->_aViewData["type"] = $sType;
 
-            if (version_compare($oConfig->getVersion(), '4.6.0', '>=')) {
-                $oPayOneAjax = oxNew(FcPayOneMainAjax::class);
-                $aColumns = $oPayOneAjax->getColumns();
-            } else {
-                $aColumns = [];
-                include_once 'inc/' . strtolower(self::class) . '.inc.php';
-            }
+            $oPayOneAjax = oxNew(FcPayOneMainAjax::class);
+            $aColumns = $oPayOneAjax->getColumns();
             $this->_aViewData['oxajax'] = $aColumns;
 
-            return "fcpayone_popup_main.html.twig";
+            return '@fcpayone/admin/popups/fcpayone_popup_main';
         }
         return $sReturn;
     }
@@ -269,12 +358,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Template getter that returns an array of available ISO-Codes of currencies
      *
-     *
-     * @return mixed[]
+     * @return array
      */
     public function fcpoGetCurrencyIso(): array
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aCurrencyArray = $oConfig->getCurrencyArray();
         $aReturn = [];
         foreach ($aCurrencyArray as $oCur) {
@@ -287,21 +375,19 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Template getter for returning template version
      *
-     *
      * @return string
      */
-    public function fcpoGetModuleVersion()
+    public function fcpoGetModuleVersion(): string
     {
-        return $this->_oFcpoHelper->fcpoGetModuleVersion();
+        return $this->_oFcPoHelper->fcpoGetModuleVersion();
     }
 
     /**
      * Template getter for boolean config values
      *
-     *
      * @return array
      */
-    public function fcpoGetConfBools()
+    public function fcpoGetConfBools(): array
     {
         return $this->_aConfBools;
     }
@@ -309,6 +395,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Template getter for string config values
      *
+     * @return array
      */
     public function fcpoGetConfStrs(): array
     {
@@ -318,10 +405,9 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Template getter for array config values
      *
-     *
      * @return array
      */
-    public function fcpoGetConfArrs()
+    public function fcpoGetConfArrs(): array
     {
         return $this->_aConfArrs;
     }
@@ -329,18 +415,28 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Template getter for countrylist
      *
-     *
      * @return array
      */
-    public function fcpoGetCountryList()
+    public function fcpoGetCountryList(): array
     {
         return $this->_aCountryList;
     }
 
     /**
+     * Template getter for Apple Pay credit card list
+     *
+     * @return array
+     */
+    public function fcpoGetAplCreditCards(): array
+    {
+        return $this->_aAplCreditCardsList;
+    }
+
+    /**
      * Saves changed configuration parameters.
      *
-     * @return mixed
+     * @return void
+     * @throws Exception
      */
     public function save(): void
     {
@@ -350,10 +446,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
             return;
         }
 
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $aConfBools = $this->_oFcpoHelper->fcpoGetRequestParameter("confbools");
-        $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-        $aConfArrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confarrs");
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $aConfBools = $this->_oFcPoHelper->fcpoGetRequestParameter("confbools");
+        $aConfStrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confstrs");
+        $aConfArrs = $this->_oFcPoHelper->fcpoGetRequestParameter("confarrs");
+
 
         if (is_array($aConfBools)) {
             foreach ($aConfBools as $sVarName => $sVarVal) {
@@ -369,7 +466,7 @@ class FcPayOneMain extends FcPayOneAdminDetails
 
         if (is_array($aConfArrs)) {
             foreach ($aConfArrs as $sVarName => $aVarVal) {
-                // home country multiple selectlist feature
+                // home country multiple select-list feature
                 if (!is_array($aVarVal)) {
                     $aVarVal = $this->_multilineToArray($aVarVal);
                 }
@@ -378,22 +475,18 @@ class FcPayOneMain extends FcPayOneAdminDetails
         }
 
         // add storeids, campaigns and logos if set
-        $this->_fcpoCheckAndAddStoreId();
-        $this->_fcpoCheckAndAddCampaign();
         $this->_fcpoCheckAndAddLogos();
 
-        // fill storeids and campaigns  if set
-        $this->_fcpoInsertStoreIds();
-        $this->_fcpoInsertCampaigns();
-
-        // add ratepay profiles if set
+        // add Ratepay profiles if set
         $this->_fcpoCheckAndAddRatePayProfile();
         $this->_fcpoInsertProfiles();
 
-        // request and add amazonpay configuration if triggered
-        $this->_fcpoCheckRequestAmazonPayConfiguration();
-
         $this->_handlePayPalExpressLogos();
+
+        $this->handleApplePayCredentials(
+            $aConfStrs['sFCPOAplCertificate'],
+            $aConfStrs['sFCPOAplKey']
+        );
 
         //reload config after saving
         $sOxid = $oConfig->getShopId();
@@ -403,18 +496,19 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Validation of entered configuration values
      *
+     * @return bool
      */
-    private function _fcpoValidateData(): bool
+    protected function _fcpoValidateData(): bool
     {
         return $this->_fcpoValidateAccountData();
     }
 
     /**
-     * Checks accountdata section on errors
+     * Checks account data section on errors
      *
-     *
+     * @return bool
      */
-    private function _fcpoValidateAccountData(): bool
+    protected function _fcpoValidateAccountData(): bool
     {
         return true;
     }
@@ -426,12 +520,12 @@ class FcPayOneMain extends FcPayOneAdminDetails
      *
      * @return array
      */
-    private function _multilineToArray($sMultiline)
+    protected function _multilineToArray(string $sMultiline): array
     {
         $aArr = explode("\n", $sMultiline);
 
         if (!is_array($aArr)) {
-            return;
+            return [$sMultiline];
         }
 
         foreach ($aArr as $key => $val) {
@@ -445,188 +539,216 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Check and add strore id and set message flag
-     *
-     *
-     */
-    private function _fcpoCheckAndAddStoreId(): void
-    {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('addStoreId')) {
-            $this->_oFcpoKlarna->fcpoAddKlarnaStoreId();
-            $this->_aAdminMessages["blStoreIdAdded"] = true;
-        }
-    }
-
-    /**
-     * Check if campaign shall be added. Set flag true in case
-     *
-     *
-     */
-    private function _fcpoCheckAndAddCampaign(): void
-    {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('addCampaign')) {
-            $this->_oFcpoKlarna->fcpoAddKlarnaCampaign();
-            $this->_aAdminMessages["blCampaignAdded"] = true;
-        }
-    }
-
-    /**
      * Check if logo shall be added. Adds it and set flag true in case
      *
-     *
+     * @return void
      */
-    private function _fcpoCheckAndAddLogos(): void
+    protected function _fcpoCheckAndAddLogos(): void
     {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('addPayPalLogo')) {
-            $this->_oFcpoPayPal->fcpoAddPaypalExpressLogo();
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter('addPayPalLogo')) {
+            $this->_oFcPoPayPal->fcpoAddPaypalExpressLogo();
             $this->_aAdminMessages["blLogoAdded"] = true;
         }
     }
 
     /**
-     * Inserts added storeids
+     * Check and add a new Ratepay Profile
      *
-     *
+     * @return void
      */
-    private function _fcpoInsertStoreIds(): void
+    protected function _fcpoCheckAndAddRatePayProfile(): void
     {
-        $aStoreIds = $this->_oFcpoHelper->fcpoGetRequestParameter('aStoreIds');
-        $this->_oFcpoKlarna->fcpoInsertStoreIds($aStoreIds);
-    }
-
-    /**
-     * Inserts added campaigns
-     *
-     *
-     */
-    private function _fcpoInsertCampaigns(): void
-    {
-        $aCampaigns = $this->_oFcpoHelper->fcpoGetRequestParameter('aCampaigns');
-        $this->_oFcpoKlarna->fcpoInsertCampaigns($aCampaigns);
-    }
-
-    /**
-     * Check and add a new RatePay Profile
-     *
-     *
-     */
-    private function _fcpoCheckAndAddRatePayProfile(): void
-    {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('addRatePayProfile')) {
-            $this->_oFcpoRatePay->fcpoAddRatePayProfile();
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter('addRatePayProfile')) {
+            $this->_oFcPoRatePay->fcpoAddRatePayProfile();
             $this->_aAdminMessages["blRatePayProfileAdded"] = true;
         }
     }
 
     /**
-     * Insert RatePay profile
+     * Insert Ratepay profile
      *
-     *
+     * @return void
      */
-    private function _fcpoInsertProfiles(): void
+    protected function _fcpoInsertProfiles(): void
     {
-        $aRatePayProfiles = $this->_oFcpoHelper->fcpoGetRequestParameter('aRatepayProfiles');
+        $aRatePayProfiles = $this->_oFcPoHelper->fcpoGetRequestParameter('aRatepayProfiles');
         if (is_array($aRatePayProfiles)) {
             foreach ($aRatePayProfiles as $sOxid => $aRatePayData) {
-                $this->_oFcpoRatePay->fcpoInsertProfile($sOxid, $aRatePayData);
+                $this->_oFcPoRatePay->fcpoInsertProfile($sOxid, $aRatePayData);
             }
         }
     }
 
     /**
-     * Checks if button for fetching configuration settings for amazon from payone api has been triggered
-     * Initiates requesting api if true
+     * Handling of PayPal express logos
      *
-     *
+     * @return void
      */
-    private function _fcpoCheckRequestAmazonPayConfiguration(): void
+    protected function _handlePayPalExpressLogos(): void
     {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('getAmazonPayConfiguration')) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
-            $blSuccess = $this->_fcpoRequestAndAddAmazonConfig();
-            $sMessage = 'FCPO_AMAZONPAY_ERROR_GETTING_CONFIG';
-            if ($blSuccess) {
-                $this->_aAdminMessages["blAmazonPayConfigFetched"] = true;
-                $sMessage = 'FCPO_AMAZONPAY_SUCCESS_GETTING_CONFIG';
-            }
-            $sTranslatedMessage = $oLang->translateString($sMessage);
-            $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
-            $oUtilsView->addErrorToDisplay($sTranslatedMessage, false, true);
-        }
-    }
-
-    /**
-     * Triggers requesting payone api for amazon configuration and returns
-     * if succeeded
-     *
-     *
-     * @return bool
-     */
-    private function _fcpoRequestAndAddAmazonConfig()
-    {
-        $oFcpoRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-        $aResponse = $oFcpoRequest->sendRequestGetAmazonPayConfiguration();
-
-        return $this->_fcpoSaveAmazonConfigFromResponse($aResponse);
-    }
-
-    /**
-     * Analyzes response tries to save config and returns if everything succeeded
-     *
-     * @param $aResponse
-     * @return bool
-     */
-    private function _fcpoSaveAmazonConfigFromResponse($aResponse)
-    {
-        $sStatus = $aResponse['status'];
-        $blReturn = false;
-        if ($sStatus == 'OK') {
-            $sSellerId = $aResponse['add_paydata[seller_id]'];
-            $sClientId = $aResponse['add_paydata[client_id]'];
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $oConfig->saveShopConfVar('str', 'sFCPOAmazonPaySellerId', $sSellerId);
-            $oConfig->saveShopConfVar('str', 'sFCPOAmazonPayClientId', $sClientId);
-            $blReturn = true;
-        }
-
-        return $blReturn;
-    }
-
-    /**
-     * Handling of paypal express logos
-     *
-     *
-     */
-    private function _handlePayPalExpressLogos(): void
-    {
-        $aLogos = $this->_oFcpoHelper->fcpoGetRequestParameter('logos');
+        $aLogos = $this->_oFcPoHelper->fcpoGetRequestParameter('logos');
 
         if (is_array($aLogos) && $aLogos !== []) {
-            $this->_oFcpoPayPal->fcpoUpdatePayPalLogos($aLogos);
-            $aMessages = $this->_oFcpoPayPal->fcpoGetMessages();
+            $this->_oFcPoPayPal->fcpoUpdatePayPalLogos($aLogos);
+            $aMessages = $this->_oFcPoPayPal->fcpoGetMessages();
             $this->_aAdminMessages = array_merge($this->_aAdminMessages, $aMessages);
+        }
+    }
+
+    /**
+     * Handles the save of credential files/text for Apple Pay configuration
+     *
+     * @param string $sCertFilename
+     * @param string $sKeyFileName
+     * @return void
+     * @throws Exception
+     */
+    public function handleApplePayCredentials(string $sCertFilename, string $sKeyFileName): void
+    {
+        $aFiles = $this->_oFcPoHelper->fcpoGetFiles();
+        $oViewConfig = $this->_oFcPoHelper->fcpoGetViewConfig();
+        $sCertDir = $oViewConfig->getModulePath('fcpayone') . 'cert/';
+        dir($sCertDir);
+        foreach ($aFiles as $sInputName => $aFile) {
+            if (!in_array($sInputName, ['fcpoAplCertificateFile', 'fcpoAplKeyFile'])) {
+                continue;
+            }
+
+            if ($sInputName == 'fcpoAplCertificateFile') {
+                $this->saveApplePayFile($aFile, $sCertFilename, $sCertDir);
+            }
+
+            if ($sInputName == 'fcpoAplKeyFile') {
+                $this->saveApplePayFile($aFile, $sKeyFileName, $sCertDir);
+            }
+        }
+
+        if (!isset($aFiles['fcpoAplKeyFile']) || empty($aFiles['fcpoAplKeyFile']['name'])) {
+            $sKeyText = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoAplKeyText');
+            if (!empty($sKeyText)) {
+                $this->saveApplePayTextKey($sKeyText, $sKeyFileName, $sCertDir);
+            }
+        }
+    }
+
+    /**
+     * Saves the file, adjusting the filename if necessary
+     *
+     * @param array $aFileData
+     * @param string $sPostedFilename
+     * @param string $sCertDir
+     * @return void
+     * @throws Exception
+     */
+    protected function saveApplePayFile(array $aFileData, string $sPostedFilename, string $sCertDir): void
+    {
+        if (!empty($aFileData['name'] && $aFileData['size'] > 0)) {
+            $sFilename = $aFileData['name'];
+            if (!empty($sPostedFilename)) {
+                $sFilename = $sPostedFilename;
+            }
+
+            $this->saveFile(
+                $sFilename,
+                $aFileData['tmp_name'],
+                $sCertDir
+            );
+        }
+    }
+
+    /**
+     * Moves a file to a destination from the temporary storage after upload
+     *
+     * @param string $sFilename
+     * @param string $sTempFilePath
+     * @param string $sDestinationPath
+     * @return void
+     */
+    private function saveFile(string $sFilename, string $sTempFilePath, string $sDestinationPath): void
+    {
+        try {
+            if (!is_dir($sDestinationPath)) {
+                mkdir($sDestinationPath, 0700);
+            }
+
+            move_uploaded_file($sTempFilePath, $sDestinationPath . $sFilename);
+            chmod($sDestinationPath . $sFilename, 0644);
+
+        } catch (Exception $oEx) {
+            $oLogger = Registry::getLogger();
+            $oLogger->error($oEx->getTraceAsString());
+        }
+    }
+
+    /**
+     * Saves the Apple Pay key text in a proper file, and store its name in configuration
+     *
+     * @param string $sKeyContent
+     * @param string $sPostedFilename
+     * @param string $sCertDir
+     * @return void
+     */
+    protected function saveApplePayTextKey(string $sKeyContent, string $sPostedFilename, string $sCertDir): void
+    {
+        if (!empty($sKeyContent)) {
+            $filename = 'merchant_id.key';
+            if (!empty($sPostedFilename)) {
+                $filename = $sPostedFilename;
+            }
+
+            $blResult = $this->writeFile($filename, $sKeyContent, $sCertDir);
+
+            if ($blResult) {
+                $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+                $oConfig->saveShopConfVar("str", 'sFCPOAplKey', $filename);
+            }
+        }
+    }
+
+    /**
+     * Writes a content to a named destination file
+     *
+     * @param string $sFilename
+     * @param string $sContent
+     * @param string $sDestinationPath
+     * @return bool
+     */
+    private function writeFile(string $sFilename, string $sContent, string $sDestinationPath): bool
+    {
+        try {
+            if (!is_dir($sDestinationPath)) {
+                mkdir($sDestinationPath, 0700);
+            }
+
+            if (!is_file($sDestinationPath . $sFilename)) {
+                touch($sDestinationPath . $sFilename);
+                chmod($sDestinationPath . $sFilename, 0644);
+            }
+            file_put_contents($sDestinationPath . $sFilename, $sContent);
+
+            return true;
+        } catch (Exception $oEx) {
+            $oLogger = Registry::getLogger();
+            $oLogger->error($oEx->getTraceAsString());
+
+            return false;
         }
     }
 
     /**
      * Returns collected errors
      *
-     *
-     * @return mixed array|false
+     * @return array array|false
      */
-    public function fcpoGetConfigErrors()
+    public function fcpoGetConfigErrors(): array
     {
-        if (!is_array($this->_aConfErrors)) {
-            return false;
-        }
-
         return $this->_aConfErrors;
     }
 
     /**
      * Template getter for requesting if logo has recently been added
      *
-     *
+     * @return bool
      */
     public function fcpoIsLogoAdded(): bool
     {
@@ -634,98 +756,45 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Template getter for requesting if campaign has recently been added
-     *
-     *
-     */
-    public function fcpoIsCampaignAdded(): bool
-    {
-        return (
-            isset($this->_aAdminMessages["blCampaignAdded"]) &&
-            $this->_aAdminMessages["blCampaignAdded"] === true
-        );
-    }
-
-    /**
-     * Template getter for requesting if campaign has recently been added
-     *
-     *
-     */
-    public function fcpoIsStoreIdAdded(): bool
-    {
-        return isset($this->_aAdminMessages["blStoreIdAdded"]) && $this->_aAdminMessages["blStoreIdAdded"] === true;
-    }
-
-    /**
-     * Returns configured storeids for klarna payment
-     *
-     *
-     * @return array
-     */
-    public function fcpoGetStoreIds()
-    {
-        return $this->_oFcpoKlarna->fcpoGetStoreIds();
-    }
-
-    /**
      * Returns configured ratepay profiles
      *
-     *
      * @return array
      */
-    public function fcpoGetRatePayProfiles()
+    public function fcpoGetRatePayProfiles(): array
     {
-        return $this->_oFcpoRatePay->fcpoGetRatePayProfiles();
+        return $this->_oFcPoRatePay->fcpoGetRatePayProfiles();
     }
 
     /**
-     * Returns configured klarna campaigns
-     *
-     *
-     * @return array
-     */
-    public function fcpoKlarnaCampaigns()
-    {
-        $oPayment = oxNew('oxpayment');
-        return $oPayment->fcpoGetKlarnaCampaigns(true);
-    }
-
-    /**
-     * Return admin template seperator sign by shop-version
+     * Return admin template separator sign by shop-version
      *
      * @return string
      */
-    public function fcGetAdminSeperator()
+    public function fcGetAdminSeparator(): string
     {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iVersion < 4300) {
-            return '?';
-        } else {
-            return '&';
-        }
+        return '&';
     }
 
     /**
-     * Generates and delivers an xml export of configuration
+     * Generates and delivers an XML export of configuration
      *
-     *
+     * @return void
      */
     public function export(): void
     {
-        $oConfigExport = $this->_oFcpoHelper->getFactoryObject(FcPoConfigExport::class);
+        $oConfigExport = $this->_oFcPoHelper->getFactoryObject(FcPoConfigExport::class);
         $oConfigExport->fcpoExportConfig();
     }
 
     /**
      * Returns an array of languages of the shop
      *
-     *
      * @return array<int|string, mixed>
      */
     public function fcGetLanguages(): array
     {
         $aReturn = [];
-        $oFcLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oFcLang = $this->_oFcPoHelper->fcpoGetLang();
 
         foreach ($oFcLang->getLanguageArray() as $oLang) {
             if ($oLang->active == 1) {
@@ -738,15 +807,14 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Returns an array of currencies of the shop
      *
-     *
      * @return array<int|string, mixed>
      */
     public function fcGetCurrencies(): array
     {
         $aReturn = [];
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        foreach ($oConfig->getCurrencyArray() as $oCurr) {
+        foreach ($oConfig->getCurrencyArray() as $iKey => $oCurr) {
             $aReturn[$oCurr->name] = $oCurr->name;
         }
         return $aReturn;
@@ -755,24 +823,28 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Returns list of uploaded paypalexpresslogos
      *
-     *
      * @return array
      */
-    public function fcpoGetPayPalLogos()
+    public function fcpoGetPayPalLogos(): array
     {
-        $oPaypal = $this->_oFcpoHelper->getFactoryObject(FcPoPayPal::class);
+        $oPaypal = $this->_oFcPoHelper->getFactoryObject(FcPoPaypal::class);
 
         return $oPaypal->fcpoGetPayPalLogos();
     }
 
     /**
-     * Returns fields belonging to creditcard
+     * Returns fields belonging to credit card
      *
-     *
+     * @return string[]
      */
     public function getCCFields(): array
     {
-        return ['Number', 'CVC', 'Month', 'Year'];
+        return [
+            'Number',
+            'CVC',
+            'Month',
+            'Year',
+        ];
     }
 
     /**
@@ -781,15 +853,15 @@ class FcPayOneMain extends FcPayOneAdminDetails
      * @param string $sField
      * @return array{select?: mixed, tel: mixed, password: mixed, text: mixed}
      */
-    public function getCCTypes($sField): array
+    public function getCCTypes(string $sField): array
     {
         $aTypes = [];
         if ($sField == 'Month' || $sField == 'Year') {
-            $aTypes['select'] = $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_SELECT');
+            $aTypes['select'] = $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_SELECT');
         }
-        $aTypes['tel'] = $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_NUMERIC');
-        $aTypes['password'] = $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_PASSWORD');
-        $aTypes['text'] = $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_TEXT');
+        $aTypes['tel'] = $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_NUMERIC');
+        $aTypes['password'] = $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_PASSWORD');
+        $aTypes['text'] = $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_TYPE_TEXT');
 
         return $aTypes;
     }
@@ -797,24 +869,24 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Get available cc styles
      *
-     *
      * @return array{standard: mixed, custom: mixed}
      */
     public function getCCStyles(): array
     {
-        return ['standard' => $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_STANDARD'), 'custom' => $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_CUSTOM')];
+        return [
+            'standard' => $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_STANDARD'),
+            'custom' => $this->_oFcPoHelper->fcpoGetLang()->translateString('FCPO_CC_IFRAME_CUSTOM'),
+        ];
     }
 
     /**
      * Template getter returns the preview javascript code
      *
-     *
      * @return string
      */
-    public function fcpoGetJsCardPreviewCode()
+    public function fcpoGetJsCardPreviewCode(): string
     {
-        $sJsCode = "";
-        $sJsCode .= $this->_fcpoGetJsPreviewCodeHeader();
+        $sJsCode =  $this->_fcpoGetJsPreviewCodeHeader();
         $sJsCode .= $this->_fcpoGetJsPreviewCodeFields();
         $sJsCode .= '	},';
         $sJsCode .= $this->_fcpoGetJsPreviewCodeDefaultStyle();
@@ -827,13 +899,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Returns the header part of injected javascript
      *
-     *
      * @return string
      */
-    private function _fcpoGetJsPreviewCodeHeader()
+    protected function _fcpoGetJsPreviewCodeHeader(): string
     {
-        $sJsCode = "";
-        $sJsCode .= "var request, config;" . "\n";
+        $sJsCode =  "var request, config;" . "\n";
         $sJsCode .= "config = {" . "\n";
 
         return $sJsCode . ("\t" . "fields: {" . "\n");
@@ -842,15 +912,14 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Returns the configured fields
      *
-     *
      * @return string
      */
-    private function _fcpoGetJsPreviewCodeFields()
+    protected function _fcpoGetJsPreviewCodeFields(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sJsCode = "";
 
-        foreach (self::A_FC_JS_CC_PREVIEW_FIELD_CONFIGS as $sFieldGroupIdent => $aCCFieldConfig) {
+        foreach ($this->_aFcJsCCPreviewFieldConfigs as $sFieldGroupIdent => $aCCFieldConfig) {
             $blCustomStyle = $oConfig->getConfigParam($aCCFieldConfig['customstyle']);
             $blCustomIframe = $oConfig->getConfigParam($aCCFieldConfig['customiframe']);
             $sJsCode .= "\t\t" . $sFieldGroupIdent . ": {" . "\n";
@@ -867,28 +936,29 @@ class FcPayOneMain extends FcPayOneAdminDetails
     }
 
     /**
-     * Method returns config value of a given config name or false if not existing
+     * Method returns config value of a given config name or empty string if not existing
      *
-     * @param string $sParam
-     * @return mixed
+     * @param string $sParam config parameter name
+     * @return string
      */
-    public function getConfigParam($sParam)
+    public function getConfigParam(string $sParam): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
-        return $oConfig->getConfigParam($sParam);
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam($sParam) ?: '';
     }
 
     /**
-     * Method returns the matching value no matter if its a config value or direct
+     * Method returns the matching value no matter if it's a config value or direct
      *
-     * @param bool   $blCustomStyle
-     * @param bool   $blCustomIframe
+     * @param string $sVar
+     * @param string $sConfVal
+     * @param bool $blCustomStyle
+     * @param bool $blCustomIframe
      * @return string
      */
-    private function _fcGetJsPreviewCodeValue(string $sVar, string $sConfVal, $blCustomStyle, $blCustomIframe)
+    protected function _fcGetJsPreviewCodeValue(string $sVar, string $sConfVal, bool $blCustomStyle, bool $blCustomIframe): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sReturn = "";
 
         $blCustomStyleVar = ($sVar == 'style');
@@ -911,18 +981,17 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Returns default style javascript block
      *
-     *
      * @return string
      */
-    private function _fcpoGetJsPreviewCodeDefaultStyle()
+    protected function _fcpoGetJsPreviewCodeDefaultStyle(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sJsCode = "\t" . 'defaultStyle: {' . "\n";
-        $sJsCode .= "\t\t" . 'input: "' . $oConfig->getConfigParam(self::A_FC_JS_CC_PREVIEW_DEFAULT_STYLE['input']) . '",' . "\n";
-        $sJsCode .= "\t\t" . 'select: "' . $oConfig->getConfigParam(self::A_FC_JS_CC_PREVIEW_DEFAULT_STYLE['select']) . '",' . "\n";
+        $sJsCode .= "\t\t" . 'input: "' . $oConfig->getConfigParam($this->_aFcJsCCPreviewDefaultStyle['input']) . '",' . "\n";
+        $sJsCode .= "\t\t" . 'select: "' . $oConfig->getConfigParam($this->_aFcJsCCPreviewDefaultStyle['select']) . '",' . "\n";
         $sJsCode .= "\t\t" . 'iframe: {' . "\n";
-        $sJsCode .= "\t\t\t" . 'width: "' . $oConfig->getConfigParam(self::A_FC_JS_CC_PREVIEW_DEFAULT_STYLE['width']) . '",' . "\n";
-        $sJsCode .= "\t\t\t" . 'height: "' . $oConfig->getConfigParam(self::A_FC_JS_CC_PREVIEW_DEFAULT_STYLE['height']) . '",' . "\n";
+        $sJsCode .= "\t\t\t" . 'width: "' . $oConfig->getConfigParam($this->_aFcJsCCPreviewDefaultStyle['width']) . '",' . "\n";
+        $sJsCode .= "\t\t\t" . 'height: "' . $oConfig->getConfigParam($this->_aFcJsCCPreviewDefaultStyle['height']) . '",' . "\n";
         $sJsCode .= "\t\t" . '}' . "\n";
 
         return $sJsCode . ("\t" . '},' . "\n");
@@ -931,12 +1000,11 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Getter which delivers the error block part
      *
-     *
      * @return string
      */
-    private function _fcpoGetJsPreviewCodeErrorBlock()
+    protected function _fcpoGetJsPreviewCodeErrorBlock(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sJsCode = "";
         $blFCPOCCErrorsActive = $oConfig->getConfigParam('blFCPOCCErrorsActive');
         $sFCPOCCErrorsLang = $oConfig->getConfigParam('sFCPOCCErrorsLang');
@@ -944,22 +1012,21 @@ class FcPayOneMain extends FcPayOneAdminDetails
 
         if ($blFCPOCCErrorsActive) {
             $sJsCode .= "\t\t" . 'error: "errorOutput",' . "\n";
-            $sJsCode .= "\t\t\t" . 'language: language: Payone.ClientApi.Language.' . $sLangConcat . "\n";
+            $sJsCode .= "\t\t\t" . 'language: Payone.ClientApi.Language.' . $sLangConcat . "\n";
         }
 
         return $sJsCode;
     }
 
     /**
-     * Returns a list of deliverysets for template select
-     *
+     * Returns a list of delivery sets for template select
      *
      * @return array
      */
-    public function fcpoGetDeliverySets()
+    public function fcpoGetDeliverySets(): array
     {
         $oDeliveryAdminList =
-            $this->_oFcpoHelper->getFactoryObject('DeliverySet_List');
+            $this->_oFcPoHelper->getFactoryObject(DeliverySetList::class);
         $oList = $oDeliveryAdminList->getItemList();
         return $oList->getArray();
     }
@@ -967,30 +1034,29 @@ class FcPayOneMain extends FcPayOneAdminDetails
     /**
      * Adding a detected configuration error
      *
-     * @param $sTranslationString
+     * @param string $sTranslationString
+     * @return void
      */
-    private function _fcpoAddConfigError($sTranslationString): void
+    protected function _fcpoAddConfigError(string $sTranslationString): void
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sMessage = $oLang->translateString($sTranslationString);
 
-        if (!is_array($this->_aConfErrors)) {
-            $this->_aConfErrors = [];
-        }
         $this->_aConfErrors[] = $sMessage;
     }
 
     /**
      * Method returns the checksum result
      *
-     *
      * @return string
+     * @throws Exception
      */
-    private function _fcpoGetCheckSumResult()
+    protected function _fcpoGetCheckSumResult(): string
     {
-        $sIncludePath = getShopBasePath() . 'modules/fcPayOne/fcCheckChecksum.php';
-        $oScript = $this->_oFcpoHelper->fcpoGetInstance('fcCheckChecksum', $sIncludePath);
+        $sIncludePath = VENDOR_PATH . 'payone-gmbh/oxid-7/FcCheckChecksum.php';
+        $oScript = $this->_oFcPoHelper->fcpoGetInstance(FcCheckChecksum::class, $sIncludePath);
 
         return $oScript->checkChecksumXml();
     }
+
 }

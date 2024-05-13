@@ -1,0 +1,228 @@
+{% if oView.fcpoRatePayAllowed('fcporp_installment') %}
+    {% set sSettlementType = oView.fcpoGetRatepaySettlementType('fcporp_installment') %}
+    {% set aFcPoRpCalcParam = oView.fcpoGetRatepayCalculatorParams('fcporp_installment') %}
+
+    <div class="payment-option">
+        {% set dynvalue = oView.getDynValue() %}
+        <div class="payment-option-form">
+            <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+                   value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+            <label
+                    for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+            <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+                <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+                <input type="hidden" name="dynvalue[fcporp_installment_profileid]" value="{{ oView.fcpoGetRatePayMatchedProfile('fcporp_installment') }}">
+                <input type="hidden" name="dynvalue[fcporp_installment_device_fingerprint]" value="{{ oView.fcpoGetRatePayDeviceFingerprint() }}">
+                <input type="hidden" id="fcporp_installment_settlement_type" name="dynvalue[fcporp_installment_settlement_type]" value="{% if sSettlementType=='both' %}debit{% else %}{{ sSettlementType }}{% endif %}">
+
+                <script type="text/javascript" src="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/di.js"></script>
+                <noscript>
+                    <link rel="stylesheet" type="text/css" href="//d.ratepay.com/di.css?t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}&l=Checkout">
+                </noscript>
+                <object type="application/x-shockwave-flash" data="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf" width="0" height="0">
+                    <param name="movie" value="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf"/>
+                    <param name="flashvars" value="t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}"/>
+                    <param name="AllowScriptAccess" value="always"/>
+                </object>
+
+                {% if oView.fcpoRatePayShowUstid() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_installment_ustid]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxustid') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}</label>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowBirthdate() %}
+                    <div class="mb-3">
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_BIRTHDATE" }) }}:</label>
+                        <div style="display: flex">
+                            <select name="dynvalue[fcporp_installment_birthdate_day]">
+                                {% for sDay in oView.fcpoGetDayRange() %}
+                                    <option value="{{ sDay }}" {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>
+                                        {{ sDay }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_installment_birthdate_month]">
+                                {% for sMonth in oView.fcpoGetMonthRange() %}
+                                    <option value="{{ sMonth }}" {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>
+                                        {{ sMonth }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_installment_birthdate_year]">
+                                {% for sYear in oView.fcpoGetYearRange() %}
+                                    <option value="{{ sYear }}" {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>
+                                        {{ sYear }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowFon() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_installment_fon]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxfon') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}</label>
+                    </div>
+                {% endif %}
+
+                <div class="form-floating mb-3 rpContainer">
+                    <div class="col-lg-offset-0">
+                        {{ translate({ ident: "FCPO_RATEPAY_CALCULATION_INTRO_PART1" }) }}
+                        {{ translate({ ident: "FCPO_RATEPAY_CALCULATION_INTRO_PART2" }) }}
+                        {{ translate({ ident: "FCPO_RATEPAY_CALCULATION_INTRO_PART3" }) }}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center" id="fcporp_installment_firstInput">
+                                    <h2>{{ translate({ ident: "FCPO_RATEPAY_RUNTIME_TITLE" }) }}</h2>
+                                    {{ translate({ ident: "FCPO_RATEPAY_RUNTIME_DESCRIPTION" }) }}
+                                </div>
+                                <input type="hidden" id="fcporp_installment_rate_elv" name="rate_elv"
+                                       value="{{ pi_rate_elv }}">
+                                <input type="hidden" id="fcporp_installment_rate" name="rate" value="{{ pi_rate }}">
+                                <input type="hidden" id="fcporp_installment_paymentFirstday" name="paymentFirstday"
+                                       value="{{ pi_firstday }}">
+                                <input type="hidden" id="fcporp_installment_month" name="month" value="">
+                                <input type="hidden" id="fcporp_installment_mode" name="mode" value="">
+                                <div class="panel-body">
+                                    <div style="display: inline-block" class="btn-group btn-group-justified" role="group" aria-label="...">
+                                        {% for sMonth in aFcPoRpCalcParam.monthAllowed %}
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button class="btn btn-default rp-btn-runtime" type="button"
+                                                        onclick="fcpoRatepayRateCalculatorAction('runtime', 'fcporp_installment', {{ sMonth }});"
+                                                        id="fcporp_installment_button_month-{{ sMonth }}"
+                                                        role="group">{{ sMonth }}
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center" id="fcporp_installment_secondInput">
+                                    <h2>{{ translate({ ident: "FCPO_RATEPAY_RATE_TITLE" }) }}</h2>
+                                    {{ translate({ ident: "FCPO_RATEPAY_RATE_DESCRIPTION" }) }}
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="fcporp_installment_rate_value"
+                                               name="dynvalue[fcporp_installment_rate_value]" class="form-control"
+                                               aria-label="Amount"/>
+                                        <span class="input-group-addon">&euro;</span>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default"
+                                            onclick="fcpoRatepayRateCalculatorAction('rate', 'fcporp_installment');"
+                                            type="button"
+                                            id="fcporp_installment_button_runtime">{{ translate({ ident: "FCPO_RATEPAY_RATE_CALCULATE" }) }}</button>
+                                         </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fcporp_installment_calculation_details"></div>
+                </div>
+
+                {% if sSettlementType == 'both' or sSettlementType == 'debit' %}
+                    <div id="fcporp_installment_sepa_container">
+                        {% if (sSettlementType == 'both') %}
+                            <strong class="rp-installment-header">{{ translate({ ident: "FCPO_RATEPAY_INSTALLMENT_TYPE_DEBIT_TITLE" }) }}</strong>
+                            <div class="row rp-payment-type-switch"
+                                 id="fcporp_installment_rp-switch-payment-type-bank-transfer"
+                                 onclick="fcpoChangeInstallmentPaymentType(28, 'fcporp_installment')">
+                                <a class="rp-link">{{ translate({ ident: 'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_TRANSFER_LINK' }) }}</a>
+                            </div><br>
+                        {% endif %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_installment_iban]"
+                                   placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}"
+                                   autocomplete="off" value="{{ dynvalue.fcporp_installment_iban }}"
+                                   onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
+                                   id="fcporp_installment_iban"
+                                   required>
+                            <div id="fcpo_ratepay_iban_invalid" class="fcpo_check_error">
+                                <span class="help-block">
+                                    <ul role="alert" class="list-unstyled text-danger">
+                                        <li>{{ translate({ ident: "FCPO_IBAN_INVALID" }) }}</li>
+                                    </ul>
+                                </span>
+                            </div>
+                            <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ translate({ ident: 'FCPO_RATEPAY_MANDATE_IDENTIFICATION' }) }}
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input name="dynvalue[fcporp_installment_sepa_agreed]" value="agreed" type="checkbox">&nbsp;
+                            {{ translate({ ident: "FCPO_RATEPAY_SEPA_AGREE" }) }}
+                        </div>
+                    </div>
+                    {% if (sSettlementType == 'both') %}
+                        <div id="fcporp_installment_rp-switch-payment-type-direct-debit" class="form-floating mb-3">
+                            <strong class="rp-installment-header">{{ translate({ ident: "FCPO_RATEPAY_INSTALLMENT_TYPE_TRANSFER_TITLE" }) }}</strong>
+                            <div class="row rp-payment-type-switch"
+                                 id="fcporp_installment_rp-switch-payment-type-bank-transfer"
+                                 onclick="fcpoChangeInstallmentPaymentType(2, 'fcporp_installment')">
+                                <a class="rp-link">{{ translate({ ident: 'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_DEBIT_LINK' }) }}</a>
+                            </div>
+                            <br>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="form-floating mb-3">
+                    <input name="dynvalue[fcporp_installment_agreed]" value="agreed" type="checkbox">
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS1" }) }}
+                    <a href='{{ oView.fcpoGetRatepayAgreementLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">
+                        {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS2" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS3" }) }}
+                    <a href='{{ oView.fcpoGetRatepayPrivacyLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">
+                        {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS4" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS5" }) }}
+                </div>
+
+                {% block checkout_payment_longdesc %}
+                    {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                        <div class="alert alert-info desc">
+                            {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        {% if paymentmethod.getPrice() %}
+            <div class="payment-option-price">
+                {% set oPaymentPrice = paymentmethod.getPrice() %}
+                {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                    {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                    {% if oPaymentPrice.getVatValue() > 0 %}
+                        {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                    {% endif %}
+                {% else %}
+                    {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

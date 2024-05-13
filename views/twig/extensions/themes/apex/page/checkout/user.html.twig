@@ -1,0 +1,9 @@
+{% extends 'page/checkout/user.html.twig' %}
+
+{% block checkout_user_main %}
+    {% if oView.fcpoGetUserErrorMessage() %}
+        {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_user_errormessage.html.twig" %}
+    {% endif %}
+
+    {{ parent() }}
+{% endblock %}

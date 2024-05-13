@@ -1,0 +1,127 @@
+{% if oView.fcpoRatePayAllowed('fcporp_bill') %}
+    <div class="payment-option">
+        {% set dynvalue = oView.getDynValue() %}
+        <div class="payment-option-form">
+            <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+                   value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+            <label
+                    for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+            <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+                <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+                <input type="hidden" name="dynvalue[fcporp_bill_profileid]" value="{{ oView.fcpoGetRatePayMatchedProfile('fcporp_bill') }}">
+                <input type="hidden" name="dynvalue[fcporp_bill_device_fingerprint]" value="{{ oView.fcpoGetRatePayDeviceFingerprint() }}">
+                <link href="{{ oViewConf.getModuleUrl("fcpayone", "css/lightview.css") }}" rel="stylesheet">
+                <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/jquery-3.6.0.min.js") }}"></script>
+                <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/lightview/lightview.js") }}"></script>
+                <script language="JavaScript">
+                    var di = {
+                        t: '{{ oView.fcpoGetRatePayDeviceFingerprint() }}',
+                        v: '{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}',
+                        l: 'Checkout'
+                    };
+                </script>
+                <script type="text/javascript"
+                        src="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/di.js"></script>
+                <noscript>
+                    <link rel="stylesheet" type="text/css" href="//d.ratepay.com/di.css?t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}&l=Checkout">
+                </noscript>
+                <object type="application/x-shockwave-flash"
+                        data="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf" width="0"
+                        height="0">
+                    <param name="movie"
+                           value="//d.ratepay.com/{{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}/c.swf"/>
+                    <param name="flashvars"
+                           value="t={{ oView.fcpoGetRatePayDeviceFingerprint() }}&v={{ oView.fcpoGetRatePayDeviceFingerprintSnippetId() }}"/>
+                    <param
+                            name="AllowScriptAccess" value="always"/>
+                </object>
+
+                {% if oView.fcpoRatePayShowUstid() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_bill_ustid]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxustid') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_USTID" }) }}</label>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowBirthdate() %}
+                    <div class="mb-3">
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_BIRTHDATE" }) }}:</label>
+                        <div style="display: flex">
+                            <select name="dynvalue[fcporp_bill_birthdate_day]">
+                                {% for sDay in oView.fcpoGetDayRange() %}
+                                    <option value="{{ sDay }}" {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>
+                                        {{ sDay }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_bill_birthdate_month]">
+                                {% for sMonth in oView.fcpoGetMonthRange() %}
+                                    <option value="{{ sMonth }}" {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>
+                                        {{ sMonth }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <select name="dynvalue[fcporp_bill_birthdate_year]">
+                                {% for sYear in oView.fcpoGetYearRange() %}
+                                    <option value="{{ sYear }}" {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>
+                                        {{ sYear }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if oView.fcpoRatePayShowFon() %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcporp_bill_fon]"
+                               placeholder="{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}"
+                               autocomplete="off" value="{{ oView.fcpoGetUserValue('oxfon') }}"
+                               required>
+                        <label>{{ translate({ ident: "FCPO_RATEPAY_FON" }) }}</label>
+                    </div>
+                {% endif %}
+
+                <div class="form-floating mb-3">
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS1" }) }}
+                    <a href='{{ oView.fcpoGetRatepayAgreementLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe"
+                       data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">
+                        {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS2" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS3" }) }}
+                    <a href='{{ oView.fcpoGetRatepayPrivacyLink() }}' class='lightview fcpoRatepayAgreeRed' data-lightview-type="iframe"
+                       data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">{{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS4" }) }}
+                    </a>
+                    {{ translate({ ident: "FCPO_RATEPAY_ADD_TERMS5" }) }}
+                </div>
+
+                {% block checkout_payment_longdesc %}
+                    {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                        <div class="alert alert-info desc">
+                            {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        {% if paymentmethod.getPrice() %}
+            <div class="payment-option-price">
+                {% set oPaymentPrice = paymentmethod.getPrice() %}
+                {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                    {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                    {% if oPaymentPrice.getVatValue() > 0 %}
+                        {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                    {% endif %}
+                {% else %}
+                    {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

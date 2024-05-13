@@ -6,15 +6,15 @@
     {% set readonly = "" %}
 {% endif %}
 
-<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink() }}" method="post">
-    {{ oViewConf.getHiddenSid() }}
-    <input type="hidden" name="oxid" value="{{ oxid }}">
+<form autocomplete="off" name="transfer" id="transfer" action="{{  oViewConf.getSelfLink()|raw  }}" method="post">
+    {{  oViewConf.getHiddenSid()|raw  }}
+    <input type="hidden" name="oxid" value="{{  oxid  }}">
     <input type="hidden" name="cl" value="FcPayOneApiLog">
 </form>
 
-{% if oxid == ' - 1' %}
+{% if oxid == '-1'  %}
 
-    {{ translate({ ident: "FCPO_NO_APILOG" }) }}
+{{ translate({ ident: "FCPO_NO_APILOG" }) }}
 
 {% else %}
 
@@ -22,14 +22,14 @@
         <tr>
             <td style="vertical-align: top;width: 50%;">
                 REQUEST:<br>
-                {% if edit.getRequestArray() != false %}
+                {% if edit.getRequestArray() != false  %}
                     <table style="border: 1px solid #C8C8C8;">
                         {% set blWhite = "" %}
                         {% for key, entry in edit.getRequestArray() %}
-                            {% set listclass = listitem$blWhite %}
+                            {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
-                                <td class="{{ listclass }}">{{ key }}</td>
-                                <td class="{{ listclass }}">{{ entry }}</td>
+                                <td class="{{  listclass }}">{{ key|raw }}</td>
+                                <td class="{{  listclass }}">{{ entry|raw }}</td>
                             </tr>
                             {% if blWhite == "2" %}
                                 {% set blWhite = "" %}
@@ -37,21 +37,21 @@
                                 {% set blWhite = "2" %}
                             {% endif %}
                         {% endfor %}
-                    </table>
+                     </table>
                 {% else %}
-                    <pre>{{ edit.fcporequestlog__fcpo_request.value }}</pre>
+                    <pre>{{  edit.fcporequestlog__fcpo_request.value|raw }}</pre>
                 {% endif %}
             </td>
             <td style="vertical-align: top;">
-                RESPONSE:<br>
-                {% if edit.getResponseArray() != false %}
+				RESPONSE:<br>
+                {% if edit.getResponseArray() != false  %}
                     <table style="border: 1px solid #C8C8C8;">
                         {% set blWhite = "" %}
                         {% for key, entry in edit.getResponseArray() %}
-                            {% set listclass = listitem$blWhite %}
+                             {% set listclass = 'listitem' ~ blWhite %}
                             <tr>
-                                <td class="{{ listclass }}">{{ key }}</td>
-                                <td class="{{ listclass }}">{{ entry }}</td>
+                                <td class="{{  listclass }}">{{ key|raw }}</td>
+                                <td class="{{  listclass }}">{{ entry|raw }}</td>
                             </tr>
                             {% if blWhite == "2" %}
                                 {% set blWhite = "" %}
@@ -61,7 +61,7 @@
                         {% endfor %}
                     </table>
                 {% else %}
-                    <pre>{{ edit.fcporequestlog__fcpo_response.value }}</pre>
+                    <pre>{{  edit.fcporequestlog__fcpo_response.value|raw }}</pre>
                 {% endif %}
             </td>
         </tr>

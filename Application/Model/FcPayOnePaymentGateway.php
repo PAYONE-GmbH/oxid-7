@@ -20,34 +20,28 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use OxidEsales\Eshop\Application\Model\Order;
+
 class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
 {
 
-    /**
-     * @var null|int
-     */
-    public $_iLastErrorNo;
-    /**
-     * @var null|int
-     */
-    public $_sLastError;
     /**
      * Overrides standard oxid finalizeOrder method if the used payment method belongs to PAYONE.
      * Return parent's return if payment method is no PAYONE method
      *
      * Executes payment, returns true on success.
      *
-     * @param double  $dAmount Goods amount
-     * @param object &$oOrder  User ordering object
+     * @param float $dAmount Goods amount
+     * @param Order &$oOrder User ordering object
      *
      * @extend executePayment
      * @return bool
      */
-    public function executePayment($dAmount, &$oOrder)
+    public function executePayment($dAmount, &$oOrder): bool
     {
         // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
         if ($oOrder->isPayOnePaymentType() === false) {
-            return null;
+            return parent::executePayment($dAmount, $oOrder);
         }
 
         $this->_iLastErrorNo = null;
@@ -56,25 +50,26 @@ class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
         return $oOrder->fcHandleAuthorization(false, $this);
     }
 
-
     /**
      * Setter for last error number
      *
      * @param int $iLastErrorNr
+     * @return void
      */
-    public function fcSetLastErrorNr($iLastErrorNr): void
+    public function fcpoSetLastErrorNr(int $iLastErrorNr): void
     {
         $this->_iLastErrorNo = $iLastErrorNr;
     }
 
-
     /**
      * Setter for last error text
      *
-     * @param int $sLastError
+     * @param string $sLastError
+     * @return void
      */
-    public function fcSetLastError($sLastError): void
+    public function fcpoSetLastError(string $sLastError): void
     {
         $this->_sLastError = $sLastError;
     }
+
 }

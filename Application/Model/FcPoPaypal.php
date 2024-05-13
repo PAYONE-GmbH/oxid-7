@@ -20,53 +20,62 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
-final class FcPoPaypal extends BaseModel
+class FcPoPaypal extends BaseModel
 {
 
     /**
      * Collects messages of different types
+     *
+     * @var array
      */
-    private array $_aAdminMessages = [];
+    protected array $_aAdminMessages = [];
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var fcpohelper
+     * @var FcPoHelper
      */
-    private $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    private readonly DatabaseInterface $_oFcpoDb;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
      * Path of payone images
      *
      * @var string
      */
-    private const S_PAY_PAL_EXPRESS_LOGO_PATH = 'modules/fc/fcpayone/out/img/';
+    protected string $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
+
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
      * Method returns collected messages back to controller
      *
+     * @return array
      */
     public function fcpoGetMessages(): array
     {
@@ -74,15 +83,16 @@ final class FcPoPaypal extends BaseModel
     }
 
     /**
-     * Method requests database for fetching paypal logos and return this data in an array
+     * Method requests database for fetching PayPal logos and return this data in an array
      *
-     * 
-     * @return mixed[][]
+     * @return array[]
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetPayPalLogos(): array
     {
         $sQuery = "SELECT oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default FROM fcpopayoneexpresslogos";
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $aRows = $oDb->getAll($sQuery);
         $aLogos = [];
 
@@ -111,40 +121,44 @@ final class FcPoPaypal extends BaseModel
      * Add logo path if dependencies are fulfilled
      *
      * @param string $sPoLogo
+     * @param array $aLogo
      * @return array
      */
-    private function _fcpoAddLogoPath($sPoLogo, array $aLogo)
+    protected function _fcpoAddLogoPath(string $sPoLogo, array $aLogo): array
     {
         $blLogoEnteredAndExisting = $this->_fcpoGetLogoEnteredAndExisting($sPoLogo);
         if ($blLogoEnteredAndExisting) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
             $sShopURL = $oConfig->getCurrentShopUrl(false);
-            $aLogo['logo'] = $sShopURL . self::S_PAY_PAL_EXPRESS_LOGO_PATH . $sPoLogo;
+            $aLogo['logo'] = $sShopURL . $this->_sPayPalExpressLogoPath . $sPoLogo;
         }
 
         return $aLogo;
     }
 
     /**
-     * Validates the existance and availablility of paypalexpress logo
+     * Validates the existence and availability of paypalexpress logo
      *
      * @param string $sPoLogo
+     * @return bool
      */
-    private function _fcpoGetLogoEnteredAndExisting($sPoLogo): bool
+    protected function _fcpoGetLogoEnteredAndExisting(string $sPoLogo): bool
     {
         return !empty($sPoLogo) &&
-        $this->_oFcpoHelper->fcpoFileExists(getShopBasePath() . self::S_PAY_PAL_EXPRESS_LOGO_PATH . $sPoLogo);
+            $this->_oFcPoHelper->fcpoFileExists(getShopBasePath() . $this->_sPayPalExpressLogoPath . $sPoLogo);
     }
 
     /**
      * Updates a given set of logos into database
      *
      * @param array $aLogos
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoUpdatePayPalLogos($aLogos): void
+    public function fcpoUpdatePayPalLogos(array $aLogos): void
     {
         foreach ($aLogos as $iId => $aLogo) {
-            $oDb = $this->_oFcpoHelper->fcpoGetDb();
+            $oDb = $this->_oFcPoHelper->fcpoGetDb();
             $sLogoQuery = $this->_handleUploadPaypalExpressLogo($iId);
 
             $sQuery = " UPDATE
@@ -152,25 +166,25 @@ final class FcPoPaypal extends BaseModel
                             SET
                                 FCPO_ACTIVE = " . DatabaseProvider::getDb()->quote($aLogo['active']) . ",
                                 FCPO_LANGID = " . DatabaseProvider::getDb()->quote($aLogo['langid']) . "
-                                {$sLogoQuery}
+                                $sLogoQuery
                             WHERE
                                 oxid = " . DatabaseProvider::getDb()->quote($iId);
 
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
             $this->_fcpoTriggerUpdateLogos();
         }
     }
 
     /**
-     * Handle the uploading of paypal logos
+     * Handle the uploading of PayPal logos
      *
      * @param int $iId
      * @return string
      */
-    private function _handleUploadPaypalExpressLogo($iId)
+    protected function _handleUploadPaypalExpressLogo(int $iId): string
     {
         $sLogoQuery = '';
-        $aFiles = $this->_oFcpoHelper->fcpoGetFiles();
+        $aFiles = $this->_oFcPoHelper->fcpoGetFiles();
 
         $blFileValid = $this->_fcpoValidateFile($iId, $aFiles);
         if ($blFileValid) {
@@ -184,29 +198,33 @@ final class FcPoPaypal extends BaseModel
     /**
      * Method checks if all needed data of file is available
      *
-     * @param int   $iId
+     * @param int $iId
+     * @param array $aFiles
+     * @return bool
      */
-    private function _fcpoValidateFile($iId, array $aFiles): bool
+    protected function _fcpoValidateFile(int $iId, array $aFiles): bool
     {
         return $aFiles &&
-        array_key_exists('logo_' . $iId, $aFiles) &&
-        $aFiles['logo_' . $iId]['error'] == 0;
+            array_key_exists('logo_' . $iId, $aFiles) &&
+            $aFiles['logo_' . $iId]['error'] == 0;
     }
 
     /**
      * Handles the upload file
      *
-     * @param int   $iId
+     * @param int $iId
+     * @param array $aFiles
      * @return string
+     * @throws DatabaseConnectionException
      */
-    private function _fcpoHandleFile($iId, array $aFiles)
+    protected function _fcpoHandleFile(int $iId, array $aFiles): string
     {
         $sLogoQuery = '';
 
         $sMediaUrl = $this->_fcpoFetchMediaUrl($iId, $aFiles);
 
         if ($sMediaUrl) {
-            $sLogoQuery = ", FCPO_LOGO = " . DatabaseProvider::getDb()->quote(basename((string) $sMediaUrl));
+            $sLogoQuery = ", FCPO_LOGO = " . DatabaseProvider::getDb()->quote(basename((string)$sMediaUrl));
             $this->_aAdminMessages["blLogoAdded"] = true;
         }
 
@@ -216,45 +234,45 @@ final class FcPoPaypal extends BaseModel
     /**
      * Grabs the media url form data and returns it
      *
-     * @param int   $iId
+     * @param int $iId
+     * @param array $aFiles
+     * @return mixed
+     * @throws StandardException
      */
-    private function _fcpoFetchMediaUrl($iId, array $aFiles)
+    protected function _fcpoFetchMediaUrl(int $iId, array $aFiles): mixed
     {
-        $oUtilsFile = $this->_oFcpoHelper->fcpoGetUtilsFile();
-        if ($this->_oFcpoHelper->fcpoGetIntShopVersion() < 4530) {
-            $sMediaUrl = $oUtilsFile->handleUploadedFile($aFiles['logo_' . $iId], self::S_PAY_PAL_EXPRESS_LOGO_PATH);
-        } else {
-            $sMediaUrl = $oUtilsFile->processFile('logo_' . $iId, self::S_PAY_PAL_EXPRESS_LOGO_PATH);
-        }
+        $oUtilsFile = $this->_oFcPoHelper->fcpoGetUtilsFile();
 
-        return $sMediaUrl;
+        return $oUtilsFile->processFile('logo_' . $iId, $this->_sPayPalExpressLogoPath);
     }
 
     /**
      * Do the update on database
      *
-     * 
+     * @return void
+     * @throws DatabaseErrorException
+     * @throws DatabaseConnectionException
      */
-    private function _fcpoTriggerUpdateLogos(): void
+    protected function _fcpoTriggerUpdateLogos(): void
     {
-        $iDefault = $this->_oFcpoHelper->fcpoGetRequestParameter('defaultlogo');
+        $iDefault = $this->_oFcPoHelper->fcpoGetRequestParameter('defaultlogo');
         if ($iDefault) {
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 0";
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcPoDb->execute($sQuery);
 
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 1 WHERE oxid = " . DatabaseProvider::getDb()->quote($iDefault);
-            $this->_oFcpoDb->Execute($sQuery);
+            $this->_oFcPoDb->execute($sQuery);
         }
     }
 
     /**
      * Add a new empty paypal-logo entry into database
-     *
-     * 
+     * @throws DatabaseErrorException
      */
     public function fcpoAddPaypalExpressLogo(): void
     {
         $sQuery = "INSERT INTO fcpopayoneexpresslogos (FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES (0, 0, '', 0)";
-        $this->_oFcpoDb->Execute($sQuery);
+        $this->_oFcPoDb->execute($sQuery);
     }
+
 }

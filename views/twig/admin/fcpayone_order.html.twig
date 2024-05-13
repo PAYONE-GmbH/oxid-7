@@ -2,9 +2,9 @@
 {% set currStatus = oView.fcpoGetCurrentStatus() %}
 {% set status_oxid = oView.fcpoGetStatusOxid() %}
 {% set status = oView.getStatus() %}
+{% set oOrderarticles = edit.getOrderArticles() %}
 
-{{ script({ include: oViewConf.fcpoGetModuleJsPath('fcpayone_order.js'), dynamic: __oxid_include_dynamic }) }}
-
+{{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/fcPayOneOrder.js"), dynamic: __oxid_include_dynamic }) }}
 
 {% if readonly %}
     {% set readonly = "readonly disabled" %}
@@ -12,15 +12,15 @@
     {% set readonly = "" %}
 {% endif %}
 
-<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink() }}" method="post">
-    {{ oViewConf.getHiddenSid() }}
+<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="oxid" value="{{ oxid }}">
     <input type="hidden" name="status_oxid" value="{{ status_oxid }}">
     <input type="hidden" name="cl" value="FcPayOneOrder">
 </form>
 
-<form autocomplete="off" name="myedit" id="myedit" action="{{ oViewConf.getSelfLink() }}" method="post">
-    {{ oViewConf.getHiddenSid() }}
+<form autocomplete="off" name="myedit" id="myedit" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="cl" value="FcPayOneOrder">
     <input type="hidden" name="fnc" value="">
     <input type="hidden" name="oxid" value="{{ oxid }}">
@@ -40,10 +40,11 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if oView.fcpoGetRequestMessage() %}
+                    {% set requestMessage = oView.fcpoGetRequestMessage() %}
+                    {% if requestMessage %}
                         <tr>
                             <td class="edittext" colspan="2">
-                                <strong>{{ oView.fcpoGetRequestMessage() }}</strong>
+                                <strong>{{ requestMessage|raw }}</strong>
                             </td>
                         </tr>
                     {% endif %}
@@ -52,7 +53,7 @@
                             {{ translate({ ident: "FCPO_REFNR" }) }}
                         </td>
                         <td class="edittext">
-                            {{ edit.oxorder__fcporefnr.value }}
+                            {{ edit.oxorder__fcporefnr.value|raw }}
                         </td>
                     </tr>
 
@@ -61,7 +62,7 @@
                             {{ translate({ ident: "FCPO_TXID" }) }}
                         </td>
                         <td class="edittext">
-                            {{ edit.oxorder__fcpotxid.value }}
+                            {{ edit.oxorder__fcpotxid.value|raw }}
                         </td>
                     </tr>
                     {% set sMandateUrl = oView.fcpoGetMandatePdfUrl() %}
@@ -95,7 +96,7 @@
                                     {{ translate({ ident: "FCPO_BANKACCOUNT" }) }}
                                 </td>
                                 <td class="edittext">
-                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankaccount.value }}
+                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankaccount.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -106,7 +107,7 @@
                                     {{ translate({ ident: "FCPO_BANKCODE" }) }}
                                 </td>
                                 <td class="edittext">
-                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankcode.value }}
+                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankcode.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -117,7 +118,7 @@
                                     {{ translate({ ident: "FCPO_BANKACCOUNTHOLDER" }) }}
                                 </td>
                                 <td class="edittext">
-                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankaccountholder.value }}
+                                    {{ lastStatus.fcpotransactionstatus__fcpo_bankaccountholder.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -128,7 +129,7 @@
                                     {{ translate({ ident: "FCPO_CARDEXPIREDATE" }) }}
                                 </td>
                                 <td class="edittext">
-                                    {{ lastStatus.fcpotransactionstatus__fcpo_cardexpiredate.value }}
+                                    {{ lastStatus.fcpotransactionstatus__fcpo_cardexpiredate.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -150,7 +151,7 @@
                                     {{ translate({ ident: "FCPO_CARDPAN" }) }}
                                 </td>
                                 <td class="edittext">
-                                    {{ lastStatus.fcpotransactionstatus__fcpo_cardpan.value }}
+                                    {{ lastStatus.fcpotransactionstatus__fcpo_cardpan.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -163,7 +164,7 @@
                             {% set blShowCapture = false %}
                             {% set oOrderarticles = edit.getOrderArticles() %}
                             {% for oOrderArt in oOrderarticles %}
-                                {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-$oOrderArt.oxorderarticles__fcpocapturedamount.value %}
+                                {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-oOrderArt.oxorderarticles__fcpocapturedamount.value %}
                                 {% if iLeftAmount > 0 %}
                                     {% set blShowCapture = true %}
                                 {% endif %}
@@ -184,12 +185,13 @@
                                         <strong>{{ translate({ ident: "FCPO_PREAUTHORIZED_AMOUNT" }) }}</strong>
                                     </td>
                                     <td class="edittext">
-                                        {{ edit.oxorder__oxtotalordersum.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}
+                                        {{ edit.oxorder__oxtotalordersum.value|number_format(2, ",", "") }}
+                                        {{ edit.oxorder__oxcurrency.value|raw }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        <table border="0" cellpadding="5" callspacing="5">
+                                        <table border="0" cellpadding="5" cellspacing="5">
                                             <tr>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_CAPTURE" }) }}</th>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}</th>
@@ -197,25 +199,28 @@
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_TITLE" }) }}</th>
                                             </tr>
                                             {% for oOrderArt in oOrderarticles %}
-                                                {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-$oOrderArt.oxorderarticles__fcpocapturedamount.value %}
+                                                {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-oOrderArt.oxorderarticles__fcpocapturedamount.value %}
                                                 {% if iLeftAmount > 0 %}
                                                     <tr>
                                                         <td>
                                                             <input type="hidden"
                                                                    name="capture_positions[{{ oOrderArt.getId() }}][price]"
-                                                                   value="{{ oOrderArt.oxorderarticles__oxbprice.value }}">
+                                                                   value="{{ oOrderArt.oxorderarticles__oxbprice.value|raw }}">
                                                             <input type="hidden"
                                                                    name="capture_positions[{{ oOrderArt.getId() }}][capture]"
                                                                    value="0">
                                                             <input type="checkbox"
                                                                    name="capture_positions[{{ oOrderArt.getId() }}][capture]"
-                                                                   value="1" checked>
+                                                                   value="1"
+                                                                   checked>
                                                         </td>
                                                         <td><input type="text" size="3"
                                                                    name="capture_positions[{{ oOrderArt.getId() }}][amount]"
                                                                    value="{{ iLeftAmount }}"></td>
-                                                        <td>{{ oOrderArt.oxorderarticles__oxbprice.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
-                                                        <td>{{ oOrderArt.oxorderarticles__oxtitle.value }}</td>
+                                                        <td>{{ oOrderArt.oxorderarticles__oxbprice.value|number_format(2, ",", "") }}
+                                                            {{ edit.oxorder__oxcurrency.value|raw }}
+                                                        </td>
+                                                        <td>{{ oOrderArt.oxorderarticles__oxtitle.value|raw }}</td>
                                                     </tr>
                                                 {% endif %}
                                             {% endfor %}
@@ -253,16 +258,17 @@
                                     <strong>{{ translate({ ident: "FCPO_PREAUTHORIZED_AMOUNT" }) }}</strong>
                                 </td>
                                 <td class="edittext">
-                                    {{ edit.oxorder__oxtotalordersum.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}
+                                    {{ edit.oxorder__oxtotalordersum.value|number_format(2, ",", "") }}
+                                    {{ edit.oxorder__oxcurrency.value|raw }}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="edittext">
-                                    <strong>{{ translate({ ident: "FCPO_AMOUNT_IN" }) }} {{ edit.oxorder__oxcurrency.value }}</strong>
+                                    <strong>{{ translate({ ident: "FCPO_AMOUNT_IN" }) }} {{ edit.oxorder__oxcurrency.value|raw }}</strong>
                                 </td>
                                 <td class="edittext">
                                     <input id="fc_capture_amount" type="text" name="capture_amount" value="0,00">
-                                    <input type="button" onclick="onClickCapture(this);"
+                                    <input type="button" onclick="fcpoOnClickCapture(this);"
                                            value="{{ translate({ ident: "FCPO_EXECUTE" }) }}"
                                            style="padding: 0 4px 0 4px;">
                                 </td>
@@ -284,7 +290,7 @@
 
                     {% if edit.allowDebit() %}
                         {% set blShowDebit = true %}
-                        {% capture name = "debit_block" %}
+                        {% set debit_block %}
                             <tr>
                                 <td colspan="2" style="border-bottom: 1px solid black;"></td>
                             </tr>
@@ -294,15 +300,15 @@
                             </tr>
                             {% if edit.debitNeedsBankData() %}
                                 <tr>
-                                    <td class="edittext" colspan="2"
-                                        style="width: 300px;">{{ translate({ ident: "FCPO_HEADER_BANKACCOUNT" }) }} -
+                                    <td class="edittext" colspan="2" style="width: 300px;">
+                                        {{ translate({ ident: "FCPO_HEADER_BANKACCOUNT" }) }} -
                                         <span id="fcShowBankaccount" style="width: 100px;">
                                             <a href="#"
-                                               onclick="toggleBankaccount();return false;">{{ translate({ ident: "FCPO_SHOW" }) }}</a>
+                                               onclick="fcpoToggleBankaccount();return false;">{{ translate({ ident: "FCPO_SHOW" }) }}</a>
                                         </span>
                                         <span id="fcHideBankaccount" style="display: none;width: 100px;">
                                             <a href="#"
-                                               onclick="toggleBankaccount();return false;">{{ translate({ ident: "FCPO_HIDE" }) }}</a>
+                                               onclick="fcpoToggleBankaccount();return false;">{{ translate({ ident: "FCPO_HIDE" }) }}</a>
                                         </span>
                                     </td>
                                 </tr>
@@ -345,13 +351,12 @@
                             {% endif %}
                             {% if edit.isDetailedProductInfoNeeded() %}
                                 {% set blShowDebit = false %}
-                                {% set oOrderarticles = edit.getOrderArticles() %}
                                 <tr>
                                     <td colspan="2">&nbsp;</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        <table border="0" cellpadding="5" callspacing="5">
+                                        <table border="0" cellpadding="5" cellspacing="5">
                                             <tr>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_CAPTURE" }) }}</th>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}</th>
@@ -360,9 +365,9 @@
                                             </tr>
                                             {% for oOrderArt in oOrderarticles %}
                                                 {% if edit.oxorder__fcpoauthmode.value == 'preauthorization' %}
-                                                    {% set iLeftAmount = oOrderArt.oxorderarticles__fcpocapturedamount.value-$oOrderArt.oxorderarticles__fcpodebitedamount.value %}
+                                                    {% set iLeftAmount = oOrderArt.oxorderarticles__fcpocapturedamount.value-oOrderArt.oxorderarticles__fcpodebitedamount.value %}
                                                 {% else %}
-                                                    {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-$oOrderArt.oxorderarticles__fcpodebitedamount.value %}
+                                                    {% set iLeftAmount = oOrderArt.oxorderarticles__oxamount.value-oOrderArt.oxorderarticles__fcpodebitedamount.value %}
                                                 {% endif %}
                                                 {% if iLeftAmount > 0 %}
                                                     {% set blShowDebit = true %}
@@ -370,7 +375,7 @@
                                                         <td>
                                                             <input type="hidden"
                                                                    name="debit_positions[{{ oOrderArt.getId() }}][price]"
-                                                                   value="{{ oOrderArt.oxorderarticles__oxbprice.value }}">
+                                                                   value="{{ oOrderArt.oxorderarticles__oxbprice.value|raw }}">
                                                             <input type="hidden"
                                                                    name="debit_positions[{{ oOrderArt.getId() }}][debit]"
                                                                    value="0">
@@ -382,15 +387,17 @@
                                                             {% if edit.oxorder__fcpoauthmode.value == 'preauthorization' %}
                                                                 <input type="text" size="3"
                                                                        name="debit_positions[{{ oOrderArt.getId() }}][amount]"
-                                                                       value="{{ oOrderArt.oxorderarticles__fcpocapturedamount.value }}">
+                                                                       value="{{ oOrderArt.oxorderarticles__fcpocapturedamount.value|raw }}">
                                                             {% else %}
                                                                 <input type="text" size="3"
                                                                        name="debit_positions[{{ oOrderArt.getId() }}][amount]"
                                                                        value="{{ iLeftAmount }}">
                                                             {% endif %}
                                                         </td>
-                                                        <td>{{ oOrderArt.oxorderarticles__oxbprice.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
-                                                        <td>{{ oOrderArt.oxorderarticles__oxtitle.value }}</td>
+                                                        <td>{{ oOrderArt.oxorderarticles__oxbprice.value|number_format(2, ",", "") }}
+                                                            {{ edit.oxorder__oxcurrency.value|raw }}
+                                                        </td>
+                                                        <td>{{ oOrderArt.oxorderarticles__oxtitle.value|raw }}</td>
                                                     </tr>
                                                 {% endif %}
                                             {% endfor %}
@@ -399,16 +406,19 @@
                                                 <tr>
                                                     <td>
                                                         <input type="hidden" name="debit_positions[oxdelcost][price]"
-                                                               value="{{ edit.oxorder__oxdelcost.value }}">
+                                                               value="{{ edit.oxorder__oxdelcost.value|raw }}">
                                                         <input type="hidden" name="debit_positions[oxdelcost][debit]"
                                                                value="0">
                                                         <input type="checkbox" name="debit_positions[oxdelcost][debit]"
-                                                               value="1" checked>
+                                                               value="1"
+                                                               checked>
                                                     </td>
                                                     <td><input type="hidden" name="debit_positions[oxdelcost][amount]"
                                                                value="1">1
                                                     </td>
-                                                    <td>{{ edit.oxorder__oxdelcost.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ edit.oxorder__oxdelcost.value|number_format(2, ",", "") }}
+                                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>
                                                         {% if edit.oxorder__oxdelcost.value > 0 %}
                                                             {{ translate({ ident: "FCPO_SURCHARGE" }) }}
@@ -424,16 +434,19 @@
                                                 <tr>
                                                     <td>
                                                         <input type="hidden" name="debit_positions[oxpaycost][price]"
-                                                               value="{{ edit.oxorder__oxpaycost.value }}">
+                                                               value="{{ edit.oxorder__oxpaycost.value|raw }}">
                                                         <input type="hidden" name="debit_positions[oxpaycost][debit]"
                                                                value="0">
                                                         <input type="checkbox" name="debit_positions[oxpaycost][debit]"
-                                                               value="1" checked>
+                                                               value="1"
+                                                               checked>
                                                     </td>
                                                     <td><input type="hidden" name="debit_positions[oxpaycost][amount]"
                                                                value="1">1
                                                     </td>
-                                                    <td>{{ edit.oxorder__oxpaycost.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ edit.oxorder__oxpaycost.value|number_format(2, ",", "") }}
+                                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>
                                                         {% if edit.oxorder__oxpaycost.value > 0 %}
                                                             {{ translate({ ident: "FCPO_SURCHARGE" }) }}
@@ -449,16 +462,19 @@
                                                 <tr>
                                                     <td>
                                                         <input type="hidden" name="debit_positions[oxwrapcost][price]"
-                                                               value="{{ edit.oxorder__oxwrapcost.value }}">
+                                                               value="{{ edit.oxorder__oxwrapcost.value|raw }}">
                                                         <input type="hidden" name="debit_positions[oxwrapcost][debit]"
                                                                value="0">
                                                         <input type="checkbox" name="debit_positions[oxwrapcost][debit]"
-                                                               value="1" checked>
+                                                               value="1"
+                                                               checked>
                                                     </td>
                                                     <td><input type="hidden" name="debit_positions[oxwrapcost][amount]"
                                                                value="1">1
                                                     </td>
-                                                    <td>{{ edit.oxorder__oxwrapcost.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ edit.oxorder__oxwrapcost.value|number_format(2, ",", "") }}
+                                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>{{ translate({ ident: "FCPO_WRAPPING" }) }}</td>
                                                 </tr>
                                             {% endif %}
@@ -468,7 +484,7 @@
                                                     <td>
                                                         <input type="hidden"
                                                                name="debit_positions[oxgiftcardcost][price]"
-                                                               value="{{ edit.oxorder__oxgiftcardcost.value }}">
+                                                               value="{{ edit.oxorder__oxgiftcardcost.value|raw }}">
                                                         <input type="hidden"
                                                                name="debit_positions[oxgiftcardcost][debit]" value="0">
                                                         <input type="checkbox"
@@ -478,7 +494,9 @@
                                                     <td><input type="hidden"
                                                                name="debit_positions[oxgiftcardcost][amount]" value="1">1
                                                     </td>
-                                                    <td>{{ edit.oxorder__oxgiftcardcost.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ edit.oxorder__oxgiftcardcost.value|number_format(2, ",", "") }}
+                                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>{{ translate({ ident: "FCPO_GIFTCARD" }) }}</td>
                                                 </tr>
                                             {% endif %}
@@ -501,7 +519,8 @@
                                                                name="debit_positions[oxvoucherdiscount][amount]"
                                                                value="1">1
                                                     </td>
-                                                    <td>{{ dNegativeAmount|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ dNegativeAmount|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>{{ translate({ ident: "FCPO_VOUCHER" }) }}</td>
                                                 </tr>
                                             {% endif %}
@@ -515,18 +534,43 @@
                                                         <input type="hidden" name="debit_positions[oxdiscount][debit]"
                                                                value="0">
                                                         <input type="checkbox" name="debit_positions[oxdiscount][debit]"
-                                                               value="1" checked>
+                                                               value="1"
+                                                               checked>
                                                     </td>
                                                     <td><input type="hidden" name="debit_positions[oxdiscount][amount]"
                                                                value="1">1
                                                     </td>
-                                                    <td>{{ dNegativeAmount|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value }}</td>
+                                                    <td>{{ dNegativeAmount|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}
+                                                    </td>
                                                     <td>{{ translate({ ident: "FCPO_DISCOUNT" }) }}</td>
                                                 </tr>
                                             {% endif %}
                                         </table>
                                     </td>
                                 </tr>
+                                {% if edit.isCancellationReasonNeeded() %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ translate({ ident: "FCPO_BNPL_ADMIN_DEBIT_REASON_TITLE" }) }}</strong>
+                                        </td>
+                                        <td>
+                                            <select name="bnpl_cancellation_reason" class="editinput">
+                                                <option value="consumer_request">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_CRQ" }) }}
+                                                </option>
+                                                <option value="duplicate">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_DUP" }) }}
+                                                </option>
+                                                <option value="fraudulent">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_FRD" }) }}
+                                                </option>
+                                                <option value="undeliverable">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_UND" }) }}
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <td class="edittext" colspan="2">
                                         <input type="button"
@@ -536,9 +580,32 @@
                                     </td>
                                 </tr>
                             {% else %}
+                                {% if edit.isCancellationReasonNeeded() %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ translate({ ident: "FCPO_BNPL_ADMIN_DEBIT_REASON_TITLE" }) }}</strong>
+                                        </td>
+                                        <td>
+                                            <select name="bnpl_cancellation_reason" class="editinput">
+                                                <option value="consumer_request">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_CRQ" }) }}
+                                                </option>
+                                                <option value="duplicate">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_DUP" }) }}
+                                                </option>
+                                                <option value="fraudulent">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_FRD" }) }}
+                                                </option>
+                                                <option value="undeliverable">
+                                                    {{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_DEBIT_REASON_UND" }) }}
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <td class="edittext">
-                                        <strong>{{ translate({ ident: "FCPO_AMOUNT_IN" }) }} {{ edit.oxorder__oxcurrency.value }}</strong>
+                                        <strong>{{ translate({ ident: "FCPO_AMOUNT_IN" }) }} {{ edit.oxorder__oxcurrency.value|raw }}</strong>
                                     </td>
                                     <td>
                                         <input type="text" name="debit_amount" value="0,00">
@@ -549,11 +616,59 @@
                                     </td>
                                 </tr>
                             {% endif %}
-                        {% endcapture %}
+                        {% endset %}
                         {% if blShowDebit == true %}
-                            {{ smarty.capture.debit_block }}
+                            {{ debit_block }}
                         {% endif %}
                     {% endif %}
+
+                    {% if oShadowBasket %}
+                        {% set oShadowBasketPrice = oShadowBasket.getPrice() %}
+                        <tr>
+                            <td class="edittext" colspan="2" style="padding-top:20px;">
+                                <h3>{{ translate({ ident: "FCPO_SHADOW_BASKET" }) }}</h3><br>
+                                <span style="color:red;font-weight: bold;">
+                                        {{ translate({ ident: "FCPO_POSSIBLE_FRAUD_DETECTED" }) }}
+                                    </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext">
+                                <strong>{{ translate({ ident: "FCPO_GENERAL_SHADOWBASKET_BRUTTO" }) }}</strong>
+                            </td>
+                            <td class="edittext">
+                                <strong>{{ oShadowBasket.getFProductsPrice() }}&nbsp;{{ currency.sign }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext">
+                                <strong>{{ translate({ ident: "FCPO_GENERAL_SHADOWBASKET_NETTO" }) }}</strong>
+                            </td>
+                            <td class="edittext">
+                                <strong>{{ oShadowBasket.getProductsNetPrice() }}&nbsp;{{ currency.sign }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext" colspan="2">
+                                <table>
+                                    {% for oBasketItem in oShadowBasket.getContents() %}
+                                        {% set oBasketItemPrice = oBasketItem.getPrice() %}
+                                        <tr>
+                                            <td>
+                                                {{ translate({ ident: "FCPO_PRODUCT_TITLE" }) }}
+                                                : {{ oBasketItem.getTitle() }}<br>
+                                                {{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}
+                                                : {{ oBasketItem.getAmount() }}<br>
+                                                {{ translate({ ident: "FCPO_PRODUCT_PRICE" }) }}
+                                                : {{ oBasketItem.getFTotalPrice() }}&nbsp;{{ currency.sign }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </td>
+                        </tr>
+                    {% endif %}
+
                     {% if status_oxid != ' - 1' and currStatus %}
                         <tr>
                             <td colspan="2" style="border-bottom: 1px solid black;"></td>
@@ -568,7 +683,7 @@
                                     TXACTION
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_txaction.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_txaction.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -579,7 +694,7 @@
                                     PORTALID
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_portalid.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_portalid.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -590,7 +705,7 @@
                                     AID
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_aid.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_aid.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -601,7 +716,7 @@
                                     CLEARINGTYPE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_clearingtype.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_clearingtype.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -612,7 +727,7 @@
                                     TXTIME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_txtime.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_txtime.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -623,7 +738,7 @@
                                     CURRENCY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_currency.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_currency.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -634,7 +749,7 @@
                                     USERID
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_userid.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_userid.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -645,7 +760,7 @@
                                     ACCESSNAME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_accessname.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_accessname.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -656,7 +771,7 @@
                                     ACCESSCODE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_accesscode.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_accesscode.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -667,7 +782,7 @@
                                     MODE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_mode.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_mode.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -678,8 +793,7 @@
                                     PRICE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_price.value|number_format(2, ',',
-    '') }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_price.value|number_format(2, ',', '') }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -690,7 +804,7 @@
                                     TXID
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_txid.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_txid.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -701,7 +815,7 @@
                                     REFERENCE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_reference.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_reference.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -712,7 +826,7 @@
                                     SEQUENCENUMBER
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_sequencenumber.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_sequencenumber.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -723,7 +837,7 @@
                                     COMPANY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_company.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_company.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -734,7 +848,7 @@
                                     FIRSTNAME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_firstname.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_firstname.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -745,7 +859,7 @@
                                     LASTNAME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_lastname.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_lastname.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -756,7 +870,7 @@
                                     STREET
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_street.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_street.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -767,7 +881,7 @@
                                     ZIP
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_zip.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_zip.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -778,7 +892,7 @@
                                     CITY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_city.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_city.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -789,7 +903,7 @@
                                     EMAIL
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_email.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_email.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -800,7 +914,7 @@
                                     COUNTRY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_country.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_country.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -811,7 +925,7 @@
                                     SHIPPING_COMPANY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_company.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_company.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -822,7 +936,7 @@
                                     SHIPPING_FIRSTNAME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_firstname.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_firstname.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -833,7 +947,7 @@
                                     SHIPPING_LASTNAME
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_lastname.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_lastname.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -844,7 +958,7 @@
                                     SHIPPING_STREET
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_street.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_street.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -855,7 +969,7 @@
                                     SHIPPING_ZIP
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_zip.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_zip.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -866,7 +980,7 @@
                                     SHIPPING_CITY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_city.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_city.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -877,7 +991,7 @@
                                     SHIPPING_COUNTRY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_country.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_shipping_country.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -888,7 +1002,7 @@
                                     BANKCOUNTRY
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_bankcountry.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_bankcountry.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -899,7 +1013,7 @@
                                     BANKACCOUNT
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_bankaccount.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_bankaccount.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -910,7 +1024,7 @@
                                     BANKCODE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_bankcode.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_bankcode.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -921,7 +1035,7 @@
                                     BANKACCOUNTHOLDER
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_bankaccountholder.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_bankaccountholder.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -932,7 +1046,7 @@
                                     CARDEXPIREDATE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_cardexpiredate.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_cardexpiredate.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -943,7 +1057,7 @@
                                     CARDTYPE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_cardtype.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_cardtype.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -954,7 +1068,7 @@
                                     CARDPAN
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_cardpan.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_cardpan.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -965,7 +1079,7 @@
                                     CUSTOMERID
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_customerid.value }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_customerid.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -976,8 +1090,7 @@
                                     BALANCE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_balance.value|number_format(2, ',',
-    '') }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_balance.value|number_format(2, ',', '') }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -988,8 +1101,7 @@
                                     RECEIVABLE
                                 </td>
                                 <td class="edittext">
-                                    {{ currStatus.fcpotransactionstatus__fcpo_receivable.value|number_format(2, ',',
-    '') }}
+                                    {{ currStatus.fcpotransactionstatus__fcpo_receivable.value|number_format(2, ',', '') }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -999,122 +1111,165 @@
             </td>
             <td valign="top">
                 {% if status %}
-                    <div id="liste">
-                        {{ translate({ ident: "FCPO_LIST_HEADER_TITLE" }) }}<br>
-                        <table cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <colgroup>
-                                <col width="25%">
-                                <col width="25%">
-                                <col width="25%">
-                                <col width="25%">
-                            </colgroup>
-                            <tr class="listitem">
-                                <td valign="top" class="listfilter first">
-                                    <div class="r1">
-                                        <div class="b1">
-                                            {{ translate({ ident: "FCPO_LIST_HEADER_TXTIME" }) }}
-                                        </div>
-                                    </div>
+                    {% set authorizationMethod = oView.getAuthorizationMethod() %}
+                    {% set captureDebitEntries = oView.getCaptureDebitEntries() %}
+                    <table border="0" width="50%">
+                        <tbody>
+                        <tr>
+                            <td><strong>{{ translate({ ident: "FCPO_AUTHORIZATION_METHOD" }) }}</strong></td>
+                            <td style="text-align: right">
+                                {% if authorizationMethod == 'authorization' %}
+                                    <span><strong>{{ translate({ ident: "FCPO_AUTHORIZATION" }) }}</strong></span>
+                                {% else %}
+                                    <span><strong>{{ translate({ ident: "FCPO_PREAUTHORIZATION" }) }}</strong></span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: solid 1px">
+                            <td>
+                                {% if authorizationMethod == 'authorization' %}
+                                    <strong>{{ translate({ ident: "FCPO_AUTHORIZED_AMOUNT" }) }}</strong>
+                                {% else %}
+                                    <strong>{{ translate({ ident: "FCPO_PREAUTHORIZED_AMOUNT" }) }}</strong>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right">
+                                <span><strong>{{ edit.oxorder__oxtotalordersum.value|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}</strong></span>
+                            </td>
+                        </tr>
+
+                        {% if authorizationMethod == 'authorization' and captureDebitEntries.paid|length > 0 %}
+                            {% for entry in captureDebitEntries.paid %}
+                                <tr class="paid-details" style="">
+                                    <td>
+                                        <span>{{ translate({ ident: "FCPO_PAID_AMOUNT" }) }}</span>
+                                        <a href="Javascript:fcpoEditThisStatus('{{ entry.oxid }}', '{{ oxid }}');">{{ entry.date }}</a>
+                                    </td>
+                                    <td style="text-align: right; padding-right: 10px">{{ entry.amount|number_format(2, ",", "") }}
+                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="preauth-remains-details" style="">
+                                <td>
+                                    <span>{{ translate({ ident: "FCPO_LEFT_PREAUTHORIZED_AMOUNT" }) }}</span>
                                 </td>
-                                <td height="20" valign="top" class="listfilter" nowrap>
-                                    <div class="r1">
-                                        <div class="b1">
-                                            {{ translate({ ident: "FCPO_LIST_HEADER_PROCESS" }) }}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td height="20" valign="top" class="listfilter" nowrap>
-                                    <div class="r1">
-                                        <div class="b1">
-                                            {{ translate({ ident: "FCPO_LIST_HEADER_DEMAND" }) }}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td height="20" valign="top" class="listfilter" nowrap>
-                                    <div class="r1">
-                                        <div class="b1">
-                                            {{ translate({ ident: "fcpo_payment" }) }}
-                                        </div>
-                                    </div>
+                                <td style="text-align: right; padding-right: 10px">
+                                    {{ (edit.oxorder__oxtotalordersum.value-captureDebitEntries.totalCapture)|number_format(2, ',', '') }} {{ edit.oxorder__oxcurrency.value|raw }}
                                 </td>
                             </tr>
-                            {% set listclass = "listitem" %}
-                            {% set last_receivable = 0 %}
-                            {% set last_payment = 0 %}
-                            {% for stat in status %}
-                            {% set receivable = stat.fcpotransactionstatus__fcpo_receivable.value %}
-                            {% set payment = stat.fcpotransactionstatus__fcpo_receivable.value-$stat.fcpotransactionstatus__fcpo_balance.value %}
-
-                            {% if last_receivable != receivable or (last_receivable == receivable and last_payment == payment) %}
-                                <tr>
-                                    <td class="{{ listclass }}" style="padding-left: 5px;"><a
-                                                href="Javascript:editThisStatus('{{ stat.fcpotransactionstatus__oxid.value }}',
-    '{{ oxid }}');">{{ stat.fcpotransactionstatus__oxtimestamp.value }}</a>&nbsp;
-                                    </td>
-                                    <td class="{{ listclass }}"
-                                        style="padding-left: 5px;">{{ stat.getDisplayNameReceivable($receivable - last_receivable) }}
-                                        &nbsp;
-                                    </td>
-                                    <td class="{{ listclass }}"
-                                        style="padding-left: 5px; {% if receivable - last_receivable < 0 %}color: red;{% endif %}">{{ receivable - last_receivable|number_format(2, ',',
-    '') }}
-                                        &nbsp;{{ stat.fcpotransactionstatus__fcpo_currency.value }}</td>
-                                    <td class="{{ listclass }}" style="padding-left: 5px;"></td>
-                                </tr>
-                                {% if listclass == "listitem2" %}
-                                    {% set listclass = "listitem" %}
-                                {% else %}
-                                    {% set listclass = "listitem2" %}
-                                {% endif %}
-                            {% endif %}
-
-                            {% if last_payment != payment %}
-                                <tr>
-                                    <td class="{{ listclass }}" style="padding-left: 5px;"><a
-                                                href="Javascript:editThisStatus('{{ stat.fcpotransactionstatus__oxid.value }}',
-    '{{ oxid }}');">{{ stat.fcpotransactionstatus__oxtimestamp.value }}</a>&nbsp;
-                                    </td>
-                                    <td class="{{ listclass }}"
-                                        style="padding-left: 5px;">{{ stat.getDisplayNamePayment($payment - last_payment) }}
-                                        &nbsp;
-                                    </td>
-                                    <td class="{{ listclass }}" style="padding-left: 5px;">&nbsp;</td>
-                                    <td class="{{ listclass }}"
-                                        style="padding-left: 5px; {% if payment - last_payment < 0 %}color: red;{% endif %}">{{ payment - last_payment|number_format(2, ',',
-    '') }}
-                                        &nbsp;{{ stat.fcpotransactionstatus__fcpo_currency.value }}</td>
-                                </tr>
-                                {% if listclass == "listitem2" %}
-                                    {% set listclass = "listitem" %}
-                                {% else %}
-                                    {% set listclass = "listitem2" %}
-                                {% endif %}
-                            {% endif %}
-
-                            {% set last_receivable = receivable %}
-                            {% set last_payment = payment %}
-                            {% if loop.last %}
-                        </table>
-                        <table cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                                <td align="right">
-                                    <strong>{{ translate({ ident: "FCPO_BALANCE" }) }}: <span
-                                                {% if stat.fcpotransactionstatus__fcpo_balance.value < 0 %}style="color: red;"{% endif %}>{{ stat.fcpotransactionstatus__fcpo_balance.value|number_format(2, ',',
-    '') }}&nbsp;{{ stat.fcpotransactionstatus__fcpo_currency.value }}</span></strong>
-                                </td>
-                            </tr>
-                        </table>
                         {% endif %}
-                        {% endfor %}
-                    </div>
+
+                        {% if captureDebitEntries.capture|length > 0 %}
+                            <tr>
+                                <td colspan="2" style="border-bottom:solid 1px black"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="capture-details-title" style="display: inline">
+                                    <span onclick="fcpoToggleDetails('capture-details', true)" class="unfold-icon"
+                                          style="cursor: pointer">&#8744;</span>
+                                        <span onclick="fcpoToggleDetails('capture-details', false)" class="fold-icon"
+                                              style="display: none; cursor: pointer">&#8743;</span>
+                                    </div>
+                                    <span><strong>{{ translate({ ident: "FCPO_CAPTURED_AMOUNT" }) }}</strong></span>
+                                </td>
+                                <td style="text-align: right">
+                                    <span><strong>{{ captureDebitEntries.totalCapture|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}</strong></span>
+                                </td>
+                            </tr>
+                            {% for entry in captureDebitEntries.capture %}
+                                <tr class="capture-details" style="display: none">
+                                    <td>
+                                        <a href="Javascript:fcpoEditThisStatus('{{ entry.oxid }}', '{{ oxid }}');">{{ entry.date }}</a>
+                                    </td>
+                                    <td style="text-align: right; padding-right: 10px">{{ entry.amount|number_format(2, ",", "") }}
+                                        {{ edit.oxorder__oxcurrency.value|raw }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if captureDebitEntries.debit|length > 0 %}
+                            <tr>
+                                <td colspan="2" style="border-bottom:solid 1px black"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="debit-details-title" style="display: inline">
+                                    <span onclick="fcpoToggleDetails('debit-details', true)" class="unfold-icon"
+                                          style="cursor: pointer">&#8744;</span>
+                                        <span onclick="fcpoToggleDetails('debit-details', false)" class="fold-icon"
+                                              style="display: none; cursor: pointer">&#8743;</span>
+                                    </div>
+                                    <span><strong>{{ translate({ ident: "FCPO_REFUNDED_AMOUNT" }) }}</strong></span>
+                                </td>
+                                <td style="text-align: right">
+                                    <span style="color: red"><strong>{{ captureDebitEntries.totalDebit|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}</strong></span>
+                                </td>
+                            </tr>
+                            {% for entry in captureDebitEntries.debit %}
+                                <tr class="debit-details" style="display: none">
+                                    <td>
+                                        <a href="Javascript:fcpoEditThisStatus('{{ entry.oxid }}', '{{ oxid }}');">{{ entry.date }}</a>
+                                    </td>
+                                    <td style="text-align: right; padding-right: 10px; color: red">
+                                        {{ entry.amount|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        <tr>
+                            <td colspan="2" style="border-bottom:solid 1px black"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>{{ translate({ ident: "FCPO_BALANCE" }) }}</strong></td>
+                            <td style="text-align: right; {% if captureDebitEntries.totalBalance < 0 %}color: red;{% endif %}">
+                                <strong>{{ captureDebitEntries.totalBalance|number_format(2, ",", "") }}
+                                    {{ edit.oxorder__oxcurrency.value|raw }}</strong></td>
+                        </tr>
+                        </tbody>
+                    </table>
                 {% else %}
                     {{ translate({ ident: "FCPO_NO_TRANSACTION_STATUS_RECEIVED" }) }}
                 {% endif %}
+
+                <div style="clear: both; margin-bottom: 50px;"></div>
+
+                <div style="margin-top: 20px">
+                    <p style="border-bottom: solid 1px black;text-transform: uppercase;">
+                        <strong>{{ translate({ ident: "FCPO_PRODUCTS" }) }}</strong></p>
+                    <table border="0" cellpadding="5" cellspacing="5">
+                        <colgroup>
+                            <col width="70%">
+                            <col width="10%">
+                            <col width="5%">
+                            <col width="10%">
+                        </colgroup>
+                        <tr style="text-align: right">
+                            <th style="text-align: left">{{ translate({ ident: "FCPO_PRODUCT_TITLE" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_PRODUCT_PRICE" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}</th>
+                            <th>{{ translate({ ident: "FCPO_PRODUCT_TOTAL" }) }}</th>
+                        </tr>
+                        {% for oOrderArt in oOrderarticles %}
+                            {% set articleTotal = oOrderArt.oxorderarticles__oxamount.value*oOrderArt.oxorderarticles__oxbprice.value %}
+                            <tr style="text-align: right">
+                                <td style="text-align: left">{{ oOrderArt.oxorderarticles__oxtitle.value|raw }}</td>
+                                <td>{{ oOrderArt.oxorderarticles__oxbprice.value|number_format(2, ",", "") }}
+                                    {{ edit.oxorder__oxcurrency.value|raw }}
+                                </td>
+                                <td style="text-align: center">{{ oOrderArt.oxorderarticles__oxamount.value|raw }}</td>
+                                <td>{{ articleTotal|number_format(2, ",", "") }} {{ edit.oxorder__oxcurrency.value|raw }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
             </td>
         </tr>
     </table>
 </form>
 
 {% include "bottomnaviitem.html.twig" %}
-</table>
 {% include "bottomitem.html.twig" %}

@@ -21,14 +21,12 @@
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
 use Fatchip\PayOne\Application\Model\FcPoMapping;
-use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Payment;
 use stdClass;
 
 class FcPayOneStatusMapping extends FcPayOneAdminDetails
 {
 
-    public $_oFcpoMapping;
-    public $_oFcpoHelper;
     /**
      * Current class template name.
      *
@@ -39,10 +37,9 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Returns list of former configured mappings
      *
-     *
      * @return array
      */
-    public function getMappings()
+    public function getMappings(): array
     {
         $aMappings = $this->_fcpoGetExistingMappings();
 
@@ -52,22 +49,22 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Requests database for existing mappings and returns an array of mapping objects
      *
-     *
      * @return array
      */
-    private function _fcpoGetExistingMappings()
+    protected function _fcpoGetExistingMappings(): array
     {
-        return $this->_oFcpoMapping->fcpoGetExistingMappings();
+        return $this->_oFcPoMapping->fcpoGetExistingMappings();
     }
 
     /**
      * Adds a new entry if flag has been set
      *
+     * @param array $aMappings
      * @return array
      */
-    private function _fcpoAddNewMapping(array $aMappings)
+    protected function _fcpoAddNewMapping(array $aMappings): array
     {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('add')) {
+        if ($this->_oFcPoHelper->fcpoGetRequestParameter('add')) {
             $oMapping = new stdClass();
             $oMapping->sOxid = 'new';
             $oMapping->sPaymentType = '';
@@ -82,60 +79,37 @@ class FcPayOneStatusMapping extends FcPayOneAdminDetails
     /**
      * Returns a list of payment types
      *
-     *
      * @return array
      */
-    public function getPaymentTypeList()
+    public function getPaymentTypeList(): array
     {
-        $oPayment = oxNew('oxPayment');
+        $oPayment = oxNew(Payment::class);
 
         return $oPayment->fcpoGetPayonePaymentTypes();
     }
 
     /**
-     * Returns a list of payone status list
-     *
-     *
-     * @return \stdClass[]
-     */
-    public function getPayoneStatusList(): array
-    {
-        $aPayoneStatusList = $this->_oFcpoHelper->fcpoGetPayoneStatusList();
-
-        $aNewList = [];
-        foreach ($aPayoneStatusList as $aPayoneRectorPrefix202301StatusList) {
-            $oStatus = new stdClass();
-            $oStatus->sId = $aPayoneRectorPrefix202301StatusList;
-            $oStatus->sTitle = $this->_oFcpoHelper->fcpoGetLang()->translateString('fcpo_status_' . $aPayoneRectorPrefix202301StatusList, null, true);
-            $aNewList[] = $oStatus;
-        }
-
-        return $aNewList;
-    }
-
-    /**
      * Returns a list of shop states
-     *
      *
      * @return array
      */
-    public function getShopStatusList()
+    public function getShopStatusList(): array
     {
-        $oFcpoHelper = oxNew(FcPoHelper::class);
-        $oConfig = $oFcpoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam('aOrderfolder');
+        return $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('aOrderfolder');
     }
 
     /**
-     * Updating settings into database
+     * Updating mappings into database
      *
+     * @return void
      */
     public function save(): void
     {
         $oMapping = $this->fcpoGetInstance(FcPoMapping::class);
-        $aMappings = $this->_oFcpoHelper->fcpoGetRequestParameter("editval");
+        $aMappings = $this->_oFcPoHelper->fcpoGetRequestParameter("editval");
         if (is_array($aMappings) && $aMappings !== []) {
             $oMapping->fcpoUpdateMappings($aMappings);
         }
     }
+
 }

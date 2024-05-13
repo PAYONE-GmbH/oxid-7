@@ -2,45 +2,46 @@
 
 {% if readonly %}
     {% set readonly = "readonly disabled" %}
-{% else %}
+    {% else %}
     {% set readonly = "" %}
-{% endif %}
+    {% endif %}
 
 {% set confbools = oView.fcpoGetConfBools() %}
 {% set confstrs = oView.fcpoGetConfStrs() %}
 {% set confarrs = oView.fcpoGetConfArrs() %}
 
-{{ script({ include: oViewConf.fcpoGetModuleJsPath('fcpayone_main.js'), dynamic: __oxid_include_dynamic }) }}
+{{ script({ include: oViewConf.getModuleUrl('fcpayone', 'js/fcPayOneMain.js'), dynamic: __oxid_include_dynamic }) }}
 
-<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink() }}" method="post">
-    {{ oViewConf.getHiddenSid() }}
+<form autocomplete="off" name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="oxid" value="{{ oxid }}">
     <input type="hidden" name="cl" value="FcPayOneMain">
 </form>
 
 
-<form autocomplete="off" name="myedit" id="myedit" action="{{ oViewConf.getSelfLink() }}" method="post"
+<form autocomplete="off" name="myedit" id="myedit" action="{{ oViewConf.getSelfLink()|raw }}" method="post"
       enctype="multipart/form-data">
-    {{ oViewConf.getHiddenSid() }}
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="cl" value="FcPayOneMain">
     <input type="hidden" name="fnc" value="">
     <input type="hidden" name="oxid" value="{{ oxid }}">
 
-    {{ translate({ ident: "FCPO_MAIN_CONFIG_INFOTEXT" }) }}<br><br>
+    {{ translate({ ident: "FCPO_MAIN_CONFIG_INFOTEXT" })|raw }}<br><br>
+    {{ translate({ ident: "FCPO_MAIN_CONFIG_TESTACCOUNT_LINK" })|raw }}<br><br>
 
-    {{ translate({ ident: "FCPO_MODULE_VERSION" }) }} {{ oView.fcpoGetModuleVersion() }}<br><br>
+    {{ translate({ ident: "FCPO_MODULE_VERSION" })|raw }} {{ oView.fcpoGetModuleVersion() }}<br><br>
 
     {% if oView.fcpoGetConfigErrors() %}
-        {% for sErrorMessage in oView.fcpoGetConfigErrors() %}
-            <div style="padding:4px;background: red;color: white;font-weight: bold;">
-                {{ sErrorMessage }}
-            </div>
-        {% endfor %}
+    {% for sErrorMessage in oView.fcpoGetConfigErrors() %}
+    <div style="padding:4px;background: red;color: white;font-weight: bold;">
+        {{ sErrorMessage }}
+    </div>
+    {% endfor %}
     {% endif %}
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CONN" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CONN" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOMerchantID]"
@@ -48,29 +49,29 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_MERCHANTID"), 'sHelpText': help_text("FCPO_HELP_MERCHANTID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_MERCHANT_ID" }) }}
+                    {{ translate({ ident: "FCPO_MERCHANT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOPortalID]"
-                           value="{{ confstrs.sFCPOPortalID }}" {{ readonly }}>
+                    <input type="text" class="txt" name="confstrs[sFCPOPortalID]" value="{{ confstrs.sFCPOPortalID }}"
+                           {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PORTALID"), 'sHelpText': help_text("FCPO_HELP_PORTALID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PORTAL_ID" }) }}
+                    {{ translate({ ident: "FCPO_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOPortalKey]"
-                           value="{{ confstrs.sFCPOPortalKey }}" {{ readonly }}>
+                    <input type="text" class="txt" name="confstrs[sFCPOPortalKey]" value="{{ confstrs.sFCPOPortalKey|raw }}"
+                           {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PORTALKEY"), 'sHelpText': help_text("FCPO_HELP_PORTALKEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PORTAL_KEY" }) }}
+                    {{ translate({ ident: "FCPO_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -81,33 +82,18 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SUBACCOUNTID"), 'sHelpText': help_text("FCPO_HELP_SUBACCOUNTID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SUBACCOUNT_ID" }) }}
+                    {{ translate({ ident: "FCPO_SUBACCOUNT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPORefPrefix]"
-                           value="{{ confstrs.sFCPORefPrefix }}" {{ readonly }}>
+                    <input type="text" class="txt" name="confstrs[sFCPORefPrefix]" value="{{ confstrs.sFCPORefPrefix|raw }}"
+                           {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REFPREFIX"), 'sHelpText': help_text("FCPO_HELP_REFPREFIX")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_REFPREFIX" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <select name="confstrs[sFCPOHashMethod]">
-                        <option value="md5" {% if confstrs.sFCPOHashMethod == "md5" %}SELECTED{% endif %}>md5</option>
-                        <option value="sha2-384" {% if confstrs.sFCPOHashMethod == "sha2 - 384" %}SELECTED{% endif %}>
-                            sha2-384 (empfohlen)
-                        </option>
-                    </select>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_HASH_METHOD"), 'sHelpText': help_text("FCPO_HELP_HASH_METHOD")} %}
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_HASH_METHOD" }) }}
+                    {{ translate({ ident: "FCPO_REFPREFIX" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -117,7 +103,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GENERAL" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GENERAL" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="hidden" name="confbools[blFCPOSendArticlelist]" value="false">
@@ -126,7 +112,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SEND_ARTICLELIST"), 'sHelpText': help_text("FCPO_HELP_SEND_ARTICLELIST")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SEND_ARTICLELIST" }) }}
+                    {{ translate({ ident: "FCPO_SEND_ARTICLELIST" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -135,24 +121,24 @@
                     <input type="hidden" name="confbools[blFCPOPresaveOrder]" value="false">
                     <input type="checkbox" name="confbools[blFCPOPresaveOrder]" value="true"
                            {% if (confbools.blFCPOPresaveOrder) %}checked{% endif %}
-                           onclick="handlePresaveOrderCheckbox(this);">
+                           onclick="fcpoHandlePresaveOrderCheckbox(this);">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PRESAVE_ORDER"), 'sHelpText': help_text("FCPO_HELP_PRESAVE_ORDER")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PRESAVE_ORDER" }) }}
+                    {{ translate({ ident: "FCPO_PRESAVE_ORDER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl id="reduce_stock" {% if not (confbools.blFCPOPresaveOrder) %}style="display: none;"{% endif %}>
+            <dl id="reduce_stock" {% if not (confbools.blFCPOPresaveOrder) %}style="display: none;" {% endif %}>
                 <dt></dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_REDUCE_STOCK" }) }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REDUCE_STOCK"), 'sHelpText': help_text("FCPO_HELP_REDUCE_STOCK")} %}
-                    <br>
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK" })|raw }} {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_REDUCE_STOCK"), 'sHelpText': help_text("FCPO_HELP_REDUCE_STOCK")} %}<br>
                     <input type="radio" name="confbools[blFCPOReduceStock]" value="0"
-                           {% if confbools.blFCPOReduceStock == '0' or not confbools.blFCPOReduceStock %}checked{% endif %}> {{ translate({ ident: "FCPO_REDUCE_STOCK_BEFORE" }) }}
-                    <br>
+                           {% if confbools.blFCPOReduceStock == '0' or not confbools.blFCPOReduceStock %}checked{% endif %}>
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK_BEFORE" })|raw }}<br>
                     <input type="radio" name="confbools[blFCPOReduceStock]" value="1"
-                           {% if confbools.blFCPOReduceStock == '1' %}checked{% endif %}> {{ translate({ ident: "FCPO_REDUCE_STOCK_AFTER" }) }}
+                           {% if confbools.blFCPOReduceStock == '1' %}checked{% endif %}>
+                    {{ translate({ ident: "FCPO_REDUCE_STOCK_AFTER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -162,11 +148,11 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_ACTIVE_CREDITCARD_TYPES" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_ACTIVE_CREDITCARD_TYPES" })|raw }}</b></a>
             <dl>
                 <dt></dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CREDITCARDBRANDS_INFOTEXT" }) }}
+                    {{ translate({ ident: "FCPO_CREDITCARDBRANDS_INFOTEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -177,14 +163,13 @@
                     <input type="checkbox" name="confbools[blFCPOVisaActivated]" value="true"
                            {% if (confbools.blFCPOVisaActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=V&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=V&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCVLive]" value="1"
                            {% if confbools.blFCPOCCVLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCVLive]" value="0"
-                           {% if confbools.blFCPOCCVLive == '0' or not confbools.blFCPOCCVLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCVLive == '0' or not confbools.blFCPOCCVLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -195,14 +180,13 @@
                     <input type="checkbox" name="confbools[blFCPOMastercardActivated]" value="true"
                            {% if (confbools.blFCPOMastercardActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=M&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=M&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCMLive]" value="1"
                            {% if confbools.blFCPOCCMLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCMLive]" value="0"
-                           {% if confbools.blFCPOCCMLive == '0' or not confbools.blFCPOCCMLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCMLive == '0' or not confbools.blFCPOCCMLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -213,14 +197,13 @@
                     <input type="checkbox" name="confbools[blFCPOAmexActivated]" value="true"
                            {% if (confbools.blFCPOAmexActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=A&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=A&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCALive]" value="1"
                            {% if confbools.blFCPOCCALive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCALive]" value="0"
-                           {% if confbools.blFCPOCCALive == '0' or not confbools.blFCPOCCALive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCALive == '0' or not confbools.blFCPOCCALive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -231,14 +214,13 @@
                     <input type="checkbox" name="confbools[blFCPODinersActivated]" value="true"
                            {% if (confbools.blFCPODinersActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=D&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=D&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCDLive]" value="1"
                            {% if confbools.blFCPOCCDLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCDLive]" value="0"
-                           {% if confbools.blFCPOCCDLive == '0' or not confbools.blFCPOCCDLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCDLive == '0' or not confbools.blFCPOCCDLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -249,14 +231,13 @@
                     <input type="checkbox" name="confbools[blFCPOJCBActivated]" value="true"
                            {% if (confbools.blFCPOJCBActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=J&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=J&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCJLive]" value="1"
                            {% if confbools.blFCPOCCJLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCJLive]" value="0"
-                           {% if confbools.blFCPOCCJLive == '0' or not confbools.blFCPOCCJLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCJLive == '0' or not confbools.blFCPOCCJLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -267,14 +248,13 @@
                     <input type="checkbox" name="confbools[blFCPOMaestroIntActivated]" value="true"
                            {% if (confbools.blFCPOMaestroIntActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=O&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=O&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCOLive]" value="1"
                            {% if confbools.blFCPOCCOLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCOLive]" value="0"
-                           {% if confbools.blFCPOCCOLive == '0' or not confbools.blFCPOCCOLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCOLive == '0' or not confbools.blFCPOCCOLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -285,14 +265,13 @@
                     <input type="checkbox" name="confbools[blFCPOMaestroUKActivated]" value="true"
                            {% if (confbools.blFCPOMaestroUKActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=U&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=U&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCULive]" value="1"
                            {% if confbools.blFCPOCCULive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCULive]" value="0"
-                           {% if confbools.blFCPOCCULive == '0' or not confbools.blFCPOCCULive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCULive == '0' or not confbools.blFCPOCCULive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -303,14 +282,13 @@
                     <input type="checkbox" name="confbools[blFCPOCarteBleueActivated]" value="true"
                            {% if (confbools.blFCPOCarteBleueActivated) %}checked{% endif %}>
                     <input type="button"
-                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=B&amp;type=cc');"
-                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
+                           onclick="showDialog('{{ oView.fcGetAdminSeparator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=B&amp;type=cc');"
+                           class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" })|raw }}">
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES")} %}
                     <input type="radio" name="confbools[blFCPOCCBLive]" value="1"
                            {% if confbools.blFCPOCCBLive == '1' %}checked{% endif %}> <strong>Live</strong>
                     <input type="radio" name="confbools[blFCPOCCBLive]" value="0"
-                           {% if confbools.blFCPOCCBLive == '0' or not confbools.blFCPOCCBLive %}checked{% endif %}>
-                    Test
+                           {% if confbools.blFCPOCCBLive == '0' or not confbools.blFCPOCCBLive %}checked{% endif %}> Test
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -320,140 +298,136 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CREDITCARD" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_CREDITCARD" })|raw }}</b></a>
             <dl>
                 <dt>
                     <select name="confstrs[sFCPOCCType]">
-                        <option value="hosted" {% if confstrs.sFCPOCCType == "hosted" %}SELECTED{% endif %}>
-                            hosted-Iframe
+                        <option value="hosted" {% if oView.getConfigParam('sFCPOCCType') == "hosted" %}SELECTED{% endif %}>hosted-Iframe
                         </option>
-                        <option value="ajax" {% if confstrs.sFCPOCCType == "ajax" %}SELECTED{% endif %}>AJAX</option>
+                        <option value="ajax" {% if oView.getConfigParam('sFCPOCCType') == "ajax" %}SELECTED{% endif %}>AJAX</option>
                     </select>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_CC_TYPE"), 'sHelpText': help_text("FCPO_HELP_CC_TYPE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CC_TYPE" }) }}
+                    {{ translate({ ident: "FCPO_CC_TYPE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dd>
-                    <a href="#" onclick="toggleHostedTemplate();"
-                       style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_CUSTOM_TEMPLATE" }) }}</a>
+                    <a href="#" onclick="fcpoToggleHostedTemplate();"
+                       style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_CUSTOM_TEMPLATE" })|raw }}</a>
                     <div id="fcpoHostedCCTemplate" style="display:none;padding-top:10px;">
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_CONFIG" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_TYPE" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_COUNT" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_MAX" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_IFRAME" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_STYLE" }) }}</th>
-                                <th>{{ translate({ ident: "FCPO_CC_HEADER_CSS" }) }}</th>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_CONFIG" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_TYPE" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_COUNT" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_DIGIT_MAX" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_IFRAME" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_STYLE" })|raw }}</th>
+                                <th>{{ translate({ ident: "FCPO_CC_HEADER_CSS" })|raw }}</th>
                             </tr>
                             {% for sField in oView.getCCFields() %}
-                                <tr>
-                                    <td>
-                                        {% set sIdent = "FCPO_CC_ROW_CC_"|cat(sField) %}
-                                        {{ translate({ ident: sIdent }) }}
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Type") %}
-                                        <select name="confstrs[{{ sFieldIdent }}]">
-                                            {% for sType, sTitle in oView.getCCTypes(sField) %}
-                                                <option value="{{ sType }}"
-                                                        {% if sType == confstrs.$sFieldIdent %}selected{% endif %}>{{ sTitle }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Count") %}
-                                        <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
-                                               value="{{ confstrs.$sFieldIdent }}" {{ readonly }}>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Max") %}
-                                        <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
-                                               value="{{ confstrs.$sFieldIdent }}" {{ readonly }}>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdentIframe = "sFCPOCC"|cat(sField)|cat("Iframe") %}
-                                        <select name="confstrs[{{ sFieldIdentIframe }}]"
-                                                onchange="handleSizeFields(this, '{{ sField }}')">
-                                            {% for sType, sTitle in oView.getCCStyles() %}
-                                                <option value="{{ sType }}"
-                                                        {% if sType == confstrs.$sFieldIdentIframe %}selected{% endif %}>{{ sTitle }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Width") %}
-                                        <input id="input_width_{{ sField }}" type="text" class="txt" size="4"
-                                               name="confstrs[{{ sFieldIdent }}]"
-                                               value="{{ confstrs.$sFieldIdent }}" {{ readonly }} {% if confstrs.$sFieldIdentIframe != "custom" %}disabled{% endif %}>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Height") %}
-                                        <input id="input_height_{{ sField }}" type="text" class="txt" size="4"
-                                               name="confstrs[{{ sFieldIdent }}]"
-                                               value="{{ confstrs.$sFieldIdent }}" {{ readonly }} {% if confstrs.$sFieldIdentIframe != "custom" %}disabled{% endif %}>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdentCSS = "sFCPOCC"|cat(sField)|cat("Style") %}
-                                        <select name="confstrs[{{ sFieldIdentCSS }}]"
-                                                onchange="handleCss(this, '{{ sField }}')">
-                                            {% for sType, sTitle in oView.getCCStyles() %}
-                                                <option value="{{ sType }}"
-                                                        {% if sType == confstrs.$sFieldIdentCSS %}selected{% endif %}>{{ sTitle }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("CSS") %}
-                                        <input id="input_css_{{ sField }}" type="text" class="txt" size="50"
-                                               name="confstrs[{{ sFieldIdent }}]"
-                                               value="{{ confstrs.$sFieldIdent }}" {{ readonly }} {% if confstrs.$sFieldIdentCSS != "custom" %}disabled{% endif %}>
-                                        {% if sFieldIdent=='sFCPOCCCVCCSS' %}
-                                            &nbsp;
-                                            <input type="hidden" name="confbools[blFCPOCCUseCvc]" value="false">
-                                            <input type="checkbox" name="confbools[blFCPOCCUseCvc]" value="true"
-                                                   {% if (confbools.blFCPOCCUseCvc) %}checked{% endif %}> {{ translate({ ident: "FCPO_CC_USE_CVC" }) }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>
+                                    {% set sIdent = "FCPO_CC_ROW_CC_"|cat(sField) %}
+                                    {{ translate({ ident: sIdent }) }}
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Type") %}
+                                    <select name="confstrs[{{ sFieldIdent }}]">
+                                        {% for sType, sTitle in oView.getCCTypes(sField) %}
+                                        <option value="{{ sType }}"
+                                                {% if sType == oView.getConfigParam(sFieldIdent) %}selected{% endif %}>{{ sTitle }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Count") %}
+                                    <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
+                                           value="{{ oView.getConfigParam(sFieldIdent) }}" {{ readonly }}>
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Max") %}
+                                    <input type="text" class="txt" size="4" name="confstrs[{{ sFieldIdent }}]"
+                                           value="{{ oView.getConfigParam(sFieldIdent) }}" {{ readonly }}>
+                                </td>
+                                <td>
+                                    {% set sFieldIdentIframe = "sFCPOCC"|cat(sField)|cat("Iframe") %}
+                                    <select name="confstrs[{{ sFieldIdentIframe }}]"
+                                            onchange="fcpoHandleSizeFields(this, '{{ sField }}')">
+                                        {% for sType, sTitle in oView.getCCStyles() %}
+                                        <option value="{{ sType }}"
+                                                {% if sType == oView.getConfigParam(sFieldIdentIframe) %}selected{% endif %}>{{ sTitle }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Width") %}
+                                    <input id="input_width_{{ sField }}" type="text" class="txt" size="4"
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ oView.getConfigParam(sFieldIdent) }}"
+                                           {{ readonly }} {% if oView.getConfigParam(sFieldIdentIframe) != "custom" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("Height") %}
+                                    <input id="input_height_{{ sField }}" type="text" class="txt" size="4"
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ oView.getConfigParam(sFieldIdent) }}"
+                                           {{ readonly }} {% if oView.getConfigParam(sFieldIdentIframe) != "custom" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    {% set sFieldIdentCSS = "sFCPOCC"|cat(sField)|cat("Style") %}
+                                    <select name="confstrs[{{ sFieldIdentCSS }}]"
+                                            onchange="fcpoHandleCss(this, '{{ sField }}')">
+                                        {% for sType, sTitle in oView.getCCStyles() %}
+                                        <option value="{{ sType }}"
+                                                {% if sType == oView.getConfigParam(sFieldIdentCSS) %}selected{% endif %}>{{ sTitle }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    {% set sFieldIdent = "sFCPOCC"|cat(sField)|cat("CSS") %}
+                                    <input id="input_css_{{ sField }}" type="text" class="txt" size="50"
+                                           name="confstrs[{{ sFieldIdent }}]" value="{{ oView.getConfigParam(sFieldIdent) }}"
+                                           {{ readonly }} {% if oView.getConfigParam(sFieldIdentCSS) != "custom" %}disabled{% endif %}>
+                                </td>
+                            </tr>
                             {% endfor %}
                         </table>
                         <br>
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_STANDARD_STYLE" }) }}</th>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_INPUT" }) }}</td>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_SELECTION" }) }}</td>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_STANDARD_STYLE" })|raw }}</th>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_INPUT" })|raw }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_SELECTION" })|raw }}</td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_FIELDS" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_FIELDS" })|raw }}</td>
                                 <td><input type="text" class="txt" size="50" name="confstrs[sFCPOCCStandardInput]"
-                                           value="{{ confstrs.sFCPOCCStandardInput }}" {{ readonly }}></td>
+                                           value="{{ oView.getConfigParam('sFCPOCCStandardInput') }}" {{ readonly }}></td>
                                 <td><input type="text" class="txt" size="50" name="confstrs[sFCPOCCStandardOutput]"
-                                           value="{{ confstrs.sFCPOCCStandardOutput }}" {{ readonly }}></td>
+                                           value="{{ oView.getConfigParam('sFCPOCCStandardOutput') }}" {{ readonly }}></td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_IFRAME" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_STANDARD_IFRAME" })|raw }}</td>
                                 <td colspan="2">
                                     <table>
                                         <tr>
-                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" }) }}</td>
-                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" }) }}</td>
+                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_WIDTH" })|raw }}</td>
+                                            <td>{{ translate({ ident: "FCPO_CC_HEADER_HEIGHT" })|raw }}</td>
                                         </tr>
                                         <tr>
                                             <td><input type="text" class="txt" size="4"
                                                        name="confstrs[sFCPOCCIframeWidth]"
-                                                       value="{{ confstrs.sFCPOCCIframeWidth }}" {{ readonly }}></td>
+                                                       value="{{ oView.getConfigParam('sFCPOCCIframeWidth') }}" {{ readonly }}></td>
                                             <td><input type="text" class="txt" size="4"
                                                        name="confstrs[sFCPOCCIframeHeight]"
-                                                       value="{{ confstrs.sFCPOCCIframeHeight }}" {{ readonly }}></td>
+                                                       value="{{ oView.getConfigParam('sFCPOCCIframeHeight') }}" {{ readonly }}></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -462,11 +436,11 @@
                         <br>
                         <table>
                             <tr>
-                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_ERRORS" }) }}</th>
+                                <th style="text-align:left;width:120px;">{{ translate({ ident: "FCPO_CC_ERRORS" })|raw }}</th>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_ACTIVE" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_ACTIVE" })|raw }}</td>
                                 <td>
                                     <input type="hidden" name="confbools[blFCPOCCErrorsActive]" value="false">
                                     <input type="checkbox" name="confbools[blFCPOCCErrorsActive]" value="true"
@@ -474,22 +448,24 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>{{ translate({ ident: "FCPO_CC_LANGUAGE" }) }}</td>
+                                <td>{{ translate({ ident: "FCPO_CC_LANGUAGE" })|raw }}</td>
                                 <td>
                                     <select name="confstrs[sFCPOCCErrorsLang]">
-                                        <option value="de"
-                                                {% if confstrs.sFCPOCCErrorsLang == "de" %}selected{% endif %}>{{ translate({ ident: "FCPO_CC_ERRORLANG_DE" }) }}</option>
-                                        <option value="en"
-                                                {% if confstrs.sFCPOCCErrorsLang == "en" %}selected{% endif %}>{{ translate({ ident: "FCPO_CC_ERRORLANG_EN" }) }}</option>
+                                        <option value="de" {% if confstrs.sFCPOCCErrorsLang == "de" %}selected{% endif %}>
+                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_DE" })|raw }}
+                                        </option>
+                                        <option value="en" {% if confstrs.sFCPOCCErrorsLang == "en" %}selected{% endif %}>
+                                            {{ translate({ ident: "FCPO_CC_ERRORLANG_EN" })|raw }}
+                                        </option>
                                     </select>
                                 </td>
                             </tr>
                         </table>
                         <br>
-                        <a href="#" onclick="togglePreview();"
-                           style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_PREVIEW" }) }}</a>
+                        <a href="#" onclick="fcpoTogglePreview();"
+                           style="text-decoration: underline;">{{ translate({ ident: "FCPO_CC_PREVIEW" })|raw }}</a>
                         <div id="fcpoHostedCCPreview" style="display:none;padding-top:10px;">
-                            {% include "fcpayone_cc_preview.html.twig" %}
+                            {% include "@fcpayone/admin/fcpayone_cc_preview" %}
                         </div>
                     </div>
                 </dd>
@@ -501,80 +477,82 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_DEBITNOTE" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_DEBITNOTE" })|raw }}</b></a>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_BANKDATA" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_BANKDATA" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <select class="select" multiple size="4" name="confarrs[aFCPODebitCountries][]" {{ readonly }}>
                         {% for oCountry in oView.fcpoGetCountryList() %}
-                            <option value="{{ oCountry.oxcountry__oxid.value }}"{% if oCountry.selected %} selected{% endif %}>{{ oCountry.oxcountry__oxtitle.value }}</option>
+                        <option value="{{ oCountry.oxcountry__oxid.value|raw }}" {% if oCountry.selected %}
+                                selected{% endif %}>{{ oCountry.oxcountry__oxtitle.value|raw }}
+                        </option>
                         {% endfor %}
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MULTISELECT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MULTISELECT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_GER" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_GER" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_SHOW_OLD_FIELDS" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_SHOW_OLD_FIELDS" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPODebitBICMandatory]" value="false">
                     <input type="checkbox" name="confbools[blFCPODebitBICMandatory]" value="true"
                            {% if (confbools.blFCPODebitBICMandatory) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_BIC_MANDATORY" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_BIC_MANDATORY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_TEXT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPOMandateIssuance]" value="false">
                     <input type="checkbox" name="confbools[blFCPOMandateIssuance]" value="true"
                            {% if (confbools.blFCPOMandateIssuance) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_ACTIVE" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_ACTIVE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD" }) }}</dt>
+                <dt>{{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD" })|raw }}</dt>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_TEXT" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_TEXT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl style="border-top:0px;">
+            <dl style="border-top:0;">
                 <dt>
                     <input type="hidden" name="confbools[blFCPOMandateDownload]" value="false">
                     <input type="checkbox" name="confbools[blFCPOMandateDownload]" value="true"
                            {% if (confbools.blFCPOMandateDownload) %}checked{% endif %}>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_ACTIVE" }) }}
+                    {{ translate({ ident: "FCPO_CONFIG_DEBIT_MANDATE_DOWNLOAD_ACTIVE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -582,211 +560,87 @@
     </div>
 
     <div class="groupExp">
-        <div{% if oView.fcpoIsStoreIdAdded() %} class="exp"{% endif %}>
-            <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_KLARNA" }) }}</b></a>
-            <dl>
-                <dt></dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_KLARNA_STORE_ID_ADMIN" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            {% for sKey, sStoreId in oView.fcpoGetStoreIds() %}
-                <dl>
-                    <dt style="padding-top: 10px;">
-                        <input type="text" class="txt" name="aStoreIds[{{ sKey }}][id]"
-                               value="{{ sStoreId }}" {{ readonly }}>
-                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_ASSIGNCOUNTRIES_3"), 'sHelpText': help_text("FCPO_HELP_ASSIGNCOUNTRIES_3")} %}
-                    </dt>
-                    <dd>
-                        StoreID
-                        <input type="button"
-                               onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=KLV&amp;type={{ sKey }}');"
-                               class="" value="{{ translate({ ident: "GENERAL_ASSIGNCOUNTRIES" }) }}">
-                        <input type="submit" class="edittext" name="aStoreIds[{{ sKey }}][delete]"
-                               value="{{ translate({ ident: "FCPO_KLARNA_DELETE_STORE_ID" }) }}"
-                               onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-                    </dd>
-                    <div class="spacer"></div>
-                </dl>
-            {% endfor %}
-            <dl>
-                <dt><input type="submit" class="edittext" name="addStoreId"
-                           value="{{ translate({ ident: "FCPO_KLARNA_ADD_STORE_ID" }) }}"
-                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
-                <dd></dd>
-                <div class="spacer"></div>
-            </dl>
-        </div>
+        <div
+        {% if oView.fcpoIsLogoAdded() %} class="exp"{% endif %}>
+        <a href="#" onclick="_groupExp(this);return false;"
+           class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" })|raw }}</b></a>
+        <dl>
+            <dt>
+                <input type="hidden" name="confbools[blFCPOPayPalDelAddress]" value="false">
+                <input type="checkbox" name="confbools[blFCPOPayPalDelAddress]" value="true"
+                       {% if (confbools.blFCPOPayPalDelAddress) %}checked{% endif %}>
+                {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPAL_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPAL_DELADDRESS")} %}
+            </dt>
+            <dd>
+                {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" })|raw }}
+            </dd>
+            <div class="spacer"></div>
+        </dl>
+        <dl>
+            <dt></dt>
+            <dd>
+                {{ translate({ ident: "FCPO_PAYPAL_LOGOS" })|raw }}
+            </dd>
+            <div class="spacer"></div>
+        </dl>
+        <dl>
+            <dt></dt>
+            <dd>
+                <table border="1" cellspacing="0" cellpadding="2">
+                    <tr>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" })|raw }}</th>
+                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" })|raw }}</th>
+                    </tr>
+                    {% for aLogo in oView.fcpoGetPayPalLogos() %}
+                    <tr>
+                        <td>
+                            <input type="hidden" name="logos[{{ aLogo.oxid }}][active]" value="0">
+                            <input type="checkbox" name="logos[{{ aLogo.oxid }}][active]" value="1"
+                                   {% if (aLogo.active) %}checked{% endif %}>
+                        </td>
+                        <td>
+                            <select name="logos[{{ aLogo.oxid }}][langid]" class="editinput">
+                                {% for lang in languages %}
+                                <option value="{{ lang.id }}" {% if lang.id == aLogo.langid %}SELECTED{% endif %}>
+                                    {{ lang.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            {% if aLogo.logo == '' %}
+                            {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" })|raw }}
+                            {% else %}
+                        <img src="{{ aLogo.logo }}">
+                            {% endif %}
+                        </td>
+                        <td>
+                            <input type="file" name="logo_{{ aLogo.oxid }}">
+                        </td>
+                        <td>
+                            <input type="radio" name="defaultlogo" value="{{ aLogo.oxid }}"
+                                   {% if aLogo.default == 1 %}CHECKED{% endif %}>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                <input type="submit" class="edittext" name="addPayPalLogo"
+                       value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" })|raw }}"
+                       onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
+            </dd>
+            <div class="spacer"></div>
+        </dl>
     </div>
-
-    <div class="groupExp">
-        <div{% if oView.fcpoIsCampaignAdded() %} class="exp"{% endif %}>
-            <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_KLARNA_CAMPAIGNS" }) }}</b></a>
-            <dl>
-                <dt></dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_KLARNA_CAMPAIGNS" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            {% for sId, aCampaign in oView.fcpoKlarnaCampaigns() %}
-                <dl>
-                    <dd>
-                        <table>
-                            <tr>
-                                <td>
-                                    {{ translate({ ident: "FCPO_KLARNA_CAMPAIGN_CODE" }) }}
-                                </td>
-                                <td>
-                                    <input type="text" class="txt" name="aCampaigns[{{ sId }}][code]"
-                                           value="{{ aCampaign.code }}" size="8" {{ readonly }}>
-                                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_KLARNA_CAMPAIGNS"), 'sHelpText': help_text("FCPO_HELP_KLARNA_CAMPAIGNS")} %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    {{ translate({ ident: "FCPO_KLARNA_CAMPAIGN_TITLE" }) }}
-                                </td>
-                                <td>
-                                    <input type="text" class="txt" name="aCampaigns[{{ sId }}][title]"
-                                           value="{{ aCampaign.title }}" size="50" {{ readonly }}>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_COUNTRIES" }) }}</td>
-                                <td>
-                                    <input type="button"
-                                           onclick="showDialog('{{ oView.fcGetAdminSeperator() }}cl=FcPayOneMain&amp;aoc=1&amp;oxid=KLR_{{ sId }}&amp;type={{ sKey }}');"
-                                           class="" value="{{ translate({ ident: "FCPO_ASSIGN_COUNTRIES" }) }}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_LANGUAGE" }) }}</td>
-                                <td>
-                                    {% set aLanguages = oView.fcGetLanguages() %}
-                                    <select class="select" multiple size="{{ aLanguages|length }}"
-                                            name="aCampaigns[{{ sId }}][language][]" {{ readonly }}>
-                                        {% for sLangId, sLangTitle in aLanguages %}
-                                            <option value="{{ sLangId }}"
-                                                    {% if sLangId|in_array(aCampaign.language) %}selected{% endif %}>{{ sLangTitle }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ translate({ ident: "FCPO_CURRENCY" }) }}</td>
-                                <td>
-                                    {% set aCurrencies = oView.fcGetCurrencies() %}
-                                    <select class="select" multiple size="{{ aCurrencies|length }}"
-                                            name="aCampaigns[{{ sId }}][currency][]" {{ readonly }}>
-                                        {% for sCurrId, sCurrTitle in aCurrencies %}
-                                            <option value="{{ sCurrId }}"
-                                                    {% if sCurrId|in_array(aCampaign.currency) %}selected{% endif %}>{{ sCurrTitle }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                            </tr>
-                        </table>
-                        <input type="submit" class="edittext" name="aCampaigns[{{ sId }}][delete]"
-                               value="{{ translate({ ident: "FCPO_KLARNA_DELETE_STORE_ID" }) }}"
-                               onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-                    </dd>
-                    <div class="spacer"></div>
-                </dl>
-            {% endfor %}
-            <dl>
-                <dt><input type="submit" class="edittext" name="addCampaign"
-                           value="{{ translate({ ident: "FCPO_KLARNA_ADD_CAMPAIGN" }) }}"
-                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
-                <dd></dd>
-                <div class="spacer"></div>
-            </dl>
-        </div>
-    </div>
-
-    <div class="groupExp">
-        <div{% if oView.fcpoIsLogoAdded() %} class="exp"{% endif %}>
-            <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" }) }}</b></a>
-            <dl>
-                <dt>
-                    <input type="hidden" name="confbools[blFCPOPayPalDelAddress]" value="false">
-                    <input type="checkbox" name="confbools[blFCPOPayPalDelAddress]" value="true"
-                           {% if (confbools.blFCPOPayPalDelAddress) %}checked{% endif %}>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPAL_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPAL_DELADDRESS")} %}
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt></dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_PAYPAL_LOGOS" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt></dt>
-                <dd>
-                    <table border="1" cellspacing="0" cellpadding="2">
-                        <tr>
-                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" }) }}</th>
-                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" }) }}</th>
-                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" }) }}</th>
-                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" }) }}</th>
-                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" }) }}</th>
-                        </tr>
-                        {% for aLogo in oView.fcpoGetPayPalLogos() %}
-                            <tr>
-                                <td>
-                                    <input type="hidden" name="logos[{{ aLogo.oxid }}][active]" value="0">
-                                    <input type="checkbox" name="logos[{{ aLogo.oxid }}][active]" value="1"
-                                           {% if (aLogo.active) %}checked{% endif %}>
-                                </td>
-                                <td>
-                                    <select name="logos[{{ aLogo.oxid }}][langid]" class="editinput">
-                                        {% for lang in languages %}
-                                            <option value="{{ lang.id }}"
-                                                    {% if lang.id == aLogo.langid %}SELECTED{% endif %}>{{ lang.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td>
-                                    {% if aLogo.logo == '' %}
-                                        {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" }) }}
-                                    {% else %}
-                                        <img src="{{ aLogo.logo }}">
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <input type="file" name="logo_{{ aLogo.oxid }}">
-                                </td>
-                                <td>
-                                    <input type="radio" name="defaultlogo" value="{{ aLogo.oxid }}"
-                                           {% if aLogo.default == 1 %}CHECKED{% endif %}>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <input type="submit" class="edittext" name="addPayPalLogo"
-                           value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" }) }}"
-                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-        </div>
     </div>
 
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYOLUTION" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYOLUTION" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="hidden" name="confbools[blFCPOPayolutionB2BMode]" value="false">
@@ -795,40 +649,40 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_B2BMODE"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_B2BMODE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_B2BMODE" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_B2BMODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionCompany]"
-                           value="{{ confstrs.sFCPOPayolutionCompany }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionCompany|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_COMPANY"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_COMPANY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_COMPANY" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_COMPANY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionAuthUser]"
-                           value="{{ confstrs.sFCPOPayolutionAuthUser }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionAuthUser|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_USER"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_USER")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_USER" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_USER" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOPayolutionAuthSecret]"
-                           value="{{ confstrs.sFCPOPayolutionAuthSecret }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOPayolutionAuthSecret|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYOLUTION_AUTH_SECRET"), 'sHelpText': help_text("FCPO_HELP_PAYOLUTION_AUTH_SECRET")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_SECRET" }) }}
+                    {{ translate({ ident: "FCPO_PAYOLUTION_AUTH_SECRET" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -838,11 +692,11 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_RATEPAY" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_RATEPAY" })|raw }}</b></a>
             <dl>
                 <dt></dt>
                 <dd>
-                    <h3>{{ translate({ ident: "FCPO_RATEPAY_GENERAL_SETTINGS" }) }}</h3>
+                    <h3>{{ translate({ ident: "FCPO_RATEPAY_GENERAL_SETTINGS" })|raw }}</h3>
                 </dd>
             </dl>
             <dl>
@@ -853,14 +707,15 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_RATEPAY_B2BMODE"), 'sHelpText': help_text("FCPO_HELP_RATEPAY_B2BMODE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_RATEPAY_B2BMODE" }) }}
+                    {{ translate({ ident: "FCPO_RATEPAY_B2BMODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt"
-                           name="confstrs[sFCPORatePaySnippetID]" {% if confstrs.sFCPORatePaySnippetID == '' or confstrs.sFCPORatePaySnippetID == 'ratepay' %} value="ratepay" {% else %}  value="{{ confstrs.sFCPORatePaySnippetID }}" {% endif %}>
+                    <input type="text" class="txt" name="confstrs[sFCPORatePaySnippetID]"
+                           {% if confstrs.sFCPORatePaySnippetID == '' or confstrs.sFCPORatePaySnippetID == 'ratepay'   %}
+                           value="ratepay" {% else %} value="{{ confstrs.sFCPORatePaySnippetID }}" {% endif %}>
                 </dt>
                 <dd>
                     Ratepay Snippet ID
@@ -870,64 +725,69 @@
             <dl>
                 <dt></dt>
                 <dd>
-                    <h3>{{ translate({ ident: "FCPO_PROFILES_RATEPAY" }) }}</h3>
+                    <h3>{{ translate({ ident: "FCPO_PROFILES_RATEPAY" })|raw }}</h3>
                 </dd>
                 <div class="spacer"></div>
             </dl>
             {% for sOxid, aRatePayProfile in oView.fcpoGetRatePayProfiles() %}
-                <dl>
-                    <dt style="padding-top: 10px;"></dt>
-                    <dd>
-                        Shop-ID: <input type="text" class="edittext" name="aRatepayProfiles[{{ sOxid }}][shopid]"
-                                        value="{{ aRatePayProfile.shopid }}">&nbsp;
-                        {{ translate({ ident: "FCPO_PROFILES_RATEPAY_CURRENCY" }) }}:
-                        <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][currency]">
-                            {% for sCurrentCurrencyIso in oView.fcpoGetCurrencyIso() %}
-                                <option value="{{ sCurrentCurrencyIso }}"
-                                        {% if aRatePayProfile.currency == sCurrentCurrencyIso %}selected{% endif %}>{{ sCurrentCurrencyIso }}</option>
-                            {% endfor %}
-                        </select>&nbsp;
-                        {{ translate({ ident: "FCPO_PROFILES_RATEPAY_PAYMENT" }) }}:
-                        <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][paymentid]">
-                            <option value="fcporp_bill"
-                                    {% if aRatePayProfile.OXPAYMENTID == 'fcporp_bill' %}selected{% endif %}>Ratepay
-                                Rechnung
-                            </option>
-                            <option value="fcporp_debitnote"
-                                    {% if aRatePayProfile.OXPAYMENTID == 'fcporp_debitnote' %}selected{% endif %}>
-                                Ratepay Lastschrift
-                            </option>
-                        </select>
-                        <input type="submit" class="edittext" name="aRatepayProfiles[{{ sOxid }}][delete]"
-                               value="{{ translate({ ident: "FCPO_RATEPAY_DELETE_PROFILE" }) }}"
-                               onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}><br>
-                        {% if aRatePayProfile.merchant_name != '' %}
-                            <input type="checkbox" value="{{ sOxid }}"
-                                   onclick="handleRatePayShowDetails(this)"> {{ translate({ ident: "FCPO_RATEPAY_PROFILE_TOGGLE_DETAILS" }) }}
-                        {% endif %}
-                    </dd>
-                    <div class="spacer"></div>
-                </dl>
-                <dl id="ratepay_profile_details_{{ sOxid }}" style="display: none;">
-                    <dt></dt>
-                    <dd>
-                        <h3>{{ translate({ ident: "FCPO_RATEPAY_PROFILE_DETAILS_FOR_ID" }) }} {{ aRatePayProfile.shopid }}</h3>
-                        <table>
-                            {% for sFieldName, sFieldValue in aRatePayProfile %}
-                                <tr>
-                                    <td>{{ sFieldName }}</td>
-                                    <td>{{ sFieldValue }}</td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    </dd>
-                    <div class="spacer"></div>
-                </dl>
+            <dl>
+                <dt style="padding-top: 10px;"></dt>
+                <dd>
+                    Shop-ID: <input type="text" class="edittext" name="aRatepayProfiles[{{ sOxid }}][shopid]"
+                                    value="{{ aRatePayProfile.shopid }}">&nbsp;
+                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_CURRENCY" })|raw }}:
+                    <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][currency]">
+                        {% for sCurrentCurrencyIso in oView.fcpoGetCurrencyIso() %}
+                        <option value="{{ sCurrentCurrencyIso }}"
+                                {% if aRatePayProfile.currency == sCurrentCurrencyIso %}selected{% endif %}>
+                            {{ sCurrentCurrencyIso }}
+                        </option>
+                        {% endfor %}
+                    </select>&nbsp;
+                    {{ translate({ ident: "FCPO_PROFILES_RATEPAY_PAYMENT" })|raw }}:
+                    <select class="edittext" name="aRatepayProfiles[{{ sOxid }}][paymentid]">
+                        <option value="fcporp_bill" {% if aRatePayProfile.OXPAYMENTID == 'fcporp_bill' %}selected{% endif %}>
+                            Ratepay Rechnung
+                        </option>
+                        <option value="fcporp_debitnote"
+                                {% if aRatePayProfile.OXPAYMENTID == 'fcporp_debitnote' %}selected{% endif %}>Ratepay
+                            Lastschrift
+                        </option>
+                        <option value="fcporp_installment"
+                                {% if aRatePayProfile.OXPAYMENTID == 'fcporp_installment' %}selected{% endif %}>Ratepay
+                            Ratenkauf
+                        </option>
+                    </select>
+                    <input type="submit" class="edittext" name="aRatepayProfiles[{{ sOxid }}][delete]"
+                           value="{{ translate({ ident: "FCPO_RATEPAY_DELETE_PROFILE" })|raw }}"
+                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}><br>
+                    {% if aRatePayProfile.merchant_name != '' %}
+                <input type="checkbox" value="{{ sOxid }}"
+                       onclick="fcpoHandleRatePayShowDetails(this)"> {{ translate({ ident: "FCPO_RATEPAY_PROFILE_TOGGLE_DETAILS" })|raw }}
+                    {% endif %}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl id="ratepay_profile_details_{{ sOxid }}" style="display: none;">
+                <dt></dt>
+                <dd>
+                    <h3>{{ translate({ ident: "FCPO_RATEPAY_PROFILE_DETAILS_FOR_ID" })|raw }} {{ aRatePayProfile.shopid }}</h3>
+                    <table>
+                        {% for sFieldName, sFieldValue in aRatePayProfile %}
+                        <tr>
+                            <td>{{ sFieldName }}</td>
+                            <td>{{ sFieldValue }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </dd>
+                <div class="spacer"></div>
+            </dl>
 
             {% endfor %}
             <dl>
                 <dt><input type="submit" class="edittext" name="addRatePayProfile"
-                           value="{{ translate({ ident: "FCPO_RATEPAY_ADD_PROFILE" }) }}"
+                           value="{{ translate({ ident: "FCPO_RATEPAY_ADD_PROFILE" })|raw }}"
                            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
                 <dd></dd>
                 <div class="spacer"></div>
@@ -938,95 +798,89 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_AMAZONPAY" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_APPLE_PAY" })|raw }}</b></a>
+
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOAmazonPaySellerId]"
-                           value="{{ confstrs.sFCPOAmazonPaySellerId }}" disabled>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_AMAZONPAY_SELLERID"), 'sHelpText': help_text("FCPO_HELP_AMAZONPAY_SELLERID")} %}
+                    <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplMerchantId]"
+                           value="{{ confstrs.sFCPOAplMerchantId|raw }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_MERCHANT_ID"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_MERCHANT_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_SELLERID" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_MERCHANT_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
+
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOAmazonPayClientId]"
-                           value="{{ confstrs.sFCPOAmazonPayClientId }}" disabled>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_AMAZONPAY_CLIENTID"), 'sHelpText': help_text("FCPO_HELP_AMAZONPAY_CLIENTID")} %}
+                    <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplCertificate]"
+                           value="{{ confstrs.sFCPOAplCertificate|raw }}" {{ readonly }} id="fcpoAplCertificate">
+
+                    <input id="fcpoAplCertificateFile" type="file" accept=".pem" name="fcpoAplCertificateFile">
+                    <script type="text/javascript">
+                        $("fcpoAplCertificateFile").onchange = function (e) {
+                            $("fcpoAplCertificate").value = this.files[0].name
+                        }
+                    </script>
+
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_CERTIFICATE"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_CERTIFICATE")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_CLIENTID" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_CERTIFICATE" })|raw }}
+                    {% if oViewConf.fcpoCertificateExists() == false %}
+                    <p class="warning">{{ translate({ ident: "FCPO_APPLE_PAY_CONFIG_CERTIFICATE_MISSING" })|raw }}</p>
+                    {% endif %}
                 </dd>
                 <div class="spacer"></div>
             </dl>
-            <dl>
-                <dt><input type="submit" class="edittext" name="getAmazonPayConfiguration"
-                           value="{{ translate({ ident: "FCPO_AMAZONPAY_GET_CONFIG" }) }}"
-                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}></dt>
-                <dd></dd>
-                <div class="spacer"></div>
-            </dl>
+
             <dl>
                 <dt>
-                    <select name="confstrs[sFCPOAmazonButtonType]">
-                        <option value="PwA"
-                                {% if confstrs.sFCPOAmazonButtonType == "PwA" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_PwA" }) }}</option>
-                        <option value="Pay"
-                                {% if confstrs.sFCPOAmazonButtonType == "Pay" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_Pay" }) }}</option>
-                        <option value="A"
-                                {% if confstrs.sFCPOAmazonButtonType == "A" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_A" }) }}</option>
+                    <input type="text" class="txt" style="width: 210px" name="confstrs[sFCPOAplKey]"
+                           value="{{ confstrs.sFCPOAplKey|raw }}" {{ readonly }} id="fcpoAplKey">
+                    <input id="fcpoAplKeyFile" type="file" name="fcpoAplKeyFile">
+                    <script type="text/javascript">
+                        $("fcpoAplKeyFile").onchange = function (e) {
+                            $("fcpoAplKey").value = this.files[0].name
+                        }
+                    </script>
+
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_KEY"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_KEY")} %}
+
+                    <br/>
+                    <textarea name="fcpoAplKeyText"></textarea>
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_APPLE_PAY_KEY" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <input type="password" class="txt" style="width: 210px" name="confstrs[sFCPOAplPassword]"
+                           value="{{ confstrs.sFCPOAplPassword|raw }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_PASSWORD"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_PASSWORD")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_APPLE_PAY_PASSWORD" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <select class="select" multiple size="4" name="confarrs[aFCPOAplCreditCards][]" {{ readonly }}>
+                        {% for sCreditCardCode, oCreditCardData in oView.fcpoGetAplCreditCards() %}
+                        <option value="{{ sCreditCardCode }}" {% if oCreditCardData.selected %} selected{% endif %}>
+                            {{ oCreditCardData.name }}
+                        </option>
+                        {% endfor %}
                     </select>
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <select name="confstrs[sFCPOAmazonButtonColor]">
-                        <option value="Gold"
-                                {% if confstrs.sFCPOAmazonButtonColor == "Gold" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR_GOLD" }) }}</option>
-                        <option value="LightGray"
-                                {% if confstrs.sFCPOAmazonButtonColor == "LightGray" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY" }) }}</option>
-                        <option value="DarkGray"
-                                {% if confstrs.sFCPOAmazonButtonColor == "DarkGray" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY" }) }}</option>
-                    </select>
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_BUTTON_COLOR" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <select name="confstrs[sFCPOAmazonMode]">
-                        <option value="alwayssync"
-                                {% if confstrs.sFCPOAmazonMode == "alwayssync" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_MODE_ALWAYSSYNC" }) }}</option>
-                        <option value="firstsyncthenasync"
-                                {% if confstrs.sFCPOAmazonMode == "firstsyncthenasync" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC" }) }}</option>
-                    </select>
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_MODE" }) }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <select name="confstrs[sFCPOAmazonLoginMode]">
-                        <option value="auto"
-                                {% if confstrs.sFCPOAmazonLoginMode == "auto" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_AUTO" }) }}</option>
-                        <option value="popup"
-                                {% if confstrs.sFCPOAmazonLoginMode == "popup" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_POPUP" }) }}</option>
-                        <option value="redirect"
-                                {% if confstrs.sFCPOAmazonLoginMode == "redirect" %}selected{% endif %}>{{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE_REDIRECT" }) }}</option>
-                    </select>
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_AMAZONPAY_LOGINMODE" }) }}
+                    {{ translate({ ident: "FCPO_APPLE_PAY_CREDITCARD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1036,7 +890,7 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_SECINVOICE" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_SECINVOICE" })|raw }}</b></a>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOSecinvoicePortalId]"
@@ -1044,18 +898,18 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SECINVOICE_PORTAL_ID"), 'sHelpText': help_text("FCPO_HELP_SECINVOICE_PORTAL_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_ID" }) }}
+                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
                     <input type="text" class="txt" name="confstrs[sFCPOSecinvoicePortalKey]"
-                           value="{{ confstrs.sFCPOSecinvoicePortalKey }}" {{ readonly }}>
+                           value="{{ confstrs.sFCPOSecinvoicePortalKey|raw }}" {{ readonly }}>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_SECINVOICE_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_SECINVOICE_PORTAL_KEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_KEY" }) }}
+                    {{ translate({ ident: "FCPO_SECINVOICE_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1065,55 +919,38 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYDIREKT" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_BNPL" })|raw }}</b></a>
             <dl>
                 <dt>
-                    <select name="confstrs[sPaydirektExpressButtonType]">
-                        <option value="none"
-                                {% if confstrs.sPaydirektExpressButtonType == "none" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE" }) }}</option>
-                        <option value="green"
-                                {% if confstrs.sPaydirektExpressButtonType == "green" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN" }) }}</option>
-                        <option value="green2"
-                                {% if confstrs.sPaydirektExpressButtonType == "green2" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN2" }) }}</option>
-                        <option value="white"
-                                {% if confstrs.sPaydirektExpressButtonType == "white" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE" }) }}</option>
-                        <option value="white2"
-                                {% if confstrs.sPaydirektExpressButtonType == "white2" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE2" }) }}</option>
-                    </select>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_BUTTONTYPE"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_BUTTONTYPE")} %}
+                    <input type="text" class="txt" name="confstrs[sFCPOPLPortalId]"
+                           value="{{ confstrs.sFCPOPLPortalId }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_PORTAL_ID"), 'sHelpText': help_text("FCPO_HELP_BNPL_PORTAL_ID")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYDIREKT_BUTTONTYPE" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_PORTAL_ID" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <input type="text" class="txt" name="confstrs[sPaydirektShippingTermsUrl]"
-                           value="{{ confstrs.sPaydirektShippingTermsUrl }}">
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL")} %}
+                    <input type="text" class="txt" name="confstrs[sFCPOPLPortalKey]"
+                           value="{{ confstrs.sFCPOPLPortalKey|raw }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_PORTAL_KEY"), 'sHelpText': help_text("FCPO_HELP_BNPL_PORTAL_KEY")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYDIREKT_SHIPPING_TERMS_URL" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_PORTAL_KEY" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
-                    <select name="confstrs[sPaydirektExpressDeliverySetId]">
-                        <option value="none"
-                                {% if confstrs.sPaydirektExpressDeliverySetId == "none" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYDIREKT_EXPRESS_DELIVERY_NONE" }) }}</option>
-                        {% for oDelivery in oView.fcpoGetDeliverySets() %}
-                            {% set sCurrentSetId = oDelivery.getId() %}
-                            {% set sCurrentSetName = oDelivery.oxdeliveryset__oxtitle.rawValue %}
-                            <option value="{{ sCurrentSetId }}"
-                                    {% if confstrs.sPaydirektExpressDeliverySetId == sCurrentSetId %}SELECTED{% endif %}>{{ sCurrentSetName }}</option>
-                        {% endfor %}
-                    </select>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_DELIVERYSET"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_DELIVERYSET")} %}
+                    <input type="hidden" name="confbools[blFCPOPLAllowDiffAddress]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOPLAllowDiffAddress]" value="true"
+                           {% if (confbools.blFCPOPLAllowDiffAddress) %}checked{% endif %} {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_BNPL_ALLOW_DIFF_ADDRESS"), 'sHelpText': help_text("FCPO_HELP_BNPL_ALLOW_DIFF_ADDRESS")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_PAYDIREKT_DELIVERYSET" }) }}
+                    {{ translate({ ident: "FCPO_BNPL_ALLOW_DIFF_ADDRESS" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1123,34 +960,81 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
-               class="rc"><b>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" }) }}</b></a>
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYDIREKT" })|raw }}</b></a>
+            <dl>
+                <dt>
+                    <select name="confbools[blFCPOPaydirektSecuredPreorder]" onchange="fcpoTogglePaydirektGuaranteePeriod(this, 'fcpoPaydirektGuaranteePeriod')">
+                        <option value="false">
+                            {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_NO" })|raw }}
+                        </option>
+                        <option value="true" {% if confbools.blFCPOPaydirektSecuredPreorder %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_YES" })|raw }}
+                        </option>
+                    </select>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SECURED_PREORDER"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SECURED_PREORDER")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <div id="fcpoPaydirektGuaranteePeriod" style="{% if confbools.blFCPOPaydirektSecuredPreorder == false %} display:none {% endif %}">
+                <dl>
+                    <dt>
+                        <select name="confstrs[sFCPOPaydirektSecuredPreorderGuaranteePeriod]">
+                            {% for i in 1..15 %}
+                                <option value="{{ i }}" {% if confstrs.sFCPOPaydirektSecuredPreorderGuaranteePeriod == i %}SELECTED{% endif %}>
+                                    {{ i }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD"), 'sHelpText': help_text("FCPO_HELP_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD")} %}
+                    </dt>
+                    <dd>
+                        {{ translate({ ident: "FCPO_PAYDIREKT_SECURED_PREORDER_GUARANTEE_PERIOD" })|raw }}
+                    </dd>
+                    <div class="spacer"></div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;"
+               class="rc"><b>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" })|raw }}</b></a>
             <dl>
                 <dt>
                     <select name="confstrs[sTransactionRedirectLogging]">
-                        <option value="none"
-                                {% if confstrs.sTransactionRedirectLogging == "none" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_NONE" }) }}</option>
-                        <option value="all"
-                                {% if confstrs.sTransactionRedirectLogging == "all" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_ALL" }) }}</option>
+                        <option value="none" {% if confstrs.sTransactionRedirectLogging == "none" %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_NONE" })|raw }}
+                        </option>
+                        <option value="all" {% if confstrs.sTransactionRedirectLogging == "all" %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING_ALL" })|raw }}
+                        </option>
                     </select>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECTLOGGING"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECTLOGGING")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTLOGGING" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
             <dl>
                 <dt>
                     <select name="confstrs[sTransactionRedirectMethod]">
-                        <option value="direct"
-                                {% if confstrs.sTransactionRedirectMethod == "direct" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_DIRECT" }) }}</option>
-                        <option value="cronjob"
-                                {% if confstrs.sTransactionRedirectMethod == "cronjob" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_CRONJOB" }) }}</option>
+                        <option value="direct" {% if confstrs.sTransactionRedirectMethod == "direct" %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_DIRECT" })|raw }}
+                        </option>
+                        <option value="cronjob" {% if confstrs.sTransactionRedirectMethod == "cronjob" %}SELECTED{% endif %}>
+                            {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD_CRONJOB" })|raw }}
+                        </option>
                     </select>
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECTMETHOD"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECTMETHOD")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTIONREDIRECTMETHOD" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1161,7 +1045,7 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_TRANSACTIONREDIRECT_TIMEOUT"), 'sHelpText': help_text("FCPO_HELP_TRANSACTIONREDIRECT_TIMEOUT")} %}
                 </dt>
                 <dd>
-                    {{ translate({ ident: "FCPO_TRANSACTION_TIMEOUT" }) }}
+                    {{ translate({ ident: "FCPO_TRANSACTION_TIMEOUT" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1170,9 +1054,9 @@
 
 
     <br>
-    <input type="submit" class="edittext" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"
+    <input type="submit" class="edittext" name="save" value="{{ translate({ ident: "GENERAL_SAVE" })|raw }}"
            onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-    <input type="submit" class="edittext" name="export" value="{{ translate({ ident: "FCPO_EXPORT_CONFIG" }) }}"
+    <input type="submit" class="edittext" name="export" value="{{ translate({ ident: "FCPO_EXPORT_CONFIG" })|raw }}"
            target="_blank" onClick="Javascript:document.myedit.fnc.value='export'" {{ readonly }}>
 </form>
 

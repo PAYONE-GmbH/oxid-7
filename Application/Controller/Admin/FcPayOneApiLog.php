@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,7 +25,6 @@ use Fatchip\PayOne\Application\Model\FcPoRequestLog;
 class FcPayOneApiLog extends FcPayOneAdminDetails
 {
 
-    public $_oFcpoHelper;
     /**
      * Current class template name
      *
@@ -34,29 +32,37 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
      */
     protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog';
 
+    /**
+     * Array with existing status of order
+     *
+     * @var array|null
+     */
+    protected ?array $_aStatus = null;
+
 
     /**
      * Loads transaction log entry with given oxid, passes
-     * it's data to Smarty engine and returns name of template file
-     * "fcpayone_apilog.html.twig".
+     * its data to Twig engine and returns path to a template
+     * "fcpayone_apilog".
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         parent::render();
 
-        $oLogEntry = $this->_oFcpoHelper->getFactoryObject(FcPoRequestLog::class);
+        $oLogEntry = $this->_oFcPoHelper->getFactoryObject(FcPoRequestLog::class);
 
-        $sOxid = $this->_oFcpoHelper->fcpoGetRequestParameter("oxid");
+        $sOxid = $this->_oFcPoHelper->fcpoGetRequestParameter("oxid");
         if ($sOxid != "-1" && isset($sOxid)) {
             // load object
             $oLogEntry->load($sOxid);
             $this->_aViewData["edit"] = $oLogEntry;
         }
 
-        $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
+        $this->_aViewData['sHelpURL'] = $this->_oFcPoHelper->fcpoGetHelpUrl();
 
         return $this->_sThisTemplate;
     }
+
 }

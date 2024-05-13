@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,40 +22,32 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Basket;
 
 class FcPayOneBasketView extends FcPayOneBasketView_parent
 {
 
-    public $_iLastErrorNo;
-    public $_sLastError;
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * Path where paypal logos can be found
+     * Path where PayPal logos can be found
      *
      * @var string
      */
-    protected $_sPayPalExpressLogoPath = 'modules/fc/fcpayone/out/img/';
+    protected string $_sPayPalExpressLogoPath = 'out/modules/fcpayone/img/';
 
     /**
      * Paypal Express picture
      *
-     * @var string
-     */
-    protected $_sPayPalExpressPic;
-
-
-    /**
-     * Paydirekt Express picture
-     *
      * @var string|null
      */
-    protected $_sPaydirektExpressPic;
+    protected ?string $_sPayPalExpressPic = null;
+
 
     /**
      * init object construction
@@ -65,67 +56,37 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-    }
-
-    /**
-     * Overloading render method for checking on amazon logoff
-     *
-     *
-     * @return string
-     */
-    public function render()
-    {
-        $this->_fcpoCheckForAmazonLogoff();
-        return null;
-    }
-
-    /**
-     * Method checks for param fcpoamzaction and logoff from Amazon Session if
-     * value is set to logoff
-     *
-     */
-    private function _fcpoCheckForAmazonLogoff(): void
-    {
-        $sAmzAction = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoamzaction');
-        if ($sAmzAction == 'logoff') {
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('amazonRefNr');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
-        }
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
      * Returns basket error message if there is some. false if none
      *
-     *
-     * @return mixed string|bool
+     * @return bool|string
      */
-    public function fcpoGetBasketErrorMessage()
+    public function fcpoGetBasketErrorMessage(): bool|string
     {
         $mReturn = false;
-        $sMessage = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoerror');
+        $sMessage = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoerror');
         if ($sMessage) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
-            $sMessage = urldecode((string) $sMessage);
-            $mReturn = $oLang->translateString($sMessage);
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerrortext');
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerror');
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
+            $sMessage = urldecode($sMessage);
+            $sMessage = $oLang->translateString($sMessage);
+            $mReturn = $sMessage;
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('payerrortext');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('payerror');
         }
 
         return $mReturn;
     }
 
     /**
-     * Public getter for paypal express picture
+     * Public getter for PayPal express picture
      *
-     *
-     * @return string
+     * @return bool|string
      */
-    public function fcpoGetPayPalExpressPic()
+    public function fcpoGetPayPalExpressPic(): bool|string
     {
         if ($this->_sPayPalExpressPic === null) {
             $this->_sPayPalExpressPic = false;
@@ -138,34 +99,32 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Returns wether paypal express is active or not
+     * Returns whether PayPal express is active or not
      *
-     *
-     * @return boolean
+     * @return bool
      */
-    private function _fcpoIsPayPalExpressActive()
+    protected function _fcpoIsPayPalExpressActive(): bool
     {
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        $oBasket = $this->_oFcPoHelper->getFactoryObject(Basket::class);
         return $oBasket->fcpoIsPayPalExpressActive();
     }
 
     /**
      * Finally fetches needed values and set attribute value
      *
-     *
-     * @return mixed
+     * @return bool|string
      */
-    private function _fcpoGetPayPalExpressPic()
+    protected function _fcpoGetPayPalExpressPic(): bool|string
     {
         $sPayPalExpressPic = false;
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        $oBasket = $this->_oFcPoHelper->getFactoryObject(Basket::class);
         $sPic = $oBasket->fcpoGetPayPalExpressPic();
 
         $sPaypalExpressLogoPath = getShopBasePath() . $this->_sPayPalExpressLogoPath . $sPic;
-        $blLogoPathExists = $this->_oFcpoHelper->fcpoFileExists($sPaypalExpressLogoPath);
+        $blLogoPathExists = $this->_oFcPoHelper->fcpoFileExists($sPaypalExpressLogoPath);
 
         if ($blLogoPathExists) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
             $sShopURL = $oConfig->getCurrentShopUrl(false);
             $sPayPalExpressPic = $sShopURL . $this->_sPayPalExpressLogoPath . $sPic;
         }
@@ -174,14 +133,13 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
     }
 
     /**
-     * Method will return false or redirect to paypal express if used
+     * Method will return false or redirect to PayPal express if used
      *
-     *
-     * @return boolean
+     * @return bool
      */
-    public function fcpoUsePayPalExpress()
+    public function fcpoUsePayPalExpress(): bool
     {
-        $oRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
         $aOutput = $oRequest->sendRequestGenericPayment();
 
         if ($aOutput['status'] == 'ERROR') {
@@ -189,104 +147,12 @@ class FcPayOneBasketView extends FcPayOneBasketView_parent
             $this->_sLastError = $aOutput['customermessage'];
             return false;
         } elseif ($aOutput['status'] == 'REDIRECT') {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoWorkorderId', $aOutput['workorderid']);
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoWorkorderId', $aOutput['workorderid']);
+            $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
             $oUtils->redirect($aOutput['redirecturl'], false);
         }
-    }
-
-    /**
-     * Public getter for paydirekt express picture
-     *
-     *
-     * @return mixed
-     */
-    public function fcpoGetPaydirektExpressPic()
-    {
-        if ($this->_sPaydirektExpressPic === null) {
-            $this->_sPaydirektExpressPic = false;
-            if ($this->_fcpoIsPaydirektExpressActive()) {
-                $this->_sPaydirektExpressPic =
-                    $this->_fcpoGetPaydirektExpressPic();
-            }
-        }
-        return $this->_sPaydirektExpressPic;
-    }
-
-    /**
-     * Returns if paydirekt express is set active
-     *
-     *
-     * @return bool
-     */
-    private function _fcpoIsPaydirektExpressActive()
-    {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpopaydirekt_express');
-        return (bool)$oPayment->oxpayments__oxactive->value;
-    }
-
-    /**
-     * Returns actual Paydirekt picture. Using paypal express path due its
-     * actually the same
-     *
-     *
-     * @return mixed
-     */
-    private function _fcpoGetPaydirektExpressPic()
-    {
-        $sPaydirektExpressPic = false;
-        $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
-        $sPic = $oBasket->fcpoGetPaydirektExpressPic();
-        $sPaydirektExpressLogoPath =
-            getShopBasePath() .
-            $this->_sPayPalExpressLogoPath .
-            $sPic;
-        $blLogoPathExists =
-            $this->_oFcpoHelper->fcpoFileExists($sPaydirektExpressLogoPath);
-        if ($blLogoPathExists) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $sShopURL = $oConfig->getCurrentShopUrl(false);
-            $sPaydirektExpressPic =
-                $sShopURL . $this->_sPayPalExpressLogoPath . $sPic;
-        }
-        return $sPaydirektExpressPic;
-    }
-
-    /**
-     * Calling paydirekt express and deliver REDIRECT or false if not available
-     *
-     *
-     * @return boolean|void
-     */
-    public function fcpoUsePaydirektExpress()
-    {
-        $this->fcpoLogoutUser();
-
-        $oRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-        $aOutput = $oRequest->sendRequestPaydirektCheckout();
-        $blIsRedirect = ($aOutput['status'] == 'REDIRECT');
-        if ($blIsRedirect) {
-            $this->_oFcpoHelper
-                ->fcpoSetSessionVariable('fcpoWorkorderId', $aOutput['workorderid']);
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $oUtils->redirect($aOutput['redirecturl'], false);
-            return;
-        }
-        $this->_iLastErrorNo = $aOutput['errorcode'];
-        $this->_sLastError = $aOutput['customermessage'];
 
         return false;
     }
 
-
-    /**
-     * Logout user
-     *
-     */
-    public function fcpoLogoutUser(): void
-    {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oSession->deleteVariable('usr');
-    }
 }

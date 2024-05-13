@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -33,7 +32,6 @@ use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Request;
 use OxidEsales\Eshop\Core\Session;
-use OxidEsales\Eshop\Core\ShopVersion;
 use OxidEsales\Eshop\Core\Utils;
 use OxidEsales\Eshop\Core\UtilsDate;
 use OxidEsales\Eshop\Core\UtilsFile;
@@ -42,64 +40,30 @@ use OxidEsales\Eshop\Core\UtilsServer;
 use OxidEsales\Eshop\Core\UtilsView;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-final class FcPoHelper extends BaseModel
+class FcPoHelper extends BaseModel
 {
+
     /**
-     * oxconfig instance
+     * Config instance
+     *
+     * @var Config|null
      */
     private static ?Config $_oConfig = null;
 
     /**
-     * oxconfig instance
+     * Session instance
+     *
+     * @var Session|null
      */
     private static ?Session $_oSession = null;
 
-    /**
-     * Flags if shop uses registry
-     */
-    private static ?bool $_blUseRegistry = null;
-
-    /** @var array */
-    private const A_MODULE = [];
 
     /**
-     * static Getter for config instance
-     *
-     * @return Config
+     * Constructor
      */
-    public static function fcpoGetStaticConfig(): Config
+    public function __construct()
     {
-        return self::_useRegistry() ? Registry::getConfig() : Config::getInstance();
-    }
-
-    /**
-     * Static getter for checking newer available methods and classes in shop
-     *
-     *
-     * @return bool
-     */
-    private static function _useRegistry(): bool
-    {
-        if (self::$_blUseRegistry === null) {
-            self::$_blUseRegistry = false;
-            if (class_exists('Registry')) {
-                $config = Registry::getConfig();
-                if (method_exists($config, 'getRequestParameter')) {
-                    self::$_blUseRegistry = true;
-                }
-            }
-        }
-        return self::$_blUseRegistry;
-    }
-
-    /**
-     * Method returns current module version
-     *
-     * @return string
-     */
-    public static function fcpoGetStaticModuleVersion(): string
-    {
-        return '1.0.1';
+        parent::__construct();
     }
 
     /**
@@ -156,39 +120,21 @@ final class FcPoHelper extends BaseModel
      */
     public function fcpoGetInstance(string $sClassName, string $sIncludePath = ""): object
     {
-        if ($sIncludePath !== '' && $sIncludePath !== '0') {
+        if ($sIncludePath) {
             include_once $sIncludePath;
         }
-
         return new $sClassName();
     }
 
     /**
      * Wrapper method for getting a session variable
+     *
+     * @param string $sVariable
+     * @return mixed
      */
     public function fcpoGetSessionVariable(string $sVariable): mixed
     {
         return $this->getSession()->getVariable($sVariable);
-    }
-
-    /**
-     * Returns shop version
-     */
-    public function fcpoGetShopVersion(): int
-    {
-        return oxNew(ShopVersion::class)->getVersion();
-    }
-
-    /**
-     * oxConfig instance getter
-     */
-    public function fcpoGetConfig(): Config
-    {
-        if (self::$_oConfig == null) {
-            self::$_oConfig = Registry::getConfig();
-        }
-
-        return self::$_oConfig;
     }
 
     /**
@@ -209,12 +155,12 @@ final class FcPoHelper extends BaseModel
      * Wrapper method for setting a session variable
      *
      * @param string $sVariable
-     * @param string $sValue
+     * @param mixed|null $mValue
      * @return void
      */
-    public function fcpoSetSessionVariable(string $sVariable, string $sValue): void
+    public function fcpoSetSessionVariable(string $sVariable, mixed $mValue = null): void
     {
-        $this->getSession()->setVariable($sVariable, $sValue);
+        $this->getSession()->setVariable($sVariable, $mValue);
     }
 
     /**
@@ -231,9 +177,9 @@ final class FcPoHelper extends BaseModel
     /**
      * Getter for session instance
      *
-     * @return Session|null
+     * @return Session
      */
-    public function fcpoGetSession(): ?Session
+    public function fcpoGetSession(): Session
     {
         return $this->getSession();
     }
@@ -241,17 +187,13 @@ final class FcPoHelper extends BaseModel
     /**
      * Getter for database instance
      *
-     * @param $blAssoc bool
-     * @return DatabaseInterface|null
+     * @param bool $blAssoc with assoc mode
+     * @return DatabaseInterface
      * @throws DatabaseConnectionException
      */
-    public function fcpoGetDb(bool $blAssoc = false): ?DatabaseInterface
+    public function fcpoGetDb(bool $blAssoc = false): DatabaseInterface
     {
-        if ($blAssoc) {
-            return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-        } else {
-            return DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_NUM);
-        }
+        return DatabaseProvider::getDb($blAssoc ? DatabaseProvider::FETCH_MODE_ASSOC : DatabaseProvider::FETCH_MODE_NUM);
     }
 
     /**
@@ -263,16 +205,15 @@ final class FcPoHelper extends BaseModel
     public function fcpoGetRequestParameter(string $sParameter): mixed
     {
         $oRequest = Registry::get(Request::class);
-
         return $oRequest->getRequestParameter($sParameter);
     }
 
     /**
      * Returns a language Instance
      *
-     * @return mixed
+     * @return Language
      */
-    public function fcpoGetLang(): mixed
+    public function fcpoGetLang(): Language
     {
         return Registry::get(Language::class);
     }
@@ -288,7 +229,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of UtilsObject
+     * Returns a utilsobject instance
      *
      * @return UtilsObject
      */
@@ -298,7 +239,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of Utils
+     * Returns an instance of oxutils
      *
      * @return Utils
      */
@@ -308,7 +249,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of UtilsView
+     * Returns an instance of oxutilsview
      *
      * @return UtilsView
      */
@@ -318,7 +259,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of ViewConfig
+     * Returns an instance of oxviewvonfig
      *
      * @return ViewConfig
      */
@@ -328,7 +269,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of UtilsServer
+     * Returns an instance of oxutilserver
      *
      * @return UtilsServer
      */
@@ -338,7 +279,7 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * Returns an instance of UtilsDate
+     * Returns an instance of oxUtilsDate
      *
      * @return UtilsDate
      */
@@ -354,8 +295,46 @@ final class FcPoHelper extends BaseModel
      */
     public function fcpoGetModuleVersion(): string
     {
-        include_once __DIR__ . "/../metadata.php";
-        return self::A_MODULE['version'];
+        $aModule = [];
+        include_once VENDOR_PATH . "payone-gmbh/oxid-7/metadata.php";
+        if (empty($aModule['version'])) {
+            return self::fcpoGetStaticModuleVersion();
+        }
+        return $aModule['version'];
+    }
+
+    /**
+     * Method returns current module version
+     *
+     * @return string
+     */
+    public static function fcpoGetStaticModuleVersion(): string
+    {
+        return '1.0.0';
+    }
+
+    /**
+     * Getter for config instance
+     *
+     * @return Config
+     */
+    public function fcpoGetConfig(): Config
+    {
+        if (self::$_oConfig == null) {
+            self::$_oConfig = Registry::getConfig();
+        }
+
+        return self::$_oConfig;
+    }
+
+    /**
+     * Returns path to vendor dir
+     *
+     * @return string
+     */
+    public function getVendorDir(): string
+    {
+        return VENDOR_PATH;
     }
 
     /**
@@ -383,9 +362,8 @@ final class FcPoHelper extends BaseModel
      * Output content as header
      *
      * @param string $sContent
-     * @return void
      */
-    public function fcpoHeader(string $sContent): void
+    public function fcpoHeader(string $sContent)
     {
         header($sContent);
     }
@@ -393,7 +371,6 @@ final class FcPoHelper extends BaseModel
     /**
      * Wrapper for php exit on being able to be mocked
      *
-     * @return void
      */
     #[NoReturn] public function fcpoExit()
     {
@@ -420,31 +397,8 @@ final class FcPoHelper extends BaseModel
     {
         $oConfig = $this->fcpoGetConfig();
         $sEdition = $oConfig->getActiveShop()->oxshops__oxedition->value;
-        $shopVersion = $oConfig->getActiveView()->getShopVersion();
-
-        return $sEdition . $shopVersion;
-    }
-
-    /**
-     * Returns shop version as integer
-     *
-     * @return int
-     */
-    public function fcpoGetIntShopVersion(): int
-    {
-        $oConfig = $this->fcpoGetConfig();
-        $sVersion = $oConfig->getActiveShop()->oxshops__oxversion->value;
-        $iVersion = (int)str_replace('.', 
-    '', (string) $sVersion);
-        // fix for ce/pe 4.10.0+
-        if ($iVersion > 1000) {
-            $iVersion *= 10;
-        } else {
-            while ($iVersion < 1000) {
-                $iVersion *= 10;
-            }
-        }
-        return $iVersion;
+        $sVersion = $oConfig->getActiveView()->getShopVersion();
+        return $sEdition . $sVersion;
     }
 
     /**
@@ -455,6 +409,7 @@ final class FcPoHelper extends BaseModel
     public function fcpoGetShopName(): string
     {
         $oConfig = $this->fcpoGetConfig();
+
         return $oConfig->getActiveShop()->oxshops__oxname->value;
     }
 
@@ -469,31 +424,35 @@ final class FcPoHelper extends BaseModel
     }
 
     /**
-     * @return string[]
+     * Returns the list of possible tx statuses
+     *
+     * @return array
      */
     public function fcpoGetPayoneStatusList(): array
     {
-        return ['appointed', 
-    'capture', 
-    'paid', 
-    'underpaid', 
-    'cancelation', 
-    'refund', 
-    'debit', 
-    'reminder', 
-    'vauthorization', 
-    'vsettlement', 
-    'transfer', 
-    'invoice'];
+        return [
+            'appointed',
+            'capture',
+            'paid',
+            'underpaid',
+            'cancelation',
+            'refund',
+            'debit',
+            'reminder',
+            'vauthorization',
+            'vsettlement',
+            'transfer',
+            'invoice',
+        ];
     }
 
     /**
      * Returns a static instance of given object name
      *
-     * @param $sObjectName
-     * @return mixed
+     * @param string $sObjectName
+     * @return object
      */
-    public function getStaticInstance($sObjectName): mixed
+    public function getStaticInstance(string $sObjectName): object
     {
         return Registry::get($sObjectName);
     }
@@ -521,39 +480,69 @@ final class FcPoHelper extends BaseModel
     /**
      * Item price in smallest available unit
      *
-     * @param BasketItem|float $mValue
-     * @return int
+     * @param double|BasketItem $mValue
+     * @return float|int
      */
-    public function fcpoGetCentPrice(BasketItem|float $mValue): int
+    public function fcpoGetCentPrice(float|BasketItem $mValue): float|int
     {
         $oConfig = $this->fcpoGetConfig();
         if ($mValue instanceof BasketItem) {
             $oPrice = $mValue->getPrice();
-            $bruttoPrice = $oPrice->getBruttoPrice();
+            $dBruttoPricePosSum = $oPrice->getBruttoPrice();
             $dAmount = $mValue->getAmount();
-            $dBruttoPrice = round($bruttoPrice / $dAmount, 2);
+            $dBruttoPrice = round($dBruttoPricePosSum / $dAmount, 2);
         } else {
             $dBruttoPrice = $mValue;
         }
 
-        $actShopCurrencyObject = $oConfig->getActShopCurrencyObject();
-        $dFactor = 10.0 ** $actShopCurrencyObject->decimal;
+        $oCur = $oConfig->getActShopCurrencyObject();
+        $dFactor = (double)pow(10, $oCur->decimal);
 
         return $dBruttoPrice * $dFactor;
     }
 
     /**
-     * Returns path to modules dir
+     * Generates a Universally Unique Identifier (UUID)
      *
-     * @param bool $absolute mode - absolute/relative path
+     * @return string
+     * @throws Exception
      */
-    public function getModulesDir(bool $absolute = true): string
+    public function fcpoGenerateUUIDv4(): string
     {
-        if ($absolute) {
-            $oConfig = $this->fcpoGetConfig();
-            return $oConfig->getConfigParam('sShopDir') . 'modules/';
-        } else {
-            return 'modules/';
-        }
+        // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+        $data = random_bytes(16);
+        assert(strlen($data) == 16);
+
+        // Set version to 0100
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        // Set bits 6-7 to 10
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        // Output the 36 character UUID.
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    /**
+     * Checks if BNPL Portal and Key are configured
+     *
+     * @return bool
+     */
+    public function fcpoIsBNPLConfigured(): bool
+    {
+        $oConfig = $this->fcpoGetConfig();
+        return !empty($oConfig->getConfigParam('sFCPOPLPortalId')) &&
+            !empty($oConfig->getConfigParam('sFCPOPLPortalKey'));
+    }
+
+    /**
+     * Convert a price from cent format (xxxxxx) into precision-2 decimal format (x.xxx,xx)
+     * for display purpose
+     *
+     * @param int $iAmount
+     * @return string
+     */
+    public function fcpoPriceFromCentToDec(int $iAmount): string
+    {
+        return number_format($iAmount / 100, 2, ',', '.');
     }
 }

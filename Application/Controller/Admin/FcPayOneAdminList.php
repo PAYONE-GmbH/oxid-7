@@ -20,11 +20,39 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneAdminList extends AdminListController
 {
+
+    /**
+     * Helper object for dealing with different shop versions
+     *
+     * @var FcPoHelper
+     */
+    protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var DatabaseInterface
+     */
+    protected DatabaseInterface $_oFcPoDb;
+
+
+    /**
+     * Init needed data
+     * @throws DatabaseConnectionException
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
+    }
+
 }

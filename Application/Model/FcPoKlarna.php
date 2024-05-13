@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,116 +20,39 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
-final class FcPoKlarna extends BaseModel
+class FcPoKlarna extends BaseModel
 {
+
+    /**
+     * Helper object for dealing with different shop versions
+     *
+     * @var FcPoHelper
+     */
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    private readonly DatabaseInterface $_oFcpoDb;
+    protected DatabaseInterface $_oFcPoDb;
+
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
     }
 
-    /**
-     * Returns stored store ids
-     *
-     * 
-     * @return array<int|string, mixed>
-     */
-    public function fcpoGetStoreIds(): array
-    {
-        $aStoreIds = [];
-        $sQuery = "SELECT oxid, fcpo_storeid FROM fcpoklarnastoreids ORDER BY oxid ASC";
-        $aRows = $this->_oFcpoDb->getAll($sQuery);
-        foreach ($aRows as $aRow) {
-            $aStoreIds[$aRow['oxid']] = $aRow['fcpo_storeid'];
-        }
-
-        return $aStoreIds;
-    }
-
-    /**
-     * Add/Update klarna campaigns into database
-     *
-     * @param array $aCampaigns
-     */
-    public function fcpoInsertCampaigns($aCampaigns): void
-    {
-        if (is_array($aCampaigns) && $aCampaigns !== []) {
-            foreach ($aCampaigns as $iId => $aCampaignData) {
-                if (array_key_exists('delete', $aCampaignData)) {
-                    $sQuery = "DELETE FROM fcpoklarnacampaigns WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
-                } else {
-                    $sQuery = " UPDATE
-                                    fcpoklarnacampaigns
-                                SET
-                                    fcpo_campaign_code = " . DatabaseProvider::getDb()->quote($aCampaignData['code']) . ",
-                                    fcpo_campaign_title = " . DatabaseProvider::getDb()->quote($aCampaignData['title']) . ",
-                                    fcpo_campaign_language = " . DatabaseProvider::getDb()->quote(serialize($aCampaignData['language'])) . ",
-                                    fcpo_campaign_currency = " . DatabaseProvider::getDb()->quote(serialize($aCampaignData['currency'])) . "
-                                WHERE
-                                    oxid = " . DatabaseProvider::getDb()->quote($iId);
-                }
-                $this->_oFcpoDb->Execute($sQuery);
-            }
-        }
-    }
-
-    /**
-     * Add/Update klarna storeid into database
-     *
-     * @param array $aStoreIds
-     */
-    public function fcpoInsertStoreIds($aStoreIds): void
-    {
-        if (is_array($aStoreIds) && $aStoreIds !== []) {
-            foreach ($aStoreIds as $iId => $aStoreIdData) {
-                if (array_key_exists('delete', $aStoreIdData)) {
-                    $sQuery = "DELETE FROM fcpopayment2country WHERE fcpo_paymentid = 'KLV' AND fcpo_type = " . DatabaseProvider::getDb()->quote($iId);
-                    $this->_oFcpoDb->Execute($sQuery);
-                    $sQuery = "DELETE FROM fcpoklarnastoreids WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
-                } else {
-                    $sQuery = "UPDATE fcpoklarnastoreids SET fcpo_storeid = " . DatabaseProvider::getDb()->quote($aStoreIdData['id']) . " WHERE oxid = " . DatabaseProvider::getDb()->quote($iId);
-                }
-                $this->_oFcpoDb->Execute($sQuery);
-            }
-        }
-    }
-
-    /**
-     * Add Klarna store id
-     *
-     * 
-     */
-    public function fcpoAddKlarnaStoreId(): void
-    {
-        $sQuery = "INSERT INTO fcpoklarnastoreids (fcpo_storeid) VALUES ('')";
-        $this->_oFcpoDb->Execute($sQuery);
-    }
-
-    /**
-     * Add Klarna campaign id
-     *
-     * 
-     */
-    public function fcpoAddKlarnaCampaign(): void
-    {
-        $sQuery = "INSERT INTO fcpoklarnacampaigns (fcpo_campaign_code, fcpo_campaign_title) VALUES ('', 
-    '')";
-        $this->_oFcpoDb->Execute($sQuery);
-    }
 }

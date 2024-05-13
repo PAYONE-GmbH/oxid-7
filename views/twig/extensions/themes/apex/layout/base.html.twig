@@ -1,0 +1,16 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block base_style %}
+    {{ parent() }}
+{% endblock %}
+
+{% block base_js %}
+    {{ parent() }}
+    {{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/jquery-3.6.0.min.js"), dynamic: __oxid_include_dynamic }) }}
+    {% capture assign = "sPayoneBaseUrl" %}
+        payoneAjaxControllerUrl = '{{ oViewConf.fcpoGetAjaxControllerUrl() }}';
+    {% endcapture %}
+    {{ script({ add: sPayoneBaseUrl, dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.getModuleUrl("fcpayone", "js/fcPayOne.js"), dynamic: __oxid_include_dynamic }) }}
+    {{ script({ include: oViewConf.fcpoGetApplePayLibraryUrl(), dynamic: __oxid_include_dynamic }) }}
+{% endblock %}

@@ -22,103 +22,77 @@ namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\UtilsObject;
+use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
 class FcPayOneUser extends FcPayOneUser_parent
 {
 
-    public $oxuser__oxpassword;
-    public $oxuser__oxboni;
-    public $oxuser__oxcountryid;
-    public $oxuser__fcpobonicheckdate;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxfname;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxlname;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxstreet;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxstreetnr;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxzip;
-    /**
-     * @var Fatchip\PayOne\Application\Model\oxField
-     */
-    public $oxuser__oxcity;
-    /**
-     * @var null
-     */
-    public $_oGroups;
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * List of userflag ids of user
      *
-     * @var array
+     * @var array|null
      */
-    protected $_aUserFlags;
+    protected ?array $_aUserFlags = null;
 
     /**
      * Blocked payments for user (unvalidated)
      *
      * @var array
      */
-    protected $_aBlockedPaymentIds = [];
+    protected array $_aBlockedPaymentIds = [];
 
     /**
      * Forbidden payments for user (validated)
      *
      * @var array
      */
-    protected $_aForbiddenPaymentIds = [];
-    /** @var array<string, int> */
-    private const A_MAP = ['G' => 500, 'Y' => 300, 'R' => 100];
+    protected array $_aForbiddenPaymentIds = [];
+
 
     /**
      * init object construction
      *
-     * @return null
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
     /**
      * Returns if given payment is allowed by flags
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return bool
      */
-    public function fcpoPaymentCurrentlyAllowedByFlags($sPaymentId)
+    public function fcpoPaymentCurrentlyAllowedByFlags(string $sPaymentId): bool
     {
         $aForbiddenPayments = $this->fcpoGetForbiddenPaymentIds();
-
         return !in_array($sPaymentId, $aForbiddenPayments);
     }
 
     /**
      * Returns an array of forbidden paymentids
      *
-     * 
      * @return array
      */
-    public function fcpoGetForbiddenPaymentIds()
+    public function fcpoGetForbiddenPaymentIds(): array
     {
         $this->_fcpoAddForbiddenByUserFlags();
 
@@ -128,13 +102,13 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Adds assigned payone userflags to user
      *
-     * @param $aForbiddenPayments
+     * @return void
      */
-    private function _fcpoAddForbiddenByUserFlags(): void
+    protected function _fcpoAddForbiddenByUserFlags(): void
     {
         $aUserFlags = $this->fcpoGetFlagsOfUser();
-        foreach ($aUserFlags as $aUserFlag) {
-            $aPaymentsNotAllowedByFlag = $aUserFlag->fcpoGetBlockedPaymentIds();
+        foreach ($aUserFlags as $oUserFlag) {
+            $aPaymentsNotAllowedByFlag = $oUserFlag->fcpoGetBlockedPaymentIds();
             $this->_aForbiddenPaymentIds = array_merge($this->_aForbiddenPaymentIds, $aPaymentsNotAllowedByFlag);
         }
     }
@@ -142,9 +116,9 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns current userflags
      *
-     * @return array
+     * @return array|null
      */
-    public function fcpoGetFlagsOfUser()
+    public function fcpoGetFlagsOfUser(): ?array
     {
         if ($this->_aUserFlags === null) {
             $this->_fcpoSetUserFlags();
@@ -155,20 +129,21 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Sets current flags of user
      *
-     * 
-     * @return array
+     * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    private function _fcpoSetUserFlags(): void
+    protected function _fcpoSetUserFlags(): void
     {
         $this->_aUserFlags = [];
         $aUserFlagInfos = $this->_fcpoGetUserFlagInfos();
-        foreach ($aUserFlagInfos as $aUserFlagInfo) {
-            $sOxid = $aUserFlagInfo->sOxid;
-            $sUserFlagId = $aUserFlagInfo->sUserFlagId;
-            $sTimeStamp = $aUserFlagInfo->sTimeStamp;
+        foreach ($aUserFlagInfos as $oUserFlagInfo) {
+            $sOxid = $oUserFlagInfo->sOxid;
+            $sUserFlagId = $oUserFlagInfo->sUserFlagId;
+            $sTimeStamp = $oUserFlagInfo->sTimeStamp;
 
 
-            $oUserFlag = oxNew(FcPouserflag::class);
+            $oUserFlag = oxNew(FcPoUserFlag::class);
             if ($oUserFlag->load($sUserFlagId)) {
                 $oUserFlag->fcpoSetAssignId($sOxid);
                 $oUserFlag->fcpoSetTimeStamp($sTimeStamp);
@@ -179,15 +154,16 @@ class FcPayOneUser extends FcPayOneUser_parent
 
     /**
      * Returns an array of userflag infos mandatory for
-     * determing effects
+     * determining effects
      *
-     *
-     * @return \stdClass[]
+     * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    private function _fcpoGetUserFlagInfos(): array
+    protected function _fcpoGetUserFlagInfos(): array
     {
         $aUserFlagInfos = [];
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $sUserId = $this->getId();
         $sQuery = "
           SELECT
@@ -220,21 +196,28 @@ class FcPayOneUser extends FcPayOneUser_parent
      * @param $sOXID
      * @return mixed
      */
-    public function load($sOXID)
+    public function load($sOXID): mixed
     {
-        $this->_fcpoSetUserFlags();
-        return null;
+        $mReturn = parent::load($sOXID);
+        if ($mReturn !== false) {
+            $this->_fcpoSetUserFlags();
+        }
+
+        return $mReturn;
     }
 
     /**
      * Adds (or refreshes) a payone user flag
      *
-     * @param $oUserFlag
+     * @param object $oUserFlag
+     * @return void
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoAddPayoneUserFlag($oUserFlag): void
+    public function fcpoAddPayoneUserFlag(object $oUserFlag): void
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
-        $oUtilsObject = $this->_oFcpoHelper->getFactoryObject('oxUtilsObject');
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
+        $oUtilsObject = $this->_oFcPoHelper->getFactoryObject(UtilsObject::class);
         $sUserFlagId = $oUserFlag->fcpouserflags__oxid->value;
         $sUserId = $this->getId();
         $sNewOxid = $oUtilsObject->generateUId();
@@ -256,120 +239,59 @@ class FcPayOneUser extends FcPayOneUser_parent
           )
         ";
 
-        $oDb->Execute($sQuery);
+        $oDb->execute($sQuery);
     }
 
     /**
-     * Method manages adding/merging userdata
+     * Method adds a delivery address to user and directly set the deladrid session variable
      *
      * @param array $aResponse
+     * @param string $sUserOxid
+     * @param bool|null $blFixUtf8
+     * @return void
      */
-    public function fcpoSetAmazonOrderReferenceDetailsResponse($aResponse): void
+    public function _fcpoAddDeliveryAddress(array $aResponse, string $sUserOxid, ?bool $blFixUtf8 = false): void
     {
-        $sAmazonEmailAddress = $this->_fcpoAmazonEmailEncode($aResponse['add_paydata[email]']);
-        $aResponse['add_paydata[email]'] = $sAmazonEmailAddress;
-        $this->_fcpoAddOrUpdateAmazonUser($aResponse);
-    }
+        if ($blFixUtf8) {
+            $aResponse = array_map('utf8_decode', $aResponse);
+        }
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+        $sFirstName = trim($aResponse['add_paydata[shipping_firstname]']);
+        $sLastName = trim($aResponse['add_paydata[shipping_lastname]']);
 
-    /**
-     * Makes this Email unique to be able to handle amazon users different from standard users
-     * Currently the email address simply gets a prefix
-     *
-     * @param $sEmail
-     * @return string
-     */
-    private function _fcpoAmazonEmailEncode($sEmail)
-    {
-        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
-
-        return $oViewConf->fcpoAmazonEmailEncode($sEmail);
-    }
-
-    /**
-     * Checks if a user should be added or updated, redirects to matching method
-     * and logs user in
-     *
-     * @param $aResponse
-     */
-    private function _fcpoAddOrUpdateAmazonUser($aResponse): void
-    {
-        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
-        $blUserExists = $this->_fcpoUserExists($sAmazonEmailAddress);
-        $sUserId = $blUserExists ? $this->_fcpoUpdateAmazonUser($aResponse) : $this->_fcpoAddAmazonUser($aResponse);
-        // logoff and on again
-        $this->_fcpoLogMeIn($sUserId);
-    }
-
-    /**
-     * Method checks if a user WITH password exists using the given email-address
-     *
-     * @param string $sEmailAddress
-     * @param bool   $blWithPasswd
-     * @return bool
-     */
-    private function _fcpoUserExists($sEmailAddress, $blWithPasswd = false)
-    {
-        $blReturn = false;
-        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sEmailAddress);
-        if ($sUserOxid && !$blWithPasswd) {
-            $blReturn = true;
-        } elseif ($sUserOxid && $blWithPasswd) {
-            $this->load($sUserOxid);
-            $blReturn = (bool) $this->oxuser__oxpassword->value;
+        if (empty($sLastName)) {
+            $aNameParts = $this->_fcpoSplitNameParts($sFirstName);
+            $sFirstName = $aNameParts['firstname'];
+            $sLastName = $aNameParts['lastname'];
         }
 
-        return $blReturn;
-    }
+        $oAddress = $this->_oFcPoHelper->getFactoryObject(Address::class);
+        $oAddress->oxaddress__oxuserid = new Field($sUserOxid);
+        $oAddress->oxaddress__oxaddressuserid = new Field($sUserOxid);
+        $oAddress->oxaddress__oxfname = new Field($sFirstName);
+        $oAddress->oxaddress__oxlname = new Field($sLastName);
+        $oAddress->oxaddress__oxstreet = new Field($aStreetParts['street']);
+        $oAddress->oxaddress__oxstreetnr = new Field($aStreetParts['streetnr']);
+        $oAddress->oxaddress__oxfon = new Field($aResponse['add_paydata[shipping_telephonenumber]']);
+        $oAddress->oxaddress__oxcity = new Field($aResponse['add_paydata[shipping_city]']);
+        $oAddress->oxaddress__oxcountry = new Field($aResponse['add_paydata[shipping_country]']);
+        $oAddress->oxaddress__oxcountryid = new Field($sCountryId);
+        $oAddress->oxaddress__oxzip = new Field($aResponse['add_paydata[shipping_zip]']);
+        $oAddress->oxaddress__oxaddinfo = new Field($aResponse['add_paydata[shipping_addressaddition]']);
+        $oAddress->oxaddress__oxcompany = new Field($aResponse['add_paydata[shipping_company]']);
 
-    /**
-     * Method delivers OXID of a user by offering an email address or false if email does not exist
-     *
-     * @param string $sAmazonEmailAddress
-     * @return mixed
-     */
-    private function _fcpoGetUserOxidByEmail($sAmazonEmailAddress)
-    {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
-        $sQuery = "SELECT OXID FROM oxuser WHERE OXUSERNAME=" . $oDb->quote($sAmazonEmailAddress);
+        // check if address exists
+        $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
+        $blExists = $this->_fcpoCheckAddressExists($sEncodedDeliveryAddress);
+        if ($blExists) {
+            $oAddress->load($sEncodedDeliveryAddress);
+        } else {
+            $oAddress->setId($sEncodedDeliveryAddress);
+            $oAddress->save();
+        }
 
-        return $oDb->GetOne($sQuery);
-    }
-
-    /**
-     * Updating user. Checking current address, if different add new address as additional address to user
-     * iff current address is not known until now
-     *
-     * @param $aResponse
-     * @return string
-     */
-    private function _fcpoUpdateAmazonUser($aResponse)
-    {
-        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
-        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
-
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
-        $oUser->load($sUserOxid);
-
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
-
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField(trim((string) $aResponse['add_paydata[billing_firstname]']));
-        $oUser->oxuser__oxlname = new oxField(trim((string) $aResponse['add_paydata[billing_lastname]']));
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
-        $oUser->addToGroup('oxidnotyetordered');
-
-        $oUser->save();
-
-        // add and set deliveryaddress
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
-
-        return $sUserOxid;
+        $this->_oFcPoHelper->fcpoSetSessionVariable('deladrid', $sEncodedDeliveryAddress);
     }
 
     /**
@@ -378,9 +300,8 @@ class FcPayOneUser extends FcPayOneUser_parent
      * @param string $sStreetAndStreetNr
      * @return array
      */
-    private function _fcpoSplitStreetAndStreetNr($sStreetAndStreetNr)
+    protected function _fcpoSplitStreetAndStreetNr(string $sStreetAndStreetNr): array
     {
-        $aReturn = [];
         /**
          * @todo currently very basic by simply splitting of space
          */
@@ -405,74 +326,23 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns id of a countrycode
      *
-     * @param $sIso2Country
+     * @param string $sIso2Country
      * @return string
      */
-    private function _fcpoGetCountryIdByIso2($sIso2Country)
+    protected function _fcpoGetCountryIdByIso2(string $sIso2Country): string
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
-
+        $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
         return $oCountry->getIdByCode($sIso2Country);
-    }
-
-    /**
-     * Method adds a delivery address to user and directly set the deladrid session variable
-     *
-     * @param array  $aResponse
-     * @param string $sUserOxid
-     */
-    public function _fcpoAddDeliveryAddress($aResponse, $sUserOxid, $blFixUtf8 = false): void
-    {
-        if ($blFixUtf8) {
-            $aResponse = array_map('utf8_decode', $aResponse);
-        }
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
-        $sFirstName = trim((string) $aResponse['add_paydata[shipping_firstname]']);
-        $sLastName = trim((string) $aResponse['add_paydata[shipping_lastname]']);
-
-        if (empty($sLastName)) {
-            $aNameParts = $this->_fcpoSplitNameParts($sFirstName);
-            $sFirstName = $aNameParts['firstname'];
-            $sLastName = $aNameParts['lastname'];
-        }
-
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
-        $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxfname = new oxField($sFirstName);
-        $oAddress->oxaddress__oxlname = new oxField($sLastName);
-        $oAddress->oxaddress__oxstreet = new oxField($aStreetParts['street']);
-        $oAddress->oxaddress__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oAddress->oxaddress__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
-        $oAddress->oxaddress__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
-        $oAddress->oxaddress__oxcountry = new oxField($aResponse['add_paydata[shipping_country]']);
-        $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
-        $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oAddress->oxaddress__oxaddinfo = new oxField($aResponse['add_paydata[shipping_addressaddition]']);
-
-        // check if address exists
-        $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
-        $blExists = $this->_fcpoCheckAddressExists($sEncodedDeliveryAddress);
-        if ($blExists) {
-            $oAddress->load($sEncodedDeliveryAddress);
-        } else {
-            $oAddress->setId($sEncodedDeliveryAddress);
-            $oAddress->save();
-        }
-
-        $this->_oFcpoHelper->fcpoSetSessionVariable('deladrid', $sEncodedDeliveryAddress);
     }
 
     /**
      * Takes a complete name string and seperates into first and lastname
      *
-     * @param $sSingleNameString
-     * @return array{firstname: string, lastname: string}
+     * @param string $sSingleNameString
+     * @return array
      */
-    private function _fcpoSplitNameParts(string $sSingleNameString): array
+    protected function _fcpoSplitNameParts(string $sSingleNameString): array
     {
-        $aReturn = [];
         $aParts = explode(' ', $sSingleNameString);
         $sLastName = array_pop($aParts);
         $sFirstName = implode(' ', $aParts);
@@ -486,12 +356,12 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Checks if address is already existing
      *
-     * @param $sEncodedDeliveryAddress
+     * @param string $sEncodedDeliveryAddress
      * @return bool
      */
-    private function _fcpoCheckAddressExists($sEncodedDeliveryAddress)
+    protected function _fcpoCheckAddressExists(string $sEncodedDeliveryAddress): bool
     {
-        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+        $oAddress = $this->_oFcPoHelper->getFactoryObject(Address::class);
         $blReturn = false;
         if ($oAddress->load($sEncodedDeliveryAddress)) {
             $blReturn = true;
@@ -501,56 +371,13 @@ class FcPayOneUser extends FcPayOneUser_parent
     }
 
     /**
-     * Method adds a new amazon user into OXIDs user system. User won't get a password
-     *
-     * @param $aResponse
-     * @return string
-     */
-    private function _fcpoAddAmazonUser($aResponse)
-    {
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
-
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
-        $sUserOxid = $oUser->getId();
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
-        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[billing_firstname]']);
-        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[billing_lastname]']);
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
-        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
-        $oUser->addToGroup('oxidnotyetordered');
-
-        $oUser->save();
-
-        // add and set deliveryaddress
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
-
-        return $sUserOxid;
-    }
-
-    /**
-     * Logs user into session
-     *
-     */
-    private function _fcpoLogMeIn($sUserId = null): void
-    {
-        if ($sUserId === null) {
-            $sUserId = $this->getId();
-        }
-        $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
-    }
-
-    /**
      * Sets the user scorevalue to red (=100) if user declines
      * boni check
      *
-     * @param int $iValue
+     * @param int|null $iValue
+     * @return void
      */
-    public function fcpoSetScoreOnNonApproval($iValue = 100): void
+    public function fcpoSetScoreOnNonApproval(?int $iValue = 100): void
     {
         $this->oxuser__oxboni->value = $iValue;
         $this->save();
@@ -559,12 +386,12 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns country iso code of users country
      *
-     * @param int $iVersion
+     * @param int|null $iVersion
      * @return string
      */
-    public function fcpoGetUserCountryIso($iVersion = 2)
+    public function fcpoGetUserCountryIso(?int $iVersion = 2): string
     {
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
         if (!$oCountry->load($this->oxuser__oxcountryid->value)) {
             return '';
         }
@@ -576,11 +403,13 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Check the credit-worthiness of the user with the consumerscore or addresscheck request to the PAYONE API
      *
+     * @param bool $blCheckAddress
+     * @param bool $blCheckBoni
      * @return bool
      */
-    public function checkAddressAndScore($blCheckAddress = true, $blCheckBoni = true)
+    public function checkAddressAndScore(?bool $blCheckAddress = true, ?bool $blCheckBoni = true): bool
     {
-        // in general we assume that everything is fine with score and address
+        // in general, we assume that everything is fine with score and address
         $blBoniChecked = $blAddressValid = true;
 
         // let's see what should be checked
@@ -592,26 +421,21 @@ class FcPayOneUser extends FcPayOneUser_parent
         }
 
         // merge results
-        $blChecksValid = ($blBoniChecked && $blAddressValid);
-
-        return $blChecksValid;
+        return ($blBoniChecked && $blAddressValid);
     }
 
     /**
      * Performing boni check on user
      *
-     * 
-     * @return void
+     * @return bool|null
      */
-    private function _fcpoPerformBoniCheck()
+    protected function _fcpoPerformBoniCheck(): ?bool
     {
         $sFCPOBonicheck = $this->_fcpoGetBoniSetting();
         $blBoniCheckNeeded = $this->isBonicheckNeeded();
 
         // early return as success if bonicheck is inactive or not needed
-        if (!$sFCPOBonicheck || !$blBoniCheckNeeded) {
-            return true;
-        }
+        if (!$sFCPOBonicheck || !$blBoniCheckNeeded) return true;
 
         return $this->_fcpoValidateBoni();
     }
@@ -619,51 +443,52 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Returns boni setting or false if inactive
      *
-     * 
      * @return mixed bool/string
      */
-    private function _fcpoGetBoniSetting()
+    protected function _fcpoGetBoniSetting(): mixed
     {
         // get raw configured setting
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
 
         // multiple inactivity checks due to php is a non type checking language
         $blBoniInactive = ($sFCPOBonicheck == -1 || $sFCPOBonicheck == '-1' || !$sFCPOBonicheck);
 
         // sum it up
-        $mFCPOBonicheck = ($blBoniInactive) ? false : $sFCPOBonicheck;
-
-        return $mFCPOBonicheck;
+        return ($blBoniInactive) ? false : $sFCPOBonicheck;
     }
 
     /**
      * Check if the credit-worthiness has to be checked
+     *
+     * @return bool
      */
-    private function isBonicheckNeeded(): bool
+    protected function isBonicheckNeeded(): bool
     {
         return (
-            $this->oxuser__oxboni->value == $this->getBoni() ||
-            $this->isNewBonicheckNeeded()
-        ) &&
-        $this->isBonicheckNeededForBasket();
+            (
+                $this->oxuser__oxboni->value == $this->getBoni() ||
+                $this->isNewBonicheckNeeded()
+            ) &&
+            $this->isBonicheckNeededForBasket()
+        );
     }
 
     /**
      * Overrides oxid standard method getBoni()
      * Sets it to value defined in the admin area of PAYONE if it was configured
      *
-     * @return int
+     * @return float|int|string
      * @extend getBoni()
      */
-    public function getBoni()
+    public function getBoni(): float|int|string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $iDefaultBoni = $oConfig->getConfigParam('sFCPODefaultBoni');
-        if ($iDefaultBoni !== null && is_numeric($iDefaultBoni)) {
+        if (is_numeric($iDefaultBoni) === true) {
             return $iDefaultBoni;
         }
-        return null;
+        return parent::getBoni();
     }
 
     /**
@@ -671,10 +496,10 @@ class FcPayOneUser extends FcPayOneUser_parent
      *
      * @return bool
      */
-    private function isNewBonicheckNeeded()
+    protected function isNewBonicheckNeeded(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sTimeLastCheck = strtotime((string) $this->oxuser__fcpobonicheckdate->value);
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sTimeLastCheck = strtotime($this->oxuser__fcpobonicheckdate->value);
         $iEnduranceBoniCheck = (int)$oConfig->getConfigParam('sFCPODurabilityBonicheck');
         $sTimeout = (time() - (60 * 60 * 24 * $iEnduranceBoniCheck));
 
@@ -686,14 +511,14 @@ class FcPayOneUser extends FcPayOneUser_parent
      *
      * @return bool
      */
-    private function isBonicheckNeededForBasket()
+    protected function isBonicheckNeededForBasket(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $iStartlimitBonicheck = $oConfig->getConfigParam('sFCPOStartlimitBonicheck');
 
         $blReturn = true;
         if ($iStartlimitBonicheck && is_numeric($iStartlimitBonicheck)) {
-            $oSession = $this->_oFcpoHelper->fcpoGetSession();
+            $oSession = $this->_oFcPoHelper->fcpoGetSession();
             $oBasket = $oSession->getBasket();
             $oPrice = $oBasket->getPrice();
 
@@ -708,13 +533,12 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Requesting for boni of user if conditions are alright
      *
-     * 
-     * @return void
+     * @return true
      */
-    private function _fcpoValidateBoni(): bool
+    protected function _fcpoValidateBoni(): bool
     {
         // Consumerscore
-        $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+        $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
         $aResponse = $oPORequest->sendRequestConsumerscore($this);
         $this->fcpoSetBoni($aResponse);
 
@@ -726,26 +550,27 @@ class FcPayOneUser extends FcPayOneUser_parent
      *
      * @param array $aResponse response of a API request
      *
-     * @return null
+     * @return void
      */
-    private function fcpoSetBoni($aResponse): void
+    protected function fcpoSetBoni(array $aResponse): void
     {
         $boni = 100;
         if ($aResponse['scorevalue']) {
             $boni = $this->_fcpoCalculateBoniFromScoreValue($aResponse['scorevalue']);
         } else {
             $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
-            if (isset(self::A_MAP[$aResponse['score']])) {
-                $boni = self::A_MAP[$aResponse['score']];
+            $aMap = ['G' => 500, 'Y' => 300, 'R' => 100];
+            if (isset($aMap[$aResponse['score']])) {
+                $boni = $aMap[$aResponse['score']];
             }
         }
 
         $this->oxuser__oxboni->value = $boni;
 
-        $blValidResponse = ($aResponse && is_array($aResponse) && !array_key_exists('fcWrongCountry', $aResponse));
+        $blValidResponse = ($aResponse && is_array($aResponse) && array_key_exists('fcWrongCountry', $aResponse) === false);
 
         if ($blValidResponse) {
-            $this->oxuser__fcpobonicheckdate = new oxField(date('Y-m-d H:i:s'));
+            $this->oxuser__fcpobonicheckdate = new Field(date('Y-m-d H:i:s'));
         }
 
         $this->save();
@@ -754,18 +579,18 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Calculates scorevalue to make it usable in OXID
      *
-     * @param $sScoreValue
+     * @param string $sScoreValue
      * @return string
      * @see https://integrator.payone.de/jira/browse/OXID-136
      */
-    private function _fcpoCalculateBoniFromScoreValue($sScoreValue)
+    protected function _fcpoCalculateBoniFromScoreValue(string $sScoreValue): string
     {
         $dScoreValue = (double)$sScoreValue;
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
 
         if ($sFCPOBonicheck == 'CE') {
-            $sScoreValue = (string)round(1000 - ($dScoreValue / 6), 0);
+            $sScoreValue = (string)round(1000 - ($dScoreValue / 6));
         }
 
         return $sScoreValue;
@@ -774,19 +599,18 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Parses response and set fallback if conditions match
      *
-     * @param $aResponse
+     * @param array $aResponse
      * @return array
      */
-    private function _fcpoCheckUseFallbackBoniversum($aResponse)
+    protected function _fcpoCheckUseFallbackBoniversum(array $aResponse): array
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sScore = $aResponse['score'];
         $sAddresscheckType = $this->_fcpoGetAddressCheckType();
 
         $blUseFallBack = (
             $sScore == 'U' &&
-            in_array($sAddresscheckType, ['BB', 
-    'PB'])
+            in_array($sAddresscheckType, ['BB', 'PB'])
         );
 
         if ($blUseFallBack) {
@@ -800,12 +624,11 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Check, correct and return addresschecktype
      *
-     * 
      * @return string
      */
-    private function _fcpoGetAddressCheckType()
+    protected function _fcpoGetAddressCheckType(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
 
@@ -819,17 +642,14 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Performing address check
      *
-     * 
      * @return bool
      */
-    private function _fcpoPerformAddressCheck()
+    protected function _fcpoPerformAddressCheck(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sFCPOAddresscheck = $this->_fcpoGetAddresscheckSetting();
         // early return a success if addresscheck is inactive
-        if (!$sFCPOAddresscheck) {
-            return true;
-        }
+        if (!$sFCPOAddresscheck) return true;
 
         // get more addresscheck related settings
         $blFCPOCorrectAddress = (bool)$oConfig->getConfigParam('blFCPOCorrectAddress');
@@ -837,75 +657,77 @@ class FcPayOneUser extends FcPayOneUser_parent
 
         // perform validations
         $blIsValidAddress = $this->_fcpoValidateAddress($blFCPOCorrectAddress);
-
         return $this->_fcpoValidateDelAddress($blIsValidAddress, $blFCPOCheckDelAddress);
     }
 
     /**
      * Returns addresscheck setting or false if inactive
      *
-     * 
      * @return mixed bool/string
      */
-    private function _fcpoGetAddresscheckSetting()
+    protected function _fcpoGetAddresscheckSetting(): mixed
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
-
         return ($sFCPOAddresscheck == 'NO') ? false : $sFCPOAddresscheck;
     }
 
     /**
      * Validates address by requesting payone
      *
-     * @param string $sFCPOBonicheck
-     * @param bool   $blCheckedBoni
+     * @param bool $blFCPOCorrectAddress
      * @return bool
      */
-    private function _fcpoValidateAddress(bool $blFCPOCorrectAddress)
+    protected function _fcpoValidateAddress(bool $blFCPOCorrectAddress): bool
     {
         //check billing address
-        $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+        $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
         $aResponse = $oPORequest->sendRequestAddresscheck($this);
 
-        return $aResponse === true ? true : $this->fcpoIsValidAddress($aResponse, $blFCPOCorrectAddress);
+        if ($aResponse === true) {
+            // check has been performed recently
+            $blIsValidAddress = true;
+        } else {
+            // address check has been triggered - validate the response
+            $blIsValidAddress = $this->fcpoIsValidAddress($aResponse, $blFCPOCorrectAddress);
+        }
+
+        return $blIsValidAddress;
     }
 
     /**
      * Checks if the address given by the user matches the address returned by the PAYONE addresscheck API request
      *
+     * @param array $aResponse
+     * @param bool $blCorrectUserAddress
      * @return bool
      */
-    private function fcpoIsValidAddress($aResponse, bool $blCorrectUserAddress)
+    protected function fcpoIsValidAddress(array $aResponse, bool $blCorrectUserAddress): bool
     {
         $blEarlyValidation = (
             $aResponse &&
-            is_array($aResponse) &&
             array_key_exists('fcWrongCountry', $aResponse) &&
             $aResponse['fcWrongCountry'] === true
         );
 
         // early return on quick check
-        if ($blEarlyValidation) {
-            return true;
-        }
+        if ($blEarlyValidation) return true;
 
         // dig deeper, do corrections if configured
-        $blReturn = $this->_fcpoValidateResponse($aResponse, $blCorrectUserAddress);
-
-        return $blReturn;
+        return $this->_fcpoValidateResponse($aResponse, $blCorrectUserAddress);
     }
 
     /**
      * Validating response of address check
      *
      * @param array $aResponse
-     * @return boolean
+     * @param bool $blCorrectUserAddress
+     * @return bool
      */
-    private function _fcpoValidateResponse($aResponse, bool $blCorrectUserAddress)
+    protected function _fcpoValidateResponse(array $aResponse, bool $blCorrectUserAddress): bool
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+        $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
 
         if ($aResponse['status'] == 'VALID') {
             return $this->_fcpoValidateUserDataByResponse($aResponse, $blCorrectUserAddress);
@@ -918,19 +740,21 @@ class FcPayOneUser extends FcPayOneUser_parent
             $oUtilsView->addErrorToDisplay($sErrorMsg, false, true);
             return false;
         }
+        return false;
     }
 
     /**
      * Validate user data against request response and correct address if configured
      *
      * @param array $aResponse
-     * @return boolean
+     * @param bool $blCorrectUserAddress
+     * @return bool
      */
-    private function _fcpoValidateUserDataByResponse($aResponse, bool $blCorrectUserAddress)
+    protected function _fcpoValidateUserDataByResponse(array $aResponse, bool $blCorrectUserAddress): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+        $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
         $mPersonstatus = $oConfig->getConfigParam('blFCPOAddCheck' . $aResponse['personstatus']);
 
         if ($mPersonstatus) {
@@ -940,22 +764,22 @@ class FcPayOneUser extends FcPayOneUser_parent
         } else {
             if ($blCorrectUserAddress) {
                 if ($aResponse['firstname']) {
-                    $this->oxuser__oxfname = new oxField($aResponse['firstname']);
+                    $this->oxuser__oxfname = new Field($aResponse['firstname']);
                 }
                 if ($aResponse['lastname']) {
-                    $this->oxuser__oxlname = new oxField($aResponse['lastname']);
+                    $this->oxuser__oxlname = new Field($aResponse['lastname']);
                 }
                 if ($aResponse['streetname']) {
-                    $this->oxuser__oxstreet = new oxField($aResponse['streetname']);
+                    $this->oxuser__oxstreet = new Field($aResponse['streetname']);
                 }
                 if ($aResponse['streetnumber']) {
-                    $this->oxuser__oxstreetnr = new oxField($aResponse['streetnumber']);
+                    $this->oxuser__oxstreetnr = new Field($aResponse['streetnumber']);
                 }
                 if ($aResponse['zip']) {
-                    $this->oxuser__oxzip = new oxField($aResponse['zip']);
+                    $this->oxuser__oxzip = new Field($aResponse['zip']);
                 }
                 if ($aResponse['city']) {
-                    $this->oxuser__oxcity = new oxField($aResponse['city']);
+                    $this->oxuser__oxcity = new Field($aResponse['city']);
                 }
                 $this->save();
             }
@@ -968,13 +792,15 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Validating delivery address
      *
-     * @return boolean
+     * @param bool $blIsValidAddress
+     * @param bool $blFCPOCheckDelAddress
+     * @return bool
      */
-    private function _fcpoValidateDelAddress(bool $blIsValidAddress, bool $blFCPOCheckDelAddress)
+    protected function _fcpoValidateDelAddress(bool $blIsValidAddress, bool $blFCPOCheckDelAddress): bool
     {
-        if ($blIsValidAddress && $blFCPOCheckDelAddress) {
+        if ($blIsValidAddress && $blFCPOCheckDelAddress === true) {
             //check delivery address
-            $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
             $aResponse = $oPORequest->sendRequestAddresscheck($this, true);
 
             if ($aResponse === false || $aResponse === true) {
@@ -992,9 +818,60 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Unsetting groups
      *
+     * @return void
      */
     public function fcpoUnsetGroups(): void
     {
         $this->_oGroups = null;
     }
+
+    /**
+     * Checks if user already exists
+     *
+     * @param string $sEmail
+     * @return false|string
+     * @throws DatabaseConnectionException
+     */
+    public function fcpoDoesUserAlreadyExist(string $sEmail): false|string
+    {
+        $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . DatabaseProvider::getDb()->quote($sEmail) . " AND oxpassword != ''";
+        $sUserId = DatabaseProvider::getDb()->getOne($sQuery);
+        return $sUserId ?: false;
+    }
+
+    /**
+     * Method checks if a user WITH password exists using the given email-address
+     *
+     * @param string $sEmailAddress
+     * @param bool $blWithPasswd
+     * @return bool
+     */
+    protected function _fcpoUserExists(string $sEmailAddress, bool $blWithPasswd = false): bool
+    {
+        $blReturn = false;
+        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sEmailAddress);
+        if ($sUserOxid && !$blWithPasswd) {
+            $blReturn = true;
+        } elseif ($sUserOxid && $blWithPasswd) {
+            $this->load($sUserOxid);
+            $blReturn = (bool)$this->oxuser__oxpassword->value;
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Logs user into session
+     *
+     * @param string|null $sUserId
+     * @return void
+     */
+    protected function _fcpoLogMeIn(?string $sUserId = null): void
+    {
+        if ($sUserId === null) {
+            $sUserId = $this->getId();
+        }
+        $this->_oFcPoHelper->fcpoSetSessionVariable('usr', $sUserId);
+    }
+
 }

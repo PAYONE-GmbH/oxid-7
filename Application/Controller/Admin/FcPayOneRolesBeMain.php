@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,21 +23,22 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 class FcPayOneRolesBeMain extends FcPayOneRolesBeMain_parent
 {
 
-    /** @var array<string, mixed> */
-    public $_aViewData;
     /**
      * Add the PAYONE main node to the navigation
      *
      * @return string
      * @extend render
      */
-    public function render()
+    public function render(): string
     {
+        $sReturn = parent::render();
+
         $aDynRights = $this->_aViewData['aDynRights'];
         $oRights = $this->getRights();
         $aDynRights['fcpo_admin_title'] = $oRights->getViewRightsIndex('fcpo_admin_title');
         $this->_aViewData['aDynRights'] = $aDynRights;
 
-        return null;
+        return $sReturn;
     }
+
 }

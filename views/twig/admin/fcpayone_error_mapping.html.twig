@@ -1,7 +1,7 @@
 {% include "headitem.html.twig" with {title: "fcpo_admin_config_status_mapping"|translate} %}
 
 <form autocomplete="off" method="post" action="{{ shop.selflink }}">
-    {{ oViewConf.getHiddenSid() }}
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="cl" value="FcPayOneErrorMapping"/>
     <input type="hidden" name="fnc" value="save"/>
 
@@ -9,60 +9,60 @@
 
     {% set oMappings = oView.getMappings() %}
     {% if oMappings|length > 0 %}
-        <br>
-        <table>
-            <tr>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_payone_error_message" }) }}</th>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_language" }) }}</th>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_own_error_message" }) }}</th>
-                <th></th>
-            </tr>
-            {% for oMapping in oMappings %}
-                <tr>
-                    <td>
-                        <select name="editval[{{ oMapping.sOxid }}][sErrorCode]" style="width:200px;">
-                            {% if oMapping.sOxid == 'new' %}
-                                <option value="">---</option>
-                            {% endif %}
-                            {% for oError in oView.fcpoGetPayoneErrorMessages() %}
-                                <option value="{{ oError.sErrorCode }}"
-                                        {% if oMapping.sErrorCode == oError.sErrorCode %}selected{% endif %}>{{ oError.sErrorMessage }}
-                                    ({{ oError.sErrorCode }})
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <select name="editval[{{ oMapping.sOxid }}][sLangId]" style="width:180px;">
-                            {% if oMapping.sOxid == 'new' %}
-                                <option value="">---</option>
-                            {% endif %}
-                            {% for oLang in oView.getLanguages() %}
-                                <option value="{{ oLang.id }}"
-                                        {% if oLang.id == oMapping.sLangId %}selected{% endif %}>{{ oLang.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" name="editval[{{ oMapping.sOxid }}][sMappedMessage]"
-                               value="{{ oMapping.sMappedMessage }}" style="width:350px;">
-                    </td>
-                    <td>
-                        <input value="X {{ translate({ ident: "fcpo_admin_config_delete" }) }}"
-                               name="editval[{{ oMapping.sOxid }}][delete]"
-                               onclick="if(!confirm('{{ translate({ ident: "fcpo_admin_config_delete_confirm" }) }}')) {return false;}"
-                               type="submit">
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-        <br>
-        <input type="submit" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"/>
+<br>
+    <table>
+        <tr>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_payone_error_message" }) }}</th>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_language" }) }}</th>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_own_error_message" }) }}</th>
+            <th></th>
+        </tr>
+        {% for oMapping in oMappings %}
+        <tr>
+            <td>
+                <select name="editval[{{ oMapping.sOxid }}][sErrorCode]" style="width:200px;">
+                    {% if oMapping.sOxid == 'new' %}
+                    <option value="">---</option>
+                    {% endif %}
+                    {% for oError in oView.fcpoGetPayoneErrorMessages() %}
+                    <option value="{{ oError.sErrorCode }}"
+                            {% if oMapping.sErrorCode == oError.sErrorCode %}selected{% endif %}>{{oError.sErrorMessage}} ({{ oError.sErrorCode }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="editval[{{ oMapping.sOxid }}][sLangId]" style="width:180px;">
+                    {% if oMapping.sOxid == 'new' %}
+                    <option value="">---</option>
+                    {% endif %}
+                    {% for oLang in oView.getLanguages() %}
+                    <option value="{{ oLang.id }}" {% if oLang.id == oMapping.sLangId %}selected{% endif %}>
+                        {{ oLang.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="text" name="editval[{{ oMapping.sOxid }}][sMappedMessage]"
+                       value="{{ oMapping.sMappedMessage }}" style="width:350px;">
+            </td>
+            <td>
+                <input value="X {{ translate({ ident: "fcpo_admin_config_delete" }) }}"
+                       name="editval[{{ oMapping.sOxid }}][delete]"
+                       onclick="if(!confirm('{{ translate({ ident: "fcpo_admin_config_delete_confirm" }) }}')) {return false;}"
+                       type="submit">
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+<br>
+<input type="submit" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"/>
     {% endif %}
     <input type="submit" name="add" value="{{ translate({ ident: "fcpo_admin_config_add" }) }}"/>
 </form>
 <form autocomplete="off" method="post" action="{{ shop.selflink }}">
-    {{ oViewConf.getHiddenSid() }}
+    {{ oViewConf.getHiddenSid()|raw }}
     <input type="hidden" name="cl" value="FcPayOneErrorMapping"/>
     <input type="hidden" name="fnc" value="saveIframe"/>
 
@@ -70,53 +70,55 @@
 
     {% set oIframeMappings = oView.getIframeMappings() %}
     {% if oIframeMappings|length > 0 %}
-        <br>
-        <table>
-            <tr>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_payone_error_code" }) }}</th>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_language" }) }}</th>
-                <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_own_error_message" }) }}</th>
-                <th></th>
-            </tr>
-            {% for oMapping in oIframeMappings %}
-                <tr>
-                    <td>
-                        <select name="editval2[{{ oMapping.sOxid }}][sErrorCode]" style="width:200px;">
-                            {% if oMapping.sOxid == 'new' %}
-                                <option value="">---</option>
-                            {% endif %}
-                            {% for oError in oView.fcpoGetPayoneErrorMessages('iframe') %}
-                                <option value="{{ oError.sErrorCode }}"
-                                        {% if oMapping.sErrorCode == oError.sErrorCode %}selected{% endif %}>{{ oError.sErrorCode }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <select name="editval2[{{ oMapping.sOxid }}][sLangId]" style="width:180px;">
-                            {% if oMapping.sOxid == 'new' %}
-                                <option value="">---</option>
-                            {% endif %}
-                            {% for oLang in oView.getLanguages() %}
-                                <option value="{{ oLang.id }}"
-                                        {% if oLang.id == oMapping.sLangId %}selected{% endif %}>{{ oLang.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" name="editval2[{{ oMapping.sOxid }}][sMappedMessage]"
-                               value="{{ oMapping.sMappedMessage }}" style="width:350px;">
-                    </td>
-                    <td>
-                        <input value="X {{ translate({ ident: "fcpo_admin_config_delete" }) }}"
-                               name="editval2[{{ oMapping.sOxid }}][delete]"
-                               onclick="if(!confirm('{{ translate({ ident: "fcpo_admin_config_delete_confirm" }) }}')) {return false;}"
-                               type="submit">
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-        <br>
-        <input type="submit" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"/>
+<br>
+    <table>
+        <tr>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_payone_error_code" }) }}</th>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_language" }) }}</th>
+            <th style="text-align: left;">{{ translate({ ident: "fcpo_admin_config_status_own_error_message" }) }}</th>
+            <th></th>
+        </tr>
+        {% for oMapping in oIframeMappings %}
+        <tr>
+            <td>
+                <select name="editval2[{{ oMapping.sOxid }}][sErrorCode]" style="width:200px;">
+                    {% if oMapping.sOxid == 'new' %}
+                    <option value="">---</option>
+                    {% endif %}
+                    {% for oError in oView.fcpoGetPayoneErrorMessages('iframe') %}
+                    <option value="{{ oError.sErrorCode }}"
+                            {% if oMapping.sErrorCode == oError.sErrorCode %}selected{% endif %}>{{ oError.sErrorCode }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="editval2[{{ oMapping.sOxid }}][sLangId]" style="width:180px;">
+                    {% if oMapping.sOxid == 'new' %}
+                    <option value="">---</option>
+                    {% endif %}
+                    {% for oLang in oView.getLanguages() %}
+                    <option value="{{ oLang.id }}" {% if oLang.id == oMapping.sLangId %}selected{% endif %}>
+                        {{ oLang.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="text" name="editval2[{{ oMapping.sOxid }}][sMappedMessage]"
+                       value="{{ oMapping.sMappedMessage }}" style="width:350px;">
+            </td>
+            <td>
+                <input value="X {{ translate({ ident: "fcpo_admin_config_delete" }) }}"
+                       name="editval2[{{ oMapping.sOxid }}][delete]"
+                       onclick="if(!confirm('{{ translate({ ident: "fcpo_admin_config_delete_confirm" }) }}')) {return false;}"
+                       type="submit">
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+<br>
+<input type="submit" name="save" value="{{ translate({ ident: "GENERAL_SAVE" }) }}"/>
     {% endif %}
     <input type="submit" name="addIframe" value="{{ translate({ ident: "fcpo_admin_config_add" }) }}"/>
 </form>

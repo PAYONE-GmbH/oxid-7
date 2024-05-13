@@ -1,0 +1,40 @@
+{% extends 'email/html/order_cust.html.twig' %}
+
+{% block email_html_order_cust_paymentinfo %}
+    {% if not order.isPayOnePaymentType() %}
+        {{ parent() }}
+    {% else %}
+        {% if payment.oxuserpayments__oxpaymentsid.value == "oxidpayadvance" %}
+            <h3 style="font-weight: bold; margin: 20px 0 7px; padding: 0; line-height: 35px; font-size: 12px;font-family: Arial, Helvetica, sans-serif; text-transform: uppercase; border-bottom: 4px solid #ddd;">
+                {{ translate({ ident: "FCPO_EMAIL_BANK_DETAILS" }) }}
+            </h3>
+            <p style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                {{ translate({ ident: "FCPO_EMAIL_BANK" }) }} {{ shop.oxshops__oxbankname.value|raw }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_ROUTINGNUMBER" }) }} {{ shop.oxshops__oxbankcode.value|raw }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ shop.oxshops__oxbanknumber.value|raw }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ shop.oxshops__oxbiccode.value|raw }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ shop.oxshops__oxibannumber.value|raw }}
+            </p>
+        {% elseif order.fcpoShowClearingData() %}
+            <h3 style="font-weight: bold; margin: 20px 0 7px; padding: 0; line-height: 35px; font-size: 12px;font-family: Arial, Helvetica, sans-serif; text-transform: uppercase; border-bottom: 4px solid #ddd;">
+                {{ translate({ ident: "FCPO_EMAIL_BANK_DETAILS" }) }}
+            </h3>
+            <p style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                {{ translate({ ident: "FCPO_BANKACCOUNTHOLDER" }) }} {{ order.getFcpoBankaccountholder() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_BANK" }) }} {{ order.getFcpoBankname() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_ROUTINGNUMBER" }) }} {{ order.getFcpoBankcode() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_ACCOUNTNUMBER" }) }} {{ order.getFcpoBanknumber() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_BIC" }) }} {{ order.getFcpoBiccode() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_IBAN" }) }} {{ order.getFcpoIbannumber() }}<br>
+                {{ translate({ ident: "FCPO_EMAIL_USAGE" }) }}: {{ order.oxorder__fcpotxid.value|raw }}
+            </p>
+        {% elseif payment.oxuserpayments__oxpaymentsid.value == "fcpopo_bill" or payment.oxuserpayments__oxpaymentsid.value == "fcpopo_debitnote" %}
+            <p style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                <b>{{ translate({ ident: "FCPO_PAYOLUTION_EMAIL_CLEARING" }) }}
+                    :</b> {{ smarty.session.payolution_clearing }}
+            </p>
+        {% else %}
+            {{ parent() }}
+        {% endif %}
+    {% endif %}
+{% endblock %}

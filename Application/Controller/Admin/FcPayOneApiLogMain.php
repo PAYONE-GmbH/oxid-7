@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
-class FcPayOneApiLogMain extends FcPayoneAdminView
+class FcPayOneApiLogMain extends FcPayOneAdminView
 {
 
     /**
@@ -30,4 +29,5 @@ class FcPayOneApiLogMain extends FcPayoneAdminView
      * @var string
      */
     protected $_sThisTemplate = '@fcpayone/admin/fcpayone_apilog_main';
+
 }

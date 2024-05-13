@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,132 +20,157 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use Exception;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
-use Fatchip\PayOne\Application\Model\FcPoRatepay;
+use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Application\Model\UserPayment;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
 class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 {
 
-    public $_aDynValue;
-    public $_oPaymentList;
     /**
      * Contains dynvalue list of requested params of payment page (all)
      *
-     * @var array
+     * @var array|null
      */
-    public $_aFcRequestedValues;
+    public ?array $_aFcRequestedValues = null;
     /**
      * Flag for checking if klarna payment combined payment widget is already present
      *
      * @var bool
      */
-    public $_blKlarnaCombinedIsPresent = false;
+    public bool $_blKlarnaCombinedIsPresent = false;
     /**
      * Helper object for dealing with different shop versions
      *
      * @var FcPoHelper
      */
-    protected $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var DatabaseProvider
+     * @var DatabaseInterface
      */
-    protected DatabaseInterface $_oFcpoDb;
+    protected DatabaseInterface $_oFcPoDb;
     /**
      * bill country id of the user object
      *
-     * @var string
+     * @var string|null
      */
-    protected $_sUserBillCountryId;
+    protected ?string $_sUserBillCountryId = null;
     /**
-     * delivery country id if existant
+     * delivery country id if existent
      *
-     * @var string
+     * @var string|null
      */
-    protected $_sUserDelCountryId;
+    protected ?string $_sUserDelCountryId = null;
     /**
      * Contains the sub payment methods that are available for the user ( Visa, MC, etc. )
      *
      * @var array
      */
-    protected $_aCheckedSubPayments = [];
+    protected array $_aCheckedSubPayments = [];
     /**
      * Array of isoalpha2-countries for which birthday is needed
      *
      * @var array
      */
-    protected $_aKlarnaBirthdayNeededCountries = ['DE', 
-    'NL', 
-    'AT', 
-    'CH'];
+    protected array $_aKlarnaBirthdayNeededCountries = ['DE', 'NL', 'AT', 'CH'];
     /**
      * Datacontainer for all cc payment meta data
      *
      * @var array
      */
-    protected $_aPaymentCCMetaData = [];
+    protected array $_aPaymentCCMetaData = [];
     /**
      * Base link for payolution agreement overlay
      *
      * @var string
      */
-    protected $_sPayolutionAgreementBaseLink = 'https://payment.payolution.com/payolution-payment/infoport/dataprivacydeclaration';
+    protected string $_sPayolutionAgreementBaseLink = 'https://payment.payolution.com/payolution-payment/infoport/dataprivacydeclaration';
     /**
      * Mandate link for payolution debitnote
      *
      * @var string
      */
-    protected $_sPayolutionSepaAgreement = 'https://payment.payolution.com/payolution-payment/infoport/sepa/mandate.pdf';
+    protected string $_sPayolutionSepaAgreement = 'https://payment.payolution.com/payolution-payment/infoport/sepa/mandate.pdf';
     /**
      * Holder for installment calculation data
      *
      * @var array
      */
-    protected $_aInstallmentCalculation = [];
+    protected array $_aInstallmentCalculation = [];
     /**
      * Flag which indicates, that functionality is called from outside via ajax
+     *
+     * @var bool
      */
-    protected false $_blIsPayolutionInstallmentAjax = false;
+    protected bool $_blIsPayolutionInstallmentAjax = false;
     /**
      * Params holder for payolution installment params
      *
      * @var array
      */
-    protected $_aAjaxPayolutionParams = [];
+    protected array $_aAjaxPayolutionParams = [];
     /**
      * Contains profile which matched for ratepay payment
      *
-     * @var string
+     * @var array
      */
-    protected $_aRatePayProfileIds = ['fcporp_bill' => null, 'fcporp_debitnote' => null];
+    protected array $_aRatePayProfileIds = [
+        'fcporp_bill' => null,
+        'fcporp_debitnote' => null,
+        'fcporp_installment' => null
+    ];
+    /**
+     * Contains a cached version of profile data for successive short term requests
+     *
+     * @var array
+     */
+    protected array $_aCachedRatepayProfileData = [
+        'fcporp_bill' => null,
+        'fcporp_debitnote' => null,
+        'fcporp_installment' => null
+    ];
     /**
      * List of countries that need a telephone number for payolution bill payment
      *
      * @var array
      */
-    protected $_aPayolutionBillMandatoryTelephoneCountries = ['NL'];
+    protected array $_aPayolutionBillMandatoryTelephoneCountries = ['NL'];
     /**
-     * Contains current error message for payolution payment precheck
+     * Contains current error message for payolution payment pre-check
      *
      * @var string
      */
-    protected $_sPayolutionCurrentErrorMessage;
+    protected string $_sPayolutionCurrentErrorMessage = '';
+
 
     /**
      * init object construction
-     *
-     * @return null
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
@@ -156,130 +180,140 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return bool
      */
-    public function fcpoShowAsRegularPaymentSelection($sPaymentId)
+    public function fcpoShowAsRegularPaymentSelection(string $sPaymentId): bool
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
-        return $oPayment->fcpoShowAsRegularPaymentSelection();
+        $blShowAsRegularPaymentSelection =
+            $oPayment->fcpoShowAsRegularPaymentSelection();
+
+        if ($blShowAsRegularPaymentSelection && in_array($sPaymentId, ['fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'])) {
+            $blShowAsRegularPaymentSelection = $this->fcpoShowBNPLPaymentSelection();
+        }
+
+        return $blShowAsRegularPaymentSelection;
+    }
+
+    /**
+     * Check if BNPL methods can be shown (AT/DE country and EUR currency only)
+     *
+     * @return bool
+     */
+    protected function fcpoShowBNPLPaymentSelection(): bool
+    {
+        if (!in_array($this->getUserBillCountryId(), ['a7c40f631fc920687.20179984', 'a7c40f6320aeb2ec2.72885259'])) {
+            return false;
+        }
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        if ($oCurr->name != 'EUR') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get, and set if needed, the bill country id of the user object
+     *
+     * @return string
+     */
+    protected function getUserBillCountryId(): string
+    {
+        if ($this->_sUserBillCountryId === null) {
+            $oUser = $this->getUser();
+            $this->_sUserBillCountryId = $oUser->oxuser__oxcountryid->value;
+        }
+        return $this->_sUserBillCountryId;
     }
 
     /**
      * Extends oxid standard method init()
      * Executes parent method parent::init().
      *
-     * @return null
+     * @return void
      */
     public function init(): void
     {
-        if (!$this->_hasFilterDynDataMethod()) {
-            $this->_filterDynData();
-        }
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        $sOrderId = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
-        $sType = $this->_oFcpoHelper->fcpoGetRequestParameter('type');
+        $sOrderId = $this->_oFcPoHelper->fcpoGetSessionVariable('sess_challenge');
+        $sType = $this->_oFcPoHelper->fcpoGetRequestParameter('type');
         $blPresaveOrder = (bool)$oConfig->getConfigParam('blFCPOPresaveOrder');
-        $blReduceStockBefore = !(bool)$oConfig->getConfigParam('blFCPOReduceStock');
+        $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
         if ($sOrderId && $blPresaveOrder && $blReduceStockBefore && ($sType == 'error' || $sType == 'cancel')) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOrderId);
             if ($oOrder) {
                 $oOrder->cancelOrder();
             }
             unset($oOrder);
         }
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('sess_challenge');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('sess_challenge');
+
+        parent::init();
     }
 
     /**
-     * Checks whether the oxid version has the _filterDynData method
-     * Oxid 4.2 and below dont have the _filterDynData method
-     */
-    protected function _hasFilterDynDataMethod(): bool
-    {
-        $sVersion = $this->_oFcpoHelper->fcpoGetShopVersion();
-
-        return version_compare($sVersion, '4.3.0', 
-    '>=');
-    }
-
-    /**
-     * Extends oxid standard method _filterDynData()
-     * Unsets the PAYONE form-data fields containing creditcard data
-     *
-     * Due to legal reasons probably you are not allowed to store or even handle credit card data.
-     * In this case we just delete and forget all submited credit card data from this point.
-     * Override this method if you actually want to process credit card data.
-     *
-     * Note: You should override this method as setting blStoreCreditCardInfo to true would
-     *       force storing CC data on shop side (what most often is illegal).
-     *
-     * @return null
-     * @extend _filterDynData
-     */
-    protected function _filterDynData()
-    {
-        if ($this->_hasFilterDynDataMethod()) {
-        }
-
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
-        //in case we actually ARE allowed to store the data
-        if ($oConfig->getConfigParam("blStoreCreditCardInfo")) {
-            //then do nothing
-            return;
-        }
-
-        $aDynData = $this->_oFcpoHelper->fcpoGetSessionVariable("dynvalue");
-
-        if ($aDynData && is_array($aDynData)) {
-            $aDynData["fcpo_kktype"] = null;
-            $aDynData["fcpo_kknumber"] = null;
-            $aDynData["fcpo_kkname"] = null;
-            $aDynData["fcpo_kkmonth"] = null;
-            $aDynData["fcpo_kkyear"] = null;
-            $aDynData["fcpo_kkpruef"] = null;
-            $aDynData["fcpo_kkcsn"] = null;
-            $this->_oFcpoHelper->fcpoSetSessionVariable("dynvalue", $aDynData);
-        }
-
-        $aParameters = ['fcpo_kktype', 
-    'fcpo_kknumber', 
-    'fcpo_kkname', 'fcpo_kkmonth', 'fcpo_kkyear', 'fcpo_kkpruef', 'fcpo_kkcsn'];
-
-        foreach ($aParameters as $aParameter) {
-            unset($_REQUEST['dynvalue'][$aParameter]);
-            unset($_POST['dynvalue'][$aParameter]);
-            unset($_GET['dynvalue'][$aParameter]);
-        }
-    }
-
-    /**
-     * Gets config parameter
+     * Method returns config value of a given config name or empty string if not existing
      *
      * @param string $sParam config parameter name
-     *
      * @return string
      */
-    public function getConfigParam($sParam)
+    public function getConfigParam(string $sParam): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam($sParam);
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam($sParam) ?: '';
     }
 
     /**
-     * Method checks if user should log into shop for merging
+     * Returns array of years for credit cards
      *
+     * @return array
      */
-    public function fcpoAmazonUserLogin(): void
+    public function getCreditYears(): array
     {
-        $blAmazonMergeUserMandatory = (bool)$this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonMergeUserMandatory');
-        if ($blAmazonMergeUserMandatory) {
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $oUtils->redirect('index.php?cl=user');
+        return range(date('Y'), date('Y', strtotime('+10 year')));
+    }
+
+    /**
+     * Prepares some parameter for the installment calculation
+     *
+     * @param string $sPaymentId
+     * @return array
+     */
+    public function fcpoGetRatepayCalculatorParams(string $sPaymentId): array
+    {
+        $aRatepayCalculatorParams = [];
+        $aRatepayData = $this->fcpoGetRatepayProfileData($sPaymentId);
+
+        $aMonthAllowed = explode(',', $aRatepayData['month_allowed']);
+        $iValidMaxDuration = $this->_fcpoGetRatepayValidMaxAllowedMonth($aRatepayData, max($aMonthAllowed));
+        $aMonthAllowed = array_filter($aMonthAllowed, function ($month) use ($iValidMaxDuration) {
+            return $month <= $iValidMaxDuration;
+        });
+
+        $aRatepayCalculatorParams['monthAllowed'] = $aMonthAllowed;
+
+        return $aRatepayCalculatorParams;
+    }
+
+    /**
+     * Returns matched profile details
+     *
+     * @param string $sPaymentId
+     * @return array
+     */
+    public function fcpoGetRatepayProfileData(string $sPaymentId): array
+    {
+        if (is_null($this->_aCachedRatepayProfileData[$sPaymentId])) {
+            $sOxid = $this->fcpoGetRatePayMatchedProfile($sPaymentId);
+            $oRatePay = oxNew(FcPoRatePay::class);
+            $aProfileData = $oRatePay->fcpoGetProfileData($sOxid);
+            $this->_aCachedRatepayProfileData[$sPaymentId] = $aProfileData;
         }
 
-        $this->render();
+        return $this->_aCachedRatepayProfileData[$sPaymentId];
     }
 
     /**
@@ -288,29 +322,69 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return string
      */
-    public function fcpoGetRatePayMatchedProfile($sPaymentId)
+    public function fcpoGetRatePayMatchedProfile(string $sPaymentId): string
     {
         return $this->_aRatePayProfileIds[$sPaymentId];
     }
 
     /**
-     * Returns matching notiication string if sofo is configured to show iban
+     * Execute a pre-check to determine the maximal duration and limit the offered options
      *
+     * @param array $aRatepayData
+     * @param int $iMaxMonthAllowed
+     * @return int
+     */
+    protected function _fcpoGetRatepayValidMaxAllowedMonth(array $aRatepayData, int $iMaxMonthAllowed): int
+    {
+        $aRatepayData['duration'] = $iMaxMonthAllowed;
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+        $aResponse = $oRequest->sendRequestRatepayCalculation('calculation-by-time', $aRatepayData);
+
+        return $aResponse['add_paydata[number-of-rates]'];
+    }
+
+    /**
+     * Determines which settlement types are available in the connected Ratepay profile
+     *
+     * @param string $sPaymentId
+     * @return bool|string
+     */
+    public function fcpoGetRatepaySettlementType(string $sPaymentId): bool|string
+    {
+        $aRatepayData = $this->fcpoGetRatepayProfileData($sPaymentId);
+        $sFirstDay = $aRatepayData['payment_firstday'];
+        $sBillCountry = $aRatepayData['country_code_billing'];
+
+        if (!in_array($sBillCountry, ['DE', 'AT'])) {
+            return false;
+        }
+
+        if ($sFirstDay == '2,28') {
+            return 'both';
+        } elseif ($sFirstDay == '28') {
+            return 'banktransfer';
+        }
+        return 'debit';
+    }
+
+    /**
+     * Returns matching notification string if Trustly is configured to show iban
      *
      * @return bool
      */
-    public function fcpoGetTrustlyShowIban()
+    public function fcpoGetTrustlyShowIban(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOTrustlyShowIban');
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $blFCPOTrustlyShowIban = $oConfig->getConfigParam('blFCPOTrustlyShowIban');
 
-        return (bool)$blFCPOSofoShowIban;
+        return (bool)$blFCPOTrustlyShowIban;
     }
 
     /**
      * Method checks if deprecated bankdata should be requested instead of
      * IBAN/BIC
      *
+     * @return bool
      */
     public function fcpoForceDeprecatedBankData(): bool
     {
@@ -328,40 +402,24 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Return ISO2 code of bill country
      *
-     *
      * @return string
      */
-    public function fcGetBillCountry()
+    public function fcGetBillCountry(): string
     {
         $sBillCountryId = $this->getUserBillCountryId();
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
+        $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
 
         return ($oCountry->load($sBillCountryId)) ? $oCountry->oxcountry__oxisoalpha2->value : '';
     }
 
     /**
-     * Get, and set if needed, the bill country id of the user object
-     *
-     * @return string
-     */
-    protected function getUserBillCountryId()
-    {
-        if ($this->_sUserBillCountryId === null) {
-            $oUser = $this->getUser();
-            $this->_sUserBillCountryId = $oUser->oxuser__oxcountryid->value;
-        }
-        return $this->_sUserBillCountryId;
-    }
-
-    /**
-     * Returns matching notiication string if sofo is configured to show iban
-     *
+     * Returns matching notification string if sofo is configured to show iban
      *
      * @return bool
      */
-    public function fcpoGetSofoShowIban()
+    public function fcpoGetSofoShowIban(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOSofoShowIban');
 
         return (bool)$blFCPOSofoShowIban;
@@ -370,11 +428,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns if given paymentid represents an active payment
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
+     * @return bool
      */
-    public function fcpoPaymentActive($sPaymentId): bool
+    public function fcpoPaymentActive(string $sPaymentId): bool
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
         $oPayment->load($sPaymentId);
         $blPaymentActive = (bool)($oPayment->oxpayments__oxactive->value);
         $blPaymentAllowed = $this->isPaymentMethodAllowedByBoniCheck($oPayment);
@@ -385,10 +444,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * checks if chosen payment method is allowed according to
      * consumer score setting
      *
-     * @param $oPayment
+     * @param Payment $oPayment
      * @return bool
      */
-    public function isPaymentMethodAllowedByBoniCheck($oPayment)
+    public function isPaymentMethodAllowedByBoniCheck(Payment $oPayment): bool
     {
         $oUser = $this->_fcpoGetUserFromSession();
         return ((int)$oPayment->oxpayments__oxfromboni->value <= (int)$oUser->oxuser__oxboni->value);
@@ -397,12 +456,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Fetches current user from session and returns user object or false
      *
-     *
-     * @return mixed object/bool
+     * @return User
      */
-    protected function _fcpoGetUserFromSession()
+    protected function _fcpoGetUserFromSession(): User
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
 
         return $oBasket->getBasketUser();
@@ -413,16 +471,17 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * the currency and country is supported and
      * the combined widget already has been displayed.
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
+     * @return bool
      */
-    public function fcpoShowKlarnaCombined($sPaymentId): bool
+    public function fcpoShowKlarnaCombined(string $sPaymentId): bool
     {
         $blIsKlarnaCombined = $this->fcpoIsKlarnaCombined($sPaymentId);
         $blIsCountryCurrencyAllowedByKlarna = $this->_fcpoIsCountryCurrencyAllowedByKlarna();
         if (
             $blIsKlarnaCombined &&
             $blIsCountryCurrencyAllowedByKlarna &&
-            !$this->_blKlarnaCombinedIsPresent
+            $this->_blKlarnaCombinedIsPresent === false
         ) {
             $this->_blKlarnaCombinedIsPresent = true;
             return true;
@@ -435,49 +494,65 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks if given payment id is of type of new klarna
      * implementation
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
+     * @return bool
      */
-    public function fcpoIsKlarnaCombined($sPaymentId): bool
+    public function fcpoIsKlarnaCombined(string $sPaymentId): bool
     {
         return (
-        in_array($sPaymentId, ['fcpoklarna_invoice', 'fcpoklarna_directdebit', 'fcpoklarna_installments'])
+            in_array($sPaymentId, [
+                'fcpoklarna_invoice',
+                'fcpoklarna_directdebit',
+                'fcpoklarna_installments',
+            ])
         );
     }
 
     /**
      * Checks if klarna support the user's billing country with the active shop currency for payments.
+     *
+     * @return bool
      */
     protected function _fcpoIsCountryCurrencyAllowedByKlarna(): bool
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
         $sCountryIso = $oUser->fcpoGetUserCountryIso();
 
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oActCurrency = $oConfig->getActShopCurrencyObject();
         $sCurrencyName = $oActCurrency->name;
 
-        $aAllowedCountryCurrencies = ['AT' => 'EUR', 'DK' => 'DKK', 'FI' => 'EUR', 'DE' => 'EUR', 'NL' => 'EUR', 'NO' => 'NOK', 'SE' => 'SEK', 'CH' => 'CHF'];
+        $aAllowedCountryCurrencies = [
+            'AT' => 'EUR',
+            'DK' => 'DKK',
+            'FI' => 'EUR',
+            'DE' => 'EUR',
+            'NL' => 'EUR',
+            'NO' => 'NOK',
+            'SE' => 'SEK',
+            'CH' => 'CHF',
+        ];
 
-        return ($aAllowedCountryCurrencies[$sCountryIso] === $sCurrencyName);
+        return (isset($aAllowedCountryCurrencies[$sCountryIso]) && $aAllowedCountryCurrencies[$sCountryIso] === $sCurrencyName);
     }
 
     /**
      * Method checks if current ratepay payment has a matching profile based on activity and basket values
      *
      * @param string $sPaymentId
-     * @return void
+     * @return bool
      */
-    public function fcpoRatePayAllowed($sPaymentId)
+    public function fcpoRatePayAllowed(string $sPaymentId): bool
     {
         $aMatchingRatePayProfile = $this->_fcpoGetMatchingProfile($sPaymentId);
         $blReturn = false;
-        if ($aMatchingRatePayProfile !== []) {
+        if (count($aMatchingRatePayProfile) > 0) {
             $blReturn = true;
         }
 
-        if ($blReturn) {
+        if ($blReturn === true) {
             $this->_aRatePayProfileIds[$sPaymentId] = $aMatchingRatePayProfile['OXID'];
         }
 
@@ -491,28 +566,34 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @return array
      * @todo: The whole process of matching a profile should be moved into ratepay-model
      */
-    protected function _fcpoGetMatchingProfile($sPaymentId)
+    protected function _fcpoGetMatchingProfile(string $sPaymentId): array
     {
         $aRatePayProfiles = $this->_fcpoFetchRatePayProfilesByPaymentType($sPaymentId);
         $aReturn = [];
 
-        foreach ($aRatePayProfiles as $aRatePayProfile) {
+        foreach ($aRatePayProfiles as $aCurrentRatePayProfile) {
             $sPaymentStringAddition = $this->_fcpoGetRatePayStringAdditionByPaymentId($sPaymentId);
-            if ($sPaymentStringAddition !== '' && $sPaymentStringAddition !== '0') {
+            if ($sPaymentStringAddition) {
                 $sProfileBasketMaxIndex = 'tx_limit_' . $sPaymentStringAddition . '_max';
                 $sProfileBasketMinIndex = 'tx_limit_' . $sPaymentStringAddition . '_min';
                 $sProfileActivationStatusIndex = 'activation_status_' . $sPaymentStringAddition;
-                $dProfileBasketValueMax = (double)$aRatePayProfile[$sProfileBasketMaxIndex];
-                $dProfileBasketValueMin = (double)$aRatePayProfile[$sProfileBasketMinIndex];
-                $sProfileActivationStatus = $aRatePayProfile[$sProfileActivationStatusIndex];
-                $sProfileCountryBilling = $aRatePayProfile['country_code_billing'];
-                $sProfileCurrency = $aRatePayProfile['currency'];
+                $dProfileBasketValueMax = (double)$aCurrentRatePayProfile[$sProfileBasketMaxIndex];
+                $dProfileBasketValueMin = (double)$aCurrentRatePayProfile[$sProfileBasketMinIndex];
+                $sProfileActivationStatus = $aCurrentRatePayProfile[$sProfileActivationStatusIndex];
+                $sProfileCountryBilling = $aCurrentRatePayProfile['country_code_billing'];
+                $sProfileCurrency = $aCurrentRatePayProfile['currency'];
 
-                $aRatepayMatchData = ['basketvalue_max' => $dProfileBasketValueMax, 'basketvalue_min' => $dProfileBasketValueMin, 'activation_status' => $sProfileActivationStatus, 'country_code_billing' => $sProfileCountryBilling, 'currency' => $sProfileCurrency];
+                $aRatepayMatchData = [
+                    'basketvalue_max' => $dProfileBasketValueMax,
+                    'basketvalue_min' => $dProfileBasketValueMin,
+                    'activation_status' => $sProfileActivationStatus,
+                    'country_code_billing' => $sProfileCountryBilling,
+                    'currency' => $sProfileCurrency,
+                ];
 
                 $blProfileMatches = $this->_fcpoCheckRatePayProfileMatch($aRatepayMatchData);
                 if ($blProfileMatches) {
-                    $aReturn = $aRatePayProfile;
+                    $aReturn = $aCurrentRatePayProfile;
                     break;
                 }
             }
@@ -526,10 +607,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @param string $sPaymentId
      * @return array
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    protected function _fcpoFetchRatePayProfilesByPaymentType($sPaymentId)
+    protected function _fcpoFetchRatePayProfilesByPaymentType(string $sPaymentId): array
     {
-        $oRatePay = oxNew(FcPoRatepay::class);
+        $oRatePay = oxNew(FcPoRatePay::class);
 
         return $oRatePay->fcpoGetRatePayProfiles($sPaymentId);
     }
@@ -540,9 +623,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return string
      */
-    protected function _fcpoGetRatePayStringAdditionByPaymentId($sPaymentId)
+    protected function _fcpoGetRatePayStringAdditionByPaymentId(string $sPaymentId): string
     {
-        $aMap = ['fcporp_bill' => 'invoice', 'fcporp_debitnote' => 'elv'];
+        $aMap = [
+            'fcporp_bill' => 'invoice',
+            'fcporp_debitnote' => 'elv',
+            'fcporp_installment' => 'installment',
+        ];
 
         $sReturn = '';
         if (isset($aMap[$sPaymentId])) {
@@ -556,17 +643,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks values for matching profile data
      *
      * @param array $aRatepayMatchData
+     * @return bool
      */
-    protected function _fcpoCheckRatePayProfileMatch($aRatepayMatchData): bool
+    protected function _fcpoCheckRatePayProfileMatch(array $aRatepayMatchData): bool
     {
         if ($aRatepayMatchData['activation_status'] != '2') {
             return false;
         }
 
-        $decimal = $this->fcpoGetBasketSum();
+        $dBasketValue = $this->fcpoGetDBasketSum();
         $blBasketValueMatches = (
-            $decimal <= $aRatepayMatchData['basketvalue_max'] &&
-            $decimal >= $aRatepayMatchData['basketvalue_min']
+            $dBasketValue <= $aRatepayMatchData['basketvalue_max'] &&
+            $dBasketValue >= $aRatepayMatchData['basketvalue_min']
         );
         if (!$blBasketValueMatches) {
             return false;
@@ -581,40 +669,65 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         }
 
         $oCur = $this->getActCurrency();
-        return $oCur->name == $aRatepayMatchData['currency'];
+        $blCurrencyMatches = (
+            $oCur->name == $aRatepayMatchData['currency']
+        );
+        if (!$blCurrencyMatches) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * Returns the sum of basket
      *
-     *
-     * @return decimal
+     * @return float
      */
-    public function fcpoGetBasketSum(): string
+    public function fcpoGetDBasketSum(): float
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sShopVersion = $oConfig->getVersion();
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-        $dBruttoSum = (version_compare($sShopVersion, '4.7.0', '>=')) ? $oBasket->getBruttoSum() : $oBasket->getProductsPrice()->getBruttoSum();
-
-        return number_format($dBruttoSum, 2, ',', '.');
+        return $oBasket->getBruttoSum();
     }
 
     /**
      * Check if there are available sub payment types for the user
      *
      * @param string $sType payment type PAYONE
+     *
+     * @return bool
      */
-    public function hasPaymentMethodAvailableSubTypes($sType): bool
+    public function hasPaymentMethodAvailableSubTypes(string $sType): bool
     {
-        $aSubtypes = ['cc' => [$this->getVisa(), $this->getMastercard(), $this->getAmex(), $this->getDiners(), $this->getJCB(), $this->getMaestroInternational(), $this->getMaestroUK(), $this->getCarteBleue()], 'sb' => [$this->getSofortUeberweisung(), $this->getGiropay(), $this->getPostFinanceEFinance(), $this->getPostFinanceCard(), $this->getIdeal(), $this->getP24(), $this->getBancontact()]];
+        $aSubtypes = [
+            'cc' => [
+                $this->getVisa(),
+                $this->getMastercard(),
+                $this->getAmex(),
+                $this->getDiners(),
+                $this->getJCB(),
+                $this->getMaestroInternational(),
+                $this->getMaestroUK(),
+                $this->getCarteBleue(),
+            ],
+            'sb' => [
+                $this->getSofortUeberweisung(),
+                $this->getPostFinanceEFinance(),
+                $this->getPostFinanceCard(),
+                $this->getIdeal(),
+                $this->getP24(),
+                $this->getBancontact(),
+            ],
+        ];
 
         return in_array(true, $aSubtypes[$sType]);
     }
 
     /**
      * Check if sub payment method Visa is available to the user
+     *
+     * @return bool
      */
     public function getVisa(): bool
     {
@@ -625,16 +738,16 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Check if the user is allowed to use the given payment method
      *
      * @param string $sSubPaymentId ID of the sub payment method ( Visa, MC, etc. )
-     * @param string $sType         payment type PAYONE
+     * @param string $sType payment type PAYONE
      *
      * @return bool
      */
-    protected function isPaymentMethodAvailableToUser($sSubPaymentId, $sType)
+    protected function isPaymentMethodAvailableToUser(string $sSubPaymentId, string $sType): bool
     {
-        if (!array_key_exists($sSubPaymentId . '_' . $sType, $this->_aCheckedSubPayments)) {
+        if (array_key_exists($sSubPaymentId . '_' . $sType, $this->_aCheckedSubPayments) === false) {
             $sUserBillCountryId = $this->getUserBillCountryId();
             $sUserDelCountryId = $this->getUserDelCountryId();
-            $oPayment = oxNew('oxPayment');
+            $oPayment = oxNew(Payment::class);
             $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType] = $oPayment->isPaymentMethodAvailableToUser($sSubPaymentId, $sType, $sUserBillCountryId, $sUserDelCountryId);
         }
         return $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType];
@@ -643,12 +756,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Get, and set if needed, the delivery country id if existant
      *
-     * @return string
+     * @return bool|string
      */
-    protected function getUserDelCountryId()
+    protected function getUserDelCountryId(): bool|string
     {
         if ($this->_sUserDelCountryId === null) {
-            $oOrder = $this->_oFcpoHelper->getFactoryObject('oxorder');
+            $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oDelAddress = $oOrder->getDelAddressInfo();
             $sUserDelCountryId = false;
             if ($oDelAddress !== null) {
@@ -661,6 +774,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Mastercard is available to the user
+     *
+     * @return bool
      */
     public function getMastercard(): bool
     {
@@ -669,6 +784,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Amex is available to the user
+     *
+     * @return bool
      */
     public function getAmex(): bool
     {
@@ -677,6 +794,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Diners is available to the user
+     *
+     * @return bool
      */
     public function getDiners(): bool
     {
@@ -685,6 +804,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method JCB is available to the user
+     *
+     * @return bool
      */
     public function getJCB(): bool
     {
@@ -693,6 +814,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method MaestroInternational is available to the user
+     *
+     * @return bool
      */
     public function getMaestroInternational(): bool
     {
@@ -701,6 +824,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method MaestroUK is available to the user
+     *
+     * @return bool
      */
     public function getMaestroUK(): bool
     {
@@ -709,6 +834,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method CarteBleue is available to the user
+     *
+     * @return bool
      */
     public function getCarteBleue(): bool
     {
@@ -717,6 +844,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method SofortUeberweisung is available to the user
+     *
+     * @return bool
      */
     public function getSofortUeberweisung(): bool
     {
@@ -724,28 +853,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Check if sub payment method Giropay is available to the user
-     */
-    public function getGiropay(): bool
-    {
-        return ($this->getConfigParam('blFCPOgiroActivated') && $this->isPaymentMethodAvailableToUser('GPY', 'sb'));
-    }
-
-    /**
      * Check if sub payment method PostFinanceEFinance is available to the user
+     *
+     * @return bool
      */
     public function getPostFinanceEFinance(): bool
     {
         return ($this->getConfigParam('blFCPOPoFiEFActivated') && $this->isPaymentMethodAvailableToUser('PFF', 'sb'));
     }
 
-    /*
-     * Return language id
-     *
-     * @return int
-     */
     /**
      * Check if sub payment method PostFinanceCard is available to the user
+     *
+     * @return bool
      */
     public function getPostFinanceCard(): bool
     {
@@ -754,6 +874,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Ideal is available to the user
+     *
+     * @return bool
      */
     public function getIdeal(): bool
     {
@@ -762,6 +884,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Przelewy24 is available to the user
+     *
+     * @return bool
      */
     public function getP24(): bool
     {
@@ -770,6 +894,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Check if sub payment method Bancontact is available to the user
+     *
+     * @return bool
      */
     public function getBancontact(): bool
     {
@@ -777,43 +903,53 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
+     * Check if sub payment method EPS is available to the user
+     *
+     * @return bool
+     */
+    public function getEPS(): bool
+    {
+        return ($this->getConfigParam('blFCPOepsActivated') && $this->isPaymentMethodAvailableToUser('EPS', 'sb'));
+    }
+
+    /**
      * Get the basket brut price in the smallest unit of the currency
      *
      * @return int
      */
-    public function getAmount()
+    public function getAmount(): int
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
-        $bruttoPrice = $oPrice->getBruttoPrice();
+        $dPrice = $oPrice->getBruttoPrice();
 
-        return number_format($bruttoPrice, 2, '.', '') * 100;
+        return number_format($dPrice, 2, '.', '') * 100;
     }
 
     /**
      * Get the language the user is using in the shop
      *
      * @return string
+     * @throws LanguageNotFoundException
      */
-    public function getTplLang()
+    public function getTplLang(): string
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         return $oLang->getLanguageAbbr();
     }
 
     /**
      * Template getter for delivering all meta information to build input fields in foreach loop
      *
-     *
      * @return array
      */
-    public function fcpoGetCCPaymentMetaData()
+    public function fcpoGetCCPaymentMetaData(): array
     {
         $this->_aPaymentCCMetaData = [];
         $sPaymentId = 'fcpocreditcard';
 
-        $oPayment = oxNew('oxpayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load($sPaymentId);
 
         $this->_fcpoSetCCMetaData($oPayment, 'V', 'Visa');
@@ -831,13 +967,22 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets cc meta payment data
      *
-     * @param oxPayment $oPayment
-     * @param string    $sBrandShortcut
-     * @param string    $sBrandName
+     * @param Payment $oPayment
+     * @param string $sBrandShortcut
+     * @param string $sBrandName
      */
-    protected function _fcpoSetCCMetaData($oPayment, $sBrandShortcut, $sBrandName)
+    protected function _fcpoSetCCMetaData(Payment $oPayment, string $sBrandShortcut, string $sBrandName)
     {
-        $aActiveCCBrands = ['V' => $this->getVisa(), 'M' => $this->getMastercard(), 'A' => $this->getAmex(), 'D' => $this->getDiners(), 'J' => $this->getJCB(), 'O' => $this->getMaestroInternational(), 'U' => $this->getMaestroUK(), 'B' => $this->getCarteBleue()];
+        $aActiveCCBrands = [
+            'V' => $this->getVisa(),
+            'M' => $this->getMastercard(),
+            'A' => $this->getAmex(),
+            'D' => $this->getDiners(),
+            'J' => $this->getJCB(),
+            'O' => $this->getMaestroInternational(),
+            'U' => $this->getMaestroUK(),
+            'B' => $this->getCarteBleue(),
+        ];
 
         if ($aActiveCCBrands[$sBrandShortcut]) {
             $this->_aPaymentCCMetaData[] = $this->_fcpoGetCCPaymentMetaData($oPayment, $sBrandShortcut, $sBrandName);
@@ -845,19 +990,20 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Returns a payment meta data object for payment method and its payment-tag
+     * Returns a payment metadata object for payment method and its payment-tag
      *
-     * @param object $oPayment
+     * @param Payment $oPayment
      * @param string $sPaymentTag
+     * @param string $sPaymentName
      * @return object
      */
-    protected function _fcpoGetCCPaymentMetaData($oPayment, $sPaymentTag, $sPaymentName): stdClass
+    protected function _fcpoGetCCPaymentMetaData(Payment $oPayment, string $sPaymentTag, string $sPaymentName): object
     {
         $sPaymentId = $oPayment->getId();
         $sHashNamePrefix = "fcpo_hashcc_";
         $OperationModeNamePrefix = "fcpo_mode_";
         $aDynValue = $this->getDynValue();
-        $blSelected = $aDynValue['fcpo_kktype'] == $sPaymentTag;
+        $blSelected = isset($aDynValue['fcpo_kktype']) && $aDynValue['fcpo_kktype'] == $sPaymentTag;
 
         $oPaymentMetaData = new stdClass();
         $oPaymentMetaData->sHashName = $sHashNamePrefix . $sPaymentTag;
@@ -874,32 +1020,31 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template variable getter. Returns dyn values
      *
-     *
      * @return array
      */
-    public function getDynValue()
+    public function getDynValue(): array
     {
-        if ((bool)$this->getConfigParam('sFCPOSaveBankdata')) {
+        parent::getDynValue();
+        if ((bool)$this->getConfigParam('sFCPOSaveBankdata') === true) {
             $aPaymentList = $this->getPaymentList();
             if (isset($aPaymentList['fcpodebitnote'])) {
                 $this->_assignDebitNoteParams();
             }
         }
-        return $this->_aDynValue;
+        return $this->_aDynValue ?: [];
     }
 
     /**
      * Extends oxid standard method getPaymentList
      * Extends it with the creditworthiness check for the user
      *
-     * @return string
      * @extend getPaymentList
      */
     public function getPaymentList()
     {
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
         if ($this->_oPaymentList === null) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
             $oUser = $this->getUser();
             $sBoniCheckMoment = $oConfig->getConfigParam('sFCPOBonicheckMoment');
 
@@ -910,37 +1055,38 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             }
 
             if ($blContinue === true) {
+                parent::getPaymentList();
                 $this->_fcpoCheckPaypalExpressRemoval();
                 $this->_fcpoRemoveForbiddenPaymentsByUser();
+                $this->_fcpoCheckSecInvoiceRemoval();
+                $this->_fcpoCheckBNPLRemoval();
             } else {
-                $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-                $oUtils->redirect($this->_oFcpoHelper->fcpoGetConfig()->getShopHomeURL() . 'cl=user', false);
+                $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
+                $oUtils->redirect($this->_oFcPoHelper->fcpoGetConfig()->getShopHomeURL() . 'cl=user', false);
             }
         }
         return $this->_oPaymentList;
     }
 
     /**
-     * Checking if paypal express should be removed from payment list
-     *
+     * Removes PayPal express from payment list
      *
      * @return void
      */
-    protected function _fcpoCheckPaypalExpressRemoval()
+    protected function _fcpoCheckPaypalExpressRemoval(): void
     {
         $this->_fcpoRemovePaymentFromFrontend('fcpopaypal_express');
-        //&& !$this->_oFcpoHelper->fcpoGetSessionVariable('fcpoWorkorderId')
     }
 
     /**
      * Removes payment from frontend
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return void
      */
-    protected function _fcpoRemovePaymentFromFrontend($sPaymentId)
+    protected function _fcpoRemovePaymentFromFrontend(string $sPaymentId): void
     {
-        if (array_key_exists($sPaymentId, $this->_oPaymentList)) {
+        if (array_key_exists($sPaymentId, $this->_oPaymentList) !== false) {
             unset($this->_oPaymentList[$sPaymentId]);
         }
     }
@@ -948,15 +1094,50 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Removes payments that are forbidden by user
      *
-     *
      * @return void
      */
-    protected function _fcpoRemoveForbiddenPaymentsByUser()
+    protected function _fcpoRemoveForbiddenPaymentsByUser(): void
     {
         $oUser = $this->getUser();
         $aForbiddenPaymentIds = $oUser->fcpoGetForbiddenPaymentIds();
-        foreach ($aForbiddenPaymentIds as $aForbiddenPaymentId) {
-            $this->_fcpoRemovePaymentFromFrontend($aForbiddenPaymentId);
+        foreach ($aForbiddenPaymentIds as $sForbiddenPaymentId) {
+            $this->_fcpoRemovePaymentFromFrontend($sForbiddenPaymentId);
+        }
+    }
+
+    /**
+     * Checking if secure invoice should be removed from payment list
+     *
+     * @return void
+     */
+    protected function _fcpoCheckSecInvoiceRemoval(): void
+    {
+        $blshowshipaddress = $this->_oFcPoHelper->fcpoGetSessionVariable('blshowshipaddress');
+        if ($blshowshipaddress == 1) {
+            $this->_fcpoRemovePaymentFromFrontend('fcpo_secinvoice');
+        }
+    }
+
+    /**
+     * Checking if BNPL methods should be removed from payment list
+     *
+     * @return void
+     */
+    protected function _fcpoCheckBNPLRemoval(): void
+    {
+        $oUser = $this->getUser();
+        $blIsB2B = $oUser->oxuser__oxcompany->value != '';
+
+        $blshowshipaddress = $this->_oFcPoHelper->fcpoGetSessionVariable('blshowshipaddress');
+        $blDiffShippingAllowed = $this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('blFCPOPLAllowDiffAddress');
+
+        if ((!$blDiffShippingAllowed && $blshowshipaddress == 1)) {
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinvoice');
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinstallment');
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secdebitnote');
+        } elseif ($blIsB2B) {
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secinstallment');
+            $this->_fcpoRemovePaymentFromFrontend('fcpopl_secdebitnote');
         }
     }
 
@@ -964,19 +1145,20 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Assign debit note payment values to view data. Loads user debit note payment
      * if available and assigns payment data to $this->_aDynValue
      *
-     *
-     * @return null
+     * @return void
      */
-    protected function _assignDebitNoteParams()
+    protected function _assignDebitNoteParams(): void
     {
-        //such info available ?
-        if ((bool)$this->getConfigParam('sFCPOSaveBankdata') && ($oUserPayment = $this->_fcGetPaymentByPaymentType($this->getUser(), 'fcpodebitnote'))) {
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $aAddPaymentData = $oUtils->assignValuesFromText($oUserPayment->oxuserpayments__oxvalue->value);
-            //checking if some of values is allready set in session - leave it
-            foreach ($aAddPaymentData as $oData) {
-                if (!isset($this->_aDynValue[$oData->name]) || (isset($this->_aDynValue[$oData->name]) && !$this->_aDynValue[$oData->name])) {
-                    $this->_aDynValue[$oData->name] = $oData->value;
+        parent::_assignDebitNoteParams();
+        if ((bool)$this->getConfigParam('sFCPOSaveBankdata') === true) {
+            if ($oUserPayment = $this->_fcGetPaymentByPaymentType($this->getUser(), 'fcpodebitnote')) {
+                $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
+                $aAddPaymentData = $oUtils->assignValuesFromText($oUserPayment->oxuserpayments__oxvalue->value);
+                //checking if some values are already set in session - leave it
+                foreach ($aAddPaymentData as $oData) {
+                    if (!isset($this->_aDynValue[$oData->name]) || (isset($this->_aDynValue[$oData->name]) && !$this->_aDynValue[$oData->name])) {
+                        $this->_aDynValue[$oData->name] = $oData->value;
+                    }
                 }
             }
         }
@@ -985,38 +1167,36 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Get user payment by payment id with oxid bugfix for getting last payment
      *
-     * @param oxUser $oUser        user object
-     * @param string $sPaymentType payment type
+     * @param User|null $oUser user object
+     * @param string|null $sPaymentType payment type
      *
-     * @return bool
+     * @return bool|UserPayment
      */
-    protected function _fcGetPaymentByPaymentType($oUser = null, $sPaymentType = null)
+    protected function _fcGetPaymentByPaymentType(User $oUser = null, string $sPaymentType = null): bool|UserPayment
     {
-        $oUserPayment = null;
         $mReturn = false;
         if ($oUser && $sPaymentType != null) {
-            $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+            $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
             $sOxid = $oPayment->fcpoGetUserPaymentId($oUser->getId(), $sPaymentType);
 
             if ($sOxid) {
-                $oUserPayment = $this->_oFcpoHelper->getFactoryObject('oxuserpayment');
+                $oUserPayment = $this->_oFcPoHelper->getFactoryObject(UserPayment::class);
                 $oUserPayment->load($sOxid);
                 $mReturn = $oUserPayment;
             }
         }
 
-        return $oUserPayment;
+        return $mReturn;
     }
 
     /**
-     * Get verification safety hash for creditcard payment method
+     * Get verification safety hash for credit card payment method
      *
+     * @param string $sType
      * @return string
      */
-    public function getHashCC($sType = '')
+    public function getHashCC(string $sType = ''): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
         $sKey = $this->getPortalKey();
 
         $sData =
@@ -1029,11 +1209,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'JSON' .
             'yes';
 
-        $sHashMD5 = md5($sData . $sKey);
-        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
-
-        return ($sFCPOHashMethod == 'sha2-384')
-            ? $sHashSha2 : $sHashMD5;
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**
@@ -1041,7 +1217,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    public function getPortalKey()
+    public function getPortalKey(): string
     {
         return $this->getConfigParam('sFCPOPortalKey');
     }
@@ -1051,13 +1227,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    public function getSubAccountId()
+    public function getSubAccountId(): string
     {
         return $this->getConfigParam('sFCPOSubAccountID');
     }
 
     /**
      * Get encoding of the shop
+     *
+     * @return string
      */
     public function getEncoding(): string
     {
@@ -1069,7 +1247,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    public function getMerchantId()
+    public function getMerchantId(): string
     {
         return $this->getConfigParam('sFCPOMerchantID');
     }
@@ -1081,9 +1259,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    protected function _getOperationModeCC($sType = '')
+    protected function _getOperationModeCC(string $sType = ''): string
     {
-        $oPayment = oxNew('oxpayment');
+        $oPayment = oxNew(Payment::class);
         $oPayment->load('fcpocreditcard');
         return $oPayment->fcpoGetOperationMode($sType);
     }
@@ -1093,7 +1271,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    public function getPortalId()
+    public function getPortalId(): string
     {
         return $this->getConfigParam('sFCPOPortalID');
     }
@@ -1101,8 +1279,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for delivering payment meta data of online payments
      *
-     *
-     * @return never[]|object[]
+     * @return array
      */
     public function fcpoGetOnlinePaymentMetaData(): array
     {
@@ -1110,9 +1287,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if ($this->getSofortUeberweisung()) {
             $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('PNT');
-        }
-        if ($this->getGiropay()) {
-            $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('GPY');
         }
         if ($this->getEPS()) {
             $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('EPS');
@@ -1142,14 +1316,22 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sIdent
      * @return object
      */
-    protected function _fcpoGetOnlinePaymentData($sIdent): stdClass
+    protected function _fcpoGetOnlinePaymentData(string $sIdent): object
     {
         $aDynValue = $this->getDynValue();
         $blSelected = $aDynValue['fcpo_sotype'] == $sIdent;
 
-        $aCaptions = ['PNT' => 'SOFORT &Uuml;berweisung', 'GPY' => 'giropay', 'EPS' => 'eps - Online-&Uuml;berweisung', 'PFF' => 'PostFinance E-Finance', 'PFC' => 'PostFinance Card', 'IDL' => 'iDeal', 'P24' => 'P24', 'BCT' => 'Bancontact'];
+        $aCaptions = [
+            'PNT' => 'SOFORT &Uuml;berweisung',
+            'EPS' => 'eps - Online-&Uuml;berweisung',
+            'PFF' => 'PostFinance E-Finance',
+            'PFC' => 'PostFinance Card',
+            'IDL' => 'iDeal',
+            'P24' => 'P24',
+            'BCT' => 'Bancontact',
+        ];
 
-        $sCaption = ($aCaptions[$sIdent] !== '' && $aCaptions[$sIdent] !== '0') ? $aCaptions[$sIdent] : '';
+        $sCaption = $aCaptions[$sIdent] ?: '';
 
         $oPaymentMetaData = new stdClass();
         $oPaymentMetaData->sShortcut = $sIdent;
@@ -1160,33 +1342,28 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Check if sub payment method EPS is available to the user
-     */
-    public function getEPS(): bool
-    {
-        return ($this->getConfigParam('blFCPOepsActivated') && $this->isPaymentMethodAvailableToUser('EPS', 'sb'));
-    }
-
-    /**
      * Method returns active theme path by checking current theme and its parent
      * If theme is not assignable, 'azure' will be the fallback
      *
-     *
      * @return string
      */
-    public function fcpoGetActiveThemePath()
+    public function fcpoGetActiveThemePath(): string
     {
-        $oViewConfig = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+        $oViewConfig = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
 
         return $oViewConfig->fcpoGetActiveThemePath();
     }
 
     /**
      * Get verification safety hash for debitnote payment method with checktype parameter
+     *
+     * @return string
      */
     public function getHashELVWithChecktype(): string
     {
-        return md5(
+        $sKey = $this->getPortalKey();
+
+        $sData =
             $this->getSubAccountId() .
             $this->getChecktype() .
             $this->getEncoding() .
@@ -1194,9 +1371,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $this->_getOperationModeELV() .
             $this->getPortalId() .
             'bankaccountcheck' .
-            'JSON' .
-            $this->getPortalKey()
-        );
+            'JSON';
+
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**
@@ -1204,7 +1381,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    public function getChecktype()
+    public function getChecktype(): string
     {
         return $this->getConfigParam('sFCPOPOSCheck');
     }
@@ -1214,86 +1391,56 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    protected function _getOperationModeELV()
+    protected function _getOperationModeELV(): string
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
         $oPayment->load('fcpodebitnote');
         return $oPayment->fcpoGetOperationMode();
     }
 
     /**
      * Get verification safety hash for debitnote payment method without checktype parameter
+     *
+     * @return string
      */
     public function getHashELVWithoutChecktype(): string
     {
-        return md5(
+        $sKey = $this->getPortalKey();
+
+        $sData =
             $this->getSubAccountId() .
             $this->getEncoding() .
             $this->getMerchantId() .
             $this->_getOperationModeELV() .
             $this->getPortalId() .
             'bankaccountcheck' .
-            'JSON' .
-            $this->getPortalKey()
-        );
-    }
+            'JSON';
 
-    /**
-     * Returns if CVC
-     *
-     *
-     * @return bool
-     */
-    public function fcpoUseCVC()
-    {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-
-        return $oConfig->getConfigParam('blFCPOCCUseCvc');
+        return hash_hmac('sha384', $sData, $sKey);
     }
 
     /**
      * Returns if option for BIC is set mandatory as string to handle it with javascript checks
      *
-     *
      * @return string
      */
-    public function fcpoGetBICMandatory()
+    public function fcpoGetBICMandatory(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blFCPODebitBICMandatory = $oConfig->getConfigParam('blFCPODebitBICMandatory');
 
         return ($blFCPODebitBICMandatory) ? 'true' : 'false';
     }
 
     /**
-     * Returns creditcard type
-     *
+     * Returns credit card type
      *
      * @return mixed
      */
-    public function fcpoGetCreditcardType()
+    public function fcpoGetCreditcardType(): mixed
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOCCType');
-    }
-
-    /**
-     * Method will be triggered by amazon checkout. Will make sure that paymentid is set to
-     * amazon payment
-     *
-     *
-     * @return void
-     */
-    public function validateAmazonPayment(): string
-    {
-        $oSession = $this->getSession();
-        $oBasket = $oSession->getBasket();
-
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
-        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpoamazonpay');
-        $oBasket->setPayment('fcpoamazonpay');
-
-        return 'order';
     }
 
     /**
@@ -1310,12 +1457,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return mixed
      */
-    public function validatePayment()
+    public function validatePayment(): mixed
     {
         $sPaymentId = $this->_fcpoGetPaymentId();
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);
 
-        $mReturn = null;
+        $mReturn = parent::validatePayment();
 
         $mReturn = $this->_processParentReturnValue($mReturn);
 
@@ -1323,19 +1470,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Returns paymentid wether from request parameter or session
+     * Returns paymentid whether from request parameter or session
      *
-     *
-     * @return mixed
+     * @return string
      */
-    protected function _fcpoGetPaymentId()
+    protected function _fcpoGetPaymentId(): string
     {
-        $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
+        $sPaymentId = $this->_oFcPoHelper->fcpoGetRequestParameter('paymentid');
         if (!$sPaymentId) {
-            $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+            $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
         }
 
-        return $sPaymentId;
+        return $sPaymentId ?: '';
     }
 
     /**
@@ -1344,7 +1490,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return void
      */
-    protected function _fcpoCheckKlarnaUpdateUser($sPaymentId)
+    protected function _fcpoCheckKlarnaUpdateUser(string $sPaymentId): void
     {
         $oUser = $this->getUser();
         if ($oUser && ($sPaymentId == 'fcpoklarna')) {
@@ -1355,16 +1501,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Update klarna user
      *
-     *
      * @return void
      */
-    protected function _fcpoKlarnaUpdateUser()
+    protected function _fcpoKlarnaUpdateUser(): void
     {
         $oUser = $this->getUser();
         $blUserChanged = false;
         $aDynValue = $this->getDynValue();
-        $sPaymentId = $this->_fcpoGetPaymentId();
-        $sType = $this->_fcpoGetType($sPaymentId);
+        $sType = $this->_fcpoGetType();
 
         $blUserChanged = $this->_fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, 'oxfon', 'fon', $oUser);
         $blUserChanged = $this->_fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, 'oxbirthdate', 'birthday', $oUser);
@@ -1372,18 +1516,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blUserChanged = $this->_fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, 'oxsal', 'sal', $oUser);
         $blUserChanged = $this->_fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, 'oxaddinfo', 'addinfo', $oUser);
 
-        if (array_key_exists('fcpo_' . $sType . '_del_addinfo', $aDynValue)) {
+        if (array_key_exists('fcpo_' . $sType . '_del_addinfo', $aDynValue) !== false) {
             $sDeliveryAddressId = $oUser->getSelectedAddressId();
             if ($sDeliveryAddressId) {
-                $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+                $oAddress = $this->_oFcPoHelper->getFactoryObject(Address::class);
                 if ($oAddress->load($sDeliveryAddressId)) {
-                    $oAddress->oxaddress__oxaddinfo = new oxField($aDynValue['fcpo_' . $sType . '_del_addinfo'], oxField::T_RAW);
+                    $oAddress->oxaddress__oxaddinfo = new Field($aDynValue['fcpo_' . $sType . '_del_addinfo'], Field::T_RAW);
                     $oAddress->save();
                 }
             }
         }
 
-        if ($blUserChanged) {
+        if ($blUserChanged === true) {
             $oUser->save();
         }
     }
@@ -1391,8 +1535,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Set payment type and process special case of klarna
      *
+     * @return string
      */
-    protected function _fcpoGetType($sPaymentId): string
+    protected function _fcpoGetType(): string
     {
         return 'klv';
     }
@@ -1400,27 +1545,32 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Adds new value to user object and return the changed status
      *
-     * @param boolean $blUserChanged
-     * @param string  $sType
-     * @param array   $aDynValue
-     * @param string  $sDbField
-     * @param string  $sDynValueField
-     * @param oxUser  $oUser
-     * @return boolean
+     * @param bool $blUserChanged
+     * @param string $sType
+     * @param array $aDynValue
+     * @param string $sDbField
+     * @param string $sDynValueField
+     * @param User $oUser
+     * @return bool
      */
-    protected function _fcpoCheckUpdateField($blUserChanged, $sType, $aDynValue, $sDbField, $sDynValueField, $oUser)
-    {
+    protected function _fcpoCheckUpdateField(bool $blUserChanged, string $sType, array $aDynValue, string $sDbField, string $sDynValueField, User $oUser): bool {
         $blAlreadyChanged = $blUserChanged;
         $sCompleteDynValueName = 'fcpo_' . $sType . '_' . $sDynValueField;
 
-        if (array_key_exists($sCompleteDynValueName, $aDynValue)) {
+        if (array_key_exists($sCompleteDynValueName, $aDynValue) !== false) {
             $sObjAttribute = 'oxuser__' . $sDbField;
 
-            $oUser->$sObjAttribute = new oxField($aDynValue[$sCompleteDynValueName], oxField::T_RAW);
+            $oUser->$sObjAttribute = new Field($aDynValue[$sCompleteDynValueName], Field::T_RAW);
             $blUserChanged = true;
         }
 
-        return $blAlreadyChanged ?: $blUserChanged;
+        if ($blAlreadyChanged === true) {
+            $blReturn = true;
+        } else {
+            $blReturn = $blUserChanged;
+        }
+
+        return $blReturn;
     }
 
     /**
@@ -1429,7 +1579,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sReturn
      * @return string
      */
-    protected function _processParentReturnValue($sReturn)
+    protected function _processParentReturnValue(string $sReturn): string
     {
         return $sReturn;
     }
@@ -1437,25 +1587,21 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Extension of validation, which takes care on specific payone payments
      *
+     * @param mixed $mReturn
      * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoProcessValidation(mixed $mReturn, $sPaymentId)
+    protected function _fcpoProcessValidation(mixed $mReturn, string $sPaymentId): mixed
     {
-        if ($sPaymentId == 'fcpoamazonpay') {
-            $mReturn = 'order';
-        }
-
         if ($mReturn == 'order') { // success
-            $this->_fcpoSetKlarnaCampaigns();
-
-            $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+            $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
             $oPayment->load($sPaymentId);
             $mReturn = $this->_fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId);
+            $mReturn = $this->_fcpoBNPLSaveRequestedValues($mReturn, $sPaymentId);
             $blContinue = $this->_fcpoCheckBoniMoment($oPayment);
 
-            if (!$blContinue) {
-                $this->_fcpoSetBoniErrorValues($sPaymentId);
+            if ($blContinue !== true) {
+                $this->_fcpoSetBoniErrorValues();
                 $mReturn = 'basket';
             } else {
                 $this->_fcpoSetMandateParams($oPayment);
@@ -1466,7 +1612,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $mReturn = $this->_fcpoKlarnaCombinedValidate($mReturn, $sPaymentId);
 
             $mReturn = $this->_fcpoPayolutionPreCheck($mReturn, $sPaymentId);
-            if (in_array($sPaymentId, ['fcporp_bill', 'fcporp_debitnote'])) {
+            if (in_array($sPaymentId, ['fcporp_bill', 'fcporp_debitnote', 'fcporp_installment'])) {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
@@ -1476,37 +1622,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Sets needed session values if there is corresponding data
-     *
-     *
-     * @return void
-     */
-    protected function _fcpoSetKlarnaCampaigns()
-    {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_klarna_campaign')) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpo_klarna_campaign', $this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_klarna_campaign'));
-        } else {
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
-        }
-    }
-
-    /**
      * Save requested values of secure invoice
      *
+     * @param mixed $mReturn
      * @param string $sPaymentId
-     * @return bool
+     * @return mixed
      */
-    protected function _fcpoSecInvoiceSaveRequestedValues(mixed $mReturn, $sPaymentId)
+    protected function _fcpoSecInvoiceSaveRequestedValues(mixed $mReturn, string $sPaymentId): mixed
     {
         $blIsSecInvoice = ($sPaymentId == 'fcpo_secinvoice');
-        if (!$blIsSecInvoice) {
-            return $mReturn;
-        }
+        if (!$blIsSecInvoice) return $mReturn;
 
-        $aRequestedValues =
-            $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
-        $aBirthdayValidation =
-            $this->_fcpoValidateBirthdayData($sPaymentId, $aRequestedValues);
+        $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
+        $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId, $aRequestedValues);
         $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
 
         $blBirthdayCheckPassed = true;
@@ -1524,37 +1652,50 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks request data for valid birthday data
      *
      * @param string $sPaymentId
-     * @param        $aRequestedValues
-     * @return array{blValidBirthdateData: bool, blBirthdayRequired: bool}
+     * @param array $aRequestedValues
+     * @return array
      */
-    protected function _fcpoValidateBirthdayData($sPaymentId, $aRequestedValues): array
+    protected function _fcpoValidateBirthdayData(string $sPaymentId, array $aRequestedValues): array
     {
         $blBirthdayRequired = false;
+        $blValidBirthdateData = true;
 
         // validation
         switch ($sPaymentId) {
             case 'fcpopo_bill':
             case 'fcpopo_debitnote':
             case 'fcpopo_installment':
-                $blBirthdayRequired = $this->fcpoShowPayolutionB2C();
+                $blB2CMode = $this->fcpoShowPayolutionB2C();
+                $blBirthdayRequired = $blB2CMode;
                 $blValidBirthdateData = $this->_fcpoValidatePayolutionBirthdayData($sPaymentId, $aRequestedValues);
                 break;
             case 'fcpo_secinvoice':
-                $blBirthdayRequired = !$this->fcpoIsB2BPov();
+            case 'fcpopl_secinvoice':
+            case 'fcpopl_secinstallment':
+            case 'fcpopl_secdebitnote':
+                $blB2CMode = !$this->fcpoIsB2BPov();
+                $blFieldPresence = isset($aRequestedValues[$sPaymentId . '_birthdate_day'])
+                    && isset($aRequestedValues[$sPaymentId . '_birthdate_month'])
+                    && isset($aRequestedValues[$sPaymentId . '_birthdate_year']);
+                $blBirthdayRequired = ($blB2CMode || $sPaymentId == 'fcpopl_secinvoice') && $blFieldPresence;
                 $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues);
                 break;
         }
 
-        return ['blValidBirthdateData' => $blValidBirthdateData, 'blBirthdayRequired' => $blBirthdayRequired];
+        $aValidationData =  [
+            'blValidBirthdateData' => $blValidBirthdateData,
+            'blBirthdayRequired' => $blBirthdayRequired
+        ];
+
+        return $aValidationData;
     }
 
     /**
      * Template getter for checking which kind of field should be shown
      *
-     *
      * @return bool
      */
-    public function fcpoShowPayolutionB2C()
+    public function fcpoShowPayolutionB2C(): bool
     {
         $blB2BIsShown = $this->fcpoShowPayolutionB2B();
 
@@ -1564,23 +1705,30 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for checking which kind of field should be shown
      *
+     * @return bool
      */
     public function fcpoShowPayolutionB2B(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
 
-        return $blB2BModeActive && $this->fcpoIsB2B();
+        if ($blB2BModeActive) {
+            $blReturn = $this->fcpoIsB2B();
+        } else {
+            $blReturn = false;
+        }
+
+        return $blReturn;
     }
 
     /**
      * Generic method for determine if order is b2b
      * Can be optionally used in strict mode
      *
-     * @param $blStrict
+     * @param bool $blStrict
      * @return bool
      */
-    public function fcpoIsB2B($blStrict = false)
+    public function fcpoIsB2B(bool $blStrict = false): bool
     {
         $oUser = $this->getUser();
 
@@ -1601,12 +1749,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks request data to be valid birthday data for payolution
      *
      * @param string $sPaymentId
-     * @param array  $aRequestedValues
-     * @return boolean
+     * @param array $aRequestedValues
+     * @return bool
      */
-    protected function _fcpoValidatePayolutionBirthdayData($sPaymentId, $aRequestedValues)
+    protected function _fcpoValidatePayolutionBirthdayData(string $sPaymentId, array $aRequestedValues): bool
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
         $sBirthdateYear = $aRequestedValues['fcpo_payolution_' . $sFieldNameAddition . '_birthdate_year'];
@@ -1634,7 +1782,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return bool
      */
-    public function fcpoIsB2BPov()
+    public function fcpoIsB2BPov(): bool
     {
         $oUser = $this->getUser();
         return !empty($oUser->oxuser__oxcompany->value);
@@ -1643,16 +1791,17 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Validates birthday for secure invoice payment
      *
-     * @param $sPaymentId
-     * @param $aRequestedValues
+     * @param string $sPaymentId
+     * @param array $aRequestedValues
+     * @return bool
      */
-    protected function _fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues): bool
+    protected function _fcpoValidateSecInvoiceBirthdayData(string $sPaymentId, array $aRequestedValues): bool
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
-        $sBirthdateYear = $aRequestedValues['fcpo_secinvoice_birthdate_year'];
-        $sBirthdateMonth = $aRequestedValues['fcpo_secinvoice_birthdate_month'];
-        $sBirthdateDay = $aRequestedValues['fcpo_secinvoice_birthdate_day'];
+        $sBirthdateYear = $aRequestedValues[$sPaymentId . '_birthdate_year'];
+        $sBirthdateMonth = $aRequestedValues[$sPaymentId . '_birthdate_month'];
+        $sBirthdateDay = $aRequestedValues[$sPaymentId . '_birthdate_day'];
         $blValidRequestYear = ((!empty($sBirthdateYear) && $sBirthdateYear != $sChooseString));
         $blValidRequestMonth = ((!empty($sBirthdateMonth) && $sBirthdateMonth != $sChooseString));
         $blValidRequestDay = ((!empty($sBirthdateDay) && $sBirthdateDay != $sChooseString));
@@ -1663,14 +1812,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Method saves birthday data if needed and returns if it has saved data or not
      *
-     * @param $aRequestedValues
-     * @param $sPaymentId
+     * @param array $aRequestedValues
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoSaveBirthdayData($aRequestedValues, $sPaymentId)
+    protected function _fcpoSaveBirthdayData(array $aRequestedValues, string $sPaymentId): bool
     {
         $oUser = $this->_fcpoGetUserFromSession();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $blSavedData = false;
 
         $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId, $aRequestedValues);
@@ -1685,13 +1834,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $sRequestBirthdate = $this->_fcpoExtractBirthdateFromRequest($aRequestedValues, $sPaymentId);
             $blRefreshBirthdate = ($sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
             if ($blRefreshBirthdate) {
-                $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
-                $blSavedData = (bool)$oUser->save();
+                $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
+                $blSavedData = $oUser->save();
             }
         } elseif ($blBirthdayRequired) {
             $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BIRTHDATE_INVALID');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $blSavedData;
@@ -1700,11 +1849,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Extracts birthdate from dynvalue select fields depending on payment
      *
-     * @param $aRequestedValues
-     * @param $sPaymentId
+     * @param array $aRequestedValues
+     * @param string $sPaymentId
      * @return string
      */
-    public function _fcpoExtractBirthdateFromRequest($aRequestedValues, $sPaymentId)
+    public function _fcpoExtractBirthdateFromRequest(array $aRequestedValues, string $sPaymentId): string
     {
         $sRequestBirthdate = '--';
         switch ($sPaymentId) {
@@ -1717,9 +1866,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                     "-" . $aRequestedValues['fcpo_payolution_' . $sFieldNameAddition . '_birthdate_day'];
                 break;
             case 'fcpo_secinvoice':
-                $sRequestBirthdate = $aRequestedValues['fcpo_secinvoice_birthdate_year'] .
-                    "-" . $aRequestedValues['fcpo_secinvoice_birthdate_month'] .
-                    "-" . $aRequestedValues['fcpo_secinvoice_birthdate_day'];
+            case 'fcpopl_secinvoice':
+            case 'fcpopl_secinstallment':
+            case 'fcpopl_secdebitnote':
+                $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] .
+                    "-" . $aRequestedValues[$sPaymentId . '_birthdate_month'] .
+                    "-" . $aRequestedValues[$sPaymentId . '_birthdate_day'];
                 break;
         }
 
@@ -1729,10 +1881,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Method checks if given field should be saved and returns if it has saved this data or not
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
+     * @param string $sDbFieldName
      * @return bool
      */
-    protected function _fcpoSaveUserData($sPaymentId, $sDbFieldName)
+    protected function _fcpoSaveUserData(string $sPaymentId, string $sDbFieldName): bool
     {
         $blSavedData = false;
 
@@ -1753,12 +1906,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Returns value depending on payment or false if this hasn't been set
      *
      * @param string $sPaymentId
-     * @return mixed string/boolean
+     * @param string $sDbFieldName
+     * @return string|bool
      */
-    protected function _fcpoGetRequestedValue($sPaymentId, $sDbFieldName)
+    protected function _fcpoGetRequestedValue(string $sPaymentId, string $sDbFieldName): string|bool
     {
         $aRequestedValues = $this->_fcpoGetRequestedValues();
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
+
 
         $mReturn = false;
         if (isset($aRequestedValues['fcpo_payolution_' . $sFieldNameAddition . '_' . $sDbFieldName])) {
@@ -1769,6 +1924,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $mReturn = (string)$aRequestedValues['fcpo_secinvoice_ustid'];
         }
 
+        if (isset($aRequestedValues['fcpopl_secinvoice_ustid'])) {
+            $mReturn = (string) $aRequestedValues['fcpopl_secinvoice_ustid'];
+        }
+
         return $mReturn;
     }
 
@@ -1776,13 +1935,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Returning requested form data values wether via ajax or
      * direct
      *
-     *
      * @return array
      */
-    protected function _fcpoGetRequestedValues()
+    protected function _fcpoGetRequestedValues(): array
     {
         if ($this->_aFcRequestedValues === null) {
-            $aRequestedValues = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+            $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
             if ($this->_blIsPayolutionInstallmentAjax) {
                 $aRequestedValues = $this->_aAjaxPayolutionParams;
             }
@@ -1799,14 +1957,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sField
      * @return string
      */
-    public function fcpoGetUserValue($sField)
+    public function fcpoGetUserValue(string $sField): string
     {
         $oUser = $this->getUser();
         $sUserField = 'oxuser__' . $sField;
 
         try {
             $sReturn = $oUser->$sUserField->value;
-        } catch (Exception) {
+        } catch (Exception $ex) {
             $sReturn = '';
         }
 
@@ -1816,31 +1974,89 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Method saves a single value to a certain field of user table
      *
-     * @param $sField
-     * @param $sValue
+     * @param string $sField
+     * @param string $sValue
      * @return void
      */
-    protected function _fcpoSetUserValue($sField, $sValue)
+    protected function _fcpoSetUserValue(string $sField, string $sValue): void
     {
         $oUser = $this->getUser();
         $sUserField = 'oxuser__' . $sField;
 
         if (isset($oUser->$sUserField)) {
-            $oUser->$sUserField = new oxField($sValue, oxField::T_RAW);
+            $oUser->$sUserField = new Field($sValue, Field::T_RAW);
             $oUser->save();
         }
+    }
+
+    /**
+     * Save requested values of BNPL methods
+     *
+     * @param mixed $mReturn
+     * @param string $sPaymentId
+     * @return mixed
+     */
+    public function _fcpoBNPLSaveRequestedValues(mixed $mReturn, string $sPaymentId): mixed
+    {
+        $blIsBNPL = ($sPaymentId == 'fcpopl_secinvoice' || $sPaymentId == 'fcpopl_secinstallment' || $sPaymentId == 'fcpopl_secdebitnote');
+        if (!$blIsBNPL) return $mReturn;
+
+        $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
+        $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId, $aRequestedValues);
+        $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
+
+        $blBirthdayCheckPassed = true;
+        if ($blBirthdayRequired) {
+            $blBirthdayCheckPassed = $this->_fcpoSaveBirthdayData($aRequestedValues, $sPaymentId);
+        }
+
+        $blInstallmentPlanCheckPassed = true;
+        if ($sPaymentId == 'fcpopl_secinstallment') {
+            $blInstallmentPlanCheckPassed = $this->_fcpoBNPLValidateInstallmentPlan($aRequestedValues);
+        }
+
+        if (isset($aRequestedValues[$sPaymentId . '_fon'])) {
+            $sCurrentValue = $this->fcpoGetUserValue('oxfon');
+            $blRefreshValue = ($sCurrentValue != $aRequestedValues[$sPaymentId . '_fon']);
+            if ($blRefreshValue) {
+                $this->_fcpoSetUserValue('oxfon', $aRequestedValues[$sPaymentId . '_fon']);
+            }
+        }
+
+        $this->_fcpoSaveUserData($sPaymentId,'oxustid');
+
+        return ($blBirthdayCheckPassed && $blInstallmentPlanCheckPassed) ? $mReturn : false;
+    }
+
+    /**
+     * @param array $aRequestedValues
+     * @return bool
+     */
+    protected function _fcpoBNPLValidateInstallmentPlan(array $aRequestedValues): bool
+    {
+        if (empty($aRequestedValues['fcpopl_secinstallment_plan'])) {
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
+            $sMessage = $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_PLAN_INVALID');
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+
+            return false;
+        }
+
+        return true;
+
     }
 
     /**
      * Check configuration for boni check moment and triggers check if moment has been set to now
      * Method will return if checkout progress can be continued or not
      *
-     * @param object $oPayment
-     * @return boolean
+     * @param Payment $oPayment
+     * @return bool
      */
-    protected function _fcpoCheckBoniMoment($oPayment)
+    protected function _fcpoCheckBoniMoment(Payment $oPayment): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blContinue = true;
 
         if ($oConfig->getConfigParam('sFCPOBonicheckMoment') == 'after') {
@@ -1853,20 +2069,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks the address and boni values
      *
-     * @param bool      $blApproval
-     * @param bool      $blBoniCheckNeeded
-     * @param oxPayment $oPayment
-     * @return boolean
+     * @param Payment $oPayment
+     * @return bool
      */
-    protected function _fcpoCheckAddressAndScore($oPayment)
+    protected function _fcpoCheckAddressAndScore(Payment $oPayment): bool
     {
         $oUser = $this->getUser();
         $sPaymentId = $oPayment->getId();
-        $aApproval = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_bonicheckapproved');
+        $aApproval = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpo_bonicheckapproved');
         $blApproval = $this->_fcpoValidateApproval($sPaymentId, $aApproval);
         $blBoniCheckNeeded = $oPayment->fcBoniCheckNeeded();
 
-        if ($blBoniCheckNeeded === true && $blApproval) {
+        if ($blBoniCheckNeeded === true && $blApproval === true) {
             $blContinue = $oUser->checkAddressAndScore(false);
             $blContinue = $this->_fcpoCheckUserBoni($blContinue, $oPayment);
         } elseif ($blBoniCheckNeeded === true && $blApproval === false) {
@@ -1885,10 +2099,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks approval data to be valid and returns result
      *
      * @param string $sPaymentId
-     * @param array  $aApproval
-     * @return boolean
+     * @param array $aApproval
+     * @return bool
      */
-    protected function _fcpoValidateApproval($sPaymentId, $aApproval)
+    protected function _fcpoValidateApproval(string $sPaymentId, array $aApproval): bool
     {
         $blApproval = true;
         if ($aApproval && array_key_exists($sPaymentId, $aApproval) && $aApproval[$sPaymentId] == 'false') {
@@ -1901,11 +2115,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Compares user boni which could cause a denial on continuing process
      *
-     * @param boolean   $blContinue
-     * @param oxPayment $oPayment
-     * @return boolean
+     * @param bool $blContinue
+     * @param Payment $oPayment
+     * @return bool
      */
-    protected function _fcpoCheckUserBoni($blContinue, $oPayment)
+    protected function _fcpoCheckUserBoni(bool $blContinue, Payment $oPayment): bool
     {
         $oUser = $this->getUser();
         if ($oUser->oxuser__oxboni->value < $oPayment->oxpayments__oxfromboni->value) {
@@ -1922,42 +2136,43 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param bool $blApproval
      * @return void
      */
-    protected function _fcpoSetNotChecked($blBoniCheckNeeded, $blApproval)
+    protected function _fcpoSetNotChecked(bool $blBoniCheckNeeded, bool $blApproval): void
     {
-        if ($blBoniCheckNeeded && $blApproval === false) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoordernotchecked', 1);
+        if ($blBoniCheckNeeded === true && $blApproval === false) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoordernotchecked', 1);
         }
     }
 
     /**
      * Takes care of error handling for case that boni check is negative
      *
-     * @param string $sPaymentId
      * @return void
      */
-    protected function _fcpoSetBoniErrorValues($sPaymentId)
+    protected function _fcpoSetBoniErrorValues(): void
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $iLangId = $this->fcGetLangId();
 
-        // $this->_oFcpoHelper->fcpoSetSessionVariable( 'payerror', $oPayment->getPaymentErrorNumber() );
-        $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-        $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $oConfig->getConfigParam('sFCPODenialText_' . $iLangId));
+        // $this->_oFcPoHelper->fcpoSetSessionVariable( 'payerror', $oPayment->getPaymentErrorNumber() );
+        $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+        $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $oConfig->getConfigParam('sFCPODenialText_' . $iLangId));
 
         //#1308C - delete paymentid from session, and save selected it just for view
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
-        if (!($sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid'))) {
-            $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('paymentid');
+        if (!($sPaymentId = $this->_oFcPoHelper->fcpoGetRequestParameter('paymentid'))) {
+            $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
         }
-        $this->_oFcpoHelper->fcpoSetSessionVariable('_selected_paymentid', $sPaymentId);
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('stsprotection');
+        $this->_oFcPoHelper->fcpoSetSessionVariable('_selected_paymentid', $sPaymentId);
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('stsprotection');
 
-        $this->_oFcpoHelper->fcpoGetSession();
     }
 
-    public function fcGetLangId()
+    /**
+     * @return int
+     */
+    public function fcGetLangId(): int
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         if (!$oLang) {
             return 0;
         }
@@ -1965,78 +2180,80 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Takes care of debit specific actions arround mandates
+     * Takes care of debit specific actions around mandates
      *
-     * @param oxPayment $oPayment
+     * @param Payment $oPayment
      * @return void
      */
-    protected function _fcpoSetMandateParams($oPayment)
+    protected function _fcpoSetMandateParams(Payment $oPayment): void
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         if ($oPayment->getId() == 'fcpodebitnote' && $oConfig->getConfigParam('blFCPOMandateIssuance')) {
             $oUser = $this->getUser();
             $aDynValue = $this->_fcpoGetDynValues();
 
-            $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
-            $aResponse = $oPORequest->sendRequestManagemandate($oPayment->fcpoGetOperationMode(), $aDynValue, $oUser);
+            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+            $aResponse = $oPORequest->sendRequestManageMandate($oPayment->fcpoGetOperationMode(), $aDynValue, $oUser);
 
             $this->_fcpoHandleMandateResponse($aResponse);
         }
     }
 
     /**
-     * Returns dynvalues wether from request or session
+     * Returns dynvalues whether from request or session
      *
-     *
-     * @return mixed
+     * @return array
      */
-    protected function _fcpoGetDynValues()
+    protected function _fcpoGetDynValues(): array
     {
-        $aDynvalue = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aDynvalue = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         if (!$aDynvalue) {
-            $aDynvalue = $this->_oFcpoHelper->fcpoGetSessionVariable('dynvalue');
+            $aDynvalue = $this->_oFcPoHelper->fcpoGetSessionVariable('dynvalue');
         }
 
-        return $aDynvalue;
+        return $aDynvalue ?: [];
     }
 
     /**
      * Handles response for mandate request
      *
      * @param array $aResponse
-     * @return mixed
+     * @return void
      */
-    protected function _fcpoHandleMandateResponse($aResponse)
+    protected function _fcpoHandleMandateResponse(array $aResponse): void
     {
         if ($aResponse['status'] == 'ERROR') {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $oLang->translateString('FCPO_MANAGEMANDATE_ERROR'));
-            return;
-        } elseif (is_array($aResponse) && array_key_exists('mandate_status', $aResponse)) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoMandate', $aResponse);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $oLang->translateString('FCPO_MANAGEMANDATE_ERROR'));
+        } else if (is_array($aResponse) && array_key_exists('mandate_status', $aResponse) !== false) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoMandate', $aResponse);
         }
     }
 
     /**
-     * Remove all session variables of non selected payment
+     * Remove all session variables of non-selected payment
      *
-     * @param object $oPayment
+     * @param Payment $oPayment
      * @return void
      */
-    protected function _fcCleanupSessionFragments($oPayment)
+    protected function _fcCleanupSessionFragments(Payment $oPayment): void
     {
         $sPaymentId = $oPayment->getId();
 
-        $aPayments2SessionVariables = ['fcpodebitnote' => ['fcpoMandate'], 'fcpobarzahlen' => ['sFcpoBarzahlenHtml'], 'fcpoklarna' => ['fcpo_klarna_campaign']];
+        $aPayments2SessionVariables = [
+            'fcpodebitnote' => ['fcpoMandate'],
+            'fcpobarzahlen' => ['sFcpoBarzahlenHtml'],
+            'fcpoklarna' => ['fcpo_klarna_campaign'],
+        ];
 
         // remove own payment from list
         unset($aPayments2SessionVariables[$sPaymentId]);
 
         // iterate through the rest and delete session variables
-        foreach ($aPayments2SessionVariables as $aPayments2SessionVariable) {
-            foreach ($aPayments2SessionVariable as $sSessionVariable) {
-                $this->_oFcpoHelper->fcpoDeleteSessionVariable($sSessionVariable);
+        foreach ($aPayments2SessionVariables as $aSessionVariables) {
+            foreach ($aSessionVariables as $sSessionVariable) {
+                $this->_oFcPoHelper->fcpoDeleteSessionVariable($sSessionVariable);
             }
         }
     }
@@ -2044,11 +2261,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Validating new klarna payment
      *
-     * @param $mReturn
-     * @param $sPaymentId
+     * @param mixed $mReturn
+     * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoKlarnaCombinedValidate($mReturn, $sPaymentId)
+    protected function _fcpoKlarnaCombinedValidate(mixed $mReturn, string $sPaymentId): mixed
     {
         if ($this->fcpoIsKlarnaCombined($sPaymentId)) {
             $aDynValues = $this->_fcpoGetDynValues();
@@ -2060,7 +2277,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $this->_fcpoSetErrorMessage('FCPO_KLARNA_NO_AUTHORIZATION');
                 return null;
             } else {
-                $this->_oFcpoHelper->fcpoSetSessionVariable('klarna_authorization_token', $aDynValues['klarna_authorization_token']);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('klarna_authorization_token', $aDynValues['klarna_authorization_token']);
             }
         }
 
@@ -2070,26 +2287,27 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets a payolution error message into session, so it will be displayed in frontend
      *
-     * @param  $sLangString
+     * @param string $sLangString
      * @return void
      */
-    protected function _fcpoSetErrorMessage($sLangString)
+    protected function _fcpoSetErrorMessage(string $sLangString): void
     {
         if ($sLangString) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
             $sTranslatedString = $oLang->translateString($sLangString);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sTranslatedString);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sTranslatedString);
         }
     }
 
     /**
-     * Perform payolution precheck
+     * Perform payolution pre-check
      *
+     * @param mixed $mReturn
      * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoPayolutionPreCheck(mixed $mReturn, $sPaymentId)
+    protected function _fcpoPayolutionPreCheck(mixed $mReturn, string $sPaymentId): mixed
     {
         $blPayolutionPayment = $this->_fcpoIsPayolution($sPaymentId);
         if ($blPayolutionPayment) {
@@ -2103,21 +2321,27 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Checks if given payment belongs to payone payolution
      *
      * @param string $sPaymentId
+     * @return bool
      */
-    protected function _fcpoIsPayolution($sPaymentId): bool
+    protected function _fcpoIsPayolution(string $sPaymentId): bool
     {
-        $aPayolutionPayments = ['fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment'];
+        $aPayolutionPayments = [
+            'fcpopo_bill',
+            'fcpopo_debitnote',
+            'fcpopo_installment',
+        ];
 
         return in_array($sPaymentId, $aPayolutionPayments);
     }
 
     /**
-     * Validates payolution prechecks
+     * Validates payolution pre-checks
      *
-     * @param  $sPaymentId
+     * @param mixed $mReturn
+     * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoValidatePayolutionPreCheck($mReturn, $sPaymentId)
+    protected function _fcpoValidatePayolutionPreCheck(mixed $mReturn, string $sPaymentId): mixed
     {
         $blSavedSuccessfully = $this->_fcpoPayolutionSaveRequestedValues($sPaymentId);
         $blAgreedDataUsage = $this->_fcpoCheckAgreedDataUsage($sPaymentId);
@@ -2137,12 +2361,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Save requested values if there haven't been some before or they have changed
+     * Save requested values if there haven't been some before, or they have changed
      *
      * @param string $sPaymentId
-     * @return void
+     * @return bool
      */
-    protected function _fcpoPayolutionSaveRequestedValues($sPaymentId): bool
+    protected function _fcpoPayolutionSaveRequestedValues(string $sPaymentId): bool
     {
         $aRequestedValues = $this->_fcpoGetRequestedValues();
         $blSavedBirthday = $this->_fcpoSaveBirthdayData($aRequestedValues, $sPaymentId);
@@ -2155,12 +2379,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if user confirmed agreement of data usage
      *
-     *
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoCheckAgreedDataUsage($sPaymentId = 'fcpopo_bill')
+    protected function _fcpoCheckAgreedDataUsage(string $sPaymentId = 'fcpopo_bill'): bool
     {
-        $aParams = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aParams = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         if ($this->_blIsPayolutionInstallmentAjax) {
             $aParams = $this->_aAjaxPayolutionParams;
         }
@@ -2184,25 +2408,21 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoCheckPayolutionMandatoryUserData($sPaymentId)
+    protected function _fcpoCheckPayolutionMandatoryUserData(string $sPaymentId): bool
     {
-        // sum check results up
-        $blReturn = $this->_fcpoValidateMandatoryUserDataForPayolutionBill($sPaymentId);
-
-        return $blReturn;
+        return $this->_fcpoValidateMandatoryUserDataForPayolutionBill($sPaymentId);
     }
 
     /**
      * Method validates mandatory user data related to payolution bill payment
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoValidateMandatoryUserDataForPayolutionBill($sPaymentId)
+    protected function _fcpoValidateMandatoryUserDataForPayolutionBill(string $sPaymentId): bool
     {
-        $blValidPayment = $sPaymentId == 'fcpopo_bill';
         $blReturn = true;
-        if ($blValidPayment) {
+        if ($sPaymentId == 'fcpopo_bill') {
             $blHasTelephone = $this->_fcpoValidatePayolutionBillHasTelephone();
             $blHasUstid = $this->_fcpoValidatePayolutionBillHasUstid();
             $blReturn = ($blHasTelephone && $blHasUstid);
@@ -2215,12 +2435,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method checks if user has telephone number and if its needed anyway
      * Will return true if field is not mandatory
      *
-     *
      * @return bool
      */
-    protected function _fcpoValidatePayolutionBillHasTelephone()
+    protected function _fcpoValidatePayolutionBillHasTelephone(): bool
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $blTelephoneRequired = $this->fcpoPayolutionBillTelephoneRequired();
         $blReturn = true;
 
@@ -2231,8 +2450,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if (!$blReturn) {
             $sMessage = $oLang->translateString('FCPO_PAYOLUTION_PHONE_MISSING');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $blReturn;
@@ -2242,6 +2461,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Template getter for checking if a telephone number is required and need to be requested
      * from user
      *
+     * @return bool
      */
     public function fcpoPayolutionBillTelephoneRequired(): bool
     {
@@ -2249,33 +2469,31 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sCurrentTelephone = $this->fcpoGetUserValue('oxfon');
 
         return in_array($sTargetCountry, $this->_aPayolutionBillMandatoryTelephoneCountries) &&
-        empty($sCurrentTelephone);
+            empty($sCurrentTelephone);
     }
 
     /**
      * Returns shipping country if set or billing country if not as ISO 2 string
      *
-     *
-     * @return void
+     * @return string
      */
-    public function fcpoGetTargetCountry()
+    public function fcpoGetTargetCountry(): string
     {
         $sBillCountry = $this->fcGetBillCountry();
         $sShippingCountry = $this->fcGetShippingCountry();
 
-        return ($sShippingCountry !== '' && $sShippingCountry !== '0') ? $sShippingCountry : $sBillCountry;
+        return $sShippingCountry ?: $sBillCountry;
     }
 
     /**
      * Return ISO2 code of shipping country
      *
-     *
      * @return string
      */
-    public function fcGetShippingCountry()
+    public function fcGetShippingCountry(): string
     {
         $sShippingCountryId = $this->getUserDelCountryId();
-        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxcountry');
+        $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
 
         return ($oCountry->load($sShippingCountryId)) ? $oCountry->oxcountry__oxisoalpha2->value : '';
     }
@@ -2284,14 +2502,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Method checks if user has valid ustid and if its mandatory anyway
      * Will return true if check is not mandatory due to circumstances
      *
-     *
      * @return bool
      */
-    protected function _fcpoValidatePayolutionBillHasUstid()
+    protected function _fcpoValidatePayolutionBillHasUstid(): bool
     {
         $blReturn = true;
-        $oConfig = $this->getConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
         $blIsCompany = (bool)$this->fcpoGetUserValue('oxcompany');
 
@@ -2302,8 +2519,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if (!$blReturn) {
             $sMessage = $oLang->translateString('FCPO_PAYOLUTION_NO_USTID');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $blReturn;
@@ -2312,17 +2529,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Validates payolution payment which is related to bankdata, namely debitnote and installment
      *
-     * @param  $sPaymentId
+     * @param mixed $mReturn
+     * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoValidateBankDataRelatedPayolutionPayment($mReturn, $sPaymentId)
+    protected function _fcpoValidateBankDataRelatedPayolutionPayment(mixed $mReturn, string $sPaymentId): mixed
     {
         $blBankDataRelatedPayolutionPayment = $this->_fcpoCheckIsBankDataRelatedPayolutionPayment($sPaymentId);
 
         $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
 
         if ($aBankData) {
-            $blBankDataValid = ($this->_blIsPayolutionInstallmentAjax) ? false : $this->_fcpoValidateBankData($aBankData, $sPaymentId);
+            $blBankDataValid = !$this->_blIsPayolutionInstallmentAjax && $this->_fcpoValidateBankData($aBankData, $sPaymentId);
             if (!$blBankDataValid) {
                 $this->_fcpoSetPayolutionErrorMessage('FCPO_PAYOLUTION_BANKDATA_INCOMPLETE');
                 $mReturn = null;
@@ -2352,11 +2570,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if given PaymentId is a bank data relevant payment
      *
-     * @param  $sPaymentId
+     * @param string $sPaymentId
+     * @return bool
      */
-    protected function _fcpoCheckIsBankDataRelatedPayolutionPayment($sPaymentId): bool
+    protected function _fcpoCheckIsBankDataRelatedPayolutionPayment(string $sPaymentId): bool
     {
-        $aBankDataRelatedPaymentIds = ['fcpopo_debitnote', 'fcpopo_installment'];
+        $aBankDataRelatedPaymentIds = [
+            'fcpopo_debitnote',
+            'fcpopo_installment',
+        ];
 
         return in_array($sPaymentId, $aBankDataRelatedPaymentIds);
     }
@@ -2364,38 +2586,46 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Reutrns possible given Bankdata
      *
-     *
-     * @return mixed
+     * @param string $sPaymentId
+     * @return bool|array
      */
-    protected function _fcpoGetPayolutionBankData($sPaymentId)
+    protected function _fcpoGetPayolutionBankData(string $sPaymentId): bool|array
     {
-        $aParams = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aParams = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         $aBankData = [];
 
-        if (is_array($aParams) && $aParams !== []) {
+        if (count($aParams) > 0) {
+            $aInstallmentAdditions = [
+                'fcpopo_bill' => '',
+                'fcpopo_installment' => '_installment',
+                'fcpopo_debitnote' => '_debitnote',
+            ];
+
+            $sInstallmentAddition = $aInstallmentAdditions[$sPaymentId];
+
+            $aMap = [
+                'fcpo_payolution' . $sInstallmentAddition . '_iban',
+                'fcpo_payolution' . $sInstallmentAddition . '_bic',
+                'fcpo_payolution' . $sInstallmentAddition . '_accountholder',
+            ];
             foreach ($aParams as $sKey => $sParam) {
-                $aInstallmentAdditions = ['fcpopo_bill' => '', 'fcpopo_installment' => '_installment', 'fcpopo_debitnote' => '_debitnote'];
-
-                $sInstallmentAddition = $aInstallmentAdditions[$sPaymentId];
-
-                $aMap = ['fcpo_payolution' . $sInstallmentAddition . '_iban', 'fcpo_payolution' . $sInstallmentAddition . '_bic', 'fcpo_payolution' . $sInstallmentAddition . '_accountholder'];
-
                 if (in_array($sKey, $aMap)) {
                     $aBankData[$sKey] = $sParam;
                 }
             }
         }
 
-        return (count($aBankData) != 3) ? false : $aBankData;
+        return (count($aBankData) != 3) ? [] : $aBankData;
     }
 
     /**
      * Validates given Bankdata
      *
      * @param array $aBankData
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoValidateBankData($aBankData, $sPaymentId)
+    protected function _fcpoValidateBankData(array $aBankData, string $sPaymentId): bool
     {
         $blReturn = false;
 
@@ -2404,7 +2634,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if ($blIsPayolutionType) {
             $sPayolutionSubType = str_replace('fcpopo_', '', $sPaymentId);
             $blReturn = (
-                is_array($aBankData) &&
                 isset($aBankData['fcpo_payolution_' . $sPayolutionSubType . '_iban']) &&
                 isset($aBankData['fcpo_payolution_' . $sPayolutionSubType . '_bic']) &&
                 !empty($aBankData['fcpo_payolution_' . $sPayolutionSubType . '_iban']) &&
@@ -2420,17 +2649,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets a payolution error message into session, so it will be displayed in frontend
      *
-     * @param  $sLangString
+     * @param string $sLangString
      * @return void
      */
-    protected function _fcpoSetPayolutionErrorMessage($sLangString)
+    protected function _fcpoSetPayolutionErrorMessage(string $sLangString): void
     {
         if ($sLangString) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
             $this->_sPayolutionCurrentErrorMessage = $oLang->translateString($sLangString);
             // only put this into session if this is not from ajax
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $this->_sPayolutionCurrentErrorMessage);
+            if (!$this->_blIsPayolutionInstallmentAjax) {
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $this->_sPayolutionCurrentErrorMessage);
+            }
         }
     }
 
@@ -2440,9 +2671,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoCheckSepaAgreed($sPaymentId)
+    protected function _fcpoCheckSepaAgreed(string $sPaymentId): bool
     {
-        $aParams = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aParams = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         $blReturn = false;
         if ($sPaymentId == 'fcpopo_installment') {
             $blReturn = true;
@@ -2457,22 +2688,24 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Returns selected installment index
+     *
+     * @return bool|string
      */
-    protected function _fcpoGetPayolutionSelectedInstallmentIndex()
+    protected function _fcpoGetPayolutionSelectedInstallmentIndex(): bool|string
     {
-        $aParams = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aParams = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
 
-        return $aParams['fcpo_payolution_installment_index'] ?? false;
+        return (isset($aParams['fcpo_payolution_installment_index'])) ? $aParams['fcpo_payolution_installment_index'] : false;
     }
 
     /**
-     * Final check by performing a payolution pre check request after several checks have been passed
+     * Final check by performing a payolution pre-check request after several checks have been passed
      *
-     * @param  $mReturn
-     * @param  $sPaymentId
+     * @param mixed $mReturn
+     * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoFinalValidationPayolutionPreCheck($mReturn, $sPaymentId)
+    protected function _fcpoFinalValidationPayolutionPreCheck(mixed $mReturn, string $sPaymentId): mixed
     {
         $blPreCheckValid = $mReturn !== null && $this->_fcpoPerformPayolutionPreCheck($sPaymentId);
         if (!$blPreCheckValid) {
@@ -2484,49 +2717,50 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Performs a pre check
+     * Performs a pre-check
      *
      * @param string $sPaymentId
+     * @param string|null $sWorkOrderId
      * @return bool
      */
-    protected function _fcpoPerformPayolutionPreCheck($sPaymentId, $sWorkOrderId = null)
+    protected function _fcpoPerformPayolutionPreCheck(string $sPaymentId, string $sWorkOrderId = null): bool
     {
-        $blReturn = null;
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
         if ($blPreCheckNeeded) {
             $oUser = $this->getUser();
             if (!$oUser) {
                 // try to fetch user from session
-                $oSession = $this->getSession();
+                $oSession = $this->_oFcPoHelper->fcpoGetSession();
                 $oBasket = $oSession->getBasket();
                 $oUser = $oBasket->getBasketUser();
             }
-            $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+            $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
             $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-            $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
             $aResponse = $oPORequest->sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkOrderId);
             if ($aResponse['status'] == 'ERROR') {
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
                 $blReturn = false;
-            } elseif (is_array($aResponse) && array_key_exists('workorderid', $aResponse)) {
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
+            } else if (is_array($aResponse) && array_key_exists('workorderid', $aResponse) !== false) {
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
+                $blReturn = true;
+            } else {
                 $blReturn = true;
             }
         } else {
-            $sWorkOrderId = $this->_oFcpoHelper->fcpoGetSessionVariable('payolution_workorderid');
+            $sWorkOrderId = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_workorderid');
             $blValidCalculation = $this->_fcpoPerformInstallmentCalculation($sPaymentId, $sWorkOrderId);
             if (!$blValidCalculation) {
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
                 $blReturn = false;
             } else {
                 $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
                 $sDuration = $this->_fcpoPayolutionFetchDuration($sSelectedIndex);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_installment_duration', $sDuration);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payolution_installment_duration', $sDuration);
 
                 // OXID-225 add bank details as they are added in form after precheck is performed
                 $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
 
                 $blReturn = true;
             }
@@ -2536,12 +2770,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Precheck is not needed for payolution installment payment if its not coming via ajax
+     * Pre-check is not needed for payolution installment payment if it's not coming via ajax
      *
      * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoCheckIfPrecheckNeeded($sPaymentId)
+    protected function _fcpoCheckIfPrecheckNeeded(string $sPaymentId): bool
     {
         $blReturn = true;
         $blCheckException = ($sPaymentId == 'fcpopo_installment' && !$this->_blIsPayolutionInstallmentAjax);
@@ -2553,23 +2787,24 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Performs a pre check
+     * Performs a pre-check
      *
      * @param string $sPaymentId
+     * @param string|null $sWorkOrderId
      * @return bool
      */
-    protected function _fcpoPerformInstallmentCalculation($sPaymentId, $sWorkOrderId = null)
+    protected function _fcpoPerformInstallmentCalculation(string $sPaymentId, string $sWorkOrderId = ''): bool
     {
-        $blReturn = null;
+        $blReturn = true;
         $oUser = $this->getUser();
         $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-        $oPORequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
+        $oPORequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
         $aResponse = $oPORequest->sendRequestPayolutionInstallment($sPaymentId, $oUser, $aBankData, 'calculation', $sWorkOrderId);
         if ($aResponse['status'] == 'ERROR') {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
             $blReturn = false;
-        } elseif (is_array($aResponse) && array_key_exists('workorderid', $aResponse)) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
+        } else if (is_array($aResponse) && array_key_exists('workorderid', $aResponse) !== false) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
             $this->_fcpoSetInstallmentOptionsByResponse($aResponse);
             $blReturn = true;
         }
@@ -2578,30 +2813,30 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Fetches needed installment details from response and prepares data so it can be interpreted easier
+     * Fetches needed installment details from response and prepares data, so it can be interpreted easier
      *
      * @param array $aResponse
      * @return void
      */
-    protected function _fcpoSetInstallmentOptionsByResponse($aResponse)
+    protected function _fcpoSetInstallmentOptionsByResponse(array $aResponse): void
     {
         // cleanup before atempt
         $this->_aInstallmentCalculation = [];
-        foreach (array_keys($aResponse) as $sKey) {
+        foreach ($aResponse as $sKey => $sValue) {
             $iInstallmentIndex = $this->_fcpoFetchCurrentRatepayInstallmentIndex($sKey);
             if ($iInstallmentIndex === false) {
                 continue;
             }
 
-            $this->_fcpoSetinstallmentOptionIfIsset('Duration', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('Currency', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('StandardCreditInformationUrl', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('Usage', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('EffectiveInterestRate', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('InterestRate', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('OriginalAmount', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('TotalAmount', $iInstallmentIndex, $aResponse);
-            $this->_fcpoSetinstallmentOptionIfIsset('MinimumInstallmentFee', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('Duration', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('Currency', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('StandardCreditInformationUrl', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('Usage', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('EffectiveInterestRate', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('InterestRate', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('OriginalAmount', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('TotalAmount', $iInstallmentIndex, $aResponse);
+            $this->_fcpoSetInstallmentOptionIfIsset('MinimumInstallmentFee', $iInstallmentIndex, $aResponse);
 
             $this->_fcpoSetRatepayInstallmentMonthDetail($iInstallmentIndex, $sKey, $aResponse);
 
@@ -2613,16 +2848,16 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Fetches index from current key or false if not fetchable
      *
-     * @param  $sKey
-     * @return mixed
+     * @param string $sKey
+     * @return string|int|bool|float
      */
-    protected function _fcpoFetchCurrentRatepayInstallmentIndex($sKey)
+    protected function _fcpoFetchCurrentRatepayInstallmentIndex(string $sKey): string|int|bool|float
     {
-        if (!str_starts_with($sKey, 'add_paydata')) {
+        if (substr($sKey, 0, 11) != 'add_paydata') {
             return false;
         }
 
-        preg_match('/add_paydata\[PaymentDetails_(\d*)_/', $sKey, $aResultInstallmentIndex);
+        preg_match('/add_paydata\[PaymentDetails_([0-9]*)_/', $sKey, $aResultInstallmentIndex);
         if (!isset($aResultInstallmentIndex[1]) || !is_numeric($aResultInstallmentIndex[1])) {
             return false;
         }
@@ -2633,12 +2868,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Sets a single ratepay option if set in response
      *
-     * @param  $sOption
-     * @param  $iInstallmentIndex
-     * @param  $aResponse
+     * @param string $sOption
+     * @param int $iInstallmentIndex
+     * @param array $aResponse
      * @return void
      */
-    protected function _fcpoSetinstallmentOptionIfIsset($sOption, $iInstallmentIndex, $aResponse)
+    protected function _fcpoSetInstallmentOptionIfIsset(string $sOption, int $iInstallmentIndex, array $aResponse): void
     {
         if (!isset($this->_aInstallmentCalculation[$iInstallmentIndex][$sOption])) {
             $this->_aInstallmentCalculation[$iInstallmentIndex][$sOption] = $aResponse['add_paydata[PaymentDetails_' . $iInstallmentIndex . '_' . $sOption . ']'];
@@ -2648,14 +2883,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * check search pattern to receive month of current installment detail
      *
-     * @param  $sKey
-     * @param  $aResponse
+     * @param int $iInstallmentIndex
+     * @param string $sKey
+     * @param array $aResponse
      * @return void
      */
-    protected function _fcpoSetRatepayInstallmentMonthDetail($iInstallmentIndex, $sKey, $aResponse)
+    protected function _fcpoSetRatepayInstallmentMonthDetail(int $iInstallmentIndex, string $sKey, array $aResponse): void
     {
         // add_paydata[PaymentDetails_<n>_Installment_<m>_Amount]
-        preg_match('/add_paydata\[PaymentDetails_(\d*)_Installment_(\d*)_Amount\]/', $sKey, $aMonthResult);
+        preg_match('/add_paydata\[PaymentDetails_([0-9]*)_Installment_([0-9]*)_Amount\]/', $sKey, $aMonthResult);
         if (isset($aMonthResult[2]) && is_numeric($aMonthResult[2])) {
             $this->_aInstallmentCalculation[$iInstallmentIndex]['Amount'] = $aResponse['add_paydata[PaymentDetails_' . $iInstallmentIndex . '_Installment_' . $aMonthResult[2] . '_Amount]'];
             $this->_aInstallmentCalculation[$iInstallmentIndex]['Months'][$aMonthResult[2]]['Amount'] = $aResponse['add_paydata[PaymentDetails_' . $iInstallmentIndex . '_Installment_' . $aMonthResult[2] . '_Amount]'];
@@ -2672,7 +2908,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sSelectedIndex
      * @return mixed
      */
-    protected function _fcpoPayolutionFetchDuration($sSelectedIndex)
+    protected function _fcpoPayolutionFetchDuration(string $sSelectedIndex): mixed
     {
         $mReturn = false;
         if (isset($this->_aInstallmentCalculation[$sSelectedIndex]['Duration'])) {
@@ -2683,19 +2919,19 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Some validation error occured. Method checks which and returns its translation string
+     * Some validation error occurred. Method checks which and returns its translation string
      *
-     * @param  $blAgreedDataUsage
-     * @param  $blValidMandatoryUserData
+     * @param bool $blAgreedDataUsage
+     * @param bool $blValidMandatoryUserData
      * @return string
      */
-    protected function _fcpoGetPayolutionErrorMessage($blAgreedDataUsage, $blValidMandatoryUserData)
+    protected function _fcpoGetPayolutionErrorMessage(bool $blAgreedDataUsage, bool $blValidMandatoryUserData): string
     {
         $sTranslateErrorString = '';
 
         if (!$blAgreedDataUsage) {
             $sTranslateErrorString = 'FCPO_PAYOLUTION_NOT_AGREED';
-        } elseif (!$blValidMandatoryUserData) {
+        } else if (!$blValidMandatoryUserData) {
             $sTranslateErrorString = 'FCPO_PAYOLUTION_NO_USTID';
         }
 
@@ -2703,12 +2939,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Wether precheck has been called via ajax or not we probably need to echo an error message into frontend
+     * Whether pre-check has been called via ajax or not we probably need to echo an error message into frontend
      *
-     * @param  $mReturn
+     * @param mixed $mReturn
      * @return mixed
      */
-    protected function _fcpoGetPayolutionPreCheckReturnValue($mReturn)
+    protected function _fcpoGetPayolutionPreCheckReturnValue(mixed $mReturn): mixed
     {
         if ($this->_blIsPayolutionInstallmentAjax && $mReturn === null) {
             $mReturn = $this->_sPayolutionCurrentErrorMessage;
@@ -2720,14 +2956,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if all mandatory data is available for using ratepay invoicing
      *
+     * @param mixed $mReturn
      * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoCheckRatePayBillMandatoryUserData(mixed $mReturn, $sPaymentId)
+    protected function _fcpoCheckRatePayBillMandatoryUserData(mixed $mReturn, string $sPaymentId): mixed
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $aRequestedValues = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+        $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
 
         $this->_fcpoRatePaySaveRequestedValues($sPaymentId);
 
@@ -2735,11 +2972,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
         if ($blB2b2Mode) {
             $blShowUstid = $this->fcpoRatePayShowUstid();
-            $mReturn = ($blShowUstid) ? false : $mReturn;
+            $mReturn = (!$blShowUstid) ? $mReturn : false;
             if (!$mReturn) {
                 $sMessage = $oLang->translateString('FCPO_RATEPAY_NO_USTID');
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
             }
         } else {
             $blShowFon = $this->fcpoRatePayShowFon();
@@ -2747,29 +2984,34 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $mReturn = (!$blShowBirthdate && !$blShowFon) ? $mReturn : false;
             if (!$mReturn) {
                 $sMessage = $oLang->translateString('FCPO_RATEPAY_NO_SUFFICIENT_DATA');
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
             }
         }
 
-
-        $blSepaAndDataUsageAgreed = (
-            $sPaymentId != 'fcporp_debitnote' ||
-            (
-                $aRequestedValues['fcpo_ratepay_debitnote_agreed'] == 'agreed' &&
-                $aRequestedValues['fcpo_ratepay_debitnote_sepa_agreed'] == 'agreed'
-            )
-        );
+        $blSepaAndDataUsageAgreed = false;
+        if ($sPaymentId != 'fcporp_debitnote' && $sPaymentId != 'fcporp_installment') {
+            $blSepaAndDataUsageAgreed = true;
+        } else {
+            if ($sPaymentId == 'fcporp_installment' && $aRequestedValues['fcporp_installment_settlement_type'] == 'banktransfer') {
+                $blSepaAndDataUsageAgreed = true;
+            } else {
+                $sFieldPrefix = ($sPaymentId == 'fcporp_debitnote') ? 'fcporp_debitnote' : 'fcporp_installment';
+                if ($aRequestedValues[$sFieldPrefix . '_sepa_agreed'] == 'agreed') {
+                    $blSepaAndDataUsageAgreed = true;
+                }
+            }
+        }
 
         if (!$blSepaAndDataUsageAgreed) {
             $mReturn = false;
             $sErrorTranslateString =
-                ($aRequestedValues['fcpo_ratepay_debitnote_sepa_agreed'] != 'agreed') ?
+                ($aRequestedValues['fcporp_debitnote_sepa_agreed'] != 'agreed') ?
                     'FCPO_RATEPAY_SEPA_NOT_AGREED' :
                     'FCPO_RATEPAY_NOT_AGREED';
             $sMessage = $oLang->translateString($sErrorTranslateString);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $mReturn;
@@ -2781,40 +3023,45 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return void
      */
-    protected function _fcpoRatePaySaveRequestedValues($sPaymentId)
+    protected function _fcpoRatePaySaveRequestedValues(string $sPaymentId): void
     {
         $blSaveUser = false;
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getBasketUser();
 
-        $aRequestedValues = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $aRequestedValues = (array)$this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
         $sCurrentBirthdate = $oUser->oxuser__oxbirthdate->value;
-        $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] . "-" .
-            $aRequestedValues[$sPaymentId . '_birthdate_month'] . "-" .
-            $aRequestedValues[$sPaymentId . '_birthdate_day'];
+        if (
+            isset($aRequestedValues[$sPaymentId . '_birthdate_day']) &&
+            isset($aRequestedValues[$sPaymentId . '_birthdate_month']) &&
+            isset($aRequestedValues[$sPaymentId . '_birthdate_year'])) {
+            $sRequestBirthdate = $aRequestedValues[$sPaymentId . '_birthdate_year'] . "-" .
+                $aRequestedValues[$sPaymentId . '_birthdate_month'] . "-" .
+                $aRequestedValues[$sPaymentId . '_birthdate_day'];
 
-        $blRefreshBirthdate = ($sCurrentBirthdate != $sRequestBirthdate && $sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
-        if ($blRefreshBirthdate) {
-            $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
-            $blSaveUser = true;
+            $blRefreshBirthdate = ($sCurrentBirthdate != $sRequestBirthdate && $sRequestBirthdate != '0000-00-00' && $sRequestBirthdate != '--');
+            if ($blRefreshBirthdate) {
+                $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
+                $blSaveUser = true;
+            }
         }
 
         $blRefreshFon = (isset($aRequestedValues[$sPaymentId . '_fon']) && strlen($aRequestedValues[$sPaymentId . '_fon']) > 0);
 
         if ($blRefreshFon) {
-            $oUser->oxuser__oxfon = new oxField($aRequestedValues[$sPaymentId . '_fon'], oxField::T_RAW);
+            $oUser->oxuser__oxfon = new Field($aRequestedValues[$sPaymentId . '_fon'], Field::T_RAW);
             $blSaveUser = true;
         }
 
         $blRefreshUstid = (isset($aRequestedValues[$sPaymentId . '_ustid']) && strlen($aRequestedValues[$sPaymentId . '_ustid']) > 0);
 
         if ($blRefreshUstid) {
-            $oUser->oxuser__oxustid = new oxField($aRequestedValues[$sPaymentId . '_ustid'], oxField::T_RAW);
+            $oUser->oxuser__oxustid = new Field($aRequestedValues[$sPaymentId . '_ustid'], Field::T_RAW);
             $blSaveUser = true;
         }
 
-        $this->_oFcpoHelper->fcpoSetSessionVariable('ratepayprofileid', $aRequestedValues[$sPaymentId . '_profileid']);
+        $this->_oFcPoHelper->fcpoSetSessionVariable('ratepayprofileid', $aRequestedValues[$sPaymentId . '_profileid']);
 
         if ($blSaveUser) {
             $oUser->save();
@@ -2824,10 +3071,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting ustid is needed
      *
+     * @return bool
      */
     public function fcpoRatePayShowUstid(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oUser = $this->getUser();
         $blB2b2Mode = ($oConfig->getConfigParam('blFCPORatePayB2BMode') && $oUser->oxuser__oxcompany->value != '');
 
@@ -2837,13 +3085,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting telephone number is needed
      *
+     * @return bool
      */
     public function fcpoRatePayShowFon(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
-        $oConfig->getConfigParam('blFCPORatePayB2BMode');
 
         return $oUser->oxuser__oxfon->value == '' && !$blShowUstid;
     }
@@ -2851,10 +3098,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter which checks if requesting birthdate is needed
      *
+     * @return bool
      */
     public function fcpoRatePayShowBirthdate(): bool
     {
-        $this->_oFcpoHelper->fcpoGetConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
 
@@ -2864,20 +3111,20 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determines if adult check is needed and performing it in case
      *
-     * @param $mReturn
-     * @param $sPaymentId
+     * @param mixed $mReturn
+     * @param string $sPaymentId
      * @return mixed
      */
-    protected function _fcpoAdultCheck($mReturn, $sPaymentId)
+    protected function _fcpoAdultCheck(mixed $mReturn, string $sPaymentId): mixed
     {
         $blAgeCheckRequired = $this->_fcpoAdultCheckRequired($sPaymentId);
         if ($blAgeCheckRequired) {
             $blIsAdult = $this->_fcpoUserIsAdult();
             if (!$blIsAdult) {
-                $oLang = $this->_oFcpoHelper->fcpoGetLang();
+                $oLang = $this->_oFcPoHelper->fcpoGetLang();
                 $sMessage = $oLang->translateString('FCPO_NOT_ADULT');
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+                $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
                 $mReturn = null;
             }
         }
@@ -2887,12 +3134,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks if adult control is needed
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcpoAdultCheckRequired($sPaymentId)
+    protected function _fcpoAdultCheckRequired(string $sPaymentId): bool
     {
-        $aAffectedPaymentTypes = ['fcpo_secinvoice'];
+        $aAffectedPaymentTypes = ['fcpo_secinvoice', 'fcpopl_secinvoice', 'fcpopl_secinstallment', 'fcpopl_secdebitnote'];
         $blReturn = false;
         if (in_array($sPaymentId, $aAffectedPaymentTypes)) {
             $blReturn = true;
@@ -2904,10 +3151,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns if user is an adult
      *
-     *
      * @return bool
      */
-    protected function _fcpoUserIsAdult()
+    protected function _fcpoUserIsAdult(): bool
     {
         $blIsAdult = true;
         $oUser = $this->getUser();
@@ -2925,10 +3171,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for previously calculated installments
      *
-     *
      * @return array
      */
-    public function fcpoGetInstallments()
+    public function fcpoGetInstallments(): array
     {
         return $this->_aInstallmentCalculation;
     }
@@ -2936,20 +3181,17 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Template getter for current userflag messages
      *
-     *
-     * @return mixed[]
+     * @return array
      */
     public function fcpoGetUserFlagMessages(): array
     {
         $aMessages = [];
         $oUser = $this->getUser();
         $aUserFlags = $oUser->fcpoGetFlagsOfUser();
-        foreach ($aUserFlags as $aUserFlag) {
-            if (!$aUserFlag->fcpoGetIsActive()) {
-                continue;
-            }
+        foreach ($aUserFlags as $oUserFlag) {
+            if (!$oUserFlag->fcpoGetIsActive()) continue;
             $sCustomerMessage = $this->getPaymentErrorText();
-            $sMessage = $aUserFlag->fcpoGetTranslatedMessage($sCustomerMessage);
+            $sMessage = $oUserFlag->fcpoGetTranslatedMessage($sCustomerMessage);
             if ($sMessage) {
                 $aMessages[] = $sMessage;
             }
@@ -2960,6 +3202,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 
     /**
      * Method for transport of params that came via payolution installment params
+     *
+     * @param array $aParams
+     * @return void
      */
     public function setPayolutionAjaxParams(array $aParams): void
     {
@@ -2972,16 +3217,29 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPaymentId
      * @return mixed
      */
-    public function fcpoPayolutionPreCheck($sPaymentId)
+    public function fcpoPayolutionPreCheck(string $sPaymentId): mixed
     {
         $this->_blIsPayolutionInstallmentAjax = true;
 
         return $this->_fcpoPayolutionPreCheck(true, $sPaymentId);
     }
 
-    public function fcpoGetRatePayDeviceFingerprint()
+    /**
+     * Returns the sum of basket
+     *
+     * @return string
+     */
+    public function fcpoGetBasketSum(): string
     {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        return number_format($this->fcpoGetDBasketSum(), 2, ',', '.');
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoGetRatePayDeviceFingerprint(): string
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $sFingerprint = $oSession->getVariable('fcpoRatepayDeviceFingerPrint');
 
         if (!$sFingerprint) {
@@ -2994,25 +3252,31 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         return $sFingerprint;
     }
 
-    public function fcpoGetRatePayDeviceFingerprintSnippetId()
+    /**
+     * @return string
+     */
+    public function fcpoGetRatePayDeviceFingerprintSnippetId(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        return $oConfig->getConfigParam('sFCPORatePaySnippetID') ?: 'ratepay';
+        return $oConfig->getConfigParam('sFCPORatePaySnippetID') ? $oConfig->getConfigParam('sFCPORatePaySnippetID') : 'ratepay';
     }
 
     /**
      * Returns link for displaying legal terms for Ratepay
      *
+     * @return string
      */
     public function fcpoGetRatepayAgreementLink(): string
     {
+
         return 'https://www.ratepay.com/legal-payment-terms';
     }
 
     /**
      * Returns link for displaying data privacy statement for Ratepay
      *
+     * @return string
      */
     public function fcpoGetRatepayPrivacyLink(): string
     {
@@ -3020,8 +3284,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Ajax interface for triggering installment caclulation
+     * Ajax interface for triggering installment calculation
      *
+     * @return void
      */
     public function fcpoPerformInstallmentCalculation(): void
     {
@@ -3031,40 +3296,43 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Loads shop version and formats it in a certain way
      *
+     * @return string
      */
     public function getIntegratorid(): string
     {
-        return $this->_oFcpoHelper->fcpoGetIntegratorId();
+        return $this->_oFcPoHelper->fcpoGetIntegratorId();
     }
 
     /**
      * Loads shop edition and shop version and formats it in a certain way
      *
+     * @return string
      */
     public function getIntegratorver(): string
     {
-        return $this->_oFcpoHelper->fcpoGetIntegratorVersion();
+        return $this->_oFcPoHelper->fcpoGetIntegratorVersion();
     }
 
     /**
      * get PAYONE module version
      *
+     * @return string
      */
     public function getIntegratorextver(): string
     {
-        return $this->_oFcpoHelper->fcpoGetModuleVersion();
+        return $this->_oFcPoHelper->fcpoGetModuleVersion();
     }
 
     /**
      * Returns the Klarna confirmation text for the current bill country
      *
+     * @return string
      */
     public function fcpoGetConfirmationText(): string
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
-        $sId = $oPayment->fcpoGetKlarnaStoreId();
+        $sId = '';
         $sKlarnaLang = $this->_fcpoGetKlarnaLang();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sConfirmText = $oLang->translateString('FCPO_KLV_CONFIRM');
 
         return sprintf($sConfirmText, $sId, $sKlarnaLang, $sId, $sKlarnaLang);
@@ -3075,13 +3343,21 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return string
      */
-    protected function _fcpoGetKlarnaLang()
+    protected function _fcpoGetKlarnaLang(): string
     {
         $sReturn = 'de_de';
         $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
-        if ($sBillCountryIso2 !== '' && $sBillCountryIso2 !== '0') {
-            $aKlarnaLangMap = ['de' => 'de_de', 'at' => 'de_at', 'dk' => 'da_dk', 'fi' => 'fi_fi', 'nl' => 'nl_nl', 'no' => 'nb_no', 'se' => 'sv_se'];
-            if (array_key_exists($sBillCountryIso2, $aKlarnaLangMap)) {
+        if ($sBillCountryIso2) {
+            $aKlarnaLangMap = [
+                'de' => 'de_de',
+                'at' => 'de_at',
+                'dk' => 'da_dk',
+                'fi' => 'fi_fi',
+                'nl' => 'nl_nl',
+                'no' => 'nb_no',
+                'se' => 'sv_se',
+            ];
+            if (array_key_exists($sBillCountryIso2, $aKlarnaLangMap) !== false) {
                 $sReturn = $aKlarnaLangMap[$sBillCountryIso2];
             }
         }
@@ -3091,32 +3367,35 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if info is needed
      *
+     * @return bool
      */
     public function fcpoKlarnaInfoNeeded(): bool
     {
         return $this->fcpoKlarnaIsTelephoneNumberNeeded() ||
-        $this->fcpoKlarnaIsBirthdayNeeded() ||
-        $this->fcpoKlarnaIsAddressAdditionNeeded() ||
-        $this->fcpoKlarnaIsDelAddressAdditionNeeded() ||
-        $this->fcpoKlarnaIsGenderNeeded() ||
-        $this->fcpoKlarnaIsPersonalIdNeeded();
+            $this->fcpoKlarnaIsBirthdayNeeded() ||
+            $this->fcpoKlarnaIsAddressAdditionNeeded() ||
+            $this->fcpoKlarnaIsDelAddressAdditionNeeded() ||
+            $this->fcpoKlarnaIsGenderNeeded() ||
+            $this->fcpoKlarnaIsPersonalIdNeeded();
     }
 
     /**
      * Checks if telephone number
      *
+     * @return bool
      */
     public function fcpoKlarnaIsTelephoneNumberNeeded(): bool
     {
         $oUser = $this->getUser();
         $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
-        $blCountryNeedsPhone = (in_array($sBillCountryIso2, ['no', 'se', 'dk']));
+        $blCountryNeedsPhone = in_array($sBillCountryIso2, ['no', 'se', 'dk']);
         return $blCountryNeedsPhone && $oUser->oxuser__oxfon->value == '';
     }
 
     /**
-     * Checks if birthday neeeded for klarna
+     * Checks if birthday needed for klarna
      *
+     * @return bool
      */
     public function fcpoKlarnaIsBirthdayNeeded(): bool
     {
@@ -3126,12 +3405,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blNoBirthdaySet = (!$sBirthdate || $sBirthdate == '0000-00-00');
         $blInCountryList = in_array($sUserCountryIso2, $this->_aKlarnaBirthdayNeededCountries);
 
-        return $blInCountryList && $blNoBirthdaySet;
+        return ($blInCountryList && $blNoBirthdaySet);
     }
 
     /**
      * Determine if address addition is needed
      *
+     * @return bool
      */
     public function fcpoKlarnaIsAddressAdditionNeeded(): bool
     {
@@ -3144,10 +3424,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if delivery address addition is needed
      *
-     *
-     * @return boolean
+     * @return bool
      */
-    public function fcpoKlarnaIsDelAddressAdditionNeeded()
+    public function fcpoKlarnaIsDelAddressAdditionNeeded(): bool
     {
         $blReturn = false;
         $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
@@ -3156,7 +3435,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $oUser = $this->getUser();
             $sDeliveryAddressId = $oUser->getSelectedAddressId();
             if ($sDeliveryAddressId) {
-                $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
+                $oAddress = $this->_oFcPoHelper->getFactoryObject(Address::class);
                 $oAddress->load($sDeliveryAddressId);
                 if ($oAddress && !$oAddress->oxaddress__oxaddinfo->value) {
                     $blReturn = true;
@@ -3170,12 +3449,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if gender is needed
      *
+     * @return bool
      */
     public function fcpoKlarnaIsGenderNeeded(): bool
     {
         $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
         $oUser = $this->getUser();
-        $blValidCountry = (in_array($sBillCountryIso2, ['de', 'at', 'nl']));
+        $blValidCountry = in_array($sBillCountryIso2, ['de', 'at', 'nl']);
         $blValidSalutation = !$oUser->oxuser__oxsal->value;
 
         return $blValidCountry && $blValidSalutation;
@@ -3184,12 +3464,13 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Determine if personal id is needed
      *
+     * @return bool
      */
     public function fcpoKlarnaIsPersonalIdNeeded(): bool
     {
         $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
         $oUser = $this->getUser();
-        $blValidCountry = (in_array($sBillCountryIso2, ['dk', 'fi', 'no', 'se']));
+        $blValidCountry = in_array($sBillCountryIso2, ['dk', 'fi', 'no', 'se']);
         $blValidPersId = !$oUser->oxuser__fcpopersonalid->value;
 
         return $blValidCountry && $blValidPersId;
@@ -3198,19 +3479,18 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of configured debit countries
      *
-     *
-     * @return array<int|string, mixed>
+     * @return array
      */
     public function fcpoGetDebitCountries(): array
     {
         $aCountries = [];
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aFCPODebitCountries = $oConfig->getConfigParam('aFCPODebitCountries');
 
         if (is_array($aFCPODebitCountries) && count($aFCPODebitCountries)) {
-            foreach ($aFCPODebitCountries as $aFCPODebitCountry) {
-                $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
-                $aCountries[$oPayment->fcpoGetCountryIsoAlphaById($aFCPODebitCountry)] = $oPayment->fcpoGetCountryNameById($aFCPODebitCountry);
+            foreach ($aFCPODebitCountries as $sCountryId) {
+                $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
+                $aCountries[$oPayment->fcpoGetCountryIsoAlphaById($sCountryId)] = $oPayment->fcpoGetCountryNameById($sCountryId);
             }
         }
 
@@ -3221,14 +3501,14 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Template getter returns formatted payment costs by offering
      * current oxpayment object
      *
-     * @param object $oPayment
+     * @param Payment $oPayment
      * @return string
      */
-    public function fcpoGetFormattedPaymentCosts($oPayment)
+    public function fcpoGetFormattedPaymentCosts(Payment $oPayment): string
     {
         $oPaymentPrice = $oPayment->getPrice();
-        $oViewConf = $this->_oFcpoHelper->fcpoGetViewConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oViewConf = $this->_oFcPoHelper->fcpoGetViewConfig();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
         $dPrice = $oPaymentPrice->getBruttoPrice();
         $blShowPrice = ($dPrice > 0.00);
@@ -3254,15 +3534,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Formatting currency with currency sign
      *
-     * @param double $dPrice
+     * @param float $fPrice
      * @return string
      */
-    protected function _fcpoFormatCurrency($dPrice)
+    protected function _fcpoFormatCurrency(float $fPrice): string
     {
         $oCur = $this->getActCurrency();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
-        $sPrice = $oLang->formatCurrency($dPrice, $oCur);
+        $sPrice = $oLang->formatCurrency($fPrice, $oCur);
         $sSide = $oCur->side;
 
         return (isset($sSide) && $sSide == 'Front') ?
@@ -3273,10 +3553,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Generic method for determine if order is b2c
      *
-     *
      * @return bool
      */
-    public function fcpoIsB2C()
+    public function fcpoIsB2C(): bool
     {
         $blIsB2B = $this->fcpoIsB2B();
 
@@ -3289,11 +3568,15 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string $sPart (year,month,day)
      * @return string
      */
-    public function fcpoGetBirthdayField($sPart)
+    public function fcpoGetBirthdayField(string $sPart): string
     {
         $sBirthdate = $this->fcpoGetUserValue('oxbirthdate');
         $aBirthdateParts = explode('-', $sBirthdate);
-        $aMap = ['year' => 0, 'month' => 1, 'day' => 2];
+        $aMap = [
+            'year' => 0,
+            'month' => 1,
+            'day' => 2,
+        ];
 
         $sReturn = '';
         if (isset($aBirthdateParts[$aMap[$sPart]])) {
@@ -3304,15 +3587,23 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Returns prepared link for displaying agreement as
-     *
-     *
      * @return string
      */
-    public function fcpoGetPayolutionAgreementLink()
+    public function fcpoGetAccountHolder(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        return $this->fcpoGetUserValue('oxfname') . ' ' . $this->fcpoGetUserValue('oxlname');
+    }
+
+    /**
+     * Returns prepared link for displaying agreement as
+     *
+     * @return string
+     * @throws LanguageNotFoundException
+     */
+    public function fcpoGetPayolutionAgreementLink(): string
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sLangAbbr = $oLang->getLanguageAbbr();
         $sTargetCountry = strtoupper($this->fcpoGetTargetCountry());
 
@@ -3324,27 +3615,28 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     }
 
     /**
-     * Template getter returns payolution sepa mandata
+     * Template getter returns payolution sepa mandate
      *
      * @return string
      */
-    public function fcpoGetPayolutionSepaAgreementLink()
+    public function fcpoGetPayolutionSepaAgreementLink(): string
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
 
         return $sShopUrl .
-        '/modules/fc/fcpayone/lib/fcpopopup_content.php?loadurl=' .
-        $this->_sPayolutionSepaAgreement;
+            '/modules/fc/fcpayone/lib/fcpopopup_content.php?loadurl=' .
+            $this->_sPayolutionSepaAgreement;
     }
 
     /**
      * Template getter for returning an array with last hundred years
      *
+     * @return array
      */
     public function fcpoGetYearRange(): array
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
         $iCurrentYear = (int)date('Y');
         $iHundredYearsAgo = $iCurrentYear - 100;
@@ -3365,11 +3657,12 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param int $iFrom
      * @param int $iTo
      * @param int $iPositions
+     * @param bool $blChooseString
      * @return array
      */
-    protected function _fcpoGetNumericRange($iFrom, $iTo, $iPositions, $blChooseString = true)
+    protected function _fcpoGetNumericRange(int $iFrom, int $iTo, int $iPositions, bool $blChooseString = true): array
     {
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
         $aRange = ($blChooseString) ? [$sChooseString] : [];
 
@@ -3383,10 +3676,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of available months
      *
-     *
      * @return array
      */
-    public function fcpoGetMonthRange()
+    public function fcpoGetMonthRange(): array
     {
         return $this->_fcpoGetNumericRange(1, 12, 2);
     }
@@ -3394,10 +3686,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns an array of available days
      *
-     *
      * @return array
      */
-    public function fcpoGetDayRange()
+    public function fcpoGetDayRange(): array
     {
         return $this->_fcpoGetNumericRange(1, 31, 2);
     }
@@ -3407,14 +3698,64 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * then insert the payment method particle in the placeholder
      *
      * @param string $sPaymentId
+     * @return string
      */
-    public function fcpoGetPoAgreementInit($sPaymentId): string
+    public function fcpoGetPoAgreementInit(string $sPaymentId): string
     {
-        $oTranslator = $this->_oFcpoHelper->fcpoGetLang();
+        $oTranslator = $this->_oFcPoHelper->fcpoGetLang();
         $sBaseString = $oTranslator->translateString('FCPO_PAYOLUTION_AGREEMENT_PART_1');
         $sPaymentMethodSuffix = $oTranslator->translateString('FCPO_PAYOLUTION_AGREEMENT_PART_1_' . strtoupper($sPaymentId));
 
         return sprintf($sBaseString, $sPaymentMethodSuffix);
+    }
+
+    /**
+     * Retrieve the session stored value of the device check for Apple Pay compatibility
+     *
+     * @return int
+     */
+    public function fcpoAplGetDeviceCheck(): int
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        return (int)$oSession->getVariable('applePayAllowedDevice');
+    }
+
+    /**
+     * Checks if configured certificate file exists, for Apple Pay availability
+     *
+     * @return mixed
+     */
+    public function fcpoAplCertificateCheck(): mixed
+    {
+        $oViewConf = $this->_oFcPoHelper->fcpoGetViewConfig();
+        return $oViewConf->fcpoCertificateExists();
+    }
+
+    /**
+     * Template getter which checks if requesting telephone number is needed
+     *
+     * @return bool
+     */
+    public function fcpoBNPLShowFon($sPaymentID = ''): bool
+    {
+        $oUser = $this->getUser();
+        $blIsB2B = $oUser->oxuser__oxcompany->value != '';
+
+        return (
+            (!$blIsB2B || $sPaymentID == 'fcpopl_secinvoice')
+            && $oUser->oxuser__oxfon->value == ''
+        );
+    }
+
+    /**
+     * Template getter which checks if requesting birthdate is needed
+     *
+     * @return bool
+     */
+    public function fcpoBNPLShowBirthdate(): bool
+    {
+        $oUser = $this->getUser();
+        return ((is_null($oUser->oxuser__oxbirthdate->value) || $oUser->oxuser__oxbirthdate->value == '0000-00-00'));
     }
 
     /**
@@ -3423,23 +3764,23 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param array $aBirthdayValidation
      * @return bool
      */
-    protected function _fcpoUpdateBirthdayData($aBirthdayValidation)
+    protected function _fcpoUpdateBirthdayData(array $aBirthdayValidation): bool
     {
         $oUser = $this->_fcpoGetUserFromSession();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $blValidBirthdateData = $aBirthdayValidation['blValidBirthdateData'];
         $sRequestBirthdate = $aBirthdayValidation['sRequestBirthdate'];
 
         $blResult = false;
 
         if ($blValidBirthdateData) {
-            $oUser->oxuser__oxbirthdate = new oxField($sRequestBirthdate, oxField::T_RAW);
+            $oUser->oxuser__oxbirthdate = new Field($sRequestBirthdate, Field::T_RAW);
             $oUser->save();
             $blResult = true;
         } else {
             $sMessage = $oLang->translateString('FCPO_BIRTHDATE_INVALID');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $blResult;
@@ -3448,10 +3789,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Checks complete company data
      *
-     * @param $sPaymentId
+     * @param string $sPaymentId
      * @return bool
      */
-    protected function _fcValidateCompanyData($sPaymentId)
+    protected function _fcValidateCompanyData(string $sPaymentId): bool
     {
         $aPayments2Validate = ['fcpo_secinvoice'];
 
@@ -3463,10 +3804,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $blReturn = $this->fcpoIsB2B(true);
 
         if (!$blReturn) {
-            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $oLang = $this->_oFcPoHelper->fcpoGetLang();
             $sMessage = $oLang->translateString('FCPO_COMPANYDATA_INVALID');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
 
         return $blReturn;
@@ -3477,9 +3818,9 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @param string $aRequestedValues
      * @param string $sPaymentId
-     * @return mixed string/boolean
+     * @return string|bool
      */
-    protected function _fcpoGetRequestedUstid($aRequestedValues, $sPaymentId)
+    protected function _fcpoGetRequestedUstid(string $aRequestedValues, string $sPaymentId): bool|string
     {
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
 
@@ -3495,29 +3836,34 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * Extends oxid standard method _setValues
      * Extends it with the approval checkbox in the longdesc property
      *
-     * Calculate payment cost for each payment. Sould be removed later
+     * Calculate payment cost for each payment. Should be removed later
      *
-     * @param array    &$aPaymentList payments array
-     * @param oxBasket  $oBasket      basket object
+     * @param array       &$aPaymentList payments array
+     * @param Basket|null $oBasket basket object
      *
-     * @return null
+     * @return void
      */
-    protected function _setValues(&$aPaymentList, $oBasket = null)
+    protected function _setValues(array &$aPaymentList, Basket $oBasket = null): void
     {
-        foreach ($aPaymentList as $oPayment) {
-            if ($this->fcIsPayOnePaymentType($oPayment->getId()) && $this->fcShowApprovalMessage() && $oPayment->fcBoniCheckNeeded()) {
-                $sApprovalLongdesc = '<br><table><tr><td><input type="hidden" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="false"><input type="checkbox" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="true" style="margin-bottom:0px;margin-right:10px;"></td><td>' . $this->fcGetApprovalText() . '</td></tr></table>';
-                $oPayment->oxpayments__oxlongdesc->rawValue .= $sApprovalLongdesc;
+        parent::_setValues($aPaymentList, $oBasket);
+
+        if (is_array($aPaymentList)) {
+            foreach ($aPaymentList as $oPayment) {
+                if ($this->fcIsPayOnePaymentType($oPayment->getId()) && $this->fcShowApprovalMessage() && $oPayment->fcBoniCheckNeeded()) {
+                    $sApprovalLongdesc = '<br><table><tr><td><input type="hidden" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="false"><input type="checkbox" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="true" style="margin-bottom:0;margin-right:10px;"></td><td>' . $this->fcGetApprovalText() . '</td></tr></table>';
+                    $oPayment->oxpayments__oxlongdesc->rawValue .= $sApprovalLongdesc;
+                }
             }
         }
     }
 
     /**
-     * Returns wether payment is of type payone
+     * Returns whether payment is of type payone
      *
      * @param string $sId
+     * @return bool
      */
-    public function fcIsPayOnePaymentType($sId): bool
+    public function fcIsPayOnePaymentType(string $sId): bool
     {
         return FcPayOnePayment::fcIsPayOnePaymentType($sId);
     }
@@ -3525,55 +3871,24 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Check if approval message should be displayed
      *
+     * @return bool
      */
     public function fcShowApprovalMessage(): bool
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOBonicheckMoment') == 'after';
     }
 
     /**
      * Returns the cn
      *
-     *
      * @return mixed
      */
-    public function fcGetApprovalText()
+    public function fcGetApprovalText(): mixed
     {
         $iLangId = $this->fcGetLangId();
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         return $oConfig->getConfigParam('sFCPOApprovalText_' . $iLangId);
     }
 
-    /**
-     * Extends oxid standard method _setDeprecatedValues
-     * Extends it with the approval checkbox in the longdesc property
-     *
-     * Calculate payment cost for each payment. Sould be removed later
-     *
-     * @param array    &$aPaymentList payments array
-     * @param oxBasket  $oBasket      basket object
-     *
-     * @return null
-     */
-    protected function _setDeprecatedValues(&$aPaymentList, $oBasket = null)
-    {
-        if ($this->_fcGetCurrentVersion() <= 4700) {
-            $this->_oFcpoHelper->fcpoGetLang();
-            foreach ($aPaymentList as $oPayment) {
-                if ($this->fcIsPayOnePaymentType($oPayment->getId()) && $this->fcShowApprovalMessage() && $oPayment->fcBoniCheckNeeded()) {
-                    $sApprovalLongdesc = '<br><table><tr><td><input type="hidden" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="false"><input type="checkbox" name="fcpo_bonicheckapproved[' . $oPayment->getId() . ']" value="true" style="margin-bottom:0px;margin-right:10px;"></td><td>' . $this->fcGetApprovalText() . '</td></tr></table>';
-                    $oPayment->oxpayments__oxlongdesc->value .= $sApprovalLongdesc;
-                }
-            }
-        }
-    }
-
-    /**
-     * Get current version number as 4 digit integer e.g. Oxid 4.5.9 is 4590
-     */
-    protected function _fcGetCurrentVersion(): int
-    {
-        return $this->_oFcpoHelper->fcpoGetIntShopVersion();
-    }
 }

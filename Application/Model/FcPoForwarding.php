@@ -18,16 +18,17 @@
  * @version       OXID eShop CE
  */
 
-
 namespace Fatchip\PayOne\Application\Model;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use stdClass;
 
-final class FcPoForwarding extends BaseModel
+class FcPoForwarding extends BaseModel
 {
 
     /**
@@ -35,30 +36,41 @@ final class FcPoForwarding extends BaseModel
      *
      * @var FcPoHelper
      */
-    private $_oFcpoHelper;
-    /** @var string */
-    private const S_QUERY = "SELECT oxid, fcpo_payonestatus, fcpo_url, fcpo_timeout FROM fcpostatusforwarding ORDER BY oxid ASC";
+    protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var DatabaseInterface
+     */
+    protected DatabaseInterface $_oFcPoDb;
+
 
     /**
      * Init needed data
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
      * Returns an array of currently existing forwardings as an array with standard objects
      *
-     * 
-     * @return \stdClass[]
+     * @return stdClass[]
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
     public function fcpoGetExistingForwardings(): array
     {
         $aForwardings = [];
-        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $aRows = $oDb->getAll(self::S_QUERY);
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
+
+        $sQuery = "SELECT oxid, fcpo_payonestatus, fcpo_url, fcpo_timeout FROM fcpostatusforwarding ORDER BY oxid ASC";
+        $aRows = $oDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
             // collect values
             $sOxid = $aRow['oxid'];
@@ -79,17 +91,17 @@ final class FcPoForwarding extends BaseModel
     }
 
     /**
-     *
-     *
      * @param array $aForwardings
+     * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoUpdateForwardings($aForwardings): void
+    public function fcpoUpdateForwardings(array $aForwardings): void
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         // iterate through forwardings
         foreach ($aForwardings as $sForwardingId => $aData) {
             $sQuery = $this->_fcpoGetQuery($sForwardingId, $aData);
-            $oDb->Execute($sQuery);
+            $oDb->execute($sQuery);
         }
     }
 
@@ -97,21 +109,21 @@ final class FcPoForwarding extends BaseModel
      * Returns the matching query for updating/adding data
      *
      * @param string $sForwardingId
-     * @param array  $aData
+     * @param array $aData
      * @return string
+     * @throws DatabaseConnectionException
      */
-    private function _fcpoGetQuery($sForwardingId, $aData)
+    protected function _fcpoGetQuery(string $sForwardingId, array $aData): string
     {
         $database = DatabaseProvider::getDb();
         // quote values from outer space
         $sOxid = $database->quote($sForwardingId);
         $sPayoneStatus = $database->quote($aData['sPayoneStatus']);
         $sUrl = $database->quote($aData['sForwardingUrl']);
-        $iTimeout = $database->quote($aData['iForwardingTimeout']);
-
+        $iTimeout = (int) ($aData['iForwardingTimeout']);
 
         if (array_key_exists('delete', $aData)) {
-            $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = {$sOxid}";
+            $sQuery = "DELETE FROM fcpostatusforwarding WHERE oxid = $sOxid";
         } else {
             $sQuery = $this->_fcpoGetUpdateQuery($sForwardingId, $sPayoneStatus, $sUrl, $iTimeout);
         }
@@ -120,36 +132,37 @@ final class FcPoForwarding extends BaseModel
     }
 
     /**
-     * Returns wether an insert or update query, depending on data
+     * Returns whether an insert or update query, depending on data
      *
      * @param string $sForwardingId
      * @param string $sPayoneStatus
      * @param string $sUrl
-     * @param string $iTimeout
+     * @param int $iTimeout
      * @return string
+     * @throws DatabaseConnectionException
      */
-    private function _fcpoGetUpdateQuery($sForwardingId, string|bool $sPayoneStatus, string|bool $sUrl, string|bool $iTimeout)
+    protected function _fcpoGetUpdateQuery(string $sForwardingId, string $sPayoneStatus, string $sUrl, int $iTimeout): string
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sForwardingId, $sPayoneStatus, $sUrl);
 
         if ($blValidNewEntry) {
-            $oUtilsObject = $this->_oFcpoHelper->fcpoGetUtilsObject();
+            $oUtilsObject = $this->_oFcPoHelper->fcpoGetUtilsObject();
             $sOxid = $oUtilsObject->generateUID();
             $sQuery = " INSERT INTO fcpostatusforwarding (
                                 oxid, fcpo_payonestatus,  fcpo_url,   fcpo_timeout
                             ) VALUES (
-                                '{$sOxid}', {$sPayoneStatus}, {$sUrl},  {$iTimeout}
+                                '$sOxid', $sPayoneStatus, $sUrl,  $iTimeout
                             )";
         } else {
             $database = DatabaseProvider::getDb();
             $sForwardingId = $database->quote($sForwardingId);
             $sQuery = " UPDATE fcpostatusforwarding
                             SET
-                                fcpo_payonestatus = {$sPayoneStatus},
-                                fcpo_url = {$sUrl},
-                                fcpo_timeout = {$iTimeout}
+                                fcpo_payonestatus = $sPayoneStatus,
+                                fcpo_url = $sUrl,
+                                fcpo_timeout = $iTimeout
                             WHERE
-                                oxid = {$sForwardingId}";
+                                oxid = $sForwardingId";
         }
 
         return $sQuery;
@@ -161,11 +174,13 @@ final class FcPoForwarding extends BaseModel
      * @param string $sForwardingId
      * @param string $sPayoneStatus
      * @param string $sUrl
+     * @return bool
      */
-    private function _fcpoIsValidNewEntry($sForwardingId, string|bool $sPayoneStatus, string|bool $sUrl): bool
+    protected function _fcpoIsValidNewEntry(string $sForwardingId, string $sPayoneStatus, string $sUrl): bool
     {
         $blComplete = (!empty($sPayoneStatus) || !empty($sUrl));
 
         return $sForwardingId == 'new' && $blComplete;
     }
+
 }

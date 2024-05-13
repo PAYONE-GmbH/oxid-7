@@ -1,134 +1,77 @@
 <?php
-
 /**
- * Created by PhpStorm.
- * User: andre
- * Date: 13.07.17
- * Time: 17:50
+ * PAYONE OXID Connector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * PAYONE OXID Connector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with PAYONE OXID Connector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @link          http://www.payone.de
+ * @copyright (C) Payone GmbH
+ * @version       OXID eShop CE
  */
 
 namespace Fatchip\PayOne\Application\Controller;
 
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
-use oxregistry;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\UtilsServer;
 
 class FcPayOneUserView extends FcPayOneUserView_parent
 {
 
     /**
-     * @var array<string, bool>
-     */
-    public $_aViewData;
-    /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var FcPoHelper
      */
-    protected $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected DatabaseInterface $_oFcpoDb;
-    /** @var string */
-    private const S_PAYMENT_ID = 'fcpoamazonpay';
-    /** @var string[] */
-    private const A_ALLOWED_DOUBLE_REDIRECT_MODES = ['redirect', 
-    'auto'];
+    protected DatabaseInterface $_oFcPoDb;
 
 
     /**
      * init object construction
      *
-     * @return null
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
-    }
-
-    /**
-     * Method will be called when returning from amazonlogin
-     *
-     */
-    public function fcpoAmazonLoginReturn(): void
-    {
-        $oSession = $this->getSession();
-        $oUtilsServer = oxRegistry::get('oxUtilsServer');
-
-        // OXID-233 : if the user is logged in, we save the id in session for later
-        // AmazonPay process uses a new user, created on the fly
-        // Then we need the original Id to link back the order to the initial user
-        $user = oxRegistry::getSession()->getUser();
-        if ($user) {
-            oxRegistry::getSession()->setVariable('sOxidPreAmzUser', $user->getId());
-        }
-
-        // delete possible old data
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
-
-        $sAmazonLoginAccessTokenParam = $this->_oFcpoHelper->fcpoGetRequestParameter('access_token');
-        $sAmazonLoginAccessTokenParam = urldecode((string) $sAmazonLoginAccessTokenParam);
-        $sAmazonLoginAccessTokenCookie = $oUtilsServer->getOxCookie('amazon_Login_accessToken');
-        $blNeededDataAvailable = $sAmazonLoginAccessTokenParam || $sAmazonLoginAccessTokenCookie;
-
-        if ($blNeededDataAvailable) {
-            $sAmazonLoginAccessToken =
-                ($sAmazonLoginAccessTokenParam !== '' && $sAmazonLoginAccessTokenParam !== '0') ? $sAmazonLoginAccessTokenParam : $sAmazonLoginAccessTokenCookie;
-            $this->_oFcpoHelper->fcpoSetSessionVariable('sAmazonLoginAccessToken', $sAmazonLoginAccessToken);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', self::S_PAYMENT_ID);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('_selected_paymentid', self::S_PAYMENT_ID);
-            $oBasket = $oSession->getBasket();
-            $oBasket->setPayment(self::S_PAYMENT_ID);
-        } else {
-            $this->_fcpoHandleAmazonNoTokenFound();
-        }
-
-        // go ahead with rendering
-        $this->render();
-    }
-
-    /**
-     * Handles the case that there is no access token available/accessable
-     *
-     */
-    private function _fcpoHandleAmazonNoTokenFound(): void
-    {
-        $oConfig = $this->getConfig();
-        $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
-        $blAllowedForDoubleRedirect = (in_array($sFCPOAmazonLoginMode, self::A_ALLOWED_DOUBLE_REDIRECT_MODES));
-
-        if ($blAllowedForDoubleRedirect) {
-            // we need to fetch the token from location hash (via js) and put it into a cookie first
-            $this->_aViewData['blFCPOAmazonCatchHash'] = true;
-            $this->render();
-        } else {
-            // @todo: Redirect to basket with message, currently redirect without comment
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $sShopUrl = $oConfig->getShopUrl();
-            $oUtils->redirect($sShopUrl . "index.php?cl=basket");
-        }
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
      * Returns user error message if there is some. false if none
      *
-     *
-     * @return mixed string|bool
+     * @return string|bool
      */
-    public function fcpoGetUserErrorMessage()
+    public function fcpoGetUserErrorMessage(): bool|string
     {
         $mReturn = false;
-        $sMessage = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoerror');
+        $sMessage = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoerror');
         if ($sMessage) {
-            $mReturn = urldecode((string) $sMessage);
+            $sMessage = urldecode($sMessage);
+            $mReturn = $sMessage;
         }
 
         return $mReturn;
     }
+
 }

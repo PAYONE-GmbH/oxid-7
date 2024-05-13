@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,7 +21,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
-use oxfield;
+use OxidEsales\Eshop\Application\Model\DeliveryList;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
@@ -37,39 +36,31 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      *
      * @var FcPoHelper
      */
-    protected FcPoHelper $_oFcpoHelper;
-    /** @var string */
-    private const S_QUERY = "SELECT oxactive FROM oxpayments WHERE oxid = 'fcpopaypal_express'";
-    /** @var array<string, string> */
-    private const A_ASSIGN_MAP = ['green' => 'paydirekt-express-gruen.png', 
-    'green2' => 'paydirekt-express-gruen2.png', 
-    'white' => 'paydirekt-express-weiss.png', 
-    'white2' => 'paydirekt-express-weiss2.png'];
+    protected FcPoHelper $_oFcPoHelper;
 
 
     /**
      * init object construction
      *
-     * @return null
      */
     public function __construct()
     {
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        parent::__construct();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
     }
 
-
     /**
-     * Returns whether paypal express is active or not
+     * Returns whether PayPal express is active or not
      *
      * @return bool
      * @throws DatabaseConnectionException
      */
-    public function fcpoIsPayPalExpressActive()
+    public function fcpoIsPayPalExpressActive(): bool
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
-        return (bool)$oDb->GetOne(self::S_QUERY);
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
+        $sQuery = "SELECT oxactive FROM oxpayments WHERE oxid = 'fcpopaypal_express'";
+        return (bool)$oDb->getOne($sQuery);
     }
-
 
     /**
      * Returns pic that is configured in database
@@ -79,27 +70,12 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      */
     public function fcpoGetPayPalExpressPic(): string
     {
-        $oDb = $this->_oFcpoHelper->fcpoGetDb();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $oDb = $this->_oFcPoHelper->fcpoGetDb();
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $iLangId = $oLang->getBaseLanguage();
-        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '{$iLangId}' ORDER BY fcpo_default DESC";
+        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '$iLangId' ORDER BY fcpo_default DESC";
 
-        return $oDb->GetOne($sQuery);
-    }
-
-    /**
-     * Returns matching paydirekt express picture by config
-     *
-     *
-     * @return string
-     */
-    public function fcpoGetPaydirektExpressPic(): string
-    {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $sButtonType = $oConfig->getConfigParam('sPaydirektExpressButtonType');
-        $blAvailable = array_key_exists($sButtonType, self::A_ASSIGN_MAP);
-
-        return ($blAvailable) ? self::A_ASSIGN_MAP[$sButtonType] : self::A_ASSIGN_MAP['green'];
+        return $oDb->getOne($sQuery);
     }
 
     /**
@@ -109,8 +85,8 @@ class FcPayOneBasket extends FcPayOneBasket_parent
      */
     public function fcpoCalcDeliveryCost(): Price
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $oDeliveryPrice = oxNew('oxprice');
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oDeliveryPrice = oxNew(Price::class);
         if ($oConfig->getConfigParam('blDeliveryVatOnTop')) {
             $oDeliveryPrice->setNettoPriceMode();
         } else {
@@ -118,22 +94,29 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         }
         $oUser = oxNew(User::class);
         $oUser->oxuser__oxcountryid = new Field('a7c40f631fc920687.20179984');
+        $sDelCountry = $this->findDelivCountry();
+        if (!$sDelCountry) {
+            $sDelCountry = $oUser->oxuser__oxcountryid->value;
+        }
         $fDelVATPercent = $this->getAdditionalServicesVatPercent();
         $oDeliveryPrice->setVat($fDelVATPercent);
-        $aDeliveryList = Registry::get("oxDeliveryList")->getDeliveryList(
+        $aDeliveryList = Registry::get(DeliveryList::class)->getDeliveryList(
             $this,
             $oUser,
-            $this->_findDelivCountry(),
+            $sDelCountry,
             $this->getShippingId()
         );
-        foreach ($aDeliveryList as $oDelivery) {
-            //debug trace
-            if ($oConfig->getConfigParam('iDebug') == 5) {
-                echo("DelCost : " . $oDelivery->oxdelivery__oxtitle->value . "<br>");
+        if (count($aDeliveryList) > 0) {
+            foreach ($aDeliveryList as $oDelivery) {
+                //debug trace
+                if ($oConfig->getConfigParam('iDebug') == 5) {
+                    echo("DelCost : " . $oDelivery->oxdelivery__oxtitle->value . "<br>");
+                }
+                $oDeliveryPrice->addPrice($oDelivery->getDeliveryPrice($fDelVATPercent));
             }
-            $oDeliveryPrice->addPrice($oDelivery->getDeliveryPrice($fDelVATPercent));
         }
 
         return $oDeliveryPrice;
     }
+
 }

@@ -127,12 +127,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>105</error_code>
-        <error_message_en>The customer has to be redirected to Wallet Provider in order to select a new payment
-            method.
-        </error_message_en>
-        <error_message_de>The customer has to be redirected to Wallet Provider in order to select a new payment
-            method.
-        </error_message_de>
+        <error_message_en>The customer has to be redirected to Wallet Provider in order to select a new payment method. </error_message_en>
+        <error_message_de>The customer has to be redirected to Wallet Provider in order to select a new payment method.</error_message_de>
     </entry>
     <entry>
         <error_code>106</error_code>
@@ -286,10 +282,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>876</error_code>
-        <error_message_en>AVS mismatch: The address provided does not match billing address of card holder.
-        </error_message_en>
-        <error_message_de>AVS mismatch: The address provided does not match billing address of card holder.
-        </error_message_de>
+        <error_message_en>AVS mismatch: The address provided does not match billing address of cardholder.</error_message_en>
+        <error_message_de>AVS mismatch: The address provided does not match billing address of cardholder.</error_message_de>
     </entry>
     <entry>
         <error_code>877</error_code>
@@ -533,10 +527,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>929</error_code>
-        <error_message_en>If the request contains articles with itemtype prepaid, the amount must be 0
-        </error_message_en>
-        <error_message_de>If the request contains articles with itemtype prepaid, the amount must be 0
-        </error_message_de>
+        <error_message_en>If the request contains articles with itemtype prepaid, the amount must be 0</error_message_en>
+        <error_message_de>If the request contains articles with itemtype prepaid, the amount must be 0</error_message_de>
     </entry>
     <entry>
         <error_code>930</error_code>
@@ -570,10 +562,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>936</error_code>
-        <error_message_en>Authorisation without incoming payment not possible for this type of payment
-        </error_message_en>
-        <error_message_de>Authorisation without incoming payment not possible for this type of payment
-        </error_message_de>
+        <error_message_en>Authorisation without incoming payment not possible for this type of payment</error_message_en>
+        <error_message_de>Authorisation without incoming payment not possible for this type of payment</error_message_de>
     </entry>
     <entry>
         <error_code>937</error_code>
@@ -1157,10 +1147,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>1374</error_code>
-        <error_message_en>Parameter combination {shipping_city} and {shipping_state} faulty or missing
-        </error_message_en>
-        <error_message_de>Parameter combination {shipping_city} and {shipping_state} faulty or missing
-        </error_message_de>
+        <error_message_en>Parameter combination {shipping_city} and {shipping_state} faulty or missing</error_message_en>
+        <error_message_de>Parameter combination {shipping_city} and {shipping_state} faulty or missing</error_message_de>
     </entry>
     <entry>
         <error_code>1375</error_code>
@@ -1475,21 +1463,13 @@ List of all error codes
     </entry>
     <entry>
         <error_code>1753</error_code>
-        <error_message_en>The indicated total price of all articles from the initial term did not correspond with the
-            amounts of the individual items.
-        </error_message_en>
-        <error_message_de>The indicated total price of all articles from the initial term did not correspond with the
-            amounts of the individual items.
-        </error_message_de>
+        <error_message_en>The indicated total price of all articles from the initial term did not correspond with the amounts of the individual items.</error_message_en>
+        <error_message_de>The indicated total price of all articles from the initial term did not correspond with the amounts of the individual items.</error_message_de>
     </entry>
     <entry>
         <error_code>1754</error_code>
-        <error_message_en>The indicated total price of all articles from the subsequent term did not correspond with the
-            amounts of the individual items.
-        </error_message_en>
-        <error_message_de>The indicated total price of all articles from the subsequent term did not correspond with the
-            amounts of the individual items.
-        </error_message_de>
+        <error_message_en>The indicated total price of all articles from the subsequent term did not correspond with the amounts of the individual items.</error_message_en>
+        <error_message_de>The indicated total price of all articles from the subsequent term did not correspond with the amounts of the individual items.</error_message_de>
     </entry>
     <entry>
         <error_code>1755</error_code>
@@ -1513,21 +1493,13 @@ List of all error codes
     </entry>
     <entry>
         <error_code>1759</error_code>
-        <error_message_en>For more than one item position in the initial term the price cannot be transmitted without
-            items.
-        </error_message_en>
-        <error_message_de>For more than one item position in the initial term the price cannot be transmitted without
-            items.
-        </error_message_de>
+        <error_message_en>For more than one item position in the initial term the price cannot be transmitted without items.</error_message_en>
+        <error_message_de>For more than one item position in the initial term the price cannot be transmitted without items.</error_message_de>
     </entry>
     <entry>
         <error_code>1760</error_code>
-        <error_message_en>For more than one item position in the subsequent term the price cannot be transmitted without
-            items.
-        </error_message_en>
-        <error_message_de>For more than one item position in the subsequent term the price cannot be transmitted without
-            items.
-        </error_message_de>
+        <error_message_en>For more than one item position in the subsequent term the price cannot be transmitted without items.</error_message_en>
+        <error_message_de>For more than one item position in the subsequent term the price cannot be transmitted without items.</error_message_de>
     </entry>
     <entry>
         <error_code>1761</error_code>
@@ -1631,10 +1603,8 @@ List of all error codes
     </entry>
     <entry>
         <error_code>2013</error_code>
-        <error_message_en>API-request contains invalid characters (e.g. control characters, non-matching encoding)
-        </error_message_en>
-        <error_message_de>API-request contains invalid characters (e.g. control characters, non-matching encoding)
-        </error_message_de>
+        <error_message_en>API-request contains invalid characters (e.g. control characters, non-matching encoding)</error_message_en>
+        <error_message_de>API-request contains invalid characters (e.g. control characters, non-matching encoding)</error_message_de>
     </entry>
     <entry>
         <error_code>3000</error_code>

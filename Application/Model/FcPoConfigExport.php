@@ -20,14 +20,24 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Exception;
+use Fatchip\PayOne\FcCheckChecksum;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use JetBrains\PhpStorm\NoReturn;
+use JsonException;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
-use OxidEsales\Eshop\Core\Module\ModuleList;
-use OxidEsales\EshopCommunity\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\Module\Module;
+use OxidEsales\Eshop\Core\Str;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class FcPoConfigExport extends BaseModel
 {
@@ -37,14 +47,14 @@ class FcPoConfigExport extends BaseModel
      *
      * @var FcPoHelper
      */
-    protected FcPoHelper $_oFcpoHelper;
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * Centralized Database instance
      *
      * @var DatabaseInterface
      */
-    protected DatabaseInterface $_oFcpoDb;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
      * Holds config values for all available shop ids
@@ -93,48 +103,55 @@ class FcPoConfigExport extends BaseModel
      *
      * @var array
      */
-    protected array $_aMultiLangFields = ['sFCPOApprovalText', 
-    'sFCPODenialText'];
-
+    protected array $_aMultiLangFields = [
+        'sFCPOApprovalText',
+        'sFCPODenialText',
+    ];
 
     /**
      * config fields which needs skipping multilines
      *
      * @var array
      */
-    protected array $_aSkipMultiline = ['aFCPODebitCountries'];
+    protected array $_aSkipMultiline = ['aFCPODebitCountries', 'aFCPOAplCreditCards'];
+
 
     /**
      * Init needed data
+     *
+     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
-        $this->_oFcpoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcpoDb = DatabaseProvider::getDb();
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = DatabaseProvider::getDb();
     }
 
     /**
-     * Generates and delivers a xml export of configuration
+     * Generates and delivers an XML export of configuration
      *
-     * @return void
+     * @throws JsonException
+     * @throws DatabaseErrorException
      */
-    #[NoReturn] public function fcpoExportConfig(): void
+    public function fcpoExportConfig()
     {
         $sXml = $this->fcpoGetConfigXml();
-        $this->_oFcpoHelper->fcpoHeader("Content-Type: text/xml; charset=\"utf8\"");
-        $this->_oFcpoHelper->fcpoHeader("Content-Disposition: attachment; filename=\"payone_config_export" . date('Y-m-d H-i-s') . "_" . md5($sXml) . ".xml\"");
-        echo $this->_oFcpoHelper->fcpoProcessResultString($sXml);
-        $this->_oFcpoHelper->fcpoExit();
+        if ($sXml !== '' && $sXml !== '0') {
+            $this->_oFcPoHelper->fcpoHeader("Content-Type: text/xml; charset=\"utf8\"");
+            $this->_oFcPoHelper->fcpoHeader("Content-Disposition: attachment; filename=\"payone_config_export" . date('Y-m-d H-i-s') . "_" . md5($sXml) . ".xml\"");
+            echo $this->_oFcPoHelper->fcpoProcessResultString($sXml);
+            $this->_oFcPoHelper->fcpoExit();
+        }
     }
 
     /**
      * Returns xml configuration of all shops
      *
-     *
      * @return string
+     * @throws JsonException|DatabaseErrorException
      */
-    public function fcpoGetConfigXml()
+    public function fcpoGetConfigXml(): string
     {
         $aShopIds = $this->fcpoGetShopIds();
         $this->_fcpoSetShopConfigVars($aShopIds);
@@ -161,12 +178,12 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns a list of shop ids
      *
-     *
      * @return array
+     * @throws DatabaseErrorException
      */
-    public function fcpoGetShopIds()
+    public function fcpoGetShopIds(): array
     {
-        return $this->_oFcpoDb->getCol("SELECT `oxid` FROM `oxshops`");
+        return $this->_oFcPoDb->getCol("SELECT `oxid` FROM `oxshops`");
     }
 
     /**
@@ -175,12 +192,12 @@ class FcPoConfigExport extends BaseModel
      * @param array $aShopIds
      * @return void
      */
-    protected function _fcpoSetShopConfigVars($aShopIds)
+    protected function _fcpoSetShopConfigVars(array $aShopIds): void
     {
-        $oConf = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConf = $this->_oFcPoHelper->fcpoGetConfig();
 
         foreach ($aShopIds as $aShopId) {
-            $oShop = oxNew('oxshop');
+            $oShop = oxNew(Shop::class);
             $blLoaded = $oShop->load($aShopId);
             if ($blLoaded) {
                 $this->_aShopConfigs[$aShopId]['sFCPOMerchantID'] = $oConf->getShopConfVar('sFCPOMerchantID', $aShopId);
@@ -191,49 +208,51 @@ class FcPoConfigExport extends BaseModel
                 $this->_aShopConfigs[$aShopId]['sShopName'] = $oShop->oxshops__oxname->value;
                 $this->_aShopConfigs[$aShopId]['sShopVersion'] = $oShop->oxshops__oxversion->value;
                 $this->_aShopConfigs[$aShopId]['sShopEdition'] = $oShop->oxshops__oxedition->value;
+                $this->_aShopConfigs[$aShopId]['sShopId'] = $aShopId;
             }
         }
     }
-
 
     /**
      * Returns payone configuration
      *
      * @param string $sShopId
-     * @param int    $iLang
-     * @return array
+     * @param int $iLang
+     * @return array{strs: array, bools: array, arrs: array}
      * @throws DatabaseConnectionException
      * @throws DatabaseErrorException
      */
     public function fcpoGetConfig(string $sShopId, int $iLang = 0): array
     {
-        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $database = $this->_oFcpoHelper->fcpoGetDb(true);
-        $sQuery = "select oxvarname, oxvartype, DECODE( oxvarvalue, " . $database->quote($oConfig->getConfigParam('sConfigKey')) . ") as oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
-        $aResult = $database->getAll($sQuery);
+        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
+        $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
+        $aResult = $oDb->getAll($sQuery);
 
-        foreach ($aResult as $aRow) {
-            $sVarName = $aRow['oxvarname'];
-            $sVarType = $aRow['oxvartype'];
-            $sVarVal = $aRow['oxvarvalue'];
+        if (count($aResult) > 0) {
+            $oStr = Str::getStr();
+            foreach ($aResult as $aRow) {
+                $sVarName = $aRow['oxvarname'];
+                $sVarType = $aRow['oxvartype'];
+                $sVarVal = $aRow['oxvarvalue'];
 
-            if ($sVarType == "bool") {
-                $this->_aConfBools[$sVarName] = ($sVarVal == "true" || $sVarVal == "1");
-            }
-            if ($sVarType == "str") {
-                $sVarName = $this->fcpoGetMultilangConfStrVarName($sVarName, $iLang);
-
-                $this->_aConfStrs[$sVarName] = $sVarVal;
-                if ($this->_aConfStrs[$sVarName]) {
-                    $this->_aConfStrs[$sVarName] = htmlentities($this->_aConfStrs[$sVarName]);
+                if ($sVarType == "bool") {
+                    $this->_aConfBools[$sVarName] = ($sVarVal == "true" || $sVarVal == "1");
                 }
-            }
+                if ($sVarType == "str") {
+                    $sVarName = $this->fcpoGetMultilangConfStrVarName($sVarName, $iLang);
 
-            if ($sVarType == "arr") {
-                if (in_array($sVarName, $this->_aSkipMultiline)) {
-                    $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
-                } else {
-                    $this->_aConfArrs[$sVarName] = htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
+                    $this->_aConfStrs[$sVarName] = $sVarVal;
+                    if ($this->_aConfStrs[$sVarName]) {
+                        $this->_aConfStrs[$sVarName] = $oStr->htmlentities($this->_aConfStrs[$sVarName]);
+                    }
+                }
+
+                if ($sVarType == "arr") {
+                    if (in_array($sVarName, $this->_aSkipMultiline)) {
+                        $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
+                    } elseif (unserialize($sVarVal)) {
+                        $this->_aConfArrs[$sVarName] = $oStr->htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
+                    }
                 }
             }
         }
@@ -249,11 +268,14 @@ class FcPoConfigExport extends BaseModel
      * Returns multilang varname if multilangfield
      *
      * @param string $sVarName
-     * @param int    $iLang
+     * @param int $iLang
      * @return string
      */
     public function fcpoGetMultilangConfStrVarName(string $sVarName, int $iLang): string
     {
+        if ($iLang === 0) {
+            $iLang = 0;
+        }
         $sLang = (string)$iLang;
 
         foreach ($this->_aMultiLangFields as $_aMultiLangField) {
@@ -284,8 +306,7 @@ class FcPoConfigExport extends BaseModel
      */
     protected function _fcpoGetShopXmlGeneric(array $aShopConfVars): string
     {
-        $sShopId = null;
-        $sXml = $this->_sT . $this->_sT . "<code>{$sShopId}</code>" . $this->_sN;
+        $sXml = $this->_sT . $this->_sT . "<code>{$aShopConfVars['sShopId']}</code>" . $this->_sN;
 
         return $sXml . ($this->_sT . $this->_sT . "<name><![CDATA[{$aShopConfVars['sShopName']}]]></name>" . $this->_sN);
     }
@@ -306,7 +327,7 @@ class FcPoConfigExport extends BaseModel
         $aModules = $this->_getModuleInfo();
         if ($aModules && $aModules !== []) {
             foreach ($aModules as $sModule => $sInfo) {
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$sModule}>{$sInfo}</{$sModule}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$sModule>$sInfo</$sModule>" . $this->_sN;
             }
         }
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</modules>" . $this->_sN;
@@ -317,29 +338,23 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns a list of available modules and their versions
      *
-     *
-     * @return array
+     * @return array<int|string, mixed>
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    protected function _getModuleInfo()
+    protected function _getModuleInfo(): array
     {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iVersion < 4600) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $aModules = $oConfig->getConfigParam('aModules');
-            foreach ($aModules as $sKey => $sValue) {
-                $aModules[$sKey] = '<![CDATA[' . $sValue . ']]>';
-            }
-        } else {
-            $sModulesDir = $this->_oFcpoHelper->getModulesDir();
-            /** @var Modulelist $oModuleList */
-            $oModuleList = $this->_oFcpoHelper->getFactoryObject("oxModuleList");
-            $aOxidModules = $oModuleList->getModulesFromDir($sModulesDir);
-            $aModules = [];
-            foreach ($aOxidModules as $aOxidModule) {
-                $aModules[$aOxidModule->getId()] = $aOxidModule->getInfo('version');
-            }
+        $container = ContainerFactory::getInstance()->getContainer();
+        $shopConfiguration = $container->get(ShopConfigurationDaoBridgeInterface::class)->get();
+
+        $modules = [];
+        foreach ($shopConfiguration->getModuleConfigurations() as $moduleConfiguration) {
+            $module = oxNew(Module::class);
+            $module->load($moduleConfiguration->getId());
+            $modules[$module->getId()] = $module->getInfo('version');
         }
-        return $aModules;
+
+        return $modules;
     }
 
     /**
@@ -348,7 +363,7 @@ class FcPoConfigExport extends BaseModel
      * @param array $aShopConfVars
      * @return string
      */
-    protected function _fcpoGetShopXmlGlobal($aShopConfVars)
+    protected function _fcpoGetShopXmlGlobal(array $aShopConfVars): string
     {
         $sXml = $this->_sT . $this->_sT . "<global>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<mid>" . $aShopConfVars['sFCPOMerchantID'] . "</mid>" . $this->_sN;
@@ -359,16 +374,16 @@ class FcPoConfigExport extends BaseModel
         $aPaymentMapping = $this->_getMappings();
 
         foreach ($aPaymentMapping as $sAbbr => $aMappings) {
-            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$sAbbr}>" . $this->_sN;
+            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$sAbbr>" . $this->_sN;
             foreach ($aMappings as $index => $subtype) {
                 $subtype = $index;
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$subtype}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$subtype>" . $this->_sN;
                 foreach ($aMappings[$subtype] as $aMap) {
                     $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '" name="' . $aMap['name'] . '"/>' . $this->_sN;
                 }
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$subtype}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</$subtype>" . $this->_sN;
             }
-            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$sAbbr}>" . $this->_sN;
+            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</$sAbbr>" . $this->_sN;
         }
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</status_mapping>" . $this->_sN;
 
@@ -377,7 +392,6 @@ class FcPoConfigExport extends BaseModel
 
     /**
      * Returns the configured mappings
-     *
      *
      * @return array<string, array<string, array<int, array{from: mixed, to: mixed, name: mixed}>&array>&array>
      */
@@ -409,44 +423,48 @@ class FcPoConfigExport extends BaseModel
      * @param string $sPaymentId
      * @return string
      */
-    protected function _getPaymentAbbreviation($sPaymentId)
+    protected function _getPaymentAbbreviation(string $sPaymentId): string
     {
         $sAbbr = '';
 
-        $aAbbreviations = ['fcpocreditcard' => 'cc', 
-    'fcpocashondel' => 'cod', 
-    'fcpodebitnote' => 'elv', 
-    'fcpopayadvance' => 'vor', 
-    'fcpoinvoice' => 'rec', 
-    'fcpopaypal' => 'wlt', 
-    'fcpopaypal_express' => 'wlt', 
-    'fcpoklarna' => 'fnc', 
-    'fcpoklarna_invoice' => 'fnc', 
-    'fcpoklarna_directdebit' => 'fnc', 
-    'fcpoklarna_installments' => 'fnc', 
-    'fcpobarzahlen' => 'csh', 
-    'fcpopaydirekt' => 'wlt', 
-    'fcpopo_bill' => 'fnc', 
-    'fcpopo_debitnote' => 'fnc', 
-    'fcpopo_installment' => 'fnc', 
-    'fcporp_bill' => 'fnc', 
-    'fcpocreditcard_iframe' => 'cc', 
-    'fcpobillsafe' => 'fnc', 
-    'fcpoamazonpay' => 'wlt', 
-    'fcpo_secinvoice' => 'rec', 
-    'fcpopaydirekt_express' => 'wlt', 
-    'fcpo_sofort' => 'sb', 
-    'fcpo_giropay' => 'sb', 
-    'fcpo_eps' => 'sb', 
-    'fcpo_pf_finance' => 'sb', 
-    'fcpo_pf_card' => 'sb', 
-    'fcpo_ideal' => 'sb', 
-    'fcpo_p24' => 'sb', 
-    'fcpo_bancontact' => 'sb', 
-    'fcporp_debitnote' => 'fnc', 
-    'fcpo_alipay' => 'wlt', 
-    'fcpo_trustly' => 'sb', 
-    'fcpo_wechatpay' => 'wlt'];
+        $aAbbreviations = [
+            'fcpocreditcard' => 'cc',
+            'fcpocashondel' => 'cod',
+            'fcpodebitnote' => 'elv',
+            'fcpopayadvance' => 'vor',
+            'fcpoinvoice' => 'rec',
+            'fcpopaypal' => 'wlt',
+            'fcpopaypal_express' => 'wlt',
+            'fcpoklarna' => 'fnc',
+            'fcpoklarna_invoice' => 'fnc',
+            'fcpoklarna_directdebit' => 'fnc',
+            'fcpoklarna_installments' => 'fnc',
+            'fcpobarzahlen' => 'csh',
+            'fcpopaydirekt' => 'wlt',
+            'fcpopo_bill' => 'fnc',
+            'fcpopo_debitnote' => 'fnc',
+            'fcpopo_installment' => 'fnc',
+            'fcporp_bill' => 'fnc',
+            'fcpocreditcard_iframe' => 'cc',
+            'fcpobillsafe' => 'fnc',
+            'fcpo_secinvoice' => 'rec',
+            'fcpopl_secinvoice' => 'fnc',
+            'fcpopl_secinstallment' => 'fnc',
+            'fcpopl_secdebitnote' => 'fnc',
+            'fcpo_sofort' => 'sb',
+            'fcpo_eps' => 'sb',
+            'fcpo_pf_finance' => 'sb',
+            'fcpo_pf_card' => 'sb',
+            'fcpo_ideal' => 'sb',
+            'fcpo_p24' => 'sb',
+            'fcpo_bancontact' => 'sb',
+            'fcporp_debitnote' => 'fnc',
+            'fcpo_alipay' => 'wlt',
+            'fcpo_trustly' => 'sb',
+            'fcpo_wechatpay' => 'wlt',
+            'fcpo_apple_pay' => 'wlt',
+            'fcporp_installment' => 'fnc',
+        ];
 
         if (isset($aAbbreviations[$sPaymentId])) {
             $sAbbr = $aAbbreviations[$sPaymentId];
@@ -461,20 +479,16 @@ class FcPoConfigExport extends BaseModel
      * @param string $sPaymentId
      * @return string
      */
-    protected function _getPaymentSubtype($sPaymentId)
+    protected function _getPaymentSubtype(string $sPaymentId): string
     {
         $sAbbr = '';
 
         $aAbbreviations = [
             'fcpocreditcard' => 'V,M,A,D,J,O,U,B',
-            'fcpocashondel' => 'CSH',
-            // has no subtype use clearingtype instead
-            'fcpodebitnote' => 'ELV',
-            // has no subtype use clearingtype instead
-            'fcpopayadvance' => 'VOR',
-            // has no subtype use clearingtype instead
-            'fcpoinvoice' => 'REC',
-            // has no subtype use clearingtype instead
+            'fcpocashondel' => 'CSH', // has no subtype use clearingtype instead
+            'fcpodebitnote' => 'ELV', // has no subtype use clearingtype instead
+            'fcpopayadvance' => 'VOR', // has no subtype use clearingtype instead
+            'fcpoinvoice' => 'REC', // has no subtype use clearingtype instead
             'fcpopaypal' => 'PPE',
             'fcpopaypal_express' => 'PPE',
             'fcpoklarna_invoice' => 'KIV',
@@ -483,17 +497,18 @@ class FcPoConfigExport extends BaseModel
             'fcpoklarna_installments' => 'KIS',
             'fcpobarzahlen' => 'BZN',
             'fcpopaydirekt' => 'PDT',
-            'fcpopaydirekt_express' => 'PDT',
             'fcpopo_bill' => 'PYV',
             'fcpopo_debitnote' => 'PYD',
             'fcpopo_installment' => 'PYS',
             'fcporp_bill' => 'RPV',
             'fcporp_debitnote' => 'RPD',
+            'fcporp_installment' => 'RPS',
             'fcpocreditcard_iframe' => 'V,M,A,D,J,O,U,B',
-            'fcpoamazonpay' => 'AMZ',
             'fcpo_secinvoice' => 'POV',
+            'fcpopl_secinvoice' => 'PIV',
+            'fcpopl_secinstallment' => 'PIN',
+            'fcpopl_secdebitnote' => 'PDD',
             'fcpo_sofort' => 'PNT',
-            'fcpo_giropay' => 'GPY',
             'fcpo_eps' => 'EPS',
             'fcpo_pf_finance' => 'PFF',
             'fcpo_pf_card' => 'PFC',
@@ -503,6 +518,7 @@ class FcPoConfigExport extends BaseModel
             'fcpo_alipay' => 'ALP',
             'fcpo_trustly' => 'TRL',
             'fcpo_wechatpay' => 'WCP',
+            'fcpo_apple_pay' => 'APL',
         ];
 
         if (isset($aAbbreviations[$sPaymentId])) {
@@ -517,8 +533,9 @@ class FcPoConfigExport extends BaseModel
      *
      * @param array $aShopConfVars
      * @return string
+     * @throws DatabaseErrorException
      */
-    protected function _fcpoGetShopXmlClearingTypes($aShopConfVars)
+    protected function _fcpoGetShopXmlClearingTypes(array $aShopConfVars): string
     {
         $sXml = $this->_sT . $this->_sT . "<clearingtypes>" . $this->_sN;
         $aPayments = $this->_getPaymentTypes();
@@ -544,18 +561,18 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns array of payments
      *
-     *
-     * @return mixed[]
+     * @return array
+     * @throws DatabaseErrorException
      */
     protected function _getPaymentTypes(): array
     {
         $aPayments = [];
 
         $sQuery = "SELECT oxid FROM oxpayments WHERE fcpoispayone = 1";
-        $this->_oFcpoDb->setFetchMode(DatabaseInterface::FETCH_MODE_NUM);
-        $aRows = $this->_oFcpoDb->getAll($sQuery);
+        $this->_oFcPoDb->setFetchMode(DatabaseInterface::FETCH_MODE_NUM);
+        $aRows = $this->_oFcPoDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
-            $oPayment = oxNew('oxpayment');
+            $oPayment = oxNew(Payment::class);
             $sOxid = $aRow[0];
             if ($oPayment->load($sOxid)) {
                 $aPayments[] = $oPayment;
@@ -568,13 +585,14 @@ class FcPoConfigExport extends BaseModel
      * Returns payment countries
      *
      * @param object $oPayment
+     * @return string
      */
-    protected function _getPaymentCountries($oPayment): string
+    protected function _getPaymentCountries(object $oPayment): string
     {
         $aCountries = $oPayment->getCountries();
         $sCountries = '';
         foreach ($aCountries as $aCountry) {
-            $oCountry = oxNew('oxcountry');
+            $oCountry = oxNew(Country::class);
             if ($oCountry->load($aCountry)) {
                 $sCountries .= $oCountry->oxcountry__oxisoalpha2->value . ',';
             }
@@ -585,31 +603,30 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns shop specific protect block of xml
      *
-     *
      * @return string
      */
-    protected function _fcpoGetShopXmlProtect()
+    protected function _fcpoGetShopXmlProtect(): string
     {
-        $sShopId = null;
-        $oConf = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sShopId = $oConfig->getShopId();
         $sXml = $this->_sT . $this->_sT . "<protect>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<consumerscore>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConf->getShopConfVar('sFCPOBonicheck', $sShopId) == '-1' ? '0' : '1') . "</active>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<mode>{$oConf->getShopConfVar('sFCPOBoniOpMode', $sShopId)}</mode>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<min_order_total>{$oConf->getShopConfVar('sFCPOStartlimitBonicheck', $sShopId)}</min_order_total>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConfig->getShopConfVar('sFCPOBonicheck', $sShopId) == '-1' ? '0' : '1') . "</active>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<mode>{$oConfig->getShopConfVar('sFCPOBoniOpMode', $sShopId)}</mode>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<min_order_total>{$oConfig->getShopConfVar('sFCPOStartlimitBonicheck', $sShopId)}</min_order_total>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<max_order_total>1000000</max_order_total>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<addresscheck></addresscheck>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<red>{$this->_getRedPayments()}</red>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<yellow>{$this->_getYellowPayments()}</yellow>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<duetime>" . ((int)$oConf->getShopConfVar('sFCPODurabilityBonicheck', $sShopId) * (60 * 60 * 24)) . "</duetime>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<duetime>" . ((int)$oConfig->getShopConfVar('sFCPODurabilityBonicheck', $sShopId) * (60 * 60 * 24)) . "</duetime>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</consumerscore>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<addresscheck>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConf->getShopConfVar('sFCPOAddresscheck', $sShopId) == 'NO' ? '0' : '1') . "</active>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<mode>{$oConf->getShopConfVar('sFCPOBoniOpMode', $sShopId)}</mode>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<min_order_total>{$oConf->getShopConfVar('sFCPOStartlimitBonicheck', $sShopId)}</min_order_total>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<active>" . ($oConfig->getShopConfVar('sFCPOAddresscheck', $sShopId) == 'NO' ? '0' : '1') . "</active>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<mode>{$oConfig->getShopConfVar('sFCPOBoniOpMode', $sShopId)}</mode>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<min_order_total>{$oConfig->getShopConfVar('sFCPOStartlimitBonicheck', $sShopId)}</min_order_total>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<max_order_total>1000000</max_order_total>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<checkbilling>" . ($oConf->getShopConfVar('sFCPOAddresscheck', $sShopId) == 'NO' ? 'NO' : 'YES') . "</checkbilling>" . $this->_sN;
-        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<checkshipping>" . ($oConf->getShopConfVar('blFCPOCheckDelAddress', $sShopId) == 0 ? 'NO' : 'YES') . "</checkshipping>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<checkbilling>" . ($oConfig->getShopConfVar('sFCPOAddresscheck', $sShopId) == 'NO' ? 'NO' : 'YES') . "</checkbilling>" . $this->_sN;
+        $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<checkshipping>" . ($oConfig->getShopConfVar('blFCPOCheckDelAddress', $sShopId) == 0 ? 'NO' : 'YES') . "</checkshipping>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</addresscheck>" . $this->_sN;
 
         return $sXml . ($this->_sT . $this->_sT . "</protect>" . $this->_sN);
@@ -618,12 +635,11 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returning red payments
      *
-     *
      * @return string
      */
-    protected function _getRedPayments()
+    protected function _getRedPayments(): string
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
 
         return $oPayment->fcpoGetRedPayments();
     }
@@ -631,29 +647,27 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returning yellow payments
      *
-     *
      * @return string
      */
-    protected function _getYellowPayments()
+    protected function _getYellowPayments(): string
     {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
 
         return $oPayment->fcpoGetYellowPayments();
     }
 
     /**
-     * Returns miscelanous
-     *
+     * Returns miscellaneous
      *
      * @return string
      */
-    protected function _fcpoGetShopXmlMisc()
+    protected function _fcpoGetShopXmlMisc(): string
     {
         $sXml = $this->_sT . $this->_sT . "<misc>" . $this->_sN;
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "<transactionstatus_forwarding>" . $this->_sN;
         $aForwardings = $this->_getForwardings();
         foreach ($aForwardings as $aForwarding) {
-            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<config status="' . $aForwarding['status'] . '" url="' . htmlentities($aForwarding['url']) . '" timeout="' . $aForwarding['timeout'] . '"/>' . $this->_sN;
+            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<config status="' . $aForwarding['status'] . '" url="' . htmlentities((string)$aForwarding['url']) . '" timeout="' . $aForwarding['timeout'] . '"/>' . $this->_sN;
         }
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</transactionstatus_forwarding>" . $this->_sN;
 
@@ -663,17 +677,20 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns the configured list of forwardings
      *
-     *
      * @return array<int, array{status: mixed, url: mixed, timeout: mixed}>
      */
     protected function _getForwardings(): array
     {
         $aForwardings = [];
-        $oForwarding = $this->_oFcpoHelper->getFactoryObject(FcPoForwarding::class);
+        $oForwarding = $this->_oFcPoHelper->getFactoryObject(FcPoForwarding::class);
         $aForwardingsList = $oForwarding->fcpoGetExistingForwardings();
 
         foreach ($aForwardingsList as $aForwardingList) {
-            $aForwardings[] = ['status' => $aForwardingList->sPayoneStatusId, 'url' => $aForwardingList->sForwardingUrl, 'timeout' => $aForwardingList->iForwardingTimeout];
+            $aForwardings[] = [
+                'status' => $aForwardingList->sPayoneStatusId,
+                'url' => $aForwardingList->sForwardingUrl,
+                'timeout' => $aForwardingList->iForwardingTimeout,
+            ];
         }
 
         return $aForwardings;
@@ -682,14 +699,14 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns shop specific checksum part of xml
      *
-     *
      * @return string
+     * @throws JsonException
      */
-    protected function _fcpoGetShopXmlChecksums()
+    protected function _fcpoGetShopXmlChecksums(): string
     {
         $sXml = $this->_sT . $this->_sT . "<checksums>" . $this->_sN;
-        $mUrlOpen = $this->_oFcpoHelper->fcpoIniGet('allow_url_fopen');
-        $blCurlAvailable = $this->_oFcpoHelper->fcpoFunctionExists('curl_init');
+        $mUrlOpen = $this->_oFcPoHelper->fcpoIniGet('allow_url_fopen');
+        $blCurlAvailable = $this->_oFcPoHelper->fcpoFunctionExists('curl_init');
 
         if ($mUrlOpen == 0) {
             $sXml .= $this->_sT . $this->_sT . $this->_sT . "<status>Cant verify checksums, allow_url_fopen is not activated on customer-server</status>" . $this->_sN;
@@ -703,7 +720,7 @@ class FcPoConfigExport extends BaseModel
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . "<status>Error</status>" . $this->_sN;
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . "<errors>" . $this->_sN;
                 foreach ($aErrors as $aError) {
-                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<error>" . base64_encode($aError) . "</error>" . $this->_sN;
+                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<error>" . base64_encode((string)$aError) . "</error>" . $this->_sN;
                 }
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . "</errors>" . $this->_sN;
             }
@@ -715,22 +732,39 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns collected checksum errors if there are any
      *
-     *
-     * @return mixed
+     * @return array|bool|null
+     * @throws JsonException
      */
-    protected function _getChecksumErrors()
+    protected function _getChecksumErrors(): array|bool|null
     {
-        $blCheckSumAvailable = $this->_oFcpoHelper->fcpoCheckClassExists('fcCheckChecksum');
+        $blCheckSumAvailable = $this->_oFcPoHelper->fcpoCheckClassExists(FcCheckChecksum::class);
         if ($blCheckSumAvailable) {
             $sResult = $this->_fcpoGetCheckSumResult();
             if ($sResult == 'correct') {
                 return false;
             } else {
-                $aErrors = json_decode(stripslashes($sResult), null, 512, JSON_THROW_ON_ERROR);
+                $aErrors = json_decode(stripslashes($sResult));
                 if (is_array($aErrors)) {
                     return $aErrors;
                 }
             }
         }
+        return null;
     }
+
+    /**
+     * Method returns the checksum result
+     *
+     * @return string
+     * @throws JsonException
+     * @throws Exception
+     */
+    protected function _fcpoGetCheckSumResult(): string
+    {
+        $sIncludePath = VENDOR_PATH . 'payone-gmbh/oxid-7/FcCheckChecksum.php';
+        $oScript = $this->_oFcPoHelper->fcpoGetInstance(FcCheckChecksum::class, $sIncludePath);
+
+        return $oScript->checkChecksumXml();
+    }
+
 }

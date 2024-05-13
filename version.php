@@ -23,7 +23,7 @@ namespace Fatchip\PayOne;
 use Fatchip\PayOne\Lib\FcPoHelper;
 
 $mKey = filter_input(INPUT_GET, 'key', FILTER_NULL_ON_FAILURE);
-$blIsValidCall = ($mKey && md5((string) $mKey) === '5fce785e30dbf6e1181d452c6057bfd3');
+$blIsValidCall = ($mKey && md5((string)$mKey) === '5fce785e30dbf6e1181d452c6057bfd3');
 
 if ($blIsValidCall) {
     if (!function_exists('getShopBasePath')) {
@@ -34,7 +34,7 @@ if ($blIsValidCall) {
          */
         function getShopBasePath(): string
         {
-            return __DIR__ . '/../../../';
+            return dirname(__FILE__) . '/../../../';
         }
     }
 

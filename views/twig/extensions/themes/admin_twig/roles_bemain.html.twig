@@ -1,0 +1,282 @@
+{% extends 'roles_bemain.html.twig' %}
+
+{% block admin_roles_bemain_form %}
+    <tr>
+        <td>{{ translate({ ident: "ROLES_BEMAIN_ACTIVE" }) }}</td>
+        <td>
+            <input class="edittext" type="checkbox" name="editval[oxroles__oxactive]" value="1"
+                   {% if edit.oxroles__oxactive.value %}checked{% endif %} {{ readonly }}>
+            {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_ROLES_BEMAIN_ACTIVE"), 'sHelpText': help_text("HELP_ROLES_BEMAIN_ACTIVE")} %}
+        </td>
+    </tr>
+    <tr>
+        <td>{{ translate({ ident: "ROLES_BEMAIN_TITLE" }) }}</td>
+        <td>
+            <input autocomplete="off" class="edittext" type="text" style="width:215px" name="editval[oxroles__oxtitle]"
+                   maxlength="{{ edit.oxroles__oxtitle.fldmax_length }}" value="{{ edit.oxroles__oxtitle.value|raw }}"
+                    {{ readonly }}>
+            {% include "inputhelp.html.twig" with {'sHelpId': help_id("HELP_ROLES_BEMAIN_TITLE"), 'sHelpText': help_text("HELP_ROLES_BEMAIN_TITLE")} %}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+
+            <div style="position:relative">
+
+                <table class="edittext rrtable">
+                    <tr class="head">
+                        <td colspan="2">{{ translate({ ident: "ROLES_BEMAIN_UIROOTHEADER" }) }}</td>
+                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_F" }) }}</td>
+                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_R" }) }}</td>
+                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_D" }) }}</td>
+                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_CUST" }) }}</td>
+                    </tr>
+
+                    {% for oNode in adminmenu %}
+                        {% if oNode.tagName != 'BTN' %}
+                            {% set id = oNode.getAttribute('id') %}
+                            {% if isset( aRights.id ) %}
+                                {% set idx = aRights.id %}
+                            {% else %}
+                                {% set idx = 2 %}
+                            {% endif %}
+                            {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < idx %}
+                                {% set idx = oNode.getAttribute('idx') %}
+                            {% endif %}
+
+                            <tr id="{{ oNode.getAttribute('id') }}">
+                                <td>
+                                    {% if oNode.childNodes.length %}
+                                        {% include "roles_bemain_inc.html.twig" with {aNodes: oNode.childNodes, oParent: oNode, iParentIdx: idx} %}
+                                        <a href="#" onclick="openNode( this );return false;"> &raquo; </a>
+                                    {% endif %}
+                                </td>
+                                <td class="title">
+                                    {{ translate({ ident: oNode.getAttribute('id'), noerror: true }) }}
+                                </td>
+                                <td>
+                                    <input {{ readonly }} type="radio"
+                                            {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 2 %}disabled{% endif %}
+                                                          name="aFields[{{ oNode.getAttribute('id') }}]"
+                                                          onclick="setPerms( this );"
+                                                          value="2" {% if idx == 2 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input {{ readonly }} type="radio"
+                                            {% if oNode.hasAttribute('idx') and oNode.getAttribute('idx') < 1 %}disabled{% endif %}
+                                                          name="aFields[{{ oNode.getAttribute('id') }}]"
+                                                          onclick="setPerms( this );"
+                                                          value="1" {% if idx == 1 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input {{ readonly }} type="radio" name="aFields[{{ oNode.getAttribute('id') }}]"
+                                                          onclick="setPerms( this );"
+                                                          value="0" {% if not idx %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    {% if oNode.childNodes.length %}
+                                        <input readonly disabled type="checkbox"
+                                               id="aFields[{{ oNode.getAttribute('id') }}]_cust"
+                                               value="0">
+                                        <script type="text/javascript">
+                                            updateCustInfo(document.getElementById("aFields[{{ oNode.getAttribute('id') }}]_cust"));
+                                        </script>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# service area #}
+
+                    {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu or not isset( aDynRights.dyn_menu ) %}
+                        {% if isset( aRights.dyn_menu ) %}
+                            {% set iParentIdx = aRights.dyn_menu %}
+                        {% else %}
+                            {% set iParentIdx = 2 %}
+                        {% endif %}
+                        {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < iParentIdx %}
+                            {% set iParentIdx = aDynRights.dyn_menu %}
+                        {% endif %}
+
+                        <tr id="dyn_menu">
+                            <td>
+
+                                <table class="edittext rrtableabs" style="display:none">
+                                    <tr class="head">
+                                        <td colspan="2">{{ translate({ ident: 'dyn_menu', noerror: true }) }}</td>
+                                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_F" }) }}</td>
+                                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_R" }) }}</td>
+                                        <td>{{ translate({ ident: "ROLES_BEMAIN_UIRIGHT_D" }) }}</td>
+                                        <td valign="middle">
+                                            <div onclick="openNode( this.parentNode.parentNode.parentNode.parentNode );"
+                                                 class="closebutton">x
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    {% if isset( aRights.dyn_about ) %}
+                                        {% set idx = aRights.dyn_about %}
+                                    {% else %}
+                                        {% set idx = 2 %}
+                                    {% endif %}
+
+                                    {% if isset( aDynRights.dyn_about ) and aDynRights.dyn_about < idx %}
+                                        {% set idx = aDynRights.dyn_menu %}
+                                    {% elseif iParentIdx < idx %}
+                                        {% set idx = iParentIdx %}
+                                    {% endif %}
+
+                                    <tr id="dyn_about">
+                                        <td>
+                                        </td>
+                                        <td class="title">
+                                            {{ translate({ ident: 'dyn_about', noerror: true }) }}
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }}
+                                                    type="radio" {% if iParentIdx < 2 %}disabled{% endif %}
+                                                    name="aFields[dyn_about]" onclick="setPerms( this );"
+                                                    value="2"
+                                                    {% if idx == 2 %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }}
+                                                    type="radio" {% if iParentIdx < 1 %}disabled{% endif %}
+                                                    name="aFields[dyn_about]" onclick="setPerms( this );"
+                                                    value="1"
+                                                    {% if idx == 1 %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }} type="radio" name="aFields[dyn_about]"
+                                                                  onclick="setPerms( this );"
+                                                                  value="0" {% if not idx %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+
+                                    {% if isset( aRights.dyn_interface ) %}
+                                        {% set idx = aRights.dyn_interface %}
+                                    {% else %}
+                                        {% set idx = 2 %}
+                                    {% endif %}
+
+                                    {% if isset( aDynRights.dyn_interface ) and aDynRights.dyn_interface < idx %}
+                                        {% set idx = aDynRights.dyn_menu %}
+                                    {% elseif iParentIdx < idx %}
+                                        {% set idx = iParentIdx %}
+                                    {% endif %}
+
+                                    <tr id="dyn_interface">
+                                        <td>
+                                        </td>
+                                        <td class="title">
+                                            {{ translate({ ident: 'dyn_interface', noerror: true }) }}
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }}
+                                                    type="radio" {% if iParentIdx < 2 %}disabled{% endif %}
+                                                    name="aFields[dyn_interface]" onclick="setPerms( this );"
+                                                    value="2" {% if idx == 2 %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }}
+                                                    type="radio" {% if iParentIdx < 1 %}disabled{% endif %}
+                                                    name="aFields[dyn_interface]" onclick="setPerms( this );"
+                                                    value="1" {% if idx == 1 %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                            <input {{ readonly }} type="radio" name="aFields[dyn_interface]"
+                                                                  onclick="setPerms( this );"
+                                                                  value="0" {% if not idx %}checked{% endif %}>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <a href="#" onclick="openNode( this );return false;"> &raquo; </a>
+                            </td>
+                            <td class="title">
+                                {{ translate({ ident: 'dyn_menu', noerror: true }) }}
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 2 %}disabled{% endif %}
+                                                      name="aFields[dyn_menu]" onclick="setPerms( this );" value="2"
+                                        {% if iParentIdx == 2 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.dyn_menu ) and aDynRights.dyn_menu < 1 %}disabled{% endif %}
+                                                      name="aFields[dyn_menu]" onclick="setPerms( this );" value="1"
+                                        {% if iParentIdx == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio" name="aFields[dyn_menu]"
+                                                      onclick="setPerms( this );"
+                                                      value="0" {% if not iParentIdx %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input readonly disabled type="checkbox" id="aFields[dyn_menu]_cust" value="0">
+                                <script type="text/javascript">
+                                    updateCustInfo(document.getElementById("aFields[dyn_menu]_cust"));
+                                </script>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {# service area #}
+                    <!-- FCPAYONE BEGIN -->
+                    {# PAYONE area #}
+                    {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title or not isset( aDynRights.fcpo_admin_title ) %}
+                        {% if isset( aRights.fcpo_admin_title ) %}
+                            {% set iParentIdx = aRights.fcpo_admin_title %}
+                        {% else %}
+                            {% set iParentIdx = 2 %}
+                        {% endif %}
+                        {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < iParentIdx %}
+                            {% set iParentIdx = aDynRights.fcpo_admin_title %}
+                        {% endif %}
+
+                        <tr id="fcpo_admin_title">
+                            <td>
+                            </td>
+                            <td class="title">
+                                {{ translate({ ident: 'fcpo_admin_title', noerror: true }) }}
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 2 %}disabled{% endif %}
+                                                      name="aFields[fcpo_admin_title]"
+                                                      value="2" {% if iParentIdx == 2 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio"
+                                        {% if isset( aDynRights.fcpo_admin_title ) and aDynRights.fcpo_admin_title < 1 %}disabled{% endif %}
+                                                      name="aFields[fcpo_admin_title]"
+                                                      value="1" {% if iParentIdx == 1 %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <input {{ readonly }} type="radio" name="aFields[fcpo_admin_title]" value="0"
+                                        {% if not iParentIdx %}checked{% endif %}>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {# PAYONE area #}
+                    <!-- FCPAYONE END -->
+                </table>
+
+            </div>
+
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <br><i>{{ translate({ ident: "ROLES_BEMAIN_UIINFO" }) }}</i><br><br>
+        </td>
+    </tr>
+{% endblock %}
