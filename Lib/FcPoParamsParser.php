@@ -1,10 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Lib;
-
-use OxidEsales\Eshop\Application\Model\Address;
-use OxidEsales\Eshop\Core\ViewConfig;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,19 +19,27 @@ use OxidEsales\Eshop\Core\ViewConfig;
  * @version   OXID eShop CE
  * @link      http://www.payone.de
  */
+
+namespace Fatchip\PayOne\Lib;
+
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\User;
+use OxidEsales\Eshop\Core\ViewConfig;
+
 class FcPoParamsParser
 {
     /**
-     * Database object
+     * Helper object
      *
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * @var null
+     * @var User|null
      */
-    protected $_oUser = null;
+    protected ?User $_oUser = null;
 
     /**
      * Class constructor, sets all required parameters for requests.
@@ -48,11 +50,11 @@ class FcPoParamsParser
     }
 
     /**
-     * @param $sClientToken
-     * @param $sParamsJson
+     * @param string $sClientToken
+     * @param string $sParamsJson
      * @return string
      */
-    public function fcpoGetKlarnaWidgetJS($sClientToken, $sParamsJson)
+    public function fcpoGetKlarnaWidgetJS(string $sClientToken, string $sParamsJson): string
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -89,7 +91,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaCustomerParams()
+    protected function _fcpoGetKlarnaCustomerParams(): array
     {
         $oUser = $this->_fcpoGetUser();
         $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
@@ -98,11 +100,11 @@ class FcPoParamsParser
     }
 
     /**
-     * Returns user object of current logged in user
+     * Returns user object of current logged-in user
      *
-     * @return mixed
+     * @return User
      */
-    protected function _fcpoGetUser()
+    protected function _fcpoGetUser(): User
     {
         if ($this->_oUser === null) {
             $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -118,7 +120,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaBillingParams()
+    protected function _fcpoGetKlarnaBillingParams(): array
     {
         $oUser = $this->_fcpoGetUser();
 
@@ -130,7 +132,7 @@ class FcPoParamsParser
      *
      * @return string
      */
-    public function fcpoGetTitle()
+    public function fcpoGetTitle(): string
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -164,12 +166,12 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaShippingParams()
+    protected function _fcpoGetKlarnaShippingParams(): array
     {
         $oUser = $this->_fcpoGetUser();
 
         $oShippingAddress = $this->_fcpoGetShippingAddress();
-        $blHasShipping = (!$oShippingAddress) ? false : true;
+        $blHasShipping = !!$oShippingAddress;
 
         if ($blHasShipping) {
             return ['given_name' => $oShippingAddress->oxaddress__oxfname->value, 'family_name' => $oShippingAddress->oxaddress__oxlname->value, 'email' => $oUser->oxuser__oxusername->value, 'title' => $this->fcpoGetTitle(), 'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value, 'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value, 'postal_code' => $oShippingAddress->oxaddress__oxzip->value, 'city' => $oShippingAddress->oxaddress__oxcity->value, 'region' => "", 'phone' => $oShippingAddress->oxaddress__oxfon->value, 'country' => $oShippingAddress->fcpoGetUserCountryIso(), 'organization_name' => $oShippingAddress->oxaddress__oxcompany->value];
@@ -181,9 +183,9 @@ class FcPoParamsParser
     /**
      * Returns an object with the shipping address.
      *
-     * @return mixed false|object
+     * @return bool|Address
      */
-    protected function _fcpoGetShippingAddress()
+    protected function _fcpoGetShippingAddress(): bool|Address
     {
         if (!($sAddressId = $this->_oFcPoHelper->fcpoGetRequestParameter('deladrid'))) {
             $sAddressId = $this->_oFcPoHelper->fcpoGetSessionVariable('deladrid');
@@ -204,7 +206,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaPurchaseParams()
+    protected function _fcpoGetKlarnaPurchaseParams(): array
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oUser = $this->_fcpoGetUser();
@@ -218,7 +220,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaOrderlinesParams()
+    protected function _fcpoGetKlarnaOrderlinesParams(): array
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -249,10 +251,10 @@ class FcPoParamsParser
     /**
      * Returns delivery costs of given basket object
      *
-     * @param $oBasket
-     * @return float|object
+     * @param Basket $oBasket
+     * @return float
      */
-    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
+    protected function _fcpoFetchDeliveryCostsFromBasket(Basket $oBasket): float
     {
         $oDelivery = $oBasket->getCosts('oxdelivery');
         if ($oDelivery === null) return 0.0;
@@ -265,7 +267,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaOrderParams()
+    protected function _fcpoGetKlarnaOrderParams(): array
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -280,7 +282,7 @@ class FcPoParamsParser
      *
      * @return string
      */
-    protected function _fcpoGetKlarnaWidgetPath()
+    protected function _fcpoGetKlarnaWidgetPath(): string
     {
         $oViewConf = $this->_oFcPoHelper->getFactoryObject(ViewConfig::class);
         return $oViewConf->getModulePath('fcpayone') . '/snippets/fcpoKlarnaWidget.txt';
@@ -291,7 +293,7 @@ class FcPoParamsParser
      *
      * @return array
      */
-    protected function _fcpoGetKlarnaOrderdata()
+    protected function _fcpoGetKlarnaOrderdata(): array
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -316,9 +318,10 @@ class FcPoParamsParser
     /**
      * Removes params that are not used for this country.
      *
-     * @param $aKlarnaData
+     * @param array $aKlarnaData
+     * @return array
      */
-    protected function _fcpoRemoveKlarnaDataForCountry($aKlarnaData)
+    protected function _fcpoRemoveKlarnaDataForCountry(array $aKlarnaData): array
     {
         $oUser = $this->_fcpoGetUser();
         $sCountryIso2 = $oUser->fcpoGetUserCountryIso();

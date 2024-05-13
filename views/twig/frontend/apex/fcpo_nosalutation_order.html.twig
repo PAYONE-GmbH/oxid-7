@@ -1,51 +1,41 @@
-<div id="orderAddress" class="row">
-    <div class="col-xs-12 col-md-6">
-        <form action="{{ oViewConf.getSslSelfLink() }}" method="post">
-            <div class="hidden">
-                {{ oViewConf.getHiddenSid()|raw }}
-                <input type="hidden" name="cl" value="{{ oView.fcpoGetEditAddressTargetController() }}">
-                <input type="hidden" name="fnc" value="{{ oView.fcpoGetEditAddressTargetAction() }}">
-            </div>
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        {{ translate({ ident: "BILLING_ADDRESS" }) }}
-                        <button type="submit" class="btn btn-xs btn-warning pull-right submitButton largeButton"
-                                title="{{ translate({ ident: "EDIT" }) }}">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                    </h3>
-                </div>
-                <div class="panel-body">
-                    {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" %}
-                </div>
-            </div>
-        </form>
-    </div>
-    <div class="col-xs-12 col-md-6">
-        <form action="{{ oViewConf.getSslSelfLink() }}" method="post">
-            <div class="hidden">
-                {{ oViewConf.getHiddenSid()|raw }}
-                <input type="hidden" name="cl" value="{{ oView.fcpoGetEditAddressTargetController() }}">
-                <input type="hidden" name="fnc" value="{{ oView.fcpoGetEditAddressTargetAction() }}">
-            </div>
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        {{ translate({ ident: "SHIPPING_ADDRESS" }) }}
-                        <button type="submit" class="btn btn-xs btn-warning pull-right submitButton largeButton"
-                                title="{{ translate({ ident: "EDIT" }) }}">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                    </h3>
-                </div>
-                <div class="panel-body">
-                    {% set oDelAddress = oView.getDelAddress() %}
-                    {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" with {delivadr: oDelAddress} %}
-                </div>
-            </div>
-        </form>
-    </div>
+<div id="orderAddress">
+    <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cl" value="{{ oView.fcpoGetEditAddressTargetController() }}">
+        <input type="hidden" name="fnc" value="{{ oView.fcpoGetEditAddressTargetAction() }}">
+        <h4 class="card-header card-title card-header-edit d-flex justify-content-between align-items-center">
+            {{ translate({ ident: "BILLING_ADDRESS" }) }}
+            <button type="submit" class="btn"
+                    title="{{ translate({ ident: "EDIT" }) }}">
+                <svg aria-hidden="true">
+                    <use xlink:href="#pencil"></use>
+                </svg>
+            </button>
+        </h4>
+        <div class="card-body">
+            {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" %}
+        </div>
+    </form>
+    <form action="{{ oViewConf.getSslSelfLink()|raw }}" method="post">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cl" value="{{ oView.fcpoGetEditAddressTargetController() }}">
+        <input type="hidden" name="fnc" value="{{ oView.fcpoGetEditAddressTargetAction() }}">
+        <h4 class="card-header card-title card-header-edit d-flex justify-content-between align-items-center">
+            {{ translate({ ident: "SHIPPING_ADDRESS" }) }}
+            <button type="submit" class="btn"
+                    title="{{ translate({ ident: "EDIT" }) }}">
+                <svg aria-hidden="true">
+                    <use xlink:href="#pencil"></use>
+                </svg>
+            </button>
+        </h4>
+        <div class="card-body">
+            {% set oDelAdress = oView.getDelAddress() %}
+            {% if oDelAdress %}
+                {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" with {delivadr: oDelAdress} %}
+            {% else %}
+                {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_nosalutation_address.html.twig" %}
+            {% endif %}
+        </div>
+    </form>
 </div>

@@ -2,35 +2,24 @@
     {% set dynvalue = oView.getDynValue() %}
     <div class="payment-option-form">
         <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
-               value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
-        <label
-                for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+               value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked
+               {% else %} onclick="fcpoSelectBNPLLoadInstallment(this)" {% endif %}
+        >
+        <label for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
 
         <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
             <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
             <input type="hidden" name="dynvalue[fcpopl_secinstallment_account_holder]" value="{{ oView.fcpoGetAccountHolder() }}"/>
 
-            {% set installmentOptions = oView.fcpoGetBNPLInstallment() %}
-            {% if installmentOptions.status != 'OK' or installmentOptions.plans|length < 1 %}
-                <script type="text/javascript">
-                    document.addEventListener("DOMContentLoaded", function (event) {
-                        var aPaymentSelectionButtons = document.getElementsByName("paymentid");
-                        aPaymentSelectionButtons.forEach(function (oElem) {
-                            oElem.addEventListener('click', function (event) {
-                                var oPaymentConfirmButton = document.getElementById("paymentNextStepBottom");
-                                oPaymentConfirmButton.disabled = (event.target.value === 'fcpopl_secinstallment');
-                            });
-                        });
-                    });
-                </script>
-                <div class="form-floating mb-3">
-                    <div class="help-block">
-                        <ul role="alert" class="list-unstyled text-danger">
-                            <li>{{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_UNAVAILABLE" }) }}</li>
-                        </ul>
-                    </div>
+            <div id="fcpo_bnpl_unavailable_installment" class="form-floating mb-3" style="display: none">
+                <div class="help-block">
+                    <ul role="alert" class="list-unstyled text-danger">
+                        <li>{{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_UNAVAILABLE" }) }}</li>
+                    </ul>
                 </div>
-            {% else %}
+            </div>
+
+            <div id="fcpo_bnpl_available_installment" style="display: none">
                 {% if oView.fcpoBNPLShowBirthdate() %}
                     <div class="mb-3">
                         <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
@@ -62,7 +51,7 @@
                     </div>
                 {% endif %}
 
-                {% if oView.fcpoBNPLShowFon() %}
+                {% if oView.fcpoBNPLShowFon(sPaymentID) %}
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinstallment_fon]"
                                placeholder="{{ translate({ ident: "FCPO_BNPL_FON" }) }}"
@@ -98,78 +87,8 @@
                     {% endif %}
                 {% endblock %}
 
-                <div class="form-floating mb-3">
-                    <div></div>
-                    {% for index, plan in installmentOptions.plans %}
-                        <div>
-                            <input id="bnplPlan_{{ index }}" type="radio" name="dynvalue[fcpopl_secinstallment_plan]"
-                                   value="{{ plan.installmentOptionId }}" onclick="fcpoSelectBNPLInstallmentPlan({{ index }})"/>
-                            <a href="#" onclick="fcpoSelectBNPLInstallmentPlan({{ index }})">
-                                {{ plan.monthlyAmountValue }} {{ plan.monthlyAmountCurrency }}
-                                {{ translate({ ident: 'FCPO_PAYOLUTION_INSTALLMENT_PER_MONTH' }) }} - {{ plan.numberOfPayments }}
-                                {{ translate({ ident: 'FCPO_PAYOLUTION_INSTALLMENT_RATES' }) }}
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
+                <div id="fcpo_bnpl_available_installment_plans">
 
-                <div class="form-floating mb-3">
-                    {% for index, plan in installmentOptions.plans %}
-                        <div id="bnpl_installment_overview_{{ index }}" class="bnpl_installment_overview" style="display: none">
-                            <strong>{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_TITLE' }) }}</strong>
-                            <br/>
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_NBRATES' }) }}:</div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ plan.numberOfPayments }}</div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_TOTALFINANCING' }) }}:
-                                    </div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ installmentOptions.amountValue }}
-                                        {{ installmentOptions.amountCurrency }}
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_TOTALAMOUNT' }) }}:
-                                    </div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ plan.totalAmountValue }}
-                                        {{ plan.totalAmountCurrency }}
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_INTEREST' }) }}:</div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ plan.nominalInterestRate }}%</div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_OVW_EFFECTIVEINTEREST" }) }}:
-                                    </div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ plan.effectiveInterestRate }}%
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-8">{{ translate({ ident: 'FCPO_BNPL_SECINSTALLMENT_OVW_MONTHLYRATE' }) }}:
-                                    </div>
-                                    <div class="col-lg-4 fcpopl-secinstallment-table-value">{{ plan.monthlyAmountValue }}
-                                        {{ plan.monthlyAmountCurrency }}
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <br/>
-                                        <a target="_blank"
-                                           href="{{ plan.linkCreditInformationHref }}">{{ translate({ ident: "FCPO_BNPL_SECINSTALLMENT_OVW_DL_CREDINFO" }) }}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
                 </div>
 
                 <div class="form-floating mb-3">
@@ -179,7 +98,7 @@
                         </ul>
                     </div>
                 </div>
-            {% endif %}
+            </div>
 
         </div>
     </div>
@@ -195,5 +114,13 @@
                 {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
             {% endif %}
         </div>
+    {% endif %}
+
+    {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}
+        <script type="text/javascript">
+            window.addEventListener('load', function() {
+                fcpoSelectBNPLLoadInstallment(document.getElementById('payment_{{ sPaymentID }}'));
+            })
+        </script>
     {% endif %}
 </div>

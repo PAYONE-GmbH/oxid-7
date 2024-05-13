@@ -1,17 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Core;
-
-use Exception;
-use Fatchip\PayOne\Application\Model\FcPayOnePayment;
-use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Address;
-use OxidEsales\Eshop\Application\Model\Basket;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Eshop\Core\Theme;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -30,6 +17,20 @@ use OxidEsales\Eshop\Core\Theme;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Core;
+
+use Exception;
+use Fatchip\PayOne\Application\Model\FcPayOnePayment;
+use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Model\Address;
+use OxidEsales\Eshop\Application\Model\Basket;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Theme;
+
 class FcPayOneViewConf extends FcPayOneViewConf_parent
 {
 
@@ -38,7 +39,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      *
      * @var string
      */
-    protected string $_sModuleFolder = "fc/fcpayone";
+    protected string $_sModuleFolder = "payone-gmbh/oxid-7";
 
     /**
      * Helper object for dealing with different shop versions
@@ -48,30 +49,20 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * Hosted creditcard js url
+     * Hosted credit card js url
      *
      * @var string
      */
     protected string $_sFcPoHostedJsUrl = 'https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js';
 
     /**
-     * List of handled themes and their belonging pathes
+     * List of handled themes and their belonging paths
      *
      * @var array
      */
     protected array $_aSupportedThemes = [
         'apex' => 'apex',
         'twig' => 'twig'
-    ];
-
-    /**
-     * List of themes and their
-     *
-     * @var array
-     */
-    protected array $_aTheme2CssPayButtonSelector = [
-        'apex' => 'nextStep',
-        'twig' => 'nextStep',
     ];
 
 
@@ -85,25 +76,13 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Returns url to module img folder (admin)
-     *
-     * @return string
-     */
-    public function fcpoGetAdminModuleImgUrl(): string
-    {
-        $sModuleUrl = $this->fcpoGetModuleUrl();
-        return $sModuleUrl . 'out/admin/img/';
-    }
-
-    /**
      * Returns the url to module
      *
-     * @param bool $absolute
      * @return string
      */
-    public function fcpoGetModuleUrl(bool $absolute = false): string
+    public function fcpoGetModuleUrl(): string
     {
-        return $this->_oFcPoHelper->getModulesDir($absolute) . $this->_sModuleFolder;
+        return $this->_oFcPoHelper->getVendorDir() . $this->_sModuleFolder;
     }
 
     /**
@@ -113,34 +92,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetModulePath(): string
     {
-        return $this->_oFcPoHelper->getModulesDir($this->_sModuleFolder);
-    }
-
-    /**
-     * Returns integer of shop version
-     *
-     * @return int
-     */
-    public function fcpoGetIntShopVersion(): int
-    {
-        return $this->_oFcPoHelper->fcpoGetIntShopVersion();
-    }
-
-    /**
-     * Returns the path to javascripts of module
-     *
-     * @param string $sFile
-     * @return string
-     */
-    public function fcpoGetAbsModuleTemplateFrontendPath(string $sFile = ""): string
-    {
-        $sModulePath = $this->fcpoGetModulePath();
-        $sModulePath = $sModulePath . 'application/views/frontend/tpl/';
-        if ($sFile) {
-            $sModulePath = $sModulePath . $sFile;
-        }
-
-        return $sModulePath;
+        return $this->_oFcPoHelper->getVendorDir() . $this->_sModuleFolder;
     }
 
     /**
@@ -165,10 +117,11 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Returns abbroviation by given id
+     * Returns abbreviation by given id
      *
      * @param string $sLangId
      * @return string
+     * @throws LanguageNotFoundException
      */
     public function fcpoGetLangAbbrById(string $sLangId): string
     {
@@ -244,20 +197,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         return ($oBasket->getPaymentId() === 'fcpoklarna_directdebit');
     }
 
-
-    /**
-     * Checks is given payment is active
-     *
-     * @param string $sPaymentId
-     * @return bool
-     */
-    protected function _fcpoPaymentIsActive(string $sPaymentId): bool
-    {
-        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
-        $oPayment->load($sPaymentId);
-        return (bool)$oPayment->oxpayments__oxactive->value;
-    }
-
     /**
      * Method returns active theme path by checking current theme and its parent
      * If theme is not assignable, 'apex' will be the fallback
@@ -274,7 +213,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $aThemeIds = array_keys($this->_aSupportedThemes);
         $sCurrentParentId = $oTheme->getInfo('parentTheme');
 
-        // we're more interested on the parent then on child theme
+        // we're more interested on the parent than on child theme
         if ($sCurrentParentId) {
             $sCurrentActiveId = $sCurrentParentId;
         }
@@ -300,18 +239,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Template getter for returning shopurl
-     *
-     * @return string
-     */
-    public function fcpoGetShopUrl(): string
-    {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return $oConfig->getShopUrl();
-    }
-
-    /**
-     * Returns if if given paymentid is of type payone
+     * Returns if is given paymentid is of type payone
      *
      * @param $sPaymentId
      * @return bool
@@ -322,35 +250,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Returns current user md5 delivery address hash
-     *
-     * @return mixed
-     */
-    public function fcpoGetDeliveryMD5(): mixed
-    {
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getBasketUser();
-
-        $sDeliveryMD5 = $oUser->getEncodedDeliveryAddress();
-
-        $sDelAddrInfo = $this->fcpoGetDelAddrInfo();
-        if ($sDelAddrInfo) {
-            $sDeliveryMD5 .= $sDelAddrInfo;
-        }
-
-        return $sDeliveryMD5;
-    }
-
-    /**
      * Returns MD5 hash of current selected deliveryaddress
      *
      * @return string
      */
     public function fcpoGetDelAddrInfo(): string
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-
         $sAddressId = Registry::getRequest()->getRequestParameter('deladrid');
         if (!$sAddressId) {
             $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -365,13 +270,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Returns payment error wether from param or session
+     * Returns payment error whether from param or session
      *
      * @return mixed
      */
     public function fcpoGetPaymentError(): mixed
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $iPayError = Registry::getRequest()->getRequestParameter('payerror');
 
         if (!$iPayError) {
@@ -383,13 +287,12 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
-     * Returns payment error text wether from param or session
+     * Returns payment error text whether from param or session
      *
      * @return mixed
      */
     public function fcpoGetPaymentErrorText(): mixed
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sPayErrorText = Registry::getRequest()->getRequestParameter('payerrortext');
 
         if (!$sPayErrorText) {
@@ -473,4 +376,5 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
         return (string)$sClientId;
     }
+
 }

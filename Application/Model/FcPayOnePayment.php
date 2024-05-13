@@ -1,14 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
-use stdClass;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,9 +17,22 @@ use stdClass;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use stdClass;
+
 class FcPayOnePayment extends FcPayOnePayment_parent
 {
 
+    /**
+     * @var array|string[]
+     */
     protected static array $_aPaymentTypes = [
         'fcpoinvoice',
         'fcpopayadvance',
@@ -64,7 +67,12 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcporp_installment',
         'fcpopl_secinvoice',
         'fcpopl_secinstallment',
+        'fcpopl_secdebitnote',
     ];
+
+    /**
+     * @var array|string[]
+     */
     protected static array $_aRedirectPayments = [
         'fcpopaypal',
         'fcpopaypal_express',
@@ -84,11 +92,6 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpo_wechatpay',
     ];
 
-    /*
-     * Array of all payment method IDs belonging to PAYONE
-     *
-     * @var array
-     */
     /**
      * Array of online payments
      *
@@ -154,7 +157,6 @@ class FcPayOnePayment extends FcPayOnePayment_parent
     /**
      * init object construction
      *
-     * @return null
      * @throws DatabaseConnectionException
      */
     public function __construct()
@@ -179,7 +181,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      */
     public static function fcIsPayOnePaymentType(string $sPaymentId): bool
     {
-        return array_search($sPaymentId, self::$_aPaymentTypes) !== false;
+        return in_array($sPaymentId, self::$_aPaymentTypes);
     }
 
     /**
@@ -215,9 +217,13 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         return in_array($sPaymentId, self::$_aIframePaymentTypes);
     }
 
-    public static function fcIsPayOneFrontendApiPaymentType($sPaymentId)
+    /**
+     * @param string $sPaymentId
+     * @return bool
+     */
+    public static function fcIsPayOneFrontendApiPaymentType(string $sPaymentId): bool
     {
-        return array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false;
+        return in_array($sPaymentId, self::$_aFrontendApiPaymentTypes);
     }
 
     /**
@@ -227,7 +233,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @param string|null $sPaymentId
      * @return bool
      */
-    public function fcpoShowAsRegularPaymentSelection(string $sPaymentId = null)
+    public function fcpoShowAsRegularPaymentSelection(string $sPaymentId = null): bool
     {
         $sPaymentId = $sPaymentId ?: $this->getId();
         return !in_array($sPaymentId, $this->_aExpressPayments);
@@ -240,7 +246,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      *
      * @return string
      */
-    public function fcpoGetOperationMode(string $sType = '')
+    public function fcpoGetOperationMode(string $sType = ''): string
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blLivemode = $this->oxpayments__fcpolivemode->value;
@@ -308,7 +314,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
     }
 
     /**
-     * Returns the isoalpa of a country by offering an id
+     * Returns the isoalpha of a country by offering an id
      *
      * @param string $sCountryId
      * @return string
@@ -321,13 +327,13 @@ class FcPayOnePayment extends FcPayOnePayment_parent
     }
 
     /**
-     * Returns the isoalpa of a country by offering an id
+     * Returns the name of a country by offering an id
      *
      * @param string $sCountryId
      * @return string
      * @throws DatabaseConnectionException
      */
-    public function fcpoGetCountryNameById(string $sCountryId)
+    public function fcpoGetCountryNameById(string $sCountryId): string
     {
         $sQuery = "SELECT oxtitle FROM oxcountry WHERE oxid = " . DatabaseProvider::getDb()->quote($sCountryId);
         return $this->_oFcPoDb->getOne($sQuery);
@@ -341,7 +347,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @return void
      * @throws DatabaseConnectionException|DatabaseErrorException
      */
-    public function fcpoAddMandateToDb(string $sOrderId, string $sMandateIdentification)
+    public function fcpoAddMandateToDb(string $sOrderId, string $sMandateIdentification): void
     {
         $sOrderId = DatabaseProvider::getDb()->quote($sOrderId);
         $sMandateIdentification = DatabaseProvider::getDb()->quote(basename($sMandateIdentification . '.pdf'));
@@ -355,10 +361,10 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      *
      * @param string $sUserOxid
      * @param string $sPaymentType
-     * @return mixed
+     * @return string|bool
      * @throws DatabaseConnectionException
      */
-    public function fcpoGetUserPaymentId(string $sUserOxid, string $sPaymentType): mixed
+    public function fcpoGetUserPaymentId(string $sUserOxid, string $sPaymentType): string|bool
     {
         $oDb = DatabaseProvider::getDb();
         $sQ = 'select oxpaymentid from oxorder where oxpaymenttype=' . $oDb->quote($sPaymentType) . ' and
@@ -370,20 +376,20 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * Check database if the user is allowed to use the given payment method and re
      *
      * @param string $sSubPaymentId ID of the sub payment method ( Visa, MC, etc. )
-     * @param string $sType         payment type PAYONE
+     * @param string $sType payment type PAYONE
      * @param string $sUserBillCountryId
      * @param string $sUserDelCountryId
      * @return bool
      */
     public function isPaymentMethodAvailableToUser(string $sSubPaymentId, string $sType, string $sUserBillCountryId, string $sUserDelCountryId): bool
     {
-        $sBaseQuery = "SELECT COUNT(*) FROM fcpopayment2country WHERE fcpo_paymentid = '{$sSubPaymentId}' AND fcpo_type = '{$sType}'";
-        if ($sUserDelCountryId !== false && $sUserBillCountryId != $sUserDelCountryId) {
-            $sWhereCountry = "AND (fcpo_countryid = '{$sUserBillCountryId}' || fcpo_countryid = '{$sUserDelCountryId}')";
+        $sBaseQuery = "SELECT COUNT(*) FROM fcpopayment2country WHERE fcpo_paymentid = '$sSubPaymentId' AND fcpo_type = '$sType'";
+        if ($sUserDelCountryId !== '' && $sUserBillCountryId != $sUserDelCountryId) {
+            $sWhereCountry = "AND (fcpo_countryid = '$sUserBillCountryId' || fcpo_countryid = '$sUserDelCountryId')";
         } else {
-            $sWhereCountry = "AND fcpo_countryid = '{$sUserBillCountryId}'";
+            $sWhereCountry = "AND fcpo_countryid = '$sUserBillCountryId'";
         }
-        $sQuery = "SELECT IF(({$sBaseQuery} LIMIT 1) > 0,IF(({$sBaseQuery} {$sWhereCountry} LIMIT 1) > 0,1,0),1)";
+        $sQuery = "SELECT IF(($sBaseQuery LIMIT 1) > 0,IF(($sBaseQuery $sWhereCountry LIMIT 1) > 0,1,0),1)";
 
         return $this->_oFcPoDb->getOne($sQuery);
     }
@@ -525,11 +531,11 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @return array
      * @throws DatabaseErrorException
      */
-    protected function _fcGetCountries(string $sCampaignId)
+    protected function _fcGetCountries(string $sCampaignId): array
     {
         $aCountries = [];
 
-        $sQuery = "SELECT fcpo_countryid FROM fcpopayment2country WHERE fcpo_paymentid = 'KLR_{$sCampaignId}'";
+        $sQuery = "SELECT fcpo_countryid FROM fcpopayment2country WHERE fcpo_paymentid = 'KLR_$sCampaignId'";
         $aRows = $this->_oFcPoDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
             $aCountries[] = $aRow[0];
@@ -541,10 +547,10 @@ class FcPayOnePayment extends FcPayOnePayment_parent
     /**
      * Sets add flag to false if conditions doesn't match
      *
-     * @param bool   $blAdd
+     * @param bool $blAdd
      * @param string $sNeedle
-     * @param array  $aHaystack
-     * @return boolean
+     * @param array $aHaystack
+     * @return bool
      */
     protected function _fcpoCheckAddCampaign(bool $blAdd, string $sNeedle, array $aHaystack): bool
     {
@@ -554,4 +560,5 @@ class FcPayOnePayment extends FcPayOnePayment_parent
 
         return $blAdd;
     }
+
 }

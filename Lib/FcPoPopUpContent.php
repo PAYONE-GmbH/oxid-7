@@ -18,18 +18,14 @@
  * @version       OXID eShop CE
  */
 
-/*
- * load OXID Framework
- */
-
 namespace Fatchip\PayOne\Lib;
 
 use Exception;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
-function getShopBasePath()
+function getShopBasePath(): string
 {
-    return dirname(__FILE__) . '/../../../modules/';
+    return dirname(__FILE__) . '/../../../../source';
 }
 
 include_once getShopBasePath() . "/bootstrap.php";
@@ -45,44 +41,53 @@ $sUseLogin = filter_input(INPUT_GET, 'login');
  *
  * @author andre
  */
-class FcPopopUpContent extends BaseModel
+class FcPoPopUpContent extends BaseModel
 {
+
+    /**
+     * Helper object
+     *
+     * @var FcPoHelper
+     */
+    protected FcPoHelper $_oFcPoHelper;
 
     /**
      * url to be fetched
      *
      * @var string
      */
-    protected $_sUrl = null;
+    protected string $_sUrl;
 
     /**
      * Flag that indicates, that login should be used
      *
      * @var bool
      */
-    protected $_blUseLogin = null;
+    protected bool $_blUseLogin;
 
     /**
      * Flag if fetched content should be returned with pdf header
      *
      * @var bool
      */
-    protected $_blPdfHeader = null;
+    protected bool $_blPdfHeader;
 
     /**
      * Duration for installment
      *
      * @var string
      */
-    protected $_sDuration = null;
+    protected string $_sDuration;
 
     /**
      * Initialization
      *
      * @param string $sUrl
-     * @param bool   $blUseLogin
+     * @param string $sDuration
+     * @param bool $blPdfHeader
+     * @param bool $blUseLogin
      */
-    public function __construct($sUrl, $sDuration, $blPdfHeader = true, $blUseLogin = false)
+    public function __construct(string $sUrl, string $sDuration, bool $blPdfHeader = true, bool $blUseLogin = false)
     {
         parent::__construct();
         $this->_sUrl = $sUrl;
@@ -96,7 +101,7 @@ class FcPopopUpContent extends BaseModel
      *
      * @return string
      */
-    public function fcpo_fetch_content()
+    public function fcpo_fetch_content(): string
     {
         $resCurl = curl_init();
         $sUrl = $this->_sUrl . "&duration=" . $this->_sDuration;
@@ -116,7 +121,7 @@ class FcPopopUpContent extends BaseModel
             $mInfo = curl_getinfo($resCurl);
             if ($mInfo['http_code'] == '401') {
                 $blCurlError = true;
-                $sContent = $this->_fcpoReturnErrorMessage('Authentication failure! Please check your credentials in payolution settings.');
+                $sContent = $this->_fcpoReturnErrorMessage('Authentication failure! Please check your credentials in Unzer settings.');
             }
 
         } catch (Exception $oEx) {
@@ -135,9 +140,9 @@ class FcPopopUpContent extends BaseModel
     /**
      * Returns configured credentials
      *
-     * @return array|void
+     * @return array
      */
-    protected function _fcpoGetPayolutionCredentials()
+    protected function _fcpoGetPayolutionCredentials(): array
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aCredentials = [];
@@ -153,7 +158,7 @@ class FcPopopUpContent extends BaseModel
      * @param string $sMessage
      * @return string
      */
-    protected function _fcpoReturnErrorMessage($sMessage)
+    protected function _fcpoReturnErrorMessage(string $sMessage): string
     {
         $sMessage = utf8_encode($sMessage);
         $sReturn = '<p class="payolution_message_error">';
@@ -164,5 +169,5 @@ class FcPopopUpContent extends BaseModel
 
 }
 
-$oPopupContent = new FcPopopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
+$oPopupContent = new FcPoPopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
 echo $oPopupContent->fcpo_fetch_content();

@@ -1,17 +1,48 @@
 <?php
 
 namespace Fatchip\PayOne;
+
+use OxidEsales\Eshop\Core\Registry;
+
 class FcCheckChecksum
 {
 
-    protected $_sModuleId = null;
-    protected $_sModuleName = null;
-    protected $_sModuleVersion = null;
-    protected $_blGotModuleInfo = null;
-    protected $_sShopSystem = null;
+    /**
+     * @var string
+     */
+    protected string $_sModuleId;
+
+    /**
+     * @var string
+     */
+    protected string $_sModuleName;
+
+    /**
+     * @var string
+     */
+    protected string $_sModuleVersion;
+
+    /**
+     * @var bool
+     */
+    protected bool $_blGotModuleInfo;
+
+    /**
+     * @var string
+     */
+    protected string $_sShopSystem;
+
+    /**
+     * @var string
+     */
     protected $_sVersionCheckUrl = 'http://version.fatchip.de/fcVerifyChecksum.php';
 
-    public function checkChecksumXml($blOutput = false)
+    /**
+     * @param bool $blOutput
+     * @return bool|string|void
+     * @throws \JsonException
+     */
+    public function checkChecksumXml(bool $blOutput = false)
     {
         if (ini_get('allow_url_fopen') == 0) {
             die("Cant verify checksums, allow_url_fopen is not activated on customer-server!");
@@ -40,7 +71,11 @@ class FcCheckChecksum
         return $sResult;
     }
 
-    protected function _getFilesToCheck()
+    /**
+     * @return array|mixed
+     * @throws \JsonException
+     */
+    protected function _getFilesToCheck(): mixed
     {
         $aFiles = [];
         if (file_exists($this->_getBasePath() . 'metadata.php')) {
@@ -59,12 +94,19 @@ class FcCheckChecksum
         return $aFiles;
     }
 
-    protected function _getBasePath()
+    /**
+     * @return string
+     */
+    protected function _getBasePath(): string
     {
         return dirname(__FILE__) . '/';
     }
 
-    protected function _handleMetadata($sFilePath)
+    /**
+     * @param string $sFilePath
+     * @return void
+     */
+    protected function _handleMetadata(string $sFilePath): void
     {
         include $sFilePath;
         if (isset($aModule)) {
@@ -82,7 +124,12 @@ class FcCheckChecksum
         }
     }
 
-    protected function _handleComposerJson($sFilePath)
+    /**
+     * @param string $sFilePath
+     * @return void
+     * @throws \JsonException
+     */
+    protected function _handleComposerJson(string $sFilePath): void
     {
         $sFile = file_get_contents($sFilePath);
         if (!empty($sFile)) {
@@ -108,9 +155,10 @@ class FcCheckChecksum
     }
 
     /**
+     * @param array $aFiles
      * @return string[]|false[]
      */
-    protected function _checkFiles($aFiles): array
+    protected function _checkFiles(array $aFiles): array
     {
         $aChecksums = [];
         foreach ($aFiles as $aFile) {
@@ -122,7 +170,10 @@ class FcCheckChecksum
         return $aChecksums;
     }
 
-    protected function _getShopBasePath()
+    /**
+     * @return string
+     */
+    protected function _getShopBasePath(): string
     {
         if ($this->_sShopSystem == 'oxid') {
             return $this->_getBasePath() . '/../../../';
@@ -133,7 +184,12 @@ class FcCheckChecksum
         }
     }
 
-    protected function _getCheckResults($aChecksums)
+    /**
+     * @param array $aChecksums
+     * @return bool|string
+     * @throws \JsonException
+     */
+    protected function _getCheckResults(array $aChecksums): bool|string
     {
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $this->_sVersionCheckUrl);
@@ -155,7 +211,12 @@ class FcCheckChecksum
 
 }
 
-if (!isset($blOutput) || $blOutput == true) {
-    $oScript = new FcCheckChecksum();
-    $oScript->checkChecksumXml(true);
+if (!isset($blOutput) || $blOutput) {
+    try {
+        $oScript = new FcCheckChecksum();
+        $oScript->checkChecksumXml(true);
+    } catch (\JsonException $oEx) {
+        $oLogger = Registry::getLogger();
+        $oLogger->error($oEx->getTraceAsString());
+    }
 }

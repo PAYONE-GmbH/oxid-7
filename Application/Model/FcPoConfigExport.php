@@ -1,24 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Model;
-
-use JsonException;
-use Exception;
-use Fatchip\PayOne\FcCheckChecksum;
-use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Model\Country;
-use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Application\Model\Shop;
-use OxidEsales\Eshop\Core\DatabaseProvider;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
-use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
-use OxidEsales\Eshop\Core\Model\BaseModel;
-use OxidEsales\Eshop\Core\Module\Module;
-use OxidEsales\Eshop\Core\Str;
-use OxidEsales\EshopCommunity\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,6 +17,28 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Sho
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Model;
+
+use Exception;
+use Fatchip\PayOne\FcCheckChecksum;
+use Fatchip\PayOne\Lib\FcPoHelper;
+use JsonException;
+use OxidEsales\Eshop\Application\Model\Country;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
+use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
+use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\Eshop\Core\Module\Module;
+use OxidEsales\Eshop\Core\Str;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+
 class FcPoConfigExport extends BaseModel
 {
 
@@ -50,9 +52,9 @@ class FcPoConfigExport extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var object
+     * @var DatabaseInterface
      */
-    protected \OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface $_oFcPoDb;
+    protected DatabaseInterface $_oFcPoDb;
 
     /**
      * Holds config values for all available shop ids
@@ -106,7 +108,6 @@ class FcPoConfigExport extends BaseModel
         'sFCPODenialText',
     ];
 
-
     /**
      * config fields which needs skipping multilines
      *
@@ -114,11 +115,12 @@ class FcPoConfigExport extends BaseModel
      */
     protected array $_aSkipMultiline = ['aFCPODebitCountries', 'aFCPOAplCreditCards'];
 
+
     /**
      * Init needed data
      *
      * @throws DatabaseConnectionException
-*/
+     */
     public function __construct()
     {
         parent::__construct();
@@ -127,9 +129,10 @@ class FcPoConfigExport extends BaseModel
     }
 
     /**
-     * Generates and delivers an xml export of configuration
+     * Generates and delivers an XML export of configuration
      *
-     * @return null
+     * @throws JsonException
+     * @throws DatabaseErrorException
      */
     public function fcpoExportConfig()
     {
@@ -139,7 +142,6 @@ class FcPoConfigExport extends BaseModel
             $this->_oFcPoHelper->fcpoHeader("Content-Disposition: attachment; filename=\"payone_config_export" . date('Y-m-d H-i-s') . "_" . md5($sXml) . ".xml\"");
             echo $this->_oFcPoHelper->fcpoProcessResultString($sXml);
             $this->_oFcPoHelper->fcpoExit();
-            return null;
         }
     }
 
@@ -215,13 +217,13 @@ class FcPoConfigExport extends BaseModel
      * Returns payone configuration
      *
      * @param string $sShopId
-     * @param int    $iLang
-     * @return array{strs: mixed[], bools: mixed[], arrs: mixed[]}
+     * @param int $iLang
+     * @return array{strs: array, bools: array, arrs: array}
      * @throws DatabaseConnectionException
+     * @throws DatabaseErrorException
      */
-    public function fcpoGetConfig($sShopId, $iLang = 0): array
+    public function fcpoGetConfig(string $sShopId, int $iLang = 0): array
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
         $aResult = $oDb->getAll($sQuery);
@@ -266,10 +268,10 @@ class FcPoConfigExport extends BaseModel
      * Returns multilang varname if multilangfield
      *
      * @param string $sVarName
-     * @param int    $iLang
+     * @param int $iLang
      * @return string
      */
-    public function fcpoGetMultilangConfStrVarName($sVarName, $iLang)
+    public function fcpoGetMultilangConfStrVarName(string $sVarName, int $iLang): string
     {
         if ($iLang === 0) {
             $iLang = 0;
@@ -325,7 +327,7 @@ class FcPoConfigExport extends BaseModel
         $aModules = $this->_getModuleInfo();
         if ($aModules && $aModules !== []) {
             foreach ($aModules as $sModule => $sInfo) {
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$sModule}>{$sInfo}</{$sModule}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$sModule>$sInfo</$sModule>" . $this->_sN;
             }
         }
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</modules>" . $this->_sN;
@@ -337,6 +339,8 @@ class FcPoConfigExport extends BaseModel
      * Returns a list of available modules and their versions
      *
      * @return array<int|string, mixed>
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function _getModuleInfo(): array
     {
@@ -370,16 +374,16 @@ class FcPoConfigExport extends BaseModel
         $aPaymentMapping = $this->_getMappings();
 
         foreach ($aPaymentMapping as $sAbbr => $aMappings) {
-            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$sAbbr}>" . $this->_sN;
+            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$sAbbr>" . $this->_sN;
             foreach ($aMappings as $index => $subtype) {
                 $subtype = $index;
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$subtype}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<$subtype>" . $this->_sN;
                 foreach ($aMappings[$subtype] as $aMap) {
                     $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '" name="' . $aMap['name'] . '"/>' . $this->_sN;
                 }
-                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$subtype}>" . $this->_sN;
+                $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</$subtype>" . $this->_sN;
             }
-            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$sAbbr}>" . $this->_sN;
+            $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</$sAbbr>" . $this->_sN;
         }
         $sXml .= $this->_sT . $this->_sT . $this->_sT . "</status_mapping>" . $this->_sN;
 
@@ -389,7 +393,7 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns the configured mappings
      *
-     * @return array<string, array<string, array<int, array{from: mixed, to: mixed, name: mixed}>&mixed[]>&mixed[]>
+     * @return array<string, array<string, array<int, array{from: mixed, to: mixed, name: mixed}>&array>&array>
      */
     protected function _getMappings(): array
     {
@@ -446,6 +450,7 @@ class FcPoConfigExport extends BaseModel
             'fcpo_secinvoice' => 'rec',
             'fcpopl_secinvoice' => 'fnc',
             'fcpopl_secinstallment' => 'fnc',
+            'fcpopl_secdebitnote' => 'fnc',
             'fcpo_sofort' => 'sb',
             'fcpo_eps' => 'sb',
             'fcpo_pf_finance' => 'sb',
@@ -502,6 +507,7 @@ class FcPoConfigExport extends BaseModel
             'fcpo_secinvoice' => 'POV',
             'fcpopl_secinvoice' => 'PIV',
             'fcpopl_secinstallment' => 'PIN',
+            'fcpopl_secdebitnote' => 'PDD',
             'fcpo_sofort' => 'PNT',
             'fcpo_eps' => 'EPS',
             'fcpo_pf_finance' => 'PFF',
@@ -651,7 +657,7 @@ class FcPoConfigExport extends BaseModel
     }
 
     /**
-     * Returns miscelanous
+     * Returns miscellaneous
      *
      * @return string
      */
@@ -726,12 +732,11 @@ class FcPoConfigExport extends BaseModel
     /**
      * Returns collected checksum errors if there are any
      *
-     * @return mixed
+     * @return array|bool|null
      * @throws JsonException
      */
-    protected function _getChecksumErrors(): mixed
+    protected function _getChecksumErrors(): array|bool|null
     {
-        $blOutput = false;
         $blCheckSumAvailable = $this->_oFcPoHelper->fcpoCheckClassExists(FcCheckChecksum::class);
         if ($blCheckSumAvailable) {
             $sResult = $this->_fcpoGetCheckSumResult();
@@ -754,7 +759,7 @@ class FcPoConfigExport extends BaseModel
      * @throws JsonException
      * @throws Exception
      */
-    protected function _fcpoGetCheckSumResult()
+    protected function _fcpoGetCheckSumResult(): string
     {
         $sIncludePath = VENDOR_PATH . 'payone-gmbh/oxid-7/FcCheckChecksum.php';
         $oScript = $this->_oFcPoHelper->fcpoGetInstance(FcCheckChecksum::class, $sIncludePath);

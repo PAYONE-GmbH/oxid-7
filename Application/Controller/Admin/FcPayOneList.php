@@ -1,9 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +17,11 @@ use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
+
 class FcPayOneList extends AdminListController
 {
 

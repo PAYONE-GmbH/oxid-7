@@ -160,6 +160,9 @@ function fcpoResetErrorContainers() {
     if (document.getElementById('fcpopl_secinstallment_iban_invalid')) {
         document.getElementById('fcpopl_secinstallment_iban_invalid').style.display = '';
     }
+    if (document.getElementById('fcpopl_secdebitnote_iban_invalid')) {
+        document.getElementById('fcpopl_secdebitnote_iban_invalid').style.display = '';
+    }
 }
 
 function fcpoGetCreditcardType() {
@@ -293,16 +296,16 @@ function fcpoGetElvCountry() {
     return sElvCountry;
 }
 
-function fcpoValidateBNPLIban() {
+function fcpoValidateBNPLIban(method) {
     fcpoResetErrorContainers();
     var oForm = fcpoGetPaymentForm();
 
-    if (oForm['dynvalue[fcpopl_secinstallment_iban]']) {
-        oForm['dynvalue[fcpopl_secinstallment_iban]'].value = fcpoGetCleanedNumberIBAN(oForm['dynvalue[fcpopl_secinstallment_iban]'].value);
+    if (oForm['dynvalue[' + method + '_iban]']) {
+        oForm['dynvalue[' + method + '_iban]'].value = fcpoGetCleanedNumberIBAN(oForm['dynvalue[' + method + '_iban]'].value);
     }
 
-    if (oForm['dynvalue[fcpopl_secinstallment_iban]'].value == '') {
-        document.getElementById('fcpopl_secinstallment_iban_invalid').style.display = 'block';
+    if (oForm['dynvalue[' + method + '_iban]'].value == '') {
+        document.getElementById(method + '_iban_invalid').style.display = 'block';
         return false;
     }
 
@@ -414,15 +417,16 @@ function fcpoStartELVRequest() {
     return false;
 }
 
-function fcCheckPaymentSelection(sCheckedValue) {
+function fcCheckPaymentSelection() {
+    var sCheckedValue = fcpoGetSelectedPaymentMethod();
     if (sCheckedValue != false) {
         var oForm = fcpoGetPaymentForm();
         if (sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
             return fcpoStartCCRequest();
         } else if (sCheckedValue == 'fcpodebitnote') {
             return fcpoStartELVRequest(true);
-        } else if (sCheckedValue == 'fcpopl_secinstallment') {
-            return fcpoValidateBNPLIban();
+        } else if (sCheckedValue == 'fcpopl_secinstallment' || sCheckedValue == 'fcpopl_secdebitnote') {
+            return fcpoValidateBNPLIban(sCheckedValue);
         }
     }
     return true;
@@ -473,9 +477,6 @@ function fcpoProcessPayoneResponseCC(response) {
 }
 
 function fcHandleDebitInputs(sDebitBICMandatory) {
-    if (typeof (sDebitBICMandatory) == undefined) {
-        sDebitBICMandatory = 'true';
-    }
     fcHandleDebitInputsTypeIban();
     fcHandleDebitInputsTypeBlz();
 }
@@ -935,6 +936,41 @@ function fcpoChangeInstallmentPaymentType(payment, paymentMethod) {
 
 // >>>> BNPL INSTALLMENT
 
+function fcpoSelectBNPLLoadInstallment(targetInput) {
+    $.ajax({
+        url: payoneAjaxControllerUrl,
+        method: 'POST',
+        type: 'POST',
+        data: {
+            paymentid: 'fcpopl_secinstallment',
+            action: 'fcpopl_load_installment_form'
+        },
+        success: function(response) {
+            fcpoSelectBNPLLoadInstallmentSuccess(response, targetInput)
+        },
+        error: fcpoSelectBNPLLoadInstallmentFailure
+    });
+}
+
+function fcpoSelectBNPLLoadInstallmentSuccess(responseText, targetInput) {
+    responseData = JSON.parse(responseText);
+
+    if (responseData.status != 'OK') {
+        fcpoSelectBNPLLoadInstallmentFailure(responseText);
+    } else {
+        document.getElementById('fcpo_bnpl_available_installment_plans').innerHTML = responseData.html;
+        document.getElementById('fcpo_bnpl_unavailable_installment').style.display = "none";
+        document.getElementById('fcpo_bnpl_available_installment').style.display = "block";
+        targetInput.onclick = null;
+    }
+}
+function fcpoSelectBNPLLoadInstallmentFailure(responseText) {
+    console.log('ERROR');
+    document.getElementById('fcpo_bnpl_available_installment').style.display = "none";
+    document.getElementById('fcpo_bnpl_unavailable_installment').style.display = "block";
+    console.log(responseText);
+}
+
 function fcpoSelectBNPLInstallmentPlan(iIndex) {
     var oRadio = document.getElementById('bnplPlan_' + iIndex);
     if (oRadio) {
@@ -992,11 +1028,8 @@ if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
                         formParams += ', ';
                     }
 
-                    if (formType == 'checkbox') {
+                    if (formType == 'checkbox' && !this.checked) {
                         var inputValue = '';
-                        if (this.checked) {
-                            inputValue = this.value;
-                        }
                     } else {
                         var inputValue = this.value;
                     }
@@ -1098,6 +1131,11 @@ if (fcpoPayolutionInstallmentCheckAvailability.length > 0) {
         if (oForm["dynvalue[fcpo_elv_country]"]) {
             fcCheckDebitCountry(oForm["dynvalue[fcpo_elv_country]"]);
         }
+        $(oForm).on('submit', function(e){
+            if ( fcCheckPaymentSelection() == false ) {
+                e.preventDefault();
+            }
+        });
     }
     setTimeout(
         function () {
@@ -1357,8 +1395,7 @@ $(document).ready(function () {
         fcpoPaymentNextButtons[0].onclick = function (e) {
             e.preventDefault();
             var sCheckedValue = fcpoGetSelectedPaymentMethod();
-            var fcpoPreSubmitCheck = fcCheckPaymentSelection(sCheckedValue);
-            if (fcpoPreSubmitCheck == false) {
+            if (fcCheckPaymentSelection() == false) {
                 event.preventDefault();
             } else {
                 fcpoPaymentFormSubmit(e, sCheckedValue, paymentForm[0]);

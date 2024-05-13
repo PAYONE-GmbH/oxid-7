@@ -40,10 +40,11 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if oView.fcpoGetRequestMessage() %}
+                    {% set requestMessage = oView.fcpoGetRequestMessage() %}
+                    {% if requestMessage %}
                         <tr>
                             <td class="edittext" colspan="2">
-                                <strong>{{ oView.fcpoGetRequestMessage() }}</strong>
+                                <strong>{{ requestMessage|raw }}</strong>
                             </td>
                         </tr>
                     {% endif %}
@@ -190,7 +191,7 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        <table border="0" cellpadding="5" callspacing="5">
+                                        <table border="0" cellpadding="5" cellspacing="5">
                                             <tr>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_CAPTURE" }) }}</th>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}</th>
@@ -289,7 +290,7 @@
 
                     {% if edit.allowDebit() %}
                         {% set blShowDebit = true %}
-                        {% capture name = "debit_block" %}
+                        {% set debit_block %}
                             <tr>
                                 <td colspan="2" style="border-bottom: 1px solid black;"></td>
                             </tr>
@@ -355,7 +356,7 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2">
-                                        <table border="0" cellpadding="5" callspacing="5">
+                                        <table border="0" cellpadding="5" cellspacing="5">
                                             <tr>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_CAPTURE" }) }}</th>
                                                 <th>{{ translate({ ident: "FCPO_PRODUCT_AMOUNT" }) }}</th>
@@ -615,9 +616,9 @@
                                     </td>
                                 </tr>
                             {% endif %}
-                        {% endcapture %}
+                        {% endset %}
                         {% if blShowDebit == true %}
-                            {{ smarty.capture.debit_block }}
+                            {{ debit_block }}
                         {% endif %}
                     {% endif %}
 
@@ -1155,7 +1156,7 @@
                                     <span>{{ translate({ ident: "FCPO_LEFT_PREAUTHORIZED_AMOUNT" }) }}</span>
                                 </td>
                                 <td style="text-align: right; padding-right: 10px">
-                                    {{ edit.oxorder__oxtotalordersum.value-captureDebitEntries.totalCapture|number_format(2, ',', '') }} {{ edit.oxorder__oxcurrency.value|raw }}
+                                    {{ (edit.oxorder__oxtotalordersum.value-captureDebitEntries.totalCapture)|number_format(2, ',', '') }} {{ edit.oxorder__oxcurrency.value|raw }}
                                 </td>
                             </tr>
                         {% endif %}
@@ -1239,7 +1240,7 @@
                 <div style="margin-top: 20px">
                     <p style="border-bottom: solid 1px black;text-transform: uppercase;">
                         <strong>{{ translate({ ident: "FCPO_PRODUCTS" }) }}</strong></p>
-                    <table border="0" cellpadding="5" callspacing="5">
+                    <table border="0" cellpadding="5" cellspacing="5">
                         <colgroup>
                             <col width="70%">
                             <col width="10%">
@@ -1271,5 +1272,4 @@
 </form>
 
 {% include "bottomnaviitem.html.twig" %}
-</table>
 {% include "bottomitem.html.twig" %}

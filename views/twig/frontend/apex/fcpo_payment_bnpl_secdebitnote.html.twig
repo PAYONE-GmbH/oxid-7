@@ -8,18 +8,13 @@
 
         <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
             <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+            <input type="hidden" name="dynvalue[fcpopl_secdebitnote_account_holder]" value="{{ oView.fcpoGetAccountHolder() }}"/>
 
             {% if oView.fcpoBNPLShowBirthdate() %}
                 <div class="mb-3">
-                    {% if oView.fcpoIsB2BPov() %}
-                        <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE_B2B" }) }}:</label>
-                    {% else %}
-                        <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
-                    {% endif %}
-
                     <label>{{ translate({ ident: "FCPO_SECINVOICE_BIRTHDATE" }) }}:</label>
                     <div style="display: flex">
-                        <select style="width: 30%" name="dynvalue[fcpopl_secinvoice_birthdate_day]">
+                        <select style="width: 30%" name="dynvalue[fcpopl_secdebitnote_birthdate_day]">
                             {% for sDay in oView.fcpoGetDayRange() %}
                                 <option value="{{ sDay }}" {% if sDay == oView.fcpoGetBirthdayField('day') %}selected{% endif %}>
                                     {{ sDay }}
@@ -27,7 +22,7 @@
                             {% endfor %}
                         </select>
                         &nbsp;
-                        <select style="width: 30%" name="dynvalue[fcpopl_secinvoice_birthdate_month]">
+                        <select style="width: 30%" name="dynvalue[fcpopl_secdebitnote_birthdate_month]">
                             {% for sMonth in oView.fcpoGetMonthRange() %}
                                 <option value="{{ sMonth }}" {% if sMonth == oView.fcpoGetBirthdayField('month') %}selected{% endif %}>
                                     {{ sMonth }}
@@ -35,7 +30,7 @@
                             {% endfor %}
                         </select>
                         &nbsp;
-                        <select style="width: 30%" name="dynvalue[fcpopl_secinvoice_birthdate_year]">
+                        <select style="width: 30%" name="dynvalue[fcpopl_secdebitnote_birthdate_year]">
                             {% for sYear in oView.fcpoGetYearRange() %}
                                 <option value="{{ sYear }}" {% if sYear == oView.fcpoGetBirthdayField('year') %}selected{% endif %}>
                                     {{ sYear }}
@@ -48,7 +43,7 @@
 
             {% if oView.fcpoBNPLShowFon(sPaymentID) %}
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinvoice_fon]"
+                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secdebitnote_fon]"
                            placeholder="{{ translate({ ident: "FCPO_BNPL_FON" }) }}"
                            autocomplete="off" value="{{ oView.fcpoGetUserValue('oxfon') }}"
                            required>
@@ -56,22 +51,21 @@
                 </div>
             {% endif %}
 
-            {% if oView.fcpoIsB2BPov() %}
-                {% if empty(oView.fcpoGetUserValue('oxustid')) %}
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpopl_secinvoice_ustid]"
-                           placeholder="{{ translate({ ident: "FCPO_BNPL_USTID" }) }}"
-                           value="{{ oView.fcpoGetUserValue('oxustid') }}">
-                    <label>{{ translate({ ident: "FCPO_BNPL_USTID" }) }}</label>
-                    <p class="col-lg-12" style="padding-left: 25px">
-                        {{ translate({ ident: "FCPO_BNPL_NO_COMPANY" }) }}
-                    </p>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control js-oxValidate js-oxValidate_notEmpty" size="20" maxlength="64" name="dynvalue[fcpopl_secdebitnote_iban]"
+                       placeholder="{{ translate({ ident: "FCPO_BANK_IBAN" }) }}"
+                       autocomplete="off" value="{{ dynvalue.fcpopl_secinstallment_iban }}"
+                       onkeyup="fcHandleDebitInputs('{{ oView.fcpoGetBICMandatory() }}]');return false;"
+                       required>
+                <div id="fcpopl_secdebitnote_iban_invalid" class="fcpo_check_error">
+                    <span class="help-block">
+                        <ul role="alert" class="list-unstyled text-danger">
+                            <li>{{ translate({ ident: "FCPO_IBAN_INVALID" }) }}</li>
+                        </ul>
+                    </span>
                 </div>
-                {% endif %}
-                <p class="col-lg-12" style="padding-left: 25px">
-                    {{ translate({ ident: "FCPO_BNPL_NO_COMPANY" }) }}
-                </p>
-            {% endif %}
+                <label>{{ translate({ ident: "FCPO_BANK_IBAN" }) }}</label>
+            </div>
 
             {% include "@fcpayone/frontend/fcpo_payment_bnpl_snippet.html.twig" %}
 

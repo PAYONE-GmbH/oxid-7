@@ -1,5 +1,4 @@
 <?php
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,10 +16,6 @@
  * @link          http://www.payone.de
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
- */
-
-/*
- * load OXID Framework
  */
 
 namespace Fatchip\PayOne\Application\Controller;
@@ -58,6 +53,7 @@ class FcPayOneAjax extends BaseController
      */
     protected FcPoHelper $_oFcPoHelper;
 
+
     /**
      * init object construction
      *
@@ -66,6 +62,8 @@ class FcPayOneAjax extends BaseController
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
 
         // receive params
@@ -108,6 +106,10 @@ class FcPayOneAjax extends BaseController
                 echo $this->fcpoRatepayCalculation($sParamsJson);
             }
 
+            if ($sAction == 'fcpopl_load_installment_form' && $sPaymentId == 'fcpopl_secinstallment') {
+                echo json_encode($this->fcpoGetBNPLInstallment());
+            }
+
             $aKlarnaPayments = [
                 'fcpoklarna_invoice',
                 'fcpoklarna_installments',
@@ -122,106 +124,7 @@ class FcPayOneAjax extends BaseController
     }
 
     /**
-     *
-     *
-     * @param $sPaymentId
-     * @param $sAction
-     * @param $sParamsJson
-     * @return string
-     */
-    public function fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson)
-    {
-        if ($sAction === 'start_session') {
-            return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
-        }
-
-        return '';
-    }
-
-    /**
-     * Trigger klarna session start
-     *
-     * @param $sPaymentId
-     * @param $sParamsJson
-     * @return string
-     */
-    public function fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson)
-    {
-        $this->_fcpoUpdateUser($sParamsJson);
-        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-        $aResponse = $oRequest->sendRequestKlarnaStartSession($sPaymentId);
-        $blIsValid = (
-            isset($aResponse['status'], $aResponse['add_paydata[client_token]']) &&
-            $aResponse['status'] === 'OK'
-        );
-
-        if (!$blIsValid) {
-            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcPoHelper->fcpoSetSessionVariable(
-                'payerrortext',
-                $aResponse['errormessage']
-            );
-            header("HTTP/1.0 503 Service not available");
-        }
-
-        $this->_fcpoSetKlarnaSessionParams($aResponse);
-
-        $oParamsParser = $this->_oFcPoHelper->getFactoryObject(FcPoParamsParser::class);
-
-        return $oParamsParser->fcpoGetKlarnaWidgetJS(
-            $aResponse['add_paydata[client_token]'],
-            $sParamsJson
-        );
-    }
-
-    /**
-     *
-     *
-     * @param $sParamsJson
-     * @return string
-     */
-    public function _fcpoUpdateUser($sParamsJson): void
-    {
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getUser();
-        /** @var User $oUser value */
-        if ($aParams['birthday'] !== 'undefined') {
-            $oUser->oxuser__oxbirthdate = new Field($aParams['birthday']);
-        }
-        if ($aParams['telephone'] !== 'undefined') {
-            $oUser->oxuser__oxfon = new Field($aParams['telephone']);
-        }
-        if ($aParams['personalid'] !== 'undefined') {
-            $oUser->oxuser__fcpopersonalid = new Field($aParams['personalid']);
-        }
-        $oUser->save();
-    }
-
-    /**
-     * Set needed session params for later handling of Klarna payment
-     *
-     * @param $aResponse
-     * @return void
-     */
-    protected function _fcpoSetKlarnaSessionParams($aResponse)
-    {
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_client_token');
-        $this->_oFcPoHelper->fcpoSetSessionVariable(
-            'klarna_client_token',
-            $aResponse['add_paydata[client_token]']
-        );
-        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoWorkorderId');
-        $this->_oFcPoHelper->fcpoSetSessionVariable(
-            'fcpoWorkorderId',
-            $aResponse['workorderid']
-        );
-    }
-
-    /**
-     * Performs a precheck for payolution installment
+     * Performs a pre-check for payolution installment
      *
      * @param string $sPaymentId
      * @param string $sParamsJson
@@ -231,19 +134,35 @@ class FcPayOneAjax extends BaseController
     public function fcpoTriggerPrecheck(string $sPaymentId, string $sParamsJson): bool|string
     {
         $oPaymentController = $this->_oFcPoHelper->getFactoryObject(PaymentController::class);
-        $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson));
+        $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult = $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
 
         return ($mPreCheckResult === true) ? 'SUCCESS' : $mPreCheckResult;
     }
 
     /**
-     * Performs a precheck for payolution installment
+     * Formats error message to be displayed in a error box
+     *
+     * @param string $sMessage
+     * @return string
+     */
+    public function fcpoReturnErrorMessage(string $sMessage): string
+    {
+        $sMessage = utf8_encode($sMessage);
+
+        $sReturn = '<p class="payolution_message_error">';
+        $sReturn .= $sMessage;
+
+        return $sReturn . '</p>';
+    }
+
+    /**
+     * Performs a pre-check for payolution installment
      *
      * @param string $sPaymentId
-     * @return mixed
+     * @return array|bool
      */
-    public function fcpoTriggerInstallmentCalculation(string $sPaymentId)
+    public function fcpoTriggerInstallmentCalculation(string $sPaymentId): array|bool
     {
         $oPaymentController = $this->_oFcPoHelper->getFactoryObject(PaymentController::class);
 
@@ -259,7 +178,7 @@ class FcPayOneAjax extends BaseController
      * @param array $aCalculation
      * @return string
      */
-    public function fcpoParseCalculation2Html($aCalculation)
+    public function fcpoParseCalculation2Html(array $aCalculation): string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
@@ -284,12 +203,13 @@ class FcPayOneAjax extends BaseController
         $sHtml .= '</fieldset>';
         $sHtml .= '</div></div>';
         $sHtml .= '<div class="payolution_installment_details">';
+        $sDownloadUrl = '';
         foreach ($aCalculation as $sKey => $aCurrentInstallment) {
             $sHtml .= '<div id="payolution_rates_details_' . $sKey . '" class="payolution_rates_invisible">';
             foreach ($aCurrentInstallment['Months'] as $sMonth => $aRatesDetails) {
                 $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) . '<br>';
             }
-            $sDownloadUrl = $oConfig->getShopUrl() . '/modules/fc/fcpayone/lib/fcpopopup_content.php?login=1&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
+            $sDownloadUrl = $oConfig->getShopUrl() . '?login=1&cl=FcPoPopUpContent&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
             $sHtml .= '</div>';
 
         }
@@ -302,10 +222,10 @@ class FcPayOneAjax extends BaseController
      * Set hidden fields for beeing able to set needed values
      *
      * @param string $sKey
-     * @param array  $aCurrentInstallment
+     * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestHiddenFields($sKey, $aCurrentInstallment)
+    protected function _fcpoGetInsterestHiddenFields(string $sKey, array $aCurrentInstallment): string
     {
         $sHtml = '<input type="hidden" id="payolution_installment_value_' . $sKey . '" value="' . str_replace('.', ',', (string)$aCurrentInstallment['Amount']) . '">';
         $sHtml .= '<input type="hidden" id="payolution_installment_duration_' . $sKey . '" value="' . $aCurrentInstallment['Duration'] . '">';
@@ -319,10 +239,10 @@ class FcPayOneAjax extends BaseController
      * Returns a html radio button for current installment offer
      *
      * @param string $sKey
-     * @param array  $aCurrentInstallment
+     * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestRadio($sKey, $aCurrentInstallment)
+    protected function _fcpoGetInsterestRadio(string $sKey, array $aCurrentInstallment): string
     {
         return '<input type="radio" id="payolution_installment_offer_' . $sKey . '" name="payolution_installment_selection" value="' . $sKey . '">';
     }
@@ -331,10 +251,10 @@ class FcPayOneAjax extends BaseController
      * Returns a html label for current installment offer radiobutton
      *
      * @param string $sKey
-     * @param array  $aCurrentInstallment
+     * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestLabel($sKey, $aCurrentInstallment)
+    protected function _fcpoGetInsterestLabel(string $sKey, array $aCurrentInstallment): string
     {
         $sInterestCaption = $this->_fcpoGetInsterestCaption($aCurrentInstallment);
 
@@ -347,7 +267,7 @@ class FcPayOneAjax extends BaseController
      * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestCaption($aCurrentInstallment)
+    protected function _fcpoGetInsterestCaption(array $aCurrentInstallment): string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sPerMonth = $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_PER_MONTH');
@@ -356,20 +276,18 @@ class FcPayOneAjax extends BaseController
         $sDuration = $aCurrentInstallment['Duration'];
         $sCurrency = $aCurrentInstallment['Currency'];
 
-        // put all together to final caption
-        $sCaption = $sMonthlyAmount . " " . $sCurrency . " " . $sPerMonth . " - " . $sDuration . " " . $sRates;
-
-        return $sCaption;
+        // return all together to final caption
+        return $sMonthlyAmount . " " . $sCurrency . " " . $sPerMonth . " - " . $sDuration . " " . $sRates;
     }
 
     /**
      * Returns a caption for a certain month
      *
      * @param string $sMonth
-     * @param array  $aRatesDetails
+     * @param array $aRatesDetails
      * @return string
      */
-    protected function _fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails)
+    protected function _fcpoGetInsterestMonthDetail(string $sMonth, array $aRatesDetails): string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sRateCaption = $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_RATE');
@@ -385,7 +303,7 @@ class FcPayOneAjax extends BaseController
      *
      * @return string
      */
-    protected function _fcpoGetLightView()
+    protected function _fcpoGetLightView(): string
     {
         $sContent = 'class="lightview" data-lightview-type="iframe" data-lightview-options="';
         $sContent .= "width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'";
@@ -394,154 +312,151 @@ class FcPayOneAjax extends BaseController
     }
 
     /**
-     * Formats error message to be displayed in a error box
-     *
-     * @param string $sMessage
-     * @return string
+     * @param string $sParamsJson
+     * @return bool|string
+     * @throws JsonException
      */
-    public function fcpoReturnErrorMessage($sMessage)
-    {
-        $sMessage = utf8_encode($sMessage);
-
-        $sReturn = '<p class="payolution_message_error">';
-        $sReturn .= $sMessage;
-
-        return $sReturn . '</p>';
-    }
-
-    public function fcpoAplRegisterDevice($sParamsJson)
+    public function fcpoAplRegisterDevice(string $sParamsJson): bool|string
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
 
         $allowedDevice = $aParams['allowed'];
         $oSession->setVariable('applePayAllowedDevice', $allowedDevice);
         return json_encode(['status' => 'SUCCESS', 'message' => '']);
     }
 
-    public function fcpoAplCreateSession($sParamsJson)
+    /**
+     * @param string $sParamsJson
+     * @return false|string
+     * @throws JsonException
+     */
+    public function fcpoAplCreateSession(string $sParamsJson): bool|string
     {
-        $logger = Registry::getLogger();
+        $oLogger = Registry::getLogger();
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
-        $aParams = json_decode((string)$sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
 
         /** @var ViewConfig $config */
         $oViewConfig = $this->_oFcPoHelper->fcpoGetViewConfig();
         /** @var  Config $oConfig */
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
-        $certDir = $oViewConfig->fcpoGetCertDirPath();
-        $shopFQDN = $_SERVER['SERVER_NAME'];
-        $validationUrl = $aParams['validationUrl'];
+        $sCertDir = $oViewConfig->fcpoGetCertDirPath();
+        $sShopFQDN = $_SERVER['SERVER_NAME'];
+        $sValidationUrl = $aParams['validationUrl'];
 
         try {
-            $merchantId = $oConfig->getConfigParam('sFCPOAplMerchantId');
-            $certificateFileName = $oConfig->getConfigParam('sFCPOAplCertificate');
-            $keyFileName = $oConfig->getConfigParam('sFCPOAplKey');
-            $keyPassword = $oConfig->getConfigParam('sFCPOAplPassword');
+            $sMerchantId = $oConfig->getConfigParam('sFCPOAplMerchantId');
+            $sCertificateFileName = $oConfig->getConfigParam('sFCPOAplCertificate');
+            $sKeyFileName = $oConfig->getConfigParam('sFCPOAplKey');
+            $sKeyPassword = $oConfig->getConfigParam('sFCPOAplPassword');
 
             $payload = [
-                'merchantIdentifier' => $merchantId,
+                'merchantIdentifier' => $sMerchantId,
                 'displayName' => 'PAYONE Apple Pay',
                 'initiative' => 'web',
-                'initiativeContext' => $shopFQDN
+                'initiativeContext' => $sShopFQDN
             ];
 
             $curl = new Curl();
-            $curl->setUrl($validationUrl);
+            $curl->setUrl($sValidationUrl);
             $curl->setMethod('POST');
-            $curl->setOption('CURLOPT_SSLCERT', $certDir . $certificateFileName);
-            $curl->setOption('CURLOPT_SSLKEY', $certDir . $keyFileName);
-            $curl->setOption('CURLOPT_SSLKEYPASSWD', $keyPassword);
+            $curl->setOption('CURLOPT_SSLCERT', $sCertDir . $sCertificateFileName);
+            $curl->setOption('CURLOPT_SSLKEY', $sCertDir . $sKeyFileName);
+            $curl->setOption('CURLOPT_SSLKEYPASSWD', $sKeyPassword);
             $curl->setOption('CURLOPT_POSTFIELDS', json_encode($payload, JSON_THROW_ON_ERROR));
-            $httpResponse = $curl->execute();
-            $statusCode = $curl->getStatusCode();
+            $oHttpResponse = $curl->execute();
+            $iStatusCode = $curl->getStatusCode();
 
-            if ($statusCode !== 200) {
-                $logger->error($oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR') . ' : ' . var_export($httpResponse, true));
+            if ($iStatusCode !== 200) {
+                $oLogger->error($oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR') . ' : ' . var_export($oHttpResponse, true));
 
-                $response = [
+                $aResponse = [
                     'status' => 'ERROR',
                     'message' => $oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR'),
-                    'errorDetails' => $httpResponse
+                    'errorDetails' => $oHttpResponse
                 ];
 
-                return json_encode($response, JSON_THROW_ON_ERROR);
+                return json_encode($aResponse, JSON_THROW_ON_ERROR);
             }
 
-            $merchantSession = json_decode($httpResponse, true, 512, JSON_THROW_ON_ERROR);
-            $response = [
+            $aMerchantSession = json_decode($oHttpResponse, true, 512, JSON_THROW_ON_ERROR);
+            $aResponse = [
                 'status' => 'SUCCESS',
                 'message' => '',
-                'merchantSession' => $merchantSession
+                'merchantSession' => $aMerchantSession
             ];
 
-            return json_encode($response, JSON_THROW_ON_ERROR);
+            return json_encode($aResponse, JSON_THROW_ON_ERROR);
 
-        } catch (Exception $e) {
-            $logger->error($e->getTraceAsString());
+        } catch (Exception $oEx) {
+            $oLogger->error($oEx->getTraceAsString());
 
-            $response = [
+            $aResponse = [
                 'status' => 'ERROR',
                 'message' => $oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR'),
-                'errorDetails' => $e->getMessage()
+                'errorDetails' => $oEx->getMessage()
             ];
 
-            return json_encode($response, JSON_THROW_ON_ERROR);
+            return json_encode($aResponse, JSON_THROW_ON_ERROR);
         }
     }
 
     /**
-     * @param $sParamsJson
+     * @param string $sParamsJson
      * @return bool|string
      */
-    public function fcpoAplPayment($sParamsJson): bool|string
+    public function fcpoAplPayment(string $sParamsJson): bool|string
     {
         $aCreditCardMapping = ['visa' => 'V', 'mastercard' => 'M', 'amex' => 'M', 'discover' => 'D'];
 
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $aParams = json_decode($sParamsJson, true);
 
-        $paymentData = $aParams['token']['paymentData'];
-        $methodData = $aParams['token']['paymentMethod'];
-        $creditCardType = '';
-        if (isset($aCreditCardMapping[strtolower((string)$methodData['network'])])) {
-            $creditCardType = $aCreditCardMapping[strtolower((string)$methodData['network'])];
+        $aPaymentData = $aParams['token']['paymentData'];
+        $aMethodData = $aParams['token']['paymentMethod'];
+        $sCreditCardType = '';
+        if (isset($aCreditCardMapping[strtolower((string)$aMethodData['network'])])) {
+            $sCreditCardType = $aCreditCardMapping[strtolower((string)$aMethodData['network'])];
         }
 
-        $tokenData = [
+        $sTokenData = [
             'paydata' => [
-                'paymentdata_token_data' => isset($paymentData['data']) ? $paymentData['data'] : '',
-                'paymentdata_token_ephemeral_publickey' => isset($paymentData['header']['ephemeralPublicKey']) ? $paymentData['header']['ephemeralPublicKey'] : '',
-                'paymentdata_token_publickey_hash' => isset($paymentData['header']['publicKeyHash']) ? $paymentData['header']['publicKeyHash'] : '',
-                'paymentdata_token_transaction_id' => isset($paymentData['header']['transactionId']) ? $paymentData['header']['transactionId'] : '',
-                'paymentdata_token_signature' => isset($paymentData['signature']) ? $paymentData['signature'] : '',
-                'paymentdata_token_version' => isset($paymentData['version']) ? $paymentData['version'] : ''
+                'paymentdata_token_data' => $aPaymentData['data'] ?? '',
+                'paymentdata_token_ephemeral_publickey' => $aPaymentData['header']['ephemeralPublicKey'] ?? '',
+                'paymentdata_token_publickey_hash' => $aPaymentData['header']['publicKeyHash'] ?? '',
+                'paymentdata_token_transaction_id' => $aPaymentData['header']['transactionId'] ?? '',
+                'paymentdata_token_signature' => $aPaymentData['signature'] ?? '',
+                'paymentdata_token_version' => $aPaymentData['version'] ?? ''
             ],
-            'creditCardType' => $creditCardType
+            'creditCardType' => $sCreditCardType
         ];
 
-        $oSession->setVariable('applePayTokenData', $tokenData);
+        $oSession->setVariable('applePayTokenData', $sTokenData);
 
-        $response = [
+        $aResponse = [
             'status' => 'SUCCESS',
             'message' => ''
         ];
 
-        return json_encode($response);
+        return json_encode($aResponse);
     }
 
-    public function fcpoAplOrderInfo()
+    /**
+     * @return false|string
+     */
+    public function fcpoAplOrderInfo(): bool|string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $sPaymentId = $oBasket->getPaymentId();
-        $price = $oBasket->getPrice()->getPrice();
+        $dPrice = $oBasket->getPrice()->getPrice();
 
-        $actShopCurrencyObject = $oConfig->getActShopCurrencyObject();
-        $sCurrency = $actShopCurrencyObject->name;
+        $oActShopCurrencyObject = $oConfig->getActShopCurrencyObject();
+        $sCurrency = $oActShopCurrencyObject->name;
 
         /** @var Country $oCountry */
         $oCountry = $this->_oFcPoHelper->getFactoryObject(Country::class);
@@ -565,12 +480,12 @@ class FcPayOneAjax extends BaseController
             }
         }
 
-        $response = [
+        $aResponse = [
             'status' => 'SUCCESS',
             'message' => '',
             'info' => [
                 'isApl' => $sPaymentId == 'fcpo_apple_pay',
-                'amount' => $price,
+                'amount' => $dPrice,
                 'currency' => $sCurrency,
                 'country' => $sCountry,
                 'supportedNetworks' => $aSupportedNetwork,
@@ -579,10 +494,10 @@ class FcPayOneAjax extends BaseController
         ];
 
         if (count($aSupportedNetwork) < 1) {
-            $response['info']['errorMessage'] = $oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS');
+            $aResponse['info']['errorMessage'] = $oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS');
         }
 
-        return json_encode($response);
+        return json_encode($aResponse);
     }
 
     /**
@@ -631,12 +546,139 @@ class FcPayOneAjax extends BaseController
             $aInstallmentDetails['numberOfRate'] -= 1;
         }
 
-        $code = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
+        $iCode = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
 
-        return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $code);
+        return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $iCode);
     }
 
-    protected function _generateTranslatedResultCode($aRatepayData, $aInstallmentDetails): string|int
+    /**
+     * @return array
+     */
+    public function fcpoGetBNPLInstallment(): array
+    {
+        /** @var FcPoRequest $oRequest */
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+
+        if (!$this->_oFcPoHelper->fcpoIsBNPLConfigured()) {
+            return ['status' => 'ERROR'];
+        }
+
+        $aResponse = $oRequest->sendRequestBNPLInstallmentOptions();
+
+        $aFormattedData = [];
+        $aFormattedData['status'] = $aResponse['status'];
+        $aFormattedData['workorderid'] = $aResponse['workorderid'];
+        $aFormattedData['amountValue'] = $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[amount_value]']);
+        $aFormattedData['amountCurrency'] = $aResponse['add_paydata[amount_currency]'];
+        $aFormattedData['plans'] = [];
+
+        $this->_oFcPoHelper->fcpoSetSessionVariable('fcpopl_secinstallment_workorderid', $aResponse['workorderid']);
+
+        $iCurrPlan = 0;
+        while (true) {
+            if (!isset ($aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'])) {
+                break;
+            }
+
+            $aFormattedData['plans'][$iCurrPlan] = [
+                'effectiveInterestRate' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[effective_interest_rate_' . $iCurrPlan . ']']),
+                'firstRateDate' => $aResponse['add_paydata[first_rate_date_' . $iCurrPlan . ']'],
+                'installmentOptionId' => $aResponse['add_paydata[installment_option_id_' . $iCurrPlan . ']'],
+                'lastRateAmountCurrency' => $aResponse['add_paydata[last_rate_amount_currency_' . $iCurrPlan . ']'],
+                'lastRateAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[last_rate_amount_value_' . $iCurrPlan . ']']),
+                'linkCreditInformationHref' => $aResponse['add_paydata[link_credit_information_href_' . $iCurrPlan . ']'],
+                'linkCreditInformationType' => $aResponse['add_paydata[link_credit_information_type_' . $iCurrPlan . ']'],
+                'monthlyAmountCurrency' => $aResponse['add_paydata[monthly_amount_currency_' . $iCurrPlan . ']'],
+                'monthlyAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[monthly_amount_value_' . $iCurrPlan . ']']),
+                'nominalInterestRate' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[nominal_interest_rate_' . $iCurrPlan . ']']),
+                'numberOfPayments' => $aResponse['add_paydata[number_of_payments_' . $iCurrPlan . ']'],
+                'totalAmountCurrency' => $aResponse['add_paydata[total_amount_currency_' . $iCurrPlan . ']'],
+                'totalAmountValue' => $this->_oFcPoHelper->fcpoPriceFromCentToDec($aResponse['add_paydata[total_amount_value_' . $iCurrPlan . ']']),
+            ];
+
+            $iCurrPlan++;
+        }
+
+        $aFormattedData['html'] = $this->_fcpoBNPLPrepareInstallementHTML($aFormattedData);
+
+        return $aFormattedData;
+    }
+
+    /**
+     * @param array $aInstallamentOptions
+     * @return string
+     */
+    protected function _fcpoBNPLPrepareInstallementHTML(array $aInstallamentOptions) : string
+    {
+        $oLang = $this->_oFcPoHelper->fcpoGetLang();
+
+        $sHtmlList = '';
+        $sHtmlDetails = '';
+        foreach ($aInstallamentOptions['plans'] as $iIndex => $aPlan) {
+            $sHtmlList .= '    <div>';
+            $sHtmlList .= '        <input id="bnplPlan_' . $iIndex . '" type="radio" name="dynvalue[fcpopl_secinstallment_plan]"'
+                                    . 'value="' . $aPlan['installmentOptionId'] . '" onclick="fcpoSelectBNPLInstallmentPlan(' . $iIndex . ')"/>';
+            $sHtmlList .= '        <a href="#" onclick="fcpoSelectBNPLInstallmentPlan(' . $iIndex . ')">'
+                                    . $aPlan['monthlyAmountValue'] . ' ' . $aPlan['monthlyAmountCurrency'] . ' ' . $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_PER_MONTH')
+                                    . ' - '
+                                    . $aPlan['numberOfPayments'] . ' ' . $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_RATES')
+                                    . '</a>';
+            $sHtmlList .= '    </div>';
+
+            $sHtmlDetails .= '    <div id="bnpl_installment_overview_' . $iIndex . '" class="bnpl_installment_overview" style="display: none">';
+            $sHtmlDetails .= '        <strong>' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TITLE') . '</strong>';
+            $sHtmlDetails .= '        <br/>';
+            $sHtmlDetails .= '        <div class="container-fluid">';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_NBRATES') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['numberOfPayments'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TOTALFINANCING') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aInstallamentOptions['amountValue'] . ' ' . $aInstallamentOptions['amountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_TOTALAMOUNT') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['totalAmountValue'] . ' ' . $aPlan['totalAmountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_INTEREST') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['nominalInterestRate'] . '%</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_EFFECTIVEINTEREST') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['effectiveInterestRate'] . '%</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-8">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_MONTHLYRATE') . ':</div>';
+            $sHtmlDetails .= '                <div class="col-lg-4 fcpopl-secinstallment-table-value">' . $aPlan['monthlyAmountValue'] . ' ' . $aPlan['monthlyAmountCurrency'] . '</div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '            <div class="row">';
+            $sHtmlDetails .= '                <div class="col-lg-12">';
+            $sHtmlDetails .= '                    <br/>';
+            $sHtmlDetails .= '                    <a target="_blank" href="' . $aPlan['linkCreditInformationHref'] . '">' . $oLang->translateString('FCPO_BNPL_SECINSTALLMENT_OVW_DL_CREDINFO') . '</a>';
+            $sHtmlDetails .= '                </div>';
+            $sHtmlDetails .= '            </div>';
+            $sHtmlDetails .= '        </div>';
+            $sHtmlDetails .= '    </div>';
+        }
+        $sHtml = '<div class="form-floating mb-3">';
+        $sHtml .= '    <div></div>';
+        $sHtml .= $sHtmlList;
+        $sHtml .= '</div>';
+        $sHtml .= '<div class="form-floating mb-3">';
+        $sHtml .= $sHtmlDetails;
+        $sHtml .= ' </div> ';
+
+        return $sHtml;
+    }
+
+    /**
+     * @param array $aRatepayData
+     * @param array $aInstallmentDetails
+     * @return string|int
+     */
+    protected function _generateTranslatedResultCode(array $aRatepayData, array $aInstallmentDetails): string|int
     {
         if (isset($aRatepayData['installment']) && $aRatepayData['installment'] < $aInstallmentDetails['rate']) {
             return 'RATE_INCREASED';
@@ -648,7 +690,13 @@ class FcPayOneAjax extends BaseController
         return 603;
     }
 
-    protected function _parseRatepayRateDetails($sPaymentMethod, $aInstallmentDetails, $iCode)
+    /**
+     * @param string $sPaymentMethod
+     * @param array $aInstallmentDetails
+     * @param int $iCode
+     * @return string
+     */
+    protected function _parseRatepayRateDetails(string $sPaymentMethod, array $aInstallmentDetails, int $iCode): string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
@@ -805,4 +853,108 @@ class FcPayOneAjax extends BaseController
 
         return $sHtml . '</div>';
     }
+
+    /**
+     * @param string $sPaymentId
+     * @param string $sAction
+     * @param string $sParamsJson
+     * @return string
+     */
+    public function fcpoTriggerKlarnaAction(string $sPaymentId, string $sAction, string $sParamsJson): string
+    {
+        if ($sAction === 'start_session') {
+            try {
+                return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
+            } catch (JsonException $oEx) {
+                $oLogger = Registry::getLogger();
+                $oLogger->error($oEx->getTraceAsString());
+                return '';
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Trigger klarna session start
+     *
+     * @param string $sPaymentId
+     * @param string $sParamsJson
+     * @return string
+     * @throws JsonException
+     */
+    public function fcpoTriggerKlarnaSessionStart(string $sPaymentId, string $sParamsJson): string
+    {
+        $this->_fcpoUpdateUser($sParamsJson);
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+        $aResponse = $oRequest->sendRequestKlarnaStartSession($sPaymentId);
+        $blIsValid = (
+            isset($aResponse['status'], $aResponse['add_paydata[client_token]']) &&
+            $aResponse['status'] === 'OK'
+        );
+
+        if (!$blIsValid) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcPoHelper->fcpoSetSessionVariable(
+                'payerrortext',
+                $aResponse['errormessage']
+            );
+            header("HTTP/1.0 503 Service not available");
+        }
+
+        $this->_fcpoSetKlarnaSessionParams($aResponse);
+
+        $oParamsParser = $this->_oFcPoHelper->getFactoryObject(FcPoParamsParser::class);
+
+        return $oParamsParser->fcpoGetKlarnaWidgetJS(
+            $aResponse['add_paydata[client_token]'],
+            $sParamsJson
+        );
+    }
+
+    /**
+     * @param string $sParamsJson
+     * @return void
+     * @throws JsonException
+     */
+    public function _fcpoUpdateUser(string $sParamsJson): void
+    {
+        $aParams = json_decode($sParamsJson, true, 512, JSON_THROW_ON_ERROR);
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        /** @var User $oUser value */
+        if ($aParams['birthday'] !== 'undefined') {
+            $oUser->oxuser__oxbirthdate = new Field($aParams['birthday']);
+        }
+        if ($aParams['telephone'] !== 'undefined') {
+            $oUser->oxuser__oxfon = new Field($aParams['telephone']);
+        }
+        if ($aParams['personalid'] !== 'undefined') {
+            $oUser->oxuser__fcpopersonalid = new Field($aParams['personalid']);
+        }
+        $oUser->save();
+    }
+
+    /**
+     * Set needed session params for later handling of Klarna payment
+     *
+     * @param array $aResponse
+     * @return void
+     */
+    protected function _fcpoSetKlarnaSessionParams(array $aResponse): void
+    {
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('klarna_client_token');
+        $this->_oFcPoHelper->fcpoSetSessionVariable(
+            'klarna_client_token',
+            $aResponse['add_paydata[client_token]']
+        );
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoWorkorderId');
+        $this->_oFcPoHelper->fcpoSetSessionVariable(
+            'fcpoWorkorderId',
+            $aResponse['workorderid']
+        );
+    }
+
 }

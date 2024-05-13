@@ -1,10 +1,4 @@
 <?php
-
-namespace Fatchip\PayOne\Application\Controller\Admin;
-
-
-use Fatchip\PayOne\Application\Model\FcPoRequestLog;
-
 /**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +17,11 @@ use Fatchip\PayOne\Application\Model\FcPoRequestLog;
  * @copyright (C) Payone GmbH
  * @version       OXID eShop CE
  */
+
+namespace Fatchip\PayOne\Application\Controller\Admin;
+
+use Fatchip\PayOne\Application\Model\FcPoRequestLog;
+
 class FcPayOneApiLog extends FcPayOneAdminDetails
 {
 
@@ -36,19 +35,19 @@ class FcPayOneApiLog extends FcPayOneAdminDetails
     /**
      * Array with existing status of order
      *
-     * @var array
+     * @var array|null
      */
-    protected $_aStatus = null;
+    protected ?array $_aStatus = null;
 
 
     /**
      * Loads transaction log entry with given oxid, passes
-     * it's data to Smarty engine and returns name of template file
-     * "fcpayone_apilog.tpl".
+     * its data to Twig engine and returns path to a template
+     * "fcpayone_apilog".
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         parent::render();
 
