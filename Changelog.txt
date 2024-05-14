@@ -1,3 +1,43 @@
 ==1.0.0==
 
-* Initial module release for Oxid 7
+New Features
+ 
+* initial Release for Oxid 7
+* payment method: PAYONE Alipay
+* payment method: PAYONE Apple Pay
+* payment method: PAYONE Bancontact
+* payment method: PAYONE Barzahlen
+* payment method: PAYONE eps
+* payment method: PAYONE Secured Direct Debit
+* payment method: PAYONE Secured Installment
+* payment method: PAYONE Secure Invoice (legacy)
+* payment method: PAYONE Secured Invoice (new)
+* payment method: PAYONE Giropay
+* payment method: PAYONE iDEAL
+* payment method: PAYONE Klarna Ratenkauf
+* payment method: PAYONE Klarna Rechnung
+* payment method: PAYONE Klarna Sofort bezahlen
+* payment method: PAYONE Credit Card
+* payment method: PAYONE Direct Debit
+* payment method: PAYONE Nachnahme
+* payment method: PAYONE PayPal
+* payment method: PAYONE PayPal Express
+* payment method: PAYONE PostFinance Card
+* payment method: PAYONE PostFinance E-Finance
+* payment method: PAYONE Przelewy24
+* payment method: PAYONE Ratepay Direct Debit
+* payment method: PAYONE Ratepay Installments
+* payment method: PAYONE Ratepay Open Invoice
+* payment method: PAYONE Invoice
+* payment method: PAYONE Sofort
+* payment method: PAYONE Trustly
+* payment method: PAYONE Unzer Lastschrift
+* payment method: PAYONE Unzer Ratenkauf
+* payment method: PAYONE Unzer Rechnungskauf
+* payment method: PAYONE Prepayment
+* payment method: PAYONE WeChat Pay
+* basic order management (captures/refunds)
+ 
+Maintenance
+ 
+* tested with 7.1
