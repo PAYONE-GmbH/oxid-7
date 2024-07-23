@@ -750,7 +750,6 @@ class FcPoRequest extends Base
         $this->addParameter('clearingtype', 'sb'); //Payment method
         $this->addParameter('onlinebanktransfertype', 'IDL');
         $this->addParameter('bankcountry', 'NL');
-        $this->addParameter('bankgrouptype', $aDynvalue['fcpo_so_bankgrouptype_idl']);
     }
 
     /**
