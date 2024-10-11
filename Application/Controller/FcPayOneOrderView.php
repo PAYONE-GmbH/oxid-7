@@ -81,9 +81,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      * special user group ( oxuser::onOrderExecute(); if this option is not disabled in
      * admin). Finally, you will be redirected to next page (order::_getNextStep()).
      *
-     * @return string
+     * @return ?string
      */
-    public function execute(): string
+    public function execute(): ?string
     {
         $sFcpoMandateCheckbox = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
 
