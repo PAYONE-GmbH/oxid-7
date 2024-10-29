@@ -29,20 +29,19 @@
                     <label>{{ translate({ ident: "FCPO_CREDITCARD" }) }}</label>
                 </div>
 
-                <div class="mb-3">
+                <div class="form-floating mb-3">
+                    <span class="inputIframe form-control" id="cardpan"></span>
                     <label for="cardpanInput">{{ translate({ ident: "FCPO_NUMBER" }) }}</label>
-                    <span class="inputIframe" id="cardpan"></span>
                 </div>
-                <div class="mb-3" style="display: inline-block">
-                    <label for="expireInput">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}</label>
-                    <div id="expireInput" class="inputIframe">
-                        <span id="cardexpiremonth"></span>
-                        <span id="cardexpireyear"></span>
+                <div class="form-floating mb-3" style="display: inline-block">
+                    <div id="expireInput" class="inputIframe form-control">
+                        <span id="cardexpiremonth"></span><span id="cardexpireyear"></span>
                     </div>
+                    <label for="expireInput">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}</label>
                 </div>
-                <div class="mb-3">
+                <div class="form-floating mb-3">
+                    <span id="cardcvc2" class="inputIframe form-control"></span>
                     <label for="cvcInput">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}</label>
-                    <span id="cardcvc2" class="inputIframe"></span>
                 </div>
 
                 <div class="form-floating mb-3">
