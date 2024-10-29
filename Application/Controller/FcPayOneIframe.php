@@ -58,22 +58,6 @@ class FcPayOneIframe extends FrontendController
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
     }
 
-
-    /**
-     * The conbtroller renderer
-     *
-     *
-     * @return string
-     */
-    public function render()
-    {
-        $iCurrVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
-        if ($iCurrVersion >= 4500 && $iCurrVersion < 4700) {
-            $this->_sThisTemplate = 'page/checkout/fcpayoneiframe.html.twig';
-        }
-        return parent::render();
-    }
-
     /**
      * Returns iframe url or redirects directly to it
      *

@@ -1,7 +1,0 @@
-{% extends 'page/checkout/inc/summary_sidebar.html.twig' %}
-
-{% block basket_btn_next_bottom %}
-    {#  Place PPE Button here  #}
-    {% include "@fcpayone/frontend/" ~ oViewConf.getActiveTheme() ~ "/fcpo_basket_btn_next_bottom.html.twig" %}
-    {{ parent() }}
-{% endblock %}

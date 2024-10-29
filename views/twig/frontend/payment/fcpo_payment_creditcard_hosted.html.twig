@@ -1,0 +1,106 @@
+{% if oView.hasPaymentMethodAvailableSubTypes('cc') %}
+    <div class="payment-option">
+        {% set dynvalue = oView.getDynValue() %}
+        <div class="payment-option-form">
+            <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+                   value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+            <label
+                    for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+            <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+                <script type="text/javascript" src="{{ oViewConf.fcpoGetHostedPayoneJs() }}"></script>
+                <input type="hidden" name="dynvalue[fcpo_kknumber]" value="">
+                <input type="hidden" name="fcpo_cc_type" value="hosted">
+                <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+                {% for oFcPoCCPaymentMetaData in aFcPoCCPaymentMetaData %}
+                    <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sHashName }}" value="{{ oFcPoCCPaymentMetaData.sHashValue }}">
+                    <input type="hidden" name="{{ oFcPoCCPaymentMetaData.sOperationModeName }}" value="{{ oFcPoCCPaymentMetaData.sOperationModeValue }}">
+                {% endfor %}
+
+                <div class="form-floating mb-3">
+                    <select id="cardtype" name="dynvalue[fcpo_kktype]" class="form-control selectpicker" required>
+                        <option value="V" data-cardtype="none">{{ translate({ ident: "FCPO_CREDITCARD_CHOOSE" }) }}</option>
+                        {% for oFcPoCCPaymentMetaData in aFcPoCCPaymentMetaData %}
+                            <option value="{{ oFcPoCCPaymentMetaData.sPaymentTag }}" {% if oFcPoCCPaymentMetaData.blSelected %}selected{% endif %}>
+                                {{ oFcPoCCPaymentMetaData.sPaymentName }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <label>{{ translate({ ident: "FCPO_CREDITCARD" }) }}</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cardpanInput">{{ translate({ ident: "FCPO_NUMBER" }) }}</label>
+                    <span class="inputIframe" id="cardpan"></span>
+                </div>
+                <div class="mb-3" style="display: inline-block">
+                    <label for="expireInput">{{ translate({ ident: "FCPO_VALID_UNTIL" }) }}</label>
+                    <div id="expireInput" class="inputIframe">
+                        <span id="cardexpiremonth"></span>
+                        <span id="cardexpireyear"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="cvcInput">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}</label>
+                    <span id="cardcvc2" class="inputIframe"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input  id="fcpo_cc_cardholder" type="text" class="form-control" size="20" maxlength="64" name="dynvalue[fcpo_kkcardholder]"
+                            placeholder="{{ translate({ ident: "FCPO_CC_CARDHOLDER" }) }}"
+                            autocomplete="off" value="{{ dynvalue.fcpo_kkcardholder }}"
+                            onkeyup="fcpoValidateCardholder()"
+                            required>
+                    <span class="help-block">{{ translate({ ident: "FCPO_CC_CARDHOLDER_HELPTEXT" }) }}</span>
+                    <div id="fcpo_cc_cardholder_invalid" class="fcpo_check_error">
+                    <span class="help-block">
+                        <ul role="alert" class="list-unstyled text-danger">
+                            <li>{{ translate({ ident: "FCPO_CC_CARDHOLDER_INVALID" }) }}</li>
+                        </ul>
+                    </span>
+                    </div>
+                    <label id="fcpo_cc_cardholder_label">{{ translate({ ident: "FCPO_CC_CARDHOLDER" }) }}</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <div id="errorOutput"></div>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <div id="errorCVC" style="display:none;" class="alert-danger">
+                        {{ translate({ ident: "FCPO_CC_HOSTED_ERROR_CVC" }) }}
+                    </div>
+                    <div id="errorCardType" style="display:none;" class="alert-danger">
+                        {{ translate({ ident: "FCPO_CC_HOSTED_ERROR_CARDTYPE" }) }}
+                    </div>
+                    <div id="errorIncomplete" style="display:none;" class="alert-danger">
+                        {{ translate({ ident: "FCPO_CC_HOSTED_ERROR_INCOMPLETE" }) }}
+                    </div>
+                </div>
+
+                {% include "@fcpayone/frontend/payment/inc/fcpo_payment_creditcard_script.html.twig" %}
+
+                {% block checkout_payment_longdesc %}
+                    {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                        <div class="alert alert-info desc">
+                            {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        {% if paymentmethod.getPrice() %}
+            <div class="payment-option-price">
+                {% set oPaymentPrice = paymentmethod.getPrice() %}
+                {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                    {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                    {% if oPaymentPrice.getVatValue() > 0 %}
+                        {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                    {% endif %}
+                {% else %}
+                    {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
