@@ -1,0 +1,15 @@
+{% extends 'page/checkout/basket.html.twig' %}
+
+{% block checkout_basket_next_step_top %}
+    {{ parent() }}
+{% endblock %}
+
+{% block checkout_basket_main %}
+    {% include "@fcpayone/frontend/basket/fcpo_basket_errormessage.html.twig" %}
+    {% set iPayError = oViewConf.fcpoGetPaymentError() %}
+    {% if iPayError == -20 %}
+        <div class="alert alert-danger">{{ oViewConf.fcpoGetPaymentErrorText() }}</div>
+    {% endif %}
+
+    {{ parent() }}
+{% endblock %}
