@@ -454,12 +454,15 @@ class FcPayOneEvents
             self::$_oFcPoHelper = oxNew(FcPoHelper::class);
             self::addDatabaseStructure();
             $sMessage .= "Datenbankstruktur angepasst...<br>";
+
+            self::regenerateViews();
+            $sMessage .= "Datenbank-Views erneuert...<br>";
+
             self::addPayonePayments();
             $sMessage .= "Payone-Zahlarten hinzugef&uuml;gt...<br>";
             self::removeDeprecated();
             $sMessage .= "Veraltete Eintr&auml;ge entfernt...<br>";
-            self::regenerateViews();
-            $sMessage .= "Datenbank-Views erneuert...<br>";
+
             self::setDefaultConfigValues();
             self::clearTmp();
             $sMessage .= "Tmp geleert...<br>";
