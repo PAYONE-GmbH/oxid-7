@@ -26,9 +26,13 @@ use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Shop;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Application\Model\Payment;
+use OxidEsales\Eshop\Core\DbMetaDataHandler;
+use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Registry;
+
 
 /**
  * Eventhandler for module activation and deactivation.
@@ -450,12 +454,15 @@ class FcPayOneEvents
             self::$_oFcPoHelper = oxNew(FcPoHelper::class);
             self::addDatabaseStructure();
             $sMessage .= "Datenbankstruktur angepasst...<br>";
+
+            self::regenerateViews();
+            $sMessage .= "Datenbank-Views erneuert...<br>";
+
             self::addPayonePayments();
             $sMessage .= "Payone-Zahlarten hinzugef&uuml;gt...<br>";
             self::removeDeprecated();
             $sMessage .= "Veraltete Eintr&auml;ge entfernt...<br>";
-            self::regenerateViews();
-            $sMessage .= "Datenbank-Views erneuert...<br>";
+
             self::setDefaultConfigValues();
             self::clearTmp();
             $sMessage .= "Tmp geleert...<br>";
@@ -786,7 +793,8 @@ class FcPayOneEvents
 
         foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
             //INSERT PAYMENT METHOD
-            $blMethodCreated = self::insertRowIfNotExists('oxpayments', ['OXID' => $sPaymentOxid], "INSERT INTO oxpayments(OXID,OXACTIVE,OXDESC,OXADDSUM,OXADDSUMTYPE,OXFROMBONI,OXFROMAMOUNT,OXTOAMOUNT,OXVALDESC,OXCHECKED,OXDESC_1,OXVALDESC_1,OXDESC_2,OXVALDESC_2,OXDESC_3,OXVALDESC_3,OXLONGDESC,OXLONGDESC_1,OXLONGDESC_2,OXLONGDESC_3,OXSORT,FCPOISPAYONE,FCPOAUTHMODE,FCPOLIVEMODE) VALUES ('{$sPaymentOxid}', 0, '{$sPaymentName}', 0, 'abs', 0, 0, 1000000, '', 0, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0, 1, 'preauthorization', 0);");
+            //getCurrentMaxLangId
+            $blMethodCreated = self::createPaymentMethod($sPaymentOxid, $sPaymentName);
 
             // If method go created, user groups are assigned, otherwise we keep what is already set
             if ($blMethodCreated) {
@@ -814,20 +822,66 @@ class FcPayOneEvents
     }
 
     /**
+     * create payment method
+     *
+     * @param string $paymentOxid
+     * @param string $paymentDescription
+     * @return bool
+     */
+    protected static function createPaymentMethod(string $paymentOxid, string $paymentDescription) : bool {
+
+        try {
+            //create base payment method
+            $payment = oxNew(Payment::class);
+            if ( !$payment->load($paymentOxid) ) {
+                $payment->setId($paymentOxid);
+                $payment->assign(
+                    [
+                        'oxactive' => 0,
+                        'oxfromamount' => 0,
+                        'oxtoamount' => 1000000,
+                        'oxaddsumtype' => 'abs',
+                        'fcpoispayone' => 1,
+                        'fcpoauthmode' => 'preauthorization',
+                        'fcpolivemode' => 0,
+                    ]
+                );
+                $payment->save();
+
+                //add title for each lang
+                foreach(array_keys(Registry::getLang()->getLanguageIds()) as $langId) {
+                    $payment->loadInLang($langId, $payment->getId());
+                    $payment->assign(
+                        [
+                            'oxdesc' => $paymentDescription,
+                        ]
+                    );
+                    $payment->save();
+                }
+            }
+        } catch (\Throwable $e) {
+            Registry::getLogger()->error($e,[__CLASS__,__METHOD__]);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Removing depreacted stuff.
      *
      * @return void
      */
     public static function removeDeprecated(): void
     {
-        foreach (self::$_aRemovedPaymentMethods as $sRemovedPaymentMethod) {
+        foreach (self::$_aRemovedPaymentMethods as $paymentOxid) {
             try {
-                self::dropRowIfExists("oxpayments", ['OXID' => $sRemovedPaymentMethod], "DELETE FROM oxpayments WHERE OXID='" . $sRemovedPaymentMethod . "'");
-                self::dropRowIfExists("oxobject2group", ['OXOBJECTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2group WHERE oxobjectid='" . $sRemovedPaymentMethod . "'");
-                self::dropRowIfExists("oxobject2payment", ['OXPAYMENTID' => $sRemovedPaymentMethod], "DELETE FROM oxobject2payment WHERE oxpaymentid='" . $sRemovedPaymentMethod . "'");
+                $payment = oxNew(Payment::class);
+                if ($payment->load($paymentOxid)) {
+                    $payment->delete();
+                    self::dropRowIfExists("oxobject2group", ['OXOBJECTID' => $paymentOxid], "DELETE FROM oxobject2group WHERE oxobjectid='" . $paymentOxid . "'");
+                }
             } catch (Exception $oEx) {
-                $oLogger = Registry::getLogger();
-                $oLogger->error($oEx->getTraceAsString());
+                Registry::getLogger()->error($oEx->getTraceAsString());
             }
         }
     }
@@ -941,9 +995,13 @@ class FcPayOneEvents
      */
     public static function deactivatePaymethods(): void
     {
-        $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
-        $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
-        DatabaseProvider::getDb()->execute($sQ);
+        foreach( array_keys(self::$aPaymentMethods) as $paymentOxid  ) {
+            $payment = oxNew(Payment::class);
+            if ($payment->load($paymentOxid)) {
+                $payment->oxpayments__oxactive = new Field(0);
+                $payment->save();
+            }
+        }
     }
 
     /**
