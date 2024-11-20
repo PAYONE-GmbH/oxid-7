@@ -20,6 +20,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Fatchip\PayOne\Application\Helper\Payment;
+use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\DeliveryList;
 use OxidEsales\Eshop\Application\Model\User;
@@ -47,35 +49,6 @@ class FcPayOneBasket extends FcPayOneBasket_parent
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-    }
-
-    /**
-     * Returns whether PayPal express is active or not
-     *
-     * @return bool
-     * @throws DatabaseConnectionException
-     */
-    public function fcpoIsPayPalExpressActive(): bool
-    {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $sQuery = "SELECT oxactive FROM oxpayments WHERE oxid = 'fcpopaypal_express'";
-        return (bool)$oDb->getOne($sQuery);
-    }
-
-    /**
-     * Returns pic that is configured in database
-     *
-     * @return string
-     * @throws DatabaseConnectionException
-     */
-    public function fcpoGetPayPalExpressPic(): string
-    {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $oLang = $this->_oFcPoHelper->fcpoGetLang();
-        $iLangId = $oLang->getBaseLanguage();
-        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '$iLangId' ORDER BY fcpo_default DESC";
-
-        return $oDb->getOne($sQuery);
     }
 
     /**

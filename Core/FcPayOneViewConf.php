@@ -21,9 +21,12 @@
 namespace Fatchip\PayOne\Core;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\PayPal;
+use Fatchip\PayOne\Application\Helper\Redirect;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
+use Fatchip\PayOne\Application\Helper\Payment as PaymentHelper;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Payment;
@@ -31,9 +34,10 @@ use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Theme;
 
+use function Fatchip\PayOne\getShopBasePath;
+
 class FcPayOneViewConf extends FcPayOneViewConf_parent
 {
-
     /**
      * Name of the module folder
      *
@@ -198,6 +202,68 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
     }
 
     /**
+     * Returns if paypal is active and therefor button can be displayed
+     *
+     * @return bool
+     */
+    public function fcpoCanDisplayPayPalExpressV2Button()
+    {
+        return PaymentHelper::getInstance()->isPaymentMethodActive(PayPal::PPE_V2_EXPRESS);
+    }
+
+    /**
+     * Returns PayPal V2 Express Button ID
+     *
+     * @return string
+     */
+    public function fcpoGetPayPalExpressV2GetButtonId($sPosition)
+    {
+        $sButtonId = "fcpoPayPalExpressV2";
+        #if (PayPal::getInstance()->showBNPLButton() === true) {
+        #    $sButtonId .= "PayLater";
+        #}
+        return $sButtonId.$sPosition;
+    }
+
+    /**
+     * Returns PayPal V2 Express Button Javascript URL
+     *
+     * @return string
+     */
+    public function fcpoGetPayPalExpressV2JavascriptUrl()
+    {
+        return PayPal::getInstance()->getJavascriptUrl();
+    }
+
+    /**
+     * Returns PayPal V2 Express Button color
+     *
+     * @return string
+     */
+    public function fcpoGetPayPalExpressButtonColor()
+    {
+        return PayPal::getInstance()->getButtonColor();
+    }
+
+    /**
+     * Returns PayPal V2 Express Button shape
+     *
+     * @return string
+     */
+    public function fcpoGetPayPalExpressButtonShape()
+    {
+        return PayPal::getInstance()->getButtonShape();
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoGetPayPalExpressSuccessUrl()
+    {
+        return Redirect::getInstance()->getSuccessUrl(false, 'fcpoHandlePayPalExpressV2');
+    }
+
+    /**
      * Method returns active theme path by checking current theme and its parent
      * If theme is not assignable, 'apex' will be the fallback
      *
@@ -359,11 +425,11 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
      */
     public function fcpoGetPayoneSecureEnvironment(string $sPaymentId): string
     {
-        $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
-        $oPayment->load($sPaymentId);
-        $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
-
-        return $blIsLive ? 'p' : 't';
+        $sEnvironment = 't'; // test
+        if (PaymentHelper::getInstance()->isLiveMode($sPaymentId) === true) {
+            $sEnvironment = 'p'; // production/live
+        }
+        return $sEnvironment;
     }
 
     /**

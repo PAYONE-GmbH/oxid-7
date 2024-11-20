@@ -561,80 +561,137 @@
 
     <div class="groupExp">
         <div
-        {% if oView.fcpoIsLogoAdded() %} class="exp"{% endif %}>
-        <a href="#" onclick="_groupExp(this);return false;"
-           class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" })|raw }}</b></a>
-        <dl>
-            <dt>
-                <input type="hidden" name="confbools[blFCPOPayPalDelAddress]" value="false">
-                <input type="checkbox" name="confbools[blFCPOPayPalDelAddress]" value="true"
-                       {% if (confbools.blFCPOPayPalDelAddress) %}checked{% endif %}>
-                {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPAL_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPAL_DELADDRESS")} %}
-            </dt>
-            <dd>
-                {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" })|raw }}
-            </dd>
-            <div class="spacer"></div>
-        </dl>
-        <dl>
-            <dt></dt>
-            <dd>
-                {{ translate({ ident: "FCPO_PAYPAL_LOGOS" })|raw }}
-            </dd>
-            <div class="spacer"></div>
-        </dl>
-        <dl>
-            <dt></dt>
-            <dd>
-                <table border="1" cellspacing="0" cellpadding="2">
-                    <tr>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" })|raw }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" })|raw }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" })|raw }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" })|raw }}</th>
-                        <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" })|raw }}</th>
-                    </tr>
-                    {% for aLogo in oView.fcpoGetPayPalLogos() %}
-                    <tr>
-                        <td>
-                            <input type="hidden" name="logos[{{ aLogo.oxid }}][active]" value="0">
-                            <input type="checkbox" name="logos[{{ aLogo.oxid }}][active]" value="1"
-                                   {% if (aLogo.active) %}checked{% endif %}>
-                        </td>
-                        <td>
-                            <select name="logos[{{ aLogo.oxid }}][langid]" class="editinput">
-                                {% for lang in languages %}
-                                <option value="{{ lang.id }}" {% if lang.id == aLogo.langid %}SELECTED{% endif %}>
-                                    {{ lang.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            {% if aLogo.logo == '' %}
-                            {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" })|raw }}
-                            {% else %}
-                        <img src="{{ aLogo.logo }}">
-                            {% endif %}
-                        </td>
-                        <td>
-                            <input type="file" name="logo_{{ aLogo.oxid }}">
-                        </td>
-                        <td>
-                            <input type="radio" name="defaultlogo" value="{{ aLogo.oxid }}"
-                                   {% if aLogo.default == 1 %}CHECKED{% endif %}>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-                <br>
-                <input type="submit" class="edittext" name="addPayPalLogo"
-                       value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" })|raw }}"
-                       onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
-            </dd>
-            <div class="spacer"></div>
-        </dl>
+            {% if oView.fcpoIsLogoAdded() %} class="exp"{% endif %}>
+            <a href="#" onclick="_groupExp(this);return false;"
+               class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PP_EXPRESS_LOGOS" })|raw }}</b></a>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOPayPalDelAddress]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOPayPalDelAddress]" value="true"
+                           {% if (confbools.blFCPOPayPalDelAddress) %}checked{% endif %}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPAL_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPAL_DELADDRESS")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPAL_DELADDRESS" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt></dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPAL_LOGOS" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt></dt>
+                <dd>
+                    <table border="1" cellspacing="0" cellpadding="2">
+                        <tr>
+                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_ACTIVE" })|raw }}</th>
+                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LANG" })|raw }}</th>
+                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_LOGO" })|raw }}</th>
+                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_UPLOAD" })|raw }}</th>
+                            <th>{{ translate({ ident: "FCPO_PAYPAL_LOGOS_DEFAULT" })|raw }}</th>
+                        </tr>
+                        {% for aLogo in oView.fcpoGetPayPalLogos() %}
+                        <tr>
+                            <td>
+                                <input type="hidden" name="logos[{{ aLogo.oxid }}][active]" value="0">
+                                <input type="checkbox" name="logos[{{ aLogo.oxid }}][active]" value="1"
+                                       {% if (aLogo.active) %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <select name="logos[{{ aLogo.oxid }}][langid]" class="editinput">
+                                    {% for lang in languages %}
+                                    <option value="{{ lang.id }}" {% if lang.id == aLogo.langid %}SELECTED{% endif %}>
+                                        {{ lang.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                {% if aLogo.logo == '' %}
+                                {{ translate({ ident: "FCPO_PAYPAL_LOGOS_NOT_EXISTING" })|raw }}
+                                {% else %}
+                            <img src="{{ aLogo.logo }}">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input type="file" name="logo_{{ aLogo.oxid }}">
+                            </td>
+                            <td>
+                                <input type="radio" name="defaultlogo" value="{{ aLogo.oxid }}"
+                                       {% if aLogo.default == 1 %}CHECKED{% endif %}>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    <input type="submit" class="edittext" name="addPayPalLogo"
+                           value="{{ translate({ ident: "FCPO_CONFIG_ADD_PP_EXPRESS_LOGO" })|raw }}"
+                           onClick="Javascript:document.myedit.fnc.value='save'" {{ readonly }}>
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
     </div>
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYPALV2" })|raw }}</b></a>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOPayPalV2BNPL]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOPayPalV2BNPL]" value="true" {% if confbools.blFCPOPayPalV2BNPL %}checked{% endif %} {{ readonly }}>
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPALV2_BNPL" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <input type="text" class="txt" name="confstrs[blFCPOPayPalV2MerchantID]" value="{{ confstrs.blFCPOPayPalV2MerchantID|raw }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPALV2_MERCHANT_ID"), 'sHelpText': help_text("FCPO_HELP_PAYPALV2_MERCHANT_ID")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPALV2_MERCHANT_ID" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <select name="confstrs[blFCPOPayPalV2ButtonColor]">
+                        <option value="gold" {% if confstrs.blFCPOPayPalV2ButtonColor == "gold" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_GOLD" })|raw }}</option>
+                        <option value="blue" {% if confstrs.blFCPOPayPalV2ButtonColor == "blue" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_BLUE" })|raw }}</option>
+                        <option value="silver" {% if confstrs.blFCPOPayPalV2ButtonColor == "silver" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_SILVER" })|raw }}</option>
+                        <option value="white" {% if confstrs.blFCPOPayPalV2ButtonColor == "white" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_WHITE" })|raw }}</option>
+                        <option value="black" {% if confstrs.blFCPOPayPalV2ButtonColor == "black" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_BLACK" })|raw }}</option>
+                    </select>
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPALV2_BUTTON_COLOR" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <select name="confstrs[blFCPOPayPalV2ButtonShape]">
+                        <option value="rect" {% if confstrs.blFCPOPayPalV2ButtonShape == "rect" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_RECT" })|raw }}</option>
+                        <option value="pill" {% if confstrs.blFCPOPayPalV2ButtonShape == "pill" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_PILL" })|raw }}</option>
+                        <option value="sharp" {% if confstrs.blFCPOPayPalV2ButtonShape == "sharp" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_PAYPALV2_BUTTON_SHARP" })|raw }}</option>
+                    </select>
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPALV2_BUTTON_SHAPE" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
     </div>
 
     <div class="groupExp">

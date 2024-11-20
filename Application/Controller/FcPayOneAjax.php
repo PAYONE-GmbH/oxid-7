@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoParamsParser;
@@ -104,6 +105,10 @@ class FcPayOneAjax extends BaseController
 
             if ($sAction == 'fcporp_calculation' && $sPaymentId == 'fcporp_installment') {
                 echo $this->fcpoRatepayCalculation($sParamsJson);
+            }
+
+            if ($sAction == 'start_paypal_express' && $sPaymentId == PayPal::PPE_V2_EXPRESS) {
+                echo $this->fcpoStartPayPalExpress();
             }
 
             if ($sAction == 'fcpopl_load_installment_form' && $sPaymentId == 'fcpopl_secinstallment') {
@@ -549,6 +554,32 @@ class FcPayOneAjax extends BaseController
         $iCode = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
 
         return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $iCode);
+    }
+
+    public function fcpoStartPayPalExpress()
+    {
+        $aJsonResponse = [
+            'success' => false,
+        ];
+
+        /** @var FcPoRequest $oRequest */
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+        $aResponse = $oRequest->sendRequestGenericPayment(PayPal::PPE_V2_EXPRESS);
+
+        if (isset($aResponse['status'], $aResponse['workorderid'], $aResponse['add_paydata[orderId]']) && $aResponse['status'] == 'REDIRECT') {
+            $aJsonResponse['success'] = true;
+            $aJsonResponse['order_id'] = $aResponse['add_paydata[orderId]'];
+
+            if (!empty($aResponse['workorderid'])) {
+                $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoWorkorderId', $aResponse['workorderid']);
+            }
+        }
+
+        if (isset($aResponse['status'], $aResponse['customermessage']) && $aResponse['status'] == 'ERROR') {
+            $aJsonResponse['errormessage'] = $aResponse['customermessage'];
+        }
+
+        return json_encode($aJsonResponse);
     }
 
     /**

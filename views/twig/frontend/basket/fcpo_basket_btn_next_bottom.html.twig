@@ -1,10 +1,13 @@
-{% if oViewConf.getActiveClassName() == 'basket' %}
-    {% if oView.fcpoGetPayPalExpressPic() %}
-        <form autocomplete="off" action="{{ oViewConf.getSslSelfLink()|raw }}" method="post">
-            {{ oViewConf.getHiddenSid()|raw }}
-            <input type="hidden" name="cl" value="basket">
-            <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
-            <input type="image" src="{{ oView.fcpoGetPayPalExpressPic()|raw }}">
-        </form>
-    {% endif %}
+{% if oViewConf.getActiveClassName() == 'basket' and oView.fcpoGetPayPalExpressPic() %}
+    <form autocomplete="off" action="{{ oViewConf.getSslSelfLink()|raw }}" method="post">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cl" value="basket">
+        <input type="hidden" name="fnc" value="fcpoUsePayPalExpress">
+        <input type="image" src="{{ oView.fcpoGetPayPalExpressPic()|raw }}">
+    </form>
+{% endif %}
+
+{% if oViewConf.getActiveClassName() == 'basket' and oViewConf.fcpoCanDisplayPayPalExpressV2Button() %}
+    {{ style({ include: oViewConf.getModuleUrl('fcpayone','css/fcpopaypalexpress.css') }) }}
+    {% include_dynamic "@fcpayone/frontend/fcpo_paypal_express_v2.html.twig" with {type: "payone", position: "BasketBottom", layout: "vertical"} %}
 {% endif %}
