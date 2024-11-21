@@ -384,6 +384,8 @@ class FcPayOneEvents
         'fcpocreditcard' => 'PAYONE Kreditkarte',
         'fcpopaypal' => 'PAYONE PayPal',
         'fcpopaypal_express' => 'PAYONE PayPal Express',
+        'fcpopaypalv2' => 'PAYONE PayPal V2',
+        'fcpopaypalv2_express' => 'PAYONE PayPal Express V2',
         'fcpoklarna_invoice' => 'PAYONE Klarna Rechnung',
         'fcpoklarna_installments' => 'PAYONE Klarna Ratenkauf',
         'fcpoklarna_directdebit' => 'PAYONE Klarna Sofort bezahlen',

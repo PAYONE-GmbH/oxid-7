@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Address;
@@ -124,7 +125,24 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     public function fcpoHandlePayPalExpress(): string|null
     {
         try {
-            $this->_handlePayPalExpressCall();
+            $this->_handlePayPalExpressCall(PayPal::PPE_EXPRESS);
+            return null;
+        } catch (Exception $oEx) {
+            $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
+            $oUtilsView->addErrorToDisplay($oEx);
+            return "basket";
+        }
+    }
+
+    /**
+     * Handles paypal express
+     *
+     * @return string|null
+     */
+    public function fcpoHandlePayPalExpressV2(): string|null
+    {
+        try {
+            $this->_handlePayPalExpressCall(PayPal::PPE_V2_EXPRESS);
             return null;
         } catch (Exception $oEx) {
             $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
@@ -139,17 +157,17 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      * @return void
      * @throws Exception
      */
-    protected function _handlePayPalExpressCall(): void
+    protected function _handlePayPalExpressCall($sPaymentId): void
     {
         $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoWorkorderId');
         if ($sWorkorderId) {
             $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
-            $aOutput = $oRequest->sendRequestGenericPayment($sWorkorderId);
-            $this->_oFcPoHelper->fcpoSetSessionVariable('paymentid', "fcpopaypal_express");
+            $aOutput = $oRequest->sendRequestGenericPayment($sPaymentId, $sWorkorderId);
+            $this->_oFcPoHelper->fcpoSetSessionVariable('paymentid', $sPaymentId);
             $oUser = $this->_fcpoHandleExpressUser($aOutput);
 
             if ($oUser) {
-                $this->_fcpoUpdateUserOfExpressBasket($oUser, "fcpopaypal_express");
+                $this->_fcpoUpdateUserOfExpressBasket($oUser, $sPaymentId);
             }
         }
     }
@@ -193,14 +211,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     {
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
         $oUser = $this->_oFcPoHelper->getFactoryObject(User::class);
+
         $blReturn = $oUser->fcpoDoesUserAlreadyExist($sEmail);
-
-        $blIsExpressException = (
-            $blReturn !== false
-            && $sPaymentId == 'fcpopaypal_express'
-        );
-
-        if ($blIsExpressException) {
+        if ($blReturn !== false && in_array($sPaymentId, [PayPal::PPE_EXPRESS, PayPal::PPE_V2_EXPRESS])) {
             // always using the address that has been sent by express service is mandatory
             $blReturn = false;
         }
@@ -341,9 +354,9 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
 
         switch ($sPaymentId) {
-            case 'fcpopaypal_express':
-                $aStreetAndNumber =
-                    $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
+            case PayPal::PPE_EXPRESS:
+            case PayPal::PPE_V2_EXPRESS:
+                $aStreetAndNumber = $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
                 break;
             default:
                 $aStreetAndNumber = [
@@ -493,7 +506,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
 
         $aMap = [
-            'fcpopaypal_express' => 'basket'
+            PayPal::PPE_EXPRESS => 'basket'
         ];
 
         return (isset($aMap[$sPaymentId])) ?
@@ -512,7 +525,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         $sPaymentId = $this->_oFcPoHelper->fcpoGetSessionVariable('paymentid');
 
         $aMap = [
-            'fcpopaypal_express' => 'fcpoUsePayPalExpress'
+            PayPal::PPE_EXPRESS => 'fcpoUsePayPalExpress'
         ];
 
         return (isset($aMap[$sPaymentId])) ?

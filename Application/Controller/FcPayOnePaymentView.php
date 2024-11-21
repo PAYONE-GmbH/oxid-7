@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -1075,7 +1076,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _fcpoCheckPaypalExpressRemoval(): void
     {
-        $this->_fcpoRemovePaymentFromFrontend('fcpopaypal_express');
+        $this->_fcpoRemovePaymentFromFrontend(PayPal::PPE_EXPRESS);
+        $this->_fcpoRemovePaymentFromFrontend(PayPal::PPE_V2_EXPRESS);
     }
 
     /**

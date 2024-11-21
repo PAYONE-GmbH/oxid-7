@@ -21,6 +21,7 @@
 namespace Fatchip\PayOne\Application\Model;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Basket;
@@ -855,7 +856,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             return parent::save();
         }
 
-        if ($this->oxorder__oxshopid->value === false) {
+        if (!$this->oxorder__oxshopid || $this->oxorder__oxshopid->value === false) {
             $oShop = $oConfig->getActiveShop();
             $this->oxorder__oxshopid = new Field($oShop->getId());
         }
@@ -1298,19 +1299,29 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * Checks based on the payment method whether
      * the detailed product list is needed.
      *
-     * @return mixed
+     * @return bool
      */
-    public function isDetailedProductInfoNeeded(): mixed
+    public function isDetailedProductInfoNeeded(): bool
     {
-        $blForcedByPaymentMethod = in_array(
-            $this->oxorder__oxpaymenttype->value,
-            ['fcpobillsafe', 'fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit', 'fcpo_secinvoice', 'fcporp_bill', 'fcporp_debitnote', 'fcporp_installment', 'fcpopl_secinvoice', 'fcpopl_secinstallment','fcpopl_secdebitnote']
-        );
-
-        if ($blForcedByPaymentMethod) return true;
-
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam('blFCPOSendArticlelist');
+        if ((bool)$this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('blFCPOSendArticlelist') === true ||
+            in_array($this->oxorder__oxpaymenttype->value, [
+            'fcpobillsafe',
+            'fcpoklarna',
+            'fcpoklarna_invoice',
+            'fcpoklarna_installments',
+            'fcpoklarna_directdebit',
+            'fcpo_secinvoice',
+            'fcporp_bill',
+            'fcporp_debitnote',
+            'fcporp_installment',
+            'fcpopl_secinvoice',
+            'fcpopl_secinstallment',
+            'fcpopl_secdebitnote',
+            PayPal::PPE_V2_EXPRESS,
+        ])) {
+            return true;
+        }
+        return false;
     }
 
     public function isCancellationReasonNeeded(): bool
@@ -1560,7 +1571,12 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     public function fcIsPayPalOrder(): bool
     {
         $blReturn = false;
-        if ($this->oxorder__oxpaymenttype->value == 'fcpopaypal' || $this->oxorder__oxpaymenttype->value == 'fcpopaypal_express') {
+        if (in_array($this->oxorder__oxpaymenttype->value, [
+            'fcpopaypal',
+            'fcpopaypalv2',
+            PayPal::PPE_EXPRESS,
+            PayPal::PPE_V2_EXPRESS,
+        ])) {
             $blReturn = true;
         }
         return $blReturn;
