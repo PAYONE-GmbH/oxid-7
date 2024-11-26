@@ -431,8 +431,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         );
 
         if ($blSaveAfterRedirect === false && $this->checkOrderExist($sGetChallenge)) {
-            $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
-            $oUtils->logger('BLOCKER');
+            \OxidEsales\Eshop\Core\Registry::getLogger()->debug('finalizeOrder: Order already exists: ' . $sGetChallenge, [$oBasket, $oUser]);
             // we might use this later, this means that somebody klicked like mad on order button
             return self::ORDER_STATE_ORDEREXISTS;
         }
