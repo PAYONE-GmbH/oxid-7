@@ -1219,7 +1219,7 @@ class FcPoRequest extends Base
         if ($sPaymentCosts != 0) {
             $sPayDesc = $oLang->translateString('FCPO_DEDUCTION', null, false);
             if ($sPaymentCosts > 0) {
-                $sPayDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
+                $sPayDesc = $oLang->translateString('FCPO_SURCHARGE', null, false);
             }
             $sPayDesc .= ' ' . str_replace(':', '', $oLang->translateString('FCPO_PAYMENTTYPE', null, false));
             $this->addInvoicePosition($iIndex, 'payment', $sPaymentCosts, 'handling', 1, $sPayDesc, $this->_fcpoFetchVatCostsFromBasket($oBasket, 'oxpayment'));
@@ -1565,7 +1565,7 @@ class FcPoRequest extends Base
             if (($oOrder->oxorder__oxdelcost && $oOrder->oxorder__oxdelcost->value != 0) && (empty($aPositions) || ($blDebit === false || array_key_exists('oxdelcost', $aPositions) !== false))) {
                 $sDelDesc = $oLang->translateString('FCPO_DEDUCTION', null, false);
                 if ($oOrder->oxorder__oxdelcost->value > 0) {
-                    $sDelDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
+                    $sDelDesc = $oLang->translateString('FCPO_SURCHARGE', null, false);
                 }
                 $sDelDesc .= ' ' . str_replace(':', '', $oLang->translateString('FCPO_SHIPPINGCOST', null, false));
 
@@ -1578,7 +1578,7 @@ class FcPoRequest extends Base
             if (($oOrder->oxorder__oxpaycost && $oOrder->oxorder__oxpaycost->value != 0) && (empty($aPositions) || ($blDebit === false || array_key_exists('oxpaycost', $aPositions) !== false))) {
                 $sPayDesc = $oLang->translateString('FCPO_DEDUCTION', null, false);
                 if ($oOrder->oxorder__oxpaycost->value > 0) {
-                    $sPayDesc .= $oLang->translateString('FCPO_SURCHARGE', null, false);
+                    $sPayDesc = $oLang->translateString('FCPO_SURCHARGE', null, false);
                 }
                 $sPayDesc .= ' ' . str_replace(':', '', $oLang->translateString('FCPO_PAYMENTTYPE', null, false));
 
@@ -2404,7 +2404,11 @@ class FcPoRequest extends Base
             $this->_fcpoAddBasketItemsFromSession();
         }
 
-        $this->_addRedirectUrls('basket', false, 'fcpoHandlePayPalExpress');
+        $sRedirectFuntion = 'fcpoHandlePayPalExpress';
+        if ($sPaymentType == PayPal::PPE_V2_EXPRESS) {
+            $sRedirectFuntion = 'fcpoHandlePayPalExpressV2';
+        }
+        $this->_addRedirectUrls('basket', false, $sRedirectFuntion);
 
         return $this->send();
     }
