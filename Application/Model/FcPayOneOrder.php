@@ -1572,8 +1572,23 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $blReturn = false;
         if (in_array($this->oxorder__oxpaymenttype->value, [
             'fcpopaypal',
-            'fcpopaypalv2',
             PayPal::PPE_EXPRESS,
+        ])) {
+            $blReturn = true;
+        }
+        return $blReturn;
+    }
+
+    /**
+     * Method checks via current paymenttype is of payone PayPal V2 type
+     *
+     * @return bool
+     */
+    public function fcIsPayPalV2Order(): bool
+    {
+        $blReturn = false;
+        if (in_array($this->oxorder__oxpaymenttype->value, [
+            'fcpopaypalv2',
             PayPal::PPE_V2_EXPRESS,
         ])) {
             $blReturn = true;
