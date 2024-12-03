@@ -642,6 +642,17 @@
             <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_PAYPALV2" })|raw }}</b></a>
             <dl>
                 <dt>
+                    <input type="hidden" name="confbools[blFCPOPayPalV2DelAddress]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOPayPalV2DelAddress]" value="true" {% if oView.isPayPalV2DelAddressActive() %}checked{% endif %}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_PAYPALV2_DELADDRESS"), 'sHelpText': help_text("FCPO_HELP_PAYPALV2_DELADDRESS")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_PAYPALV2_DELADDRESS" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
                     <input type="hidden" name="confbools[blFCPOPayPalV2BNPL]" value="false">
                     <input type="checkbox" name="confbools[blFCPOPayPalV2BNPL]" value="true" {% if confbools.blFCPOPayPalV2BNPL %}checked{% endif %} {{ readonly }}>
                 </dt>

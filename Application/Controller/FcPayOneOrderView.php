@@ -159,6 +159,11 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _handlePayPalExpressCall($sPaymentId): void
     {
+        if ($this->_oFcPoHelper->fcpoGetSessionVariable('blFcpoPayonePayPalExpressRetry') === true) {
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('blFcpoPayonePayPalExpressRetry');
+            $this->_oFcPoHelper->fcpoGetUtils()->redirect($this->_oFcPoHelper->fcpoGetConfig()->getCurrentShopUrl().'index.php?cl=thankyou', false);
+        }
+
         $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoWorkorderId');
         if ($sWorkorderId) {
             $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);

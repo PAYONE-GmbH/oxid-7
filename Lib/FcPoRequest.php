@@ -295,8 +295,8 @@ class FcPoRequest extends Base
 
         $blIsWalletTypePaymentWithDelAddress = (
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
-            $oOrder->fcIsPayPalOrder() === true &&
-            $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true
+            ($oOrder->fcIsPayPalOrder() === true && $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true) ||
+            ($oOrder->fcIsPayPalV2Order() === true && $oConfig->getConfigParam('blFCPOPayPalV2DelAddress') === true)
         );
 
         $blIsBNPLPayment = (

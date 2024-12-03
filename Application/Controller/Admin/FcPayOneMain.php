@@ -1059,4 +1059,14 @@ class FcPayOneMain extends FcPayOneAdminDetails
         return $oScript->checkChecksumXml();
     }
 
+
+    public function isPayPalV2DelAddressActive()
+    {
+        $aConfBools = $this->fcpoGetConfBools();
+        $sConfigOptionName = "blFCPOPayPalV2DelAddress";
+        if (!isset($aConfBools[$sConfigOptionName]) || $aConfBools[$sConfigOptionName] === true) {
+            return true;
+        }
+        return false;
+    }
 }
