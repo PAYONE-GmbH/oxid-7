@@ -346,8 +346,6 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $this->_blFinishingSave = true;
         $this->save();
 
-        $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
-
         // deleting remark info only when order is finished
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('ordrem');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('stsprotection');
@@ -370,11 +368,13 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         // skipping this action in case of order recalculation
         $this->_fcpoMarkVouchers($blRecalculatingOrder, $oUser, $oBasket);
 
-        if (!$this->oxorder__oxordernr->value) {
+        if (!isset($this->oxorder__oxordernr->value) || !$this->oxorder__oxordernr->value) {
             $this->setNumber();
         } else {
             oxNew(Counter::class)->update($this->getCounterIdent(), $this->oxorder__oxordernr->value);
         }
+
+        $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
 
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoWorkorderId');
@@ -911,8 +911,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoSaveAfterRedirect(bool $blSaveAfterRedirect): void
     {
-        if ($blSaveAfterRedirect === true) {
-            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = '{$this->oxorder__oxordernr->value}' WHERE fcpo_txid = '" . $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoTxid') . "'";
+        if ($blSaveAfterRedirect === true && !empty($this->oxorder__fcpotxid->value)) {
+            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = '{$this->oxorder__oxordernr->value}' WHERE fcpo_txid = '" .$this->oxorder__fcpotxid->value. "'";
             $this->_oFcPoDb->execute($sQuery);
         }
     }
@@ -1572,8 +1572,23 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $blReturn = false;
         if (in_array($this->oxorder__oxpaymenttype->value, [
             'fcpopaypal',
-            'fcpopaypalv2',
             PayPal::PPE_EXPRESS,
+        ])) {
+            $blReturn = true;
+        }
+        return $blReturn;
+    }
+
+    /**
+     * Method checks via current paymenttype is of payone PayPal V2 type
+     *
+     * @return bool
+     */
+    public function fcIsPayPalV2Order(): bool
+    {
+        $blReturn = false;
+        if (in_array($this->oxorder__oxpaymenttype->value, [
+            'fcpopaypalv2',
             PayPal::PPE_V2_EXPRESS,
         ])) {
             $blReturn = true;
@@ -1831,6 +1846,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoHandleAuthorizationRedirect(array $aResponse, string $sRefNr, string $sAuthorizationType, string $sMode, bool $blReturnRedirectUrl): mixed
     {
+        if ($aResponse['status'] == 'REDIRECT' && in_array($this->oxorder__oxpaymenttype->value, [PayPal::PPE_EXPRESS, PayPal::PPE_V2_EXPRESS])) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('blFcpoPayonePayPalExpressRetry', true);
+        }
+
         $this->_fcpoFlagOrderPaymentAsRedirect();
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oUtils = $this->_oFcPoHelper->fcpoGetUtils();

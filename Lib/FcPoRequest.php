@@ -295,8 +295,8 @@ class FcPoRequest extends Base
 
         $blIsWalletTypePaymentWithDelAddress = (
             $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
-            $oOrder->fcIsPayPalOrder() === true &&
-            $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true
+            ($oOrder->fcIsPayPalOrder() === true && $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true) ||
+            ($oOrder->fcIsPayPalV2Order() === true && $oConfig->getConfigParam('blFCPOPayPalV2DelAddress') === true)
         );
 
         $blIsBNPLPayment = (
@@ -606,6 +606,10 @@ class FcPoRequest extends Base
 
         if ($blAddRedirectUrls === true) {
             $this->_addRedirectUrls('payment', $sRefNr);
+
+            if (in_array($sPaymentId, [PayPal::PPE_EXPRESS, PayPal::PPE_V2_EXPRESS]) && !empty($this->getParameter('successurl'))) {
+                $this->_oFcPoHelper->fcpoSetSessionVariable('blFcpoPayonePayPalSuccessUrl', $this->getParameter('successurl'));
+            }
         }
         return true;
     }
