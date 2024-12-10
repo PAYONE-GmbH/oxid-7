@@ -1572,8 +1572,23 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $blReturn = false;
         if (in_array($this->oxorder__oxpaymenttype->value, [
             'fcpopaypal',
-            'fcpopaypalv2',
             PayPal::PPE_EXPRESS,
+        ])) {
+            $blReturn = true;
+        }
+        return $blReturn;
+    }
+
+    /**
+     * Method checks via current paymenttype is of payone PayPal V2 type
+     *
+     * @return bool
+     */
+    public function fcIsPayPalV2Order(): bool
+    {
+        $blReturn = false;
+        if (in_array($this->oxorder__oxpaymenttype->value, [
+            'fcpopaypalv2',
             PayPal::PPE_V2_EXPRESS,
         ])) {
             $blReturn = true;
@@ -1831,6 +1846,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoHandleAuthorizationRedirect(array $aResponse, string $sRefNr, string $sAuthorizationType, string $sMode, bool $blReturnRedirectUrl): mixed
     {
+        if ($aResponse['status'] == 'REDIRECT' && in_array($this->oxorder__oxpaymenttype->value, [PayPal::PPE_EXPRESS, PayPal::PPE_V2_EXPRESS])) {
+            $this->_oFcPoHelper->fcpoSetSessionVariable('blFcpoPayonePayPalExpressRetry', true);
+        }
+
         $this->_fcpoFlagOrderPaymentAsRedirect();
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
