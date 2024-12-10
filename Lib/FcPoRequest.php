@@ -606,6 +606,10 @@ class FcPoRequest extends Base
 
         if ($blAddRedirectUrls === true) {
             $this->_addRedirectUrls('payment', $sRefNr);
+
+            if (in_array($sPaymentId, [PayPal::PPE_EXPRESS, PayPal::PPE_V2_EXPRESS]) && !empty($this->getParameter('successurl'))) {
+                $this->_oFcPoHelper->fcpoSetSessionVariable('blFcpoPayonePayPalSuccessUrl', $this->getParameter('successurl'));
+            }
         }
         return true;
     }

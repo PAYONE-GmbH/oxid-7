@@ -159,9 +159,11 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     protected function _handlePayPalExpressCall($sPaymentId): void
     {
-        if ($this->_oFcPoHelper->fcpoGetSessionVariable('blFcpoPayonePayPalExpressRetry') === true) {
+        if ($this->_oFcPoHelper->fcpoGetSessionVariable('blFcpoPayonePayPalExpressRetry') === true && !empty($this->_oFcPoHelper->fcpoGetSessionVariable('blFcpoPayonePayPalSuccessUrl'))) {
             $this->_oFcPoHelper->fcpoDeleteSessionVariable('blFcpoPayonePayPalExpressRetry');
-            $this->_oFcPoHelper->fcpoGetUtils()->redirect($this->_oFcPoHelper->fcpoGetConfig()->getCurrentShopUrl().'index.php?cl=thankyou', false);
+            $sRedirectUrl = $this->_oFcPoHelper->fcpoGetSessionVariable('blFcpoPayonePayPalSuccessUrl');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('blFcpoPayonePayPalSuccessUrl');
+            $this->_oFcPoHelper->fcpoGetUtils()->redirect($sRedirectUrl, false);
         }
 
         $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoWorkorderId');
@@ -332,17 +334,16 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      * @param string $sPayPalStreet
      * @return array
      */
-    protected function _fcpoSplitAddress(string $sPayPalStreet): array
+    protected function _fcpoSplitAddress(string $sStreetAndStreetNr): array
     {
-        $sStreetNr = '';
-        if (preg_match('/\s\d/', $sPayPalStreet, $match)) {
-            $iEndOfStreetPos = strpos($sPayPalStreet, $match[0]);
-            $iStartOfStreetNrPos = $iEndOfStreetPos + 1; // skip space between street and street nr
-            $sStreetNr = substr($sPayPalStreet, $iStartOfStreetNrPos);
-            $sPayPalStreet = substr($sPayPalStreet, 0, $iEndOfStreetPos);
+        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $sStreetAndStreetNr, $matches);
+        $sStreet = $sStreetAndStreetNr; // fallback for when splitting doesnt deliver results
+        $sStreetNr = "";
+        if (is_array($matches) && count($matches) >= 2) {
+            $sStreet = $matches[1];
+            $sStreetNr = $matches[2];
         }
-
-        return [$sPayPalStreet, $sStreetNr];
+        return [$sStreet, $sStreetNr];
     }
 
     /**

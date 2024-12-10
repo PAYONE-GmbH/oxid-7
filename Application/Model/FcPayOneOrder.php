@@ -346,8 +346,6 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $this->_blFinishingSave = true;
         $this->save();
 
-        $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
-
         // deleting remark info only when order is finished
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('ordrem');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('stsprotection');
@@ -370,11 +368,13 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         // skipping this action in case of order recalculation
         $this->_fcpoMarkVouchers($blRecalculatingOrder, $oUser, $oBasket);
 
-        if (!$this->oxorder__oxordernr->value) {
+        if (!isset($this->oxorder__oxordernr->value) || !$this->oxorder__oxordernr->value) {
             $this->setNumber();
         } else {
             oxNew(Counter::class)->update($this->getCounterIdent(), $this->oxorder__oxordernr->value);
         }
+
+        $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
 
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoordernotchecked');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoWorkorderId');
@@ -911,8 +911,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      */
     protected function _fcpoSaveAfterRedirect(bool $blSaveAfterRedirect): void
     {
-        if ($blSaveAfterRedirect === true) {
-            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = '{$this->oxorder__oxordernr->value}' WHERE fcpo_txid = '" . $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoTxid') . "'";
+        if ($blSaveAfterRedirect === true && !empty($this->oxorder__fcpotxid->value)) {
+            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = '{$this->oxorder__oxordernr->value}' WHERE fcpo_txid = '" .$this->oxorder__fcpotxid->value. "'";
             $this->_oFcPoDb->execute($sQuery);
         }
     }
