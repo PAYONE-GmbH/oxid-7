@@ -41,3 +41,21 @@ New Features
 Maintenance
  
 * tested with 7.1
+
+==1.1.0==
+
+New Features
+ 
+* new payment method: PayPal v2
+* new payment method: PayPal Express v2
+ 
+Bugfixes
+ 
+* fixed twig and duplicate files
+* fixed German translations
+* fixed response type
+ 
+Maintenance
+
+* removed iDEAL banklist in frontend
+* tested with 7.2 
