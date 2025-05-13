@@ -414,7 +414,12 @@ class FcPayOneAjax extends BaseController
      */
     public function fcpoAplPayment(string $sParamsJson): bool|string
     {
-        $aCreditCardMapping = ['visa' => 'V', 'mastercard' => 'M', 'amex' => 'M', 'discover' => 'D'];
+        $aCreditCardMapping = [
+            'visa' => 'V',
+            'mastercard' => 'M',
+            'amex' => 'A',
+            'girocard' => 'G'
+        ];
 
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $aParams = json_decode($sParamsJson, true);
@@ -472,7 +477,7 @@ class FcPayOneAjax extends BaseController
             'V' => "visa",
             'M' => "masterCard",
             'A' => "amex",
-            'D' => "discover"
+            'G' => "girocard",
         ];
 
         $aSupportedNetwork = [];
