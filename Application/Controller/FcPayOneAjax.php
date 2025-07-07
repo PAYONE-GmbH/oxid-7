@@ -556,9 +556,9 @@ class FcPayOneAjax extends BaseController
             $aInstallmentDetails['numberOfRate'] -= 1;
         }
 
-        $iCode = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
+        $sCode = $this->_generateTranslatedResultCode($aRatepayData, $aInstallmentDetails);
 
-        return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $iCode);
+        return $this->_parseRatepayRateDetails($aRatepayData['OXPAYMENTID'], $aInstallmentDetails, $sCode);
     }
 
     public function fcpoStartPayPalExpress()
@@ -712,9 +712,9 @@ class FcPayOneAjax extends BaseController
     /**
      * @param array $aRatepayData
      * @param array $aInstallmentDetails
-     * @return string|int
+     * @return string
      */
-    protected function _generateTranslatedResultCode(array $aRatepayData, array $aInstallmentDetails): string|int
+    protected function _generateTranslatedResultCode(array $aRatepayData, array $aInstallmentDetails): string
     {
         if (isset($aRatepayData['installment']) && $aRatepayData['installment'] < $aInstallmentDetails['rate']) {
             return 'RATE_INCREASED';
@@ -723,16 +723,16 @@ class FcPayOneAjax extends BaseController
             return 'RATE_REDUCED';
         }
 
-        return 603;
+        return '603';
     }
 
     /**
      * @param string $sPaymentMethod
      * @param array $aInstallmentDetails
-     * @param int $iCode
+     * @param string $sCode
      * @return string
      */
-    protected function _parseRatepayRateDetails(string $sPaymentMethod, array $aInstallmentDetails, int $iCode): string
+    protected function _parseRatepayRateDetails(string $sPaymentMethod, array $aInstallmentDetails, string $sCode): string
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
@@ -742,7 +742,7 @@ class FcPayOneAjax extends BaseController
         $sHtml .= '    </div>';
 
         $sHtml .= '    <div>';
-        $sHtml .= '        <div class="warning small text-center" colspan="2">' . $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_CODE_TRANSLATION_' . $iCode) . '<br/>' . $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_EXAMPLE') . '</div>';
+        $sHtml .= '        <div class="warning small text-center" colspan="2">' . $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_CODE_TRANSLATION_' . $sCode) . '<br/>' . $oLang->translateString('FCPO_RATEPAY_CALCULATION_DETAILS_EXAMPLE') . '</div>';
         $sHtml .= '    </div>';
 
         $sHtml .= '    <div class="rp-menue">';
