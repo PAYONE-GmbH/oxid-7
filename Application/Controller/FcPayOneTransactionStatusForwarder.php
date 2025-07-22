@@ -150,7 +150,7 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      */
     protected function _getProcessFilePath(): string
     {
-        $sTmpPath = dirname(__FILE__) . "/../";
+        $sTmpPath = dirname(__FILE__) . "/../../";
         $sFile = "forwardprocess.txt";
 
         return $sTmpPath . $sFile;
