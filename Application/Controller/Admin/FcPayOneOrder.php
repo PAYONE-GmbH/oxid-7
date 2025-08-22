@@ -258,6 +258,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
         if ($sOxid != "-1" && isset($sOxid)) {
             $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
             $oOrder->load($sOxid);
+            $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
             $blSettleAccount = $this->_oFcPoHelper->fcpoGetRequestParameter("capture_settleaccount");
             $blSettleAccount = $blSettleAccount === null || $blSettleAccount;
@@ -284,6 +285,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             }
             $this->_sResponsePrefix = 'FCPO_CAPTURE_';
             $oOrder->fcpoSendClearingDataAfterCapture();
+            $oOrder->fcpoSaveClearingDataAfterCapture($sPaymentId, $oResponse);
         }
     }
 
