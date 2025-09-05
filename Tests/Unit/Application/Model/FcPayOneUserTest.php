@@ -2,7 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
-class FcPayOneOrderTest extends FcBaseUnitTestCase
+class FcPayOneUserTest extends FcBaseUnitTestCase
 {
     public function testMethod()
     {
