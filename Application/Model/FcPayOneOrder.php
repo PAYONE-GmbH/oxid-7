@@ -45,7 +45,7 @@ use OxidEsales\Eshop\Core\Model\ListModel;
 use OxidEsales\Eshop\Core\Str;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-class FcPayOneOrder extends FcPayOneOrder_parent
+class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
 {
 
     /**
