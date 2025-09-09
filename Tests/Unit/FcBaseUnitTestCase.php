@@ -51,9 +51,4 @@ class FcBaseUnitTestCase extends UnitTestCase
             $this->assertContains($needle, $haystack, $message, true);
         }
     }
-
-    public function testNothing()
-    {
-        $this->assertNull(null);
-    }
 }
