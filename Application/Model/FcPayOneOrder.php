@@ -636,8 +636,10 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
             $sSessionChallenge
         );
 
-        if (!$blTriggerLoadingFromSession)
-            return parent::loadFromBasket($oBasket);
+        if (!$blTriggerLoadingFromSession) {
+            parent::loadFromBasket($oBasket);
+            return true;
+        }
 
         return $this->load($sSessionChallenge);
     }
