@@ -1,0 +1,75 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      max-parallel: 15
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest]
+        oxid-versions: ['dev-b-7.0-ce', 'dev-b-7.1-ce', 'dev-b-7.2-ce', 'dev-b-7.3-ce']
+        php-versions: ['8.0', '8.1', '8.2', '8.3']
+        exclude:
+        - oxid-versions: 'dev-b-7.0-ce'
+          php-versions: '8.2'
+        - oxid-versions: 'dev-b-7.0-ce'
+          php-versions: '8.3'
+        - oxid-versions: 'dev-b-7.1-ce'
+          php-versions: '8.0'
+        - oxid-versions: 'dev-b-7.1-ce'
+          php-versions: '8.3'
+        - oxid-versions: 'dev-b-7.2-ce'
+          php-versions: '8.0'
+        - oxid-versions: 'dev-b-7.2-ce'
+          php-versions: '8.1'
+        - oxid-versions: 'dev-b-7.3-ce'
+          php-versions: '8.0'
+        - oxid-versions: 'dev-b-7.3-ce'
+          php-versions: '8.1'
+    name: Oxid ${{ matrix.oxid-versions }} on PHP ${{ matrix.php-versions }}
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Install PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, xdebug, gd, bcmath, ctype, curl, dom, hash, iconv, intl, openssl, simplexml, soap, xsl, zip
+          tools: composer:v2
+      - name: Check PHP Version
+        run: php -v
+      - name: Check Composer Version
+        run: composer -V
+      - name: Check PHP Extensions
+        run: php -m
+      - name: PHP Syntax Checker
+        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )
+
+      - name: Setup Oxid 7
+        run: |
+          mkdir /tmp/oxid7
+          cd /tmp/oxid7
+          composer create-project -n --no-progress oxid-esales/oxideshop-project . ${{ matrix.oxid-versions }}
+          cp /tmp/oxid7/source/config.inc.php.dist /tmp/oxid7/source/config.inc.php
+          sed -i 's|<dbHost>|127.0.0.1|; s|<dbName>|payone_oxid7_test|; s|<dbUser>|root|; s|<dbPwd>|root|; s|<dbPort>|3306|; s|<sShopURL>|http://localhost|; s|<sShopDir>|/tmp/oxid7/source|; s|<sCompileDir>|/tmp/oxid7/source/tmp|; s|\$this->iDebug = 0|\$this->iDebug = 1|' /tmp/oxid7/source/config.inc.php
+          sed -i "s|\$this->edition = ''|\$this->edition = 'CE'|" /tmp/oxid7/source/config.inc.php
+          composer require --dev -n --no-progress oxid-esales/mink-selenium-driver:dev-b-8.0.x
+          composer require --dev -n --no-progress oxid-esales/testing-library:dev-b-8.0.x
+          chmod -R 777 /tmp/oxid7/source/log
+      - name: Install plugin
+        run: |
+          composer -n --no-progress --working-dir=/tmp/oxid7 require payone-gmbh/oxid-7:dev-master
+      - name: Run tests
+        run: |
+          mv /tmp/oxid7/vendor/payone-gmbh/oxid-7/.github/test_config.yml /tmp/oxid7/test_config.yml
+          php /tmp/oxid7/vendor/bin/runtests /tmp/oxid7/vendor/payone-gmbh/oxid-7/Tests
