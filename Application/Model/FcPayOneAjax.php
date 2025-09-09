@@ -120,7 +120,8 @@ class FcPayOneAjax extends BaseModel
                 'payerrortext',
                 $aResponse['errormessage']
             );
-            return header("HTTP/1.0 503 Service not available");
+            header("HTTP/1.0 503 Service not available");
+            return '';
         }
 
         $this->_fcpoSetKlarnaSessionParams($aResponse);
@@ -272,7 +273,7 @@ class FcPayOneAjax extends BaseModel
      * @param $sAmazonReferenceId
      * @param $sToken
      */
-    private function _fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5): void
+    private function _fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5)
     {
         $oRequest = $this->_oFcpoHelper->getFactoryObject(FcPoRequest::class);
 
@@ -285,7 +286,8 @@ class FcPayOneAjax extends BaseModel
         );
 
         if ($blSend400) {
-            return header("HTTP/1.0 404 Not Found");
+            header("HTTP/1.0 404 Not Found");
+            return ;
         }
 
         header("HTTP/1.0 200 Ok");

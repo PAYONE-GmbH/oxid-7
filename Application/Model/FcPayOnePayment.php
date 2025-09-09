@@ -27,7 +27,7 @@ use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use stdClass;
 
-class FcPayOnePayment extends FcPayOnePayment_parent
+class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
 {
 
     /**

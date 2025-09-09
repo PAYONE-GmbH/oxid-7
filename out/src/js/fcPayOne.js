@@ -746,8 +746,7 @@ $('#payolution_installment_check_availability').click(
 
                 var nameInBrackets = matches[1];
                 if (key > 0 && formParams != '{') {
-                    formParams += ', 
-    ';
+                    formParams += ', ';
                 }
 
                 if (formType == 'checkbox') {

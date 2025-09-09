@@ -45,7 +45,7 @@ use OxidEsales\Eshop\Core\Model\ListModel;
 use OxidEsales\Eshop\Core\Str;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-class FcPayOneOrder extends FcPayOneOrder_parent
+class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
 {
 
     /**
@@ -636,8 +636,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $sSessionChallenge
         );
 
-        if (!$blTriggerLoadingFromSession)
-            return parent::loadFromBasket($oBasket);
+        if (!$blTriggerLoadingFromSession) {
+            parent::loadFromBasket($oBasket);
+            return true;
+        }
 
         return $this->load($sSessionChallenge);
     }
