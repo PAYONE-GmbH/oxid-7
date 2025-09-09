@@ -11,7 +11,12 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         oxid-versions: ['dev-b-7.0-ce']
-        php-versions: ['8.0', '8.1']
+        php-versions: ['8.0', '8.1', '8.2', '8.3']
+        exclude:
+        - oxid-versions: 'dev-b-7.0-ce'
+          php-versions: '8.2'
+        - oxid-versions: 'dev-b-7.0-ce'
+          php-versions: '8.3'
     name: Oxid ${{ matrix.oxid-versions }} on PHP ${{ matrix.php-versions }}
     services:
       mysql:
