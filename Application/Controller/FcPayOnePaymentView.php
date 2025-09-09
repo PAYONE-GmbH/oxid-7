@@ -26,6 +26,7 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -42,7 +43,7 @@ use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
-class FcPayOnePaymentView extends FcPayOnePaymentView_parent
+class FcPayOnePaymentView extends PaymentController
 {
 
     /**
@@ -1151,7 +1152,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _assignDebitNoteParams(): void
     {
-        parent::_assignDebitNoteParams();
+        parent::assignDebitNoteParams();
         if ((bool)$this->getConfigParam('sFCPOSaveBankdata') === true) {
             if ($oUserPayment = $this->_fcGetPaymentByPaymentType($this->getUser(), 'fcpodebitnote')) {
                 $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
@@ -1464,7 +1465,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sPaymentId = $this->_fcpoGetPaymentId();
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);
 
-        $mReturn = parent::validatePayment();
+        $mReturn = parent::validatePayment() ?? '';
 
         $mReturn = $this->_processParentReturnValue($mReturn);
 
@@ -3818,11 +3819,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns value for ustid depending on payment or false if this hasn't been set
      *
-     * @param string $aRequestedValues
+     * @param array $aRequestedValues
      * @param string $sPaymentId
      * @return string|bool
      */
-    protected function _fcpoGetRequestedUstid(string $aRequestedValues, string $sPaymentId): bool|string
+    protected function _fcpoGetRequestedUstid(array $aRequestedValues, string $sPaymentId): bool|string
     {
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
 

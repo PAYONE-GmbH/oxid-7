@@ -22,7 +22,7 @@ namespace Fatchip\PayOne\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\Order;
 
-class FcPayOnePaymentGateway extends FcPayOnePaymentGateway_parent
+class FcPayOnePaymentGateway extends \OxidEsales\Eshop\Application\Model\PaymentGateway
 {
 
     /**

@@ -33,7 +33,7 @@ use OxidEsales\Eshop\Core\UtilsObject;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
-class FcPayOneUser extends FcPayOneUser_parent
+class FcPayOneUser extends User
 {
 
     /**
