@@ -6,7 +6,7 @@ optional_parameters:
   is_subshop: false
   install_shop: true
   restore_shop_after_tests_suite: false
-  test_database_name: null
+  test_database_name: payone_oxid7_test
   restore_after_acceptance_tests: false
   restore_after_unit_tests: false
   tmp_path: /tmp/oxid_test_library/
