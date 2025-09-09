@@ -1,0 +1,18 @@
+mandatory_parameters:
+  shop_path: source
+  shop_tests_path: vendor/oxid-esales/tests-deprecated-ce
+  module_ids: 'fcpayone'
+optional_parameters:
+  is_subshop: false
+  install_shop: false
+  restore_shop_after_tests_suite: false
+  test_database_name: payone_oxid7_test
+  restore_after_acceptance_tests: false
+  restore_after_unit_tests: false
+  tmp_path: /tmp/oxid_test_library/
+  database_restoration_class: DatabaseRestorer
+  activate_all_modules: false
+  run_tests_for_shop: false
+  run_tests_for_modules: true
+  browser_name: firefox
+  retry_times_after_test_fail: 2

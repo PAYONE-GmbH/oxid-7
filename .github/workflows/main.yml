@@ -54,5 +54,5 @@ jobs:
           composer -n --no-progress --working-dir=/tmp/oxid7 require payone-gmbh/oxid-7:dev-OX7-9-Automatic_tests
       - name: Run tests
         run: |
-          cd /tmp/oxid7/vendor/payone-gmbh/oxid-7
+          mv /tmp/oxid7/vendor/payone-gmbh/oxid-7/.github/test_config.yml /tmp/oxid7/test_config.yml
           php /tmp/oxid7/vendor/bin/runtests /tmp/oxid7/vendor/payone-gmbh/oxid-7/Tests
