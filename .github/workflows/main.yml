@@ -14,13 +14,19 @@ jobs:
         oxid-versions: ['dev-b-7.0-ce', 'dev-b-7.1-ce', 'dev-b-7.2-ce', 'dev-b-7.3-ce']
         exclude:
           - php-versions: '8.0'
-            oxid-versions: ['dev-b-7.1-ce', 'dev-b-7.2-ce', 'dev-b-7.3-ce']
+            oxid-versions: 'dev-b-7.1-ce'
+          - php-versions: '8.0'
+            oxid-versions: 'dev-b-7.2-ce'
+          - php-versions: '8.0'
+            oxid-versions: 'dev-b-7.3-ce'
           - php-versions: '8.1'
-            oxid-versions: ['dev-b-7.2-ce', 'dev-b-7.3-ce']
+            oxid-versions: 'dev-b-7.2-ce'
           - php-versions: '8.1'
-            oxid-versions: ['dev-b-7.0-ce']
+            oxid-versions: 'dev-b-7.3-ce'
+          - php-versions: '8.2'
+            oxid-versions: 'dev-b-7.0-ce'
           - php-versions: '8.3'
-            oxid-versions: ['dev-b-7.0-ce', 'dev-b-7.1-ce']
+            oxid-versions: 'dev-b-7.0-ce', 'dev-b-7.1-ce'
     name: Oxid ${{ matrix.oxid-versions }} on PHP ${{ matrix.php-versions }}
     services:
       mysql:
