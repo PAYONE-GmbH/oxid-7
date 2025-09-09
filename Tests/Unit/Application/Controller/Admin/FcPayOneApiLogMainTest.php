@@ -7,7 +7,8 @@ use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
 
 class FcPayOneApiLogMainTest extends ConfigUnitTestCase
 {
-    public function testFcGetAdminSeparator() {
+    public function testFcGetAdminSeparator()
+    {
         $oFcPayOneApiLogMain = new FcPayOneApiLogMain();
 
         $sExpect = '&';

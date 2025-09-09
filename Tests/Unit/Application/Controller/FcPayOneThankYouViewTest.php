@@ -46,9 +46,9 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $oMockPayment->method('load')->willReturn(true);
 
         $aMockMandate = [
-            'mandate_identification'=>'someValue',
+            'mandate_identification' => 'someValue',
             'mode' => 'test',
-            'mandate_status'=>'active',
+            'mandate_status' => 'active',
         ];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
@@ -104,9 +104,9 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $oMockRequest->method('sendRequestGetFile')->willReturn('https://www.someurl.org/somepdf.pdf');
 
         $aMockMandate = [
-            'mandate_identification'=>'someValue',
+            'mandate_identification' => 'someValue',
             'mode' => 'test',
-            'mandate_status'=>'lazy'
+            'mandate_status' => 'lazy'
         ];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
@@ -138,7 +138,8 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $this->assertEquals(true, $oFcPayOneThankYouView->fcpoOrderHasProblems());
     }
 
-    public function testRender() {
+    public function testRender()
+    {
         $oMockUser = $this->getMockBuilder(User::class)
             ->setMethods(['getId'])
             ->disableOriginalConstructor()->getMock();
@@ -162,7 +163,8 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $this->assertEquals('page/checkout/thankyou', $oFcPayOneThankYouView->render());
     }
 
-    public function testFcpoDeleteSessionVariablesOnOrderFinish() {
+    public function testFcpoDeleteSessionVariablesOnOrderFinish()
+    {
         $oFcPayOneThankYouView = new FcPayOneThankYouView();
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();

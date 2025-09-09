@@ -36,7 +36,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     public function testGetDynValues()
     {
         $aMockDynValues = [
-            (object) ['name' => 'fcpo_elv_blz', 'value' => '']
+            (object)['name' => 'fcpo_elv_blz', 'value' => '']
         ];
 
         $oFcPayOnePayment = $this->getMockBuilder(FcPayOnePayment::class)
@@ -55,7 +55,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryIsoAlphaById', ['someCountryId']));
     }
@@ -68,7 +68,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someName');
-        $this->invokeSetAttribute( $oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someName', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryNameById', ['someCountryId']));
     }
@@ -81,7 +81,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryNameById', ['someCountryId']));
     }
@@ -94,7 +94,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetUserPaymentId', ['someUserId', 'somePaymentType']));
     }
@@ -102,10 +102,10 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     public function testFcGetDynValues()
     {
         $aExpectDynValues = [
-            (object) ['name' => 'fcpo_elv_blz', 'value' => ''],
-            (object) ['name' => 'fcpo_elv_ktonr', 'value' => ''],
-            (object) ['name' => 'fcpo_elv_iban', 'value' => ''],
-            (object) ['name' => 'fcpo_elv_bic', 'value' => '']
+            (object)['name' => 'fcpo_elv_blz', 'value' => ''],
+            (object)['name' => 'fcpo_elv_ktonr', 'value' => ''],
+            (object)['name' => 'fcpo_elv_iban', 'value' => ''],
+            (object)['name' => 'fcpo_elv_bic', 'value' => '']
         ];
 
         $oMockConfig = $this->getMockBuilder(Config::class)
@@ -129,7 +129,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $aMockMandate = ['mandate_status'=>'pending','mandate_text'=>'someText'];
+        $aMockMandate = ['mandate_status' => 'pending', 'mandate_text' => 'someText'];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetSessionVariable')->willReturn($aMockMandate);
@@ -142,13 +142,13 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $aMockResult = [['someValue','someValue','someValue','someValue', 'someValue']];
+        $aMockResult = [['someValue', 'someValue', 'someValue', 'someValue', 'someValue']];
 
         $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
             ->setMethods(['getAll'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $this->invokeSetAttribute( $oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
 
 
         $aExpect = ['someValue'];
@@ -163,7 +163,7 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPayOnePayment->method('getId')->willReturn('fcpocreditcard');
 
-        $aMockDynValues = ['fcpo_ccmode'=>'someValue','fcpo_sotype'=>'someValue'];
+        $aMockDynValues = ['fcpo_ccmode' => 'someValue', 'fcpo_sotype' => 'someValue'];
 
         $this->assertEquals('someValue', $oFcPayOnePayment->fcpoGetMode($aMockDynValues));
     }

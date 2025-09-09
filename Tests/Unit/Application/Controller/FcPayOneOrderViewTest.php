@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller;
 
+use Exception;
 use Fatchip\PayOne\Application\Controller\FcPayOneOrderView;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -15,6 +16,7 @@ use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Session;
+use OxidEsales\Eshop\Core\UtilsObject;
 use OxidEsales\Eshop\Core\UtilsView;
 
 class FcPayOneOrderViewTest extends FcBaseUnitTestCase
@@ -72,7 +74,7 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
 
     public function testFcpoHandlePayPalExpress_Exception()
     {
-        $oMockException = new \Exception();
+        $oMockException = new Exception();
 
         $oFcPayOneOrderView = $this->getMockBuilder(FcPayOneOrderView::class)
             ->setMethods(['_handlePayPalExpressCall'])
@@ -190,12 +192,12 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
     {
         $oFcPayOneOrderView = new FcPayOneOrderView();
 
-        $aResponseParam = array(
-            'add_paydata[shipping_firstname]'   => 'someFirstName',
-            'add_paydata[shipping_lastname]'    => 'someLastName',
-            'add_paydata[shipping_city]'        => 'someCity',
-            'add_paydata[shipping_street]'      => 'someStreet',
-        );
+        $aResponseParam = [
+            'add_paydata[shipping_firstname]' => 'someFirstName',
+            'add_paydata[shipping_lastname]' => 'someLastName',
+            'add_paydata[shipping_city]' => 'someCity',
+            'add_paydata[shipping_street]' => 'someStreet',
+        ];
 
         $oMockUserParam = $this->getMockBuilder(User::class)->disableOriginalConstructor()->getMock();
         $oMockUserParam->oxuser__oxfname = new Field('someOtherFirstName');
@@ -233,14 +235,14 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $aParams = [
-            'add_paydata[shipping_street]'              => 'someStreet someStreetNr',
-            'add_paydata[shipping_addressaddition]'     => 'someAddition',
-            'add_paydata[email]'                        => 'someUserMail',
-            'add_paydata[shipping_firstname]'           => 'someFirstName',
-            'add_paydata[shipping_lastname]'            => 'someLastName',
-            'add_paydata[shipping_city]'                => 'someCity',
-            'add_paydata[shipping_zip]'                 => 'someZip',
-            'add_paydata[shipping_country]'             => 'someCountry',
+            'add_paydata[shipping_street]' => 'someStreet someStreetNr',
+            'add_paydata[shipping_addressaddition]' => 'someAddition',
+            'add_paydata[email]' => 'someUserMail',
+            'add_paydata[shipping_firstname]' => 'someFirstName',
+            'add_paydata[shipping_lastname]' => 'someLastName',
+            'add_paydata[shipping_city]' => 'someCity',
+            'add_paydata[shipping_zip]' => 'someZip',
+            'add_paydata[shipping_country]' => 'someCountry',
         ];
 
         $mResponse = $mExpect = $this->invokeMethod($oFcPayOneOrderView, '_fcpoHandleExpressUser', [$aParams]);
@@ -275,14 +277,14 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $aParams = [
-            'add_paydata[shipping_street]'              => 'someStreet someStreetNr',
-            'add_paydata[shipping_addressaddition]'     => 'someAddition',
-            'add_paydata[email]'                        => 'someUserMail',
-            'add_paydata[shipping_firstname]'           => 'someFirstName',
-            'add_paydata[shipping_lastname]'            => 'someLastName',
-            'add_paydata[shipping_city]'                => 'someCity',
-            'add_paydata[shipping_zip]'                 => 'someZip',
-            'add_paydata[shipping_country]'             => 'someCountry',
+            'add_paydata[shipping_street]' => 'someStreet someStreetNr',
+            'add_paydata[shipping_addressaddition]' => 'someAddition',
+            'add_paydata[email]' => 'someUserMail',
+            'add_paydata[shipping_firstname]' => 'someFirstName',
+            'add_paydata[shipping_lastname]' => 'someLastName',
+            'add_paydata[shipping_city]' => 'someCity',
+            'add_paydata[shipping_zip]' => 'someZip',
+            'add_paydata[shipping_country]' => 'someCountry',
         ];
 
         $mResponse = $mExpect = $this->invokeMethod($oFcPayOneOrderView, '_fcpoHandleExpressUser', [$aParams]);
@@ -317,14 +319,14 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $aParams = [
-            'add_paydata[shipping_street]'              => 'someStreet someStreetNr',
-            'add_paydata[shipping_addressaddition]'     => 'someAddition',
-            'add_paydata[email]'                        => 'someUserMail',
-            'add_paydata[shipping_firstname]'           => 'someFirstName',
-            'add_paydata[shipping_lastname]'            => 'someLastName',
-            'add_paydata[shipping_city]'                => 'someCity',
-            'add_paydata[shipping_zip]'                 => 'someZip',
-            'add_paydata[shipping_country]'             => 'someCountry',
+            'add_paydata[shipping_street]' => 'someStreet someStreetNr',
+            'add_paydata[shipping_addressaddition]' => 'someAddition',
+            'add_paydata[email]' => 'someUserMail',
+            'add_paydata[shipping_firstname]' => 'someFirstName',
+            'add_paydata[shipping_lastname]' => 'someLastName',
+            'add_paydata[shipping_city]' => 'someCity',
+            'add_paydata[shipping_zip]' => 'someZip',
+            'add_paydata[shipping_country]' => 'someCountry',
         ];
 
         $mResponse = $mExpect = $this->invokeMethod($oFcPayOneOrderView, '_fcpoHandleExpressUser', [$aParams]);
@@ -368,14 +370,14 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oMockUser, '_oFcPoHelper', $oFcPoHelper);
 
         $aParams = [
-            'add_paydata[shipping_street]'              => 'someStreet someStreetNr',
-            'add_paydata[shipping_addressaddition]'     => 'someAddition',
-            'add_paydata[email]'                        => 'someUserMail',
-            'add_paydata[shipping_firstname]'           => 'someFirstName',
-            'add_paydata[shipping_lastname]'            => 'someLastName',
-            'add_paydata[shipping_city]'                => 'someCity',
-            'add_paydata[shipping_zip]'                 => 'someZip',
-            'add_paydata[shipping_country]'             => 'someCountry',
+            'add_paydata[shipping_street]' => 'someStreet someStreetNr',
+            'add_paydata[shipping_addressaddition]' => 'someAddition',
+            'add_paydata[email]' => 'someUserMail',
+            'add_paydata[shipping_firstname]' => 'someFirstName',
+            'add_paydata[shipping_lastname]' => 'someLastName',
+            'add_paydata[shipping_city]' => 'someCity',
+            'add_paydata[shipping_zip]' => 'someZip',
+            'add_paydata[shipping_country]' => 'someCountry',
         ];
 
         $mResponse = $mExpect = $this->invokeMethod($oFcPayOneOrderView, '_fcpoHandleExpressUser', [$aParams]);
@@ -383,14 +385,22 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $this->assertEquals($mExpect, $mResponse);
     }
 
-    // TODO VBFC FIXME fails "Call to undefined method Exception::setMessage()"
-    /*
     public function testFcpoThrowException()
     {
+        $this->wrapExpectException('Exception');
+
         $oFcPayOneOrderView = new FcPayOneOrderView();
-        $oFcPayOneOrderView->_fcpoThrowException('someMessage');
+
+        $oMockException = $this->getMockBuilder(Exception::class)
+            ->setMethods(['setMessage'])
+            ->disableOriginalConstructor()->getMock();
+
+        UtilsObject::setClassInstance(Exception::class, $oMockException);
+
+        $this->invokeMethod($oFcPayOneOrderView, '_fcpoThrowException', ['someMessage']);
+
+        UtilsObject::resetClassInstances();
     }
-    */
 
     public function testHandlePayPalExpressCall()
     {
@@ -463,8 +473,8 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
     {
         $oFcPayOneOrderView = new FcPayOneOrderView();
         $aMockMandate = [
-            'mandate_status'    => 'pending',
-            'mandate_text'      => 'someText',
+            'mandate_status' => 'pending',
+            'mandate_text' => 'someText',
         ];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
@@ -478,8 +488,8 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
     {
         $oFcPayOneOrderView = new FcPayOneOrderView();
         $aMockMandate = [
-            'someblabla'        => 'falseValue',
-            'mandate_next'      => 'moreCrap',
+            'someblabla' => 'falseValue',
+            'mandate_next' => 'moreCrap',
         ];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
@@ -549,7 +559,7 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
-        $aMockResponse = array('add_paydata[shipping_addressaddition]' => 'someAddition');
+        $aMockResponse = ['add_paydata[shipping_addressaddition]' => 'someAddition'];
 
         $this->assertEquals(null, $this->invokeMethod($oFcPayOneOrderView, '_fcpoCreateExpressDelAddress', [$aMockResponse, 'someUserId']));
     }
@@ -578,7 +588,7 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockAddress);
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
-        $aMockResponse = array('add_paydata[shipping_addressaddition]' => 'someAddition');
+        $aMockResponse = ['add_paydata[shipping_addressaddition]' => 'someAddition'];
 
         $this->assertEquals(null, $this->invokeMethod($oFcPayOneOrderView, '_fcpoCreateExpressDelAddress', [$aMockResponse, 'someUserId']));
     }
@@ -598,8 +608,8 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockOrder);
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
-        $aMockResponse = array('add_paydata[shipping_street]' => 'MyStreet 123');
+        $aMockResponse = ['add_paydata[shipping_street]' => 'MyStreet 123'];
 
-        $this->assertEquals('someAddressId', $oFcPayOneOrderView->_fcpoGetExistingPayPalAddressId($aMockResponse));
+        $this->assertEquals('someAddressId', $this->invokeMethod($oFcPayOneOrderView, '_fcpoGetExistingPayPalAddressId', [$aMockResponse]));
     }
 }

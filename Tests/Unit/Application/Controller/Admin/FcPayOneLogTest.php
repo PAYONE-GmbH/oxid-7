@@ -9,7 +9,6 @@ use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
-use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneLogTest extends ConfigUnitTestCase
 {
@@ -88,12 +87,6 @@ class FcPayOneLogTest extends ConfigUnitTestCase
         $this->assertTrue(in_array($oFcPayOneLog->getCaptureMessage(), $aPossibleReturns));
     }
 
-    /**
-     * Creates some entries in fcpotransactionstatus table
-     *
-     * @param  void
-     * @return void
-     */
     protected function _fcpoPrepareTransactionTable()
     {
         $sQuery = "
@@ -106,13 +99,6 @@ class FcPayOneLogTest extends ConfigUnitTestCase
         DatabaseProvider::getDb()->execute($sQuery);
     }
 
-
-    /**
-     * Truncates fcpotransactionstatus table
-     *
-     * @param  void
-     * @return void
-     */
     protected function _fcpoTruncateTransactionTable()
     {
         $sQuery = "DELETE FROM `fcpotransactionstatus` ";

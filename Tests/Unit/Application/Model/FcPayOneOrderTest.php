@@ -63,7 +63,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someUserId');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someUserId', $oFcPayOneOrder->fcpoGetIdByUserName('someUserName'));
     }
@@ -76,7 +76,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someValue', $oFcPayOneOrder->fcpoGetIdByCode('someCode'));
     }
@@ -89,7 +89,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someSalutation');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someSalutation', $oFcPayOneOrder->fcpoGetSalByFirstName('someFirstname'));
     }
@@ -106,7 +106,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someAddressId');
         $oMockDatabase->method('quote')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $aMockResponse = [
             'add_paydata[shipping_firstname]' => 'someFirstname',
@@ -247,7 +247,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSessionVariable')->willReturn('someSessionValue');
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(3, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser, false));
+        $this->assertEquals(3, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser));
     }
 
     public function testFinalizeOrder_IsPayone()
@@ -319,7 +319,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSessionVariable')->willReturn('someSessionValue');
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser, false));
+        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser));
     }
 
     public function testFinalizeOrder_IsPayone_OrderExists()
@@ -340,7 +340,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oMockUser->oxuser__oxstreet = new Field('someStreet');
         $oMockUser->oxuser__oxstreetnr = new Field('someStreetNr');
         $oMockUser->oxuser__oxaddinfo = new Field('someAddInfo');
-        $oMockUser->oxuser__oxustid = new Field('someUstId');;
+        $oMockUser->oxuser__oxustid = new Field('someUstId');
         $oMockUser->oxuser__oxcity = new Field('someCity');
         $oMockUser->oxuser__oxcountryid = new Field('someCountryId');
         $oMockUser->oxuser__oxstateid = new Field('someStateId');
@@ -423,7 +423,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser, false));
+        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser));
     }
 
     public function testFinalizeOrder_IsPayone_RecalcOrderHasOrderState()
@@ -445,7 +445,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oMockUser->oxuser__oxstreet = new Field('someStreet');
         $oMockUser->oxuser__oxstreetnr = new Field('someStreetNr');
         $oMockUser->oxuser__oxaddinfo = new Field('someAddInfo');
-        $oMockUser->oxuser__oxustid = new Field('someUstId');;
+        $oMockUser->oxuser__oxustid = new Field('someUstId');
         $oMockUser->oxuser__oxcity = new Field('someCity');
         $oMockUser->oxuser__oxcountryid = new Field('someCountryId');
         $oMockUser->oxuser__oxstateid = new Field('someStateId');
@@ -522,7 +522,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(2, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser, false));
+        $this->assertEquals(2, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser));
     }
 
     public function testFinalizeOrder_IsPayone_RecalcOrderNoOrderState()
@@ -544,7 +544,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oMockUser->oxuser__oxstreet = new Field('someStreet');
         $oMockUser->oxuser__oxstreetnr = new Field('someStreetNr');
         $oMockUser->oxuser__oxaddinfo = new Field('someAddInfo');
-        $oMockUser->oxuser__oxustid = new Field('someUstId');;
+        $oMockUser->oxuser__oxustid = new Field('someUstId');
         $oMockUser->oxuser__oxcity = new Field('someCity');
         $oMockUser->oxuser__oxcountryid = new Field('someCountryId');
         $oMockUser->oxuser__oxstateid = new Field('someStateId');
@@ -613,7 +613,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSessionVariable')->willReturn('someSessionValue');
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser, false));
+        $this->assertEquals(1, $oFcPayOneOrder->finalizeOrder($oMockBasket, $oMockUser));
     }
 
     public function testFcpoProcessOrder()
@@ -725,7 +725,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
 
         $oMockBasket = new Basket();
 
-        $oFcPayOneOrder->_fcpoHandleBasket(true, $oMockBasket);
+        $this->invokeMethod($oFcPayOneOrder, '_fcpoHandleBasket', [true, $oMockBasket]);
     }
 
     /**
@@ -748,7 +748,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
 
         $oMockBasket = new Basket();
 
-        $oFcPayOneOrder->_fcpoHandleBasket(false, $oMockBasket);
+        $this->invokeMethod($oFcPayOneOrder, '_fcpoHandleBasket', [false, $oMockBasket]);
     }
 
     public function testFcpoEarlyValidation_NoSaveAfterRedirect()
@@ -769,7 +769,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSessionVariable')->willReturn('someSessionValue');
         $oFcPoHelper->method('fcpoGetUtils')->willReturn($oMockUtils);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
-        
+
         $oMockBasket = new Basket();
         $oMockUser = new User();
 
@@ -880,7 +880,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['Execute'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('Execute')->willReturn(true);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(null, $this->invokeMethod($oFcPayOneOrder, '_fcpoSaveAfterRedirect', [true]));
     }
@@ -931,7 +931,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn('someFile');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals('someFile', $oFcPayOneOrder->fcpoGetMandateFilename());
     }
@@ -958,7 +958,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['getAll'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $aResponse = $aExpect = $oFcPayOneOrder->fcpoGetStatus();
 
@@ -984,7 +984,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['Execute'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('Execute')->willReturn(true);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(null, $this->invokeMethod($oFcPayOneOrder, '_fcpoSaveOrderValues', ['someTxid', '1']));
     }
@@ -1009,7 +1009,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['getOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getOne')->willReturn(false);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $blResponse = $this->invokeMethod($oFcPayOneOrder, '_fcpoCheckTxid');
 
@@ -1036,7 +1036,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['getOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getOne')->willReturn(false);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $blResponse = $this->invokeMethod($oFcPayOneOrder, '_fcpoCheckTxid');
 
@@ -1180,7 +1180,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(0);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(false, $oFcPayOneOrder->allowCapture());
     }
@@ -1194,7 +1194,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(0);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(false, $oFcPayOneOrder->allowCapture());
     }
@@ -1209,7 +1209,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(0);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(true, $oFcPayOneOrder->allowDebit());
     }
@@ -1224,7 +1224,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(0);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(false, $oFcPayOneOrder->allowDebit());
     }
@@ -1288,7 +1288,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(1);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(2, $oFcPayOneOrder->getSequenceNumber());
     }
@@ -1306,7 +1306,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(1);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockTransaction);
@@ -1332,7 +1332,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['GetOne'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('GetOne')->willReturn(1);
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockRequestLog);
@@ -1426,9 +1426,6 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $this->assertEquals(100, $oFcPayOneOrder->getFcpoCapturableAmount());
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
     public function testValidateStock()
     {
         $this->wrapExpectException('oxOutOfStockException');
@@ -1471,9 +1468,6 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPayOneOrder->validateStock($oMockBasket);
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
     public function testValidateStock_ExceptionNoArticle()
     {
         $this->wrapExpectException('oxNoArticleException');
@@ -1744,7 +1738,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oMockDatabase->method('GetOne')->willReturn(1);
         $oMockDatabase->method('Execute')->willReturn(true);
         $oMockDatabase->method('quote')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
@@ -1786,7 +1780,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oMockDatabase->method('GetOne')->willReturn(1);
         $oMockDatabase->method('Execute')->willReturn(true);
         $oMockDatabase->method('quote')->willReturn('someValue');
-        $this->invokeSetAttribute( $oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);

@@ -2,8 +2,8 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Model;
 
-use Fatchip\PayOne\Application\Helper\PayPal as FcPayonePaypalHelper;
 use Fatchip\PayOne\Application\Helper\Payment as FcPayonePaymentHelper;
+use Fatchip\PayOne\Application\Helper\PayPal as FcPayonePaypalHelper;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Tests\Unit\FcBaseUnitTestCase;
 use OxidEsales\Eshop\Application\Model\Basket;
@@ -85,7 +85,7 @@ class FcpoPaypalHelperTest extends FcBaseUnitTestCase
 
         UtilsObject::setClassInstance(FcPayonePaymentHelper::class, $oPaymentHelper);
 
-        $oCurrency = (object) ['name' => 'EURTEST'];
+        $oCurrency = (object)['name' => 'EURTEST'];
 
         $oMockBasket = $this->getMockBuilder(Basket::class)
             ->setMethods(['getBasketCurrency'])

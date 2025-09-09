@@ -50,7 +50,7 @@ class FcPayOneApiLogListTest extends ConfigUnitTestCase
 
         $sExpectString = " AND fcporequestlog.fcpo_portalid = 'myportalid' AND fcporequestlog.fcpo_aid = 'mysubaccountid' ";
 
-        $this->assertEquals($sExpectString, $this->invokeMethod($oFcPayOneApiLogList, '_prepareWhereQuery', array(array(),'')));
+        $this->assertEquals($sExpectString, $this->invokeMethod($oFcPayOneApiLogList, '_prepareWhereQuery', [[], '']));
     }
 
     public function testGetListFilter()
@@ -84,7 +84,7 @@ class FcPayOneApiLogListTest extends ConfigUnitTestCase
         $this->invokeSetAttribute($oFcPayOneApiLogList, '_aCurrSorting', null);
         $this->invokeSetAttribute($oFcPayOneApiLogList, '_sDefSortField', 'sortValue');
 
-        $aExpect[''] = array('sortValue'=>'desc');
+        $aExpect[''] = ['sortValue' => 'desc'];
 
         $this->assertEquals($aExpect, $oFcPayOneApiLogList->getListSorting());
     }

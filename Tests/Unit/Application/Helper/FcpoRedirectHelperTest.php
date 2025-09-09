@@ -16,7 +16,7 @@ class FcpoRedirectHelperTest extends FcBaseUnitTestCase
         $sExpected = 'abortTest';
 
         $oFcPayoneRedirectHelper = new FcPayoneRedirectHelper();
-        $sResult = $oFcPayoneRedirectHelper->getErrorUrl($sExpected, true);
+        $sResult = $oFcPayoneRedirectHelper->getErrorUrl($sExpected);
 
         $this->assertStringContainsString($sExpected, $sResult);
         $this->assertStringContainsString('type=error', $sResult);
@@ -42,7 +42,7 @@ class FcpoRedirectHelperTest extends FcBaseUnitTestCase
         UtilsObject::setClassInstance(fcpohelper::class, $oFcPoHelper);
 
         $oFcPayoneRedirectHelper = new FcPayoneRedirectHelper();
-        $sResult = $oFcPayoneRedirectHelper->getSuccessUrl('testRefNr', false, false, false);
+        $sResult = $oFcPayoneRedirectHelper->getSuccessUrl('testRefNr');
 
         $this->assertStringContainsString('sid12345', $sResult);
         $this->assertStringContainsString('testValue', $sResult);

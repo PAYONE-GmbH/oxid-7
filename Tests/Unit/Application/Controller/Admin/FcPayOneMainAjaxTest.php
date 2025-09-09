@@ -39,7 +39,7 @@ class FcPayOneMainAjaxTest extends FcBaseUnitTestCase
         $oFcPayOneMainAjax = $this->getMockBuilder(FcPayOneMainAjax::class)
             ->setMethods(['_getActionIds'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1','2']);
+        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1', '2']);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturnOnConsecutiveCalls('1', '2', '3');
@@ -55,7 +55,7 @@ class FcPayOneMainAjaxTest extends FcBaseUnitTestCase
         $oFcPayOneMainAjax = $this->getMockBuilder(FcPayOneMainAjax::class)
             ->setMethods(['_getActionIds'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1','2']);
+        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1', '2']);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn('someValue');
@@ -71,7 +71,7 @@ class FcPayOneMainAjaxTest extends FcBaseUnitTestCase
         $oFcPayOneMainAjax = $this->getMockBuilder(FcPayOneMainAjax::class)
             ->setMethods(['_getActionIds'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1','2']);
+        $oFcPayOneMainAjax->method('_getActionIds')->willReturn(['1', '2']);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn(false);

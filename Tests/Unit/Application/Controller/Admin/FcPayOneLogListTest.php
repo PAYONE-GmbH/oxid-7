@@ -52,7 +52,7 @@ class FcPayOneLogListTest extends ConfigUnitTestCase
 
         $sExpectString = " AND fcpotransactionstatus.fcpo_portalid IN ('myportalid','mysecinvportalid','mybnplportalid') AND fcpotransactionstatus.fcpo_aid = 'mysubaccountid' ";
 
-        $this->assertEquals($sExpectString, $this->invokeMethod($oFcPayOneLogList, '_prepareWhereQuery', array(array(),'')));
+        $this->assertEquals($sExpectString, $this->invokeMethod($oFcPayOneLogList, '_prepareWhereQuery', [[], '']));
     }
 
     public function testGetListFilter()
@@ -86,7 +86,7 @@ class FcPayOneLogListTest extends ConfigUnitTestCase
         $this->invokeSetAttribute($oFcPayOneLogList, '_aCurrSorting', null);
         $this->invokeSetAttribute($oFcPayOneLogList, '_sDefSortField', 'sortValue');
 
-        $aExpect[''] = array('sortValue'=>'asc');
+        $aExpect[''] = ['sortValue' => 'asc'];
 
         $this->assertEquals($aExpect, $oFcPayOneLogList->getListSorting());
     }

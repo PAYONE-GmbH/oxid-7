@@ -179,7 +179,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturnOnConsecutiveCalls($oMockOrder, $oMockTransactionStatus);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->invokeSetAttribute($oFcPayOneOrder, '_aStatus', ['someValue','someOtherValue']);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_aStatus', ['someValue', 'someOtherValue']);
 
         $aResponse = $aExpect = $oFcPayOneOrder->getStatus();
 
@@ -208,7 +208,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockRequest->method('load')->willReturn(true);
         $oMockRequest->method('sendRequestCapture')->willReturn(['returnValue']);
-        $aMockPositions = array('1' => array('capture' => '0'));
+        $aMockPositions = ['1' => ['capture' => '0']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturnOnConsecutiveCalls('1', '1', '1,99', $aMockPositions);
@@ -238,7 +238,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockRequest->method('load')->willReturn(true);
         $oMockRequest->method('sendRequestCapture')->willReturn(['returnValue']);
-        $aMockPositions = array('1' => array('capture' => '0'));
+        $aMockPositions = ['1' => ['capture' => '0']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturnOnConsecutiveCalls('1', '1', null, $aMockPositions);
@@ -268,7 +268,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockRequest->method('load')->willReturn(true);
         $oMockRequest->method('sendRequestDebit')->willReturn(['returnValue']);
-        $aMockPositions = array('1' => array('debit' => '0'));
+        $aMockPositions = ['1' => ['debit' => '0']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturnOnConsecutiveCalls('1', 'someCountry', 'someAccount', 'someBankCode', 'someHolder', '1,99', 'someCancelReason', $aMockPositions);
@@ -298,7 +298,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockRequest->method('load')->willReturn(true);
         $oMockRequest->method('sendRequestDebit')->willReturn(['returnValue']);
-        $aMockPositions = array('1' => array('debit' => '0'));
+        $aMockPositions = ['1' => ['debit' => '0']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturnOnConsecutiveCalls('1', 'someCountry', 'someAccount', 'someBankCode', 'someHolder', null, 'someCancelReason', $aMockPositions);
@@ -535,7 +535,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
 
     protected function _fcpoTruncateTable($sTableName)
     {
-        $sQuery = "DELETE FROM `{$sTableName}` ";
+        $sQuery = "DELETE FROM `$sTableName` ";
 
         DatabaseProvider::getDb()->execute($sQuery);
     }

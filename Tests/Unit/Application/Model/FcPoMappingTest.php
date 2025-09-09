@@ -1,6 +1,7 @@
 <?php
 
 namespace Fatchip\PayOne\Tests\Unit;
+
 use Fatchip\PayOne\Application\Model\FcPoMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -26,17 +27,20 @@ class FcPoMappingTest extends FcBaseUnitTestCase
             ->setMethods(['getAll'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $this->invokeSetAttribute( $oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
-        $this->invokeSetAttribute( $oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
 
         $aResponse = $aExpect = $oFcPoMapping->fcpoGetExistingMappings();
         $this->assertEquals($aExpect, $aResponse);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testFcpoUpdateMappings()
     {
         $oFcPoMapping = $this->getMockBuilder(FcPoMapping::class)
@@ -55,7 +59,7 @@ class FcPoMappingTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $oFcPoMapping->fcpoUpdateMappings($aMockMappings, 'someType');
+        $oFcPoMapping->fcpoUpdateMappings($aMockMappings);
     }
 
     public function testFcpoGetQuery_Delete()
@@ -78,7 +82,7 @@ class FcPoMappingTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $sExpect = "DELETE FROM fcpostatusmapping WHERE oxid = {$sQuotedOxid}";
+        $sExpect = "DELETE FROM fcpostatusmapping WHERE oxid = $sQuotedOxid";
 
         $this->assertEquals($sExpect, $this->invokeMethod($oFcPoMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, 'someType']));
     }
@@ -106,7 +110,7 @@ class FcPoMappingTest extends FcBaseUnitTestCase
 
         $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
             ->disableOriginalConstructor()->getMock();
-        $this->invokeSetAttribute( $oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
 
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])
@@ -142,7 +146,7 @@ class FcPoMappingTest extends FcBaseUnitTestCase
 
         $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
             ->disableOriginalConstructor()->getMock();
-        $this->invokeSetAttribute( $oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
 
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])

@@ -4,13 +4,14 @@ namespace Fatchip\PayOne\Tests\Unit;
 
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ModuleConfigurationDaoBridge;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\DataObject\ModuleConfiguration;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Setting\Setting;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ConfigUnitTestCase extends FcBaseUnitTestCase
 {
     protected function initMockChain($blHasModuleSetting, $sReturnValue = false)
     {
-        $oSetting = $this->getMockBuilder(\OxidEsales\EshopCommunity\Internal\Framework\Module\Setting\Setting::class)->disableOriginalConstructor()->getMock();
+        $oSetting = $this->getMockBuilder(Setting::class)->disableOriginalConstructor()->getMock();
         $oSetting->method('getValue')->willReturn($sReturnValue);
 
         $oModuleConfig = $this->getMockBuilder(ModuleConfiguration::class)->disableOriginalConstructor()->getMock();

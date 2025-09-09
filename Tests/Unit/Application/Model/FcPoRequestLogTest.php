@@ -4,6 +4,7 @@ namespace Fatchip\PayOne\Tests\Unit;
 
 use Fatchip\PayOne\Application\Model\FcPoRequestLog;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\EshopCommunity\Core\Field as FieldAlias;
 
 class FcPoRequestLogTest extends FcBaseUnitTestCase
 {
@@ -13,7 +14,7 @@ class FcPoRequestLogTest extends FcBaseUnitTestCase
 
         $aMockData = ['someRequestKey' => 'someRequestValue'];
         $sMockData = serialize($aMockData);
-        $oFcPoRequestLog->fcporequestlog__fcpo_request = new Field($sMockData, Field::T_RAW);
+        $oFcPoRequestLog->fcporequestlog__fcpo_request = new Field($sMockData, FieldAlias::T_RAW);
 
         $this->assertEquals($aMockData, $oFcPoRequestLog->getRequestArray());
     }
@@ -24,7 +25,7 @@ class FcPoRequestLogTest extends FcBaseUnitTestCase
 
         $aMockData = ['someResponseKey' => 'someResponseValue'];
         $sMockData = serialize($aMockData);
-        $oFcPoRequestLog->fcporequestlog__fcpo_response = new Field($sMockData, Field::T_RAW);
+        $oFcPoRequestLog->fcporequestlog__fcpo_response = new Field($sMockData, FieldAlias::T_RAW);
 
         $this->assertEquals($aMockData, $oFcPoRequestLog->getResponseArray());
     }

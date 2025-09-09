@@ -50,9 +50,6 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
         $oFcPoRatepay->fcpoInsertProfile('someId', $aMockData);
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
     public function testFcpoGetRatePayProfiles()
     {
         $oFcPoRatepay = new FcPoRatePay();
@@ -72,7 +69,7 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getAll')->willReturn($aMockResult);
         $oMockDatabase->method('quote')->willReturn(null);
-        $this->invokeSetAttribute( $oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
@@ -177,7 +174,7 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockRequest);
         $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoHelper', $oFcPoHelper);
 
-        $oFcPoRatepay->_fcpoUpdateRatePayProfile('someId');
+        $this->invokeMethod($oFcPoRatepay, '_fcpoUpdateRatePayProfile', ['someId']);
     }
 
     /**
@@ -192,8 +189,8 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('Execute')->willReturn(null);
         $oMockDatabase->method('quote')->willReturn(null);
-        $this->invokeSetAttribute( $oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
 
-        $oFcPoRatepay->_fcpoUpdateRatePayProfileByResponse('someId', []);
+        $this->invokeMethod($oFcPoRatepay, '_fcpoUpdateRatePayProfileByResponse', ['someId', []]);
     }
 }

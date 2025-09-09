@@ -70,7 +70,7 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
         $sMockOxid = 'someId';
         $sQuotedOxid = DatabaseProvider::getDb()->quote($sMockOxid);
 
-        $sExpect = "DELETE FROM fcpostatusforwarding WHERE oxid = {$sQuotedOxid}";
+        $sExpect = "DELETE FROM fcpostatusforwarding WHERE oxid = $sQuotedOxid";
 
         $this->assertEquals($sExpect, $this->invokeMethod($oFcPoForwarding, '_fcpoGetQuery', [$sMockOxid, $aMockData]));
     }
@@ -112,7 +112,7 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
         $iMockTimeout = 90;
         $sMockOxid = 'someOxid';
 
-        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery',  [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
 
         $this->assertEquals($sExpect, $sResponse);
     }
@@ -139,7 +139,7 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
         $iMockTimeout = 90;
         $sMockOxid = 'someOxid';
 
-        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery',  [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
 
         $this->assertEquals($sExpect, $sResponse);
     }

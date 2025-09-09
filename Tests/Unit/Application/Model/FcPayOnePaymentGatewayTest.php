@@ -23,7 +23,7 @@ class FcPayOnePaymentGatewayTest extends FcBaseUnitTestCase
     public function testExecutePayment()
     {
         $oMockOrder = $this->getMockBuilder(Order::class)
-            ->setMethods(['isPayOnePaymentType','fcHandleAuthorization'])
+            ->setMethods(['isPayOnePaymentType', 'fcHandleAuthorization'])
             ->disableOriginalConstructor()->getMock();
         $oMockOrder->method('isPayOnePaymentType')->willReturn(true);
         $oMockOrder->method('fcHandleAuthorization')->willReturn(true);

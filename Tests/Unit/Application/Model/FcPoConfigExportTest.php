@@ -22,9 +22,9 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
 
         $aMockResult = [
             [
-                'oxvarname'=>'someName',
-                'oxvartype'=>'someType',
-                'oxvarvalue'=>'someValue',
+                'oxvarname' => 'someName',
+                'oxvartype' => 'someType',
+                'oxvarvalue' => 'someValue',
             ]
         ];
 
@@ -33,7 +33,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getAll')->willReturn($aMockResult);
         $oMockDatabase->method('quote')->willReturn('');
-        $this->invokeSetAttribute( $oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
@@ -172,7 +172,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
             ->setMethods(['getCol'])
             ->disableOriginalConstructor()->getMock();
         $oMockDatabase->method('getCol')->willReturn(['someCol' => 'someValue']);
-        $this->invokeSetAttribute( $oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
+        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
 
         $this->assertEquals(['someCol' => 'someValue'], $oFcPoConfigExport->fcpoGetShopIds());
     }
@@ -185,7 +185,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
         $aShopIds = ['oxbaseshop'];
         $oFcPoConfigExport = new FcPoConfigExport();
 
-        $oFcPoConfigExport->_fcpoSetShopConfigVars($aShopIds);
+        $this->invokeMethod($oFcPoConfigExport, '_fcpoSetShopConfigVars', [$aShopIds]);
     }
 
     public function testFcpoGetShopXmlGeneric()
@@ -327,6 +327,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
 
         $aMockCountries = ['a7c40f631fc920687.20179984'];
 
+        $sCountries = '';
         foreach ($aMockCountries as $sCountryId) {
             $oCountry = new Country();
             if ($oCountry->load($sCountryId)) {
@@ -454,7 +455,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
 
     protected function _fcpoTruncateTable($sTableName)
     {
-        $sQuery = "DELETE FROM `{$sTableName}` WHERE true ";
+        $sQuery = "DELETE FROM `$sTableName` WHERE true ";
 
         DatabaseProvider::getDb()->Execute($sQuery);
     }

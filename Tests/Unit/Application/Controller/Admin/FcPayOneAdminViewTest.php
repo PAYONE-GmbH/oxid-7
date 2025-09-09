@@ -8,19 +8,22 @@ use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
 
 class FcPayOneAdminViewTest extends ConfigUnitTestCase
 {
-    public function testFcGetAdminSeparator() {
+    public function testFcGetAdminSeparator()
+    {
         $oFcPayOneAdminView = new FcPayOneAdminView();
 
         $sExpect = '&';
         $this->assertEquals($sExpect, $oFcPayOneAdminView->fcGetAdminSeparator());
     }
 
-    public function testGetViewId() {
+    public function testGetViewId()
+    {
         $oFcPayOneAdminView = new FcPayOneAdminView();
         $this->assertEquals('dyn_fcpayone', $oFcPayOneAdminView->getViewId());
     }
 
-    public function testFcpoGetVersion() {
+    public function testFcpoGetVersion()
+    {
         $oFcPayOneAdminView = new FcPayOneAdminView();
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
@@ -31,7 +34,8 @@ class FcPayOneAdminViewTest extends ConfigUnitTestCase
         $this->assertEquals($sExpect, $oFcPayOneAdminView->fcpoGetVersion());
     }
 
-    public function testFcpoGetMerchantId() {
+    public function testFcpoGetMerchantId()
+    {
         $oFcPayOneAdminView = new FcPayOneAdminView();
 
         $oMockConfig = $this->getMockBuilder('oxConfig')->disableOriginalConstructor()->getMock();

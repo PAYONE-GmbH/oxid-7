@@ -25,7 +25,7 @@ class FcPayOneStatusMappingTest extends ConfigUnitTestCase
     public function testFcpoAddNewMapping()
     {
         $aMockExistingMappings = [
-            (object) [
+            (object)[
                 'sOxid' => 'someOxid',
                 'sPaymentType' => 'somePaymentId',
                 'sPayoneStatusId' => 'someStatus',
@@ -42,13 +42,13 @@ class FcPayOneStatusMappingTest extends ConfigUnitTestCase
         $aResponse = $this->invokeMethod($oFcPayOneStatusMapping, '_fcpoAddNewMapping', [$aMockExistingMappings]);
 
         $aExpect = [
-            (object) [
+            (object)[
                 'sOxid' => 'someOxid',
                 'sPaymentType' => 'somePaymentId',
                 'sPayoneStatusId' => 'someStatus',
                 'sShopStatusId' => 'someFolder'
             ],
-            (object) [
+            (object)[
                 'sOxid' => 'new',
                 'sPaymentType' => '',
                 'sPayoneStatusId' => '',

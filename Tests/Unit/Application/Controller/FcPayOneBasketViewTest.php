@@ -3,6 +3,7 @@
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller;
 
 use Fatchip\PayOne\Application\Controller\FcPayOneBasketView;
+use Fatchip\PayOne\Application\Helper\Payment;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use Fatchip\PayOne\Tests\Unit\FcBaseUnitTestCase;
@@ -25,7 +26,8 @@ class FcPayOneBasketViewTest extends FcBaseUnitTestCase
         $this->assertEquals($sExpect, $sResult);
     }
 
-    public function testFcpoGetBasketErrorMessage() {
+    public function testFcpoGetBasketErrorMessage()
+    {
         $oFcPayOneBasketView = new FcPayOneBasketView();
 
         $oMockLang = $this->getMockBuilder(Language::class)
@@ -41,31 +43,35 @@ class FcPayOneBasketViewTest extends FcBaseUnitTestCase
         $this->assertEquals('someMessage', $oFcPayOneBasketView->fcpoGetBasketErrorMessage());
     }
 
-    // TODO VBFC FIXME if possible to mock Payment::getInstance() call
-    /*
     public function testFcpoGetPayPalExpressPic()
     {
         $oFcPayOneBasketView = $this->getMockBuilder(FcPayOneBasketView::class)
-            ->setMethods(['_fcpoIsPayPalExpressActive', '_fcpoGetPayPalExpressPic'])
+            ->setMethods(['_fcpoIsPayPalExpressActive', '_fcpoGetPayPalExpressPic', 'getViewName'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPayOneBasketView->method('_fcpoIsPayPalExpressActive')->willReturn(true);
+        $oFcPayOneBasketView->method('_fcpoIsPayPalExpressActive')->willReturnOnConsecutiveCalls(true, false);
         $oFcPayOneBasketView->method('_fcpoGetPayPalExpressPic')->willReturn('somePic');
+
+        $oMockPaymentHelper = $this->getMockBuilder(Payment::class)
+            ->setMethods(['getInstance', 'isPaymentMethodActive'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockPaymentHelper->method('isPaymentMethodActive')->willReturnOnConsecutiveCalls(true, false);
+
+        UtilsObject::setClassInstance(Payment::class, $oMockPaymentHelper);
 
         $sResponse = $this->invokeMethod($oFcPayOneBasketView, 'fcpoGetPayPalExpressPic');
         $sExpected = 'somePic';
 
         $this->assertEquals($sExpected, $sResponse);
-    }
-    */
 
-    // TODO VBFC FIXME if possible to execute Db transactions
-    /*
+        UtilsObject::resetClassInstances();
+    }
+
     public function testFcpoGetPayPalExpressPic_protected()
     {
         DatabaseProvider::getDb()->execute('DELETE FROM fcpopayoneexpresslogos WHERE 1');
 
-        $expected = 'somePic.jpg';
-        DatabaseProvider::getDb()->execute('INSERT INTO fcpopayoneexpresslogos (oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default) VALUES ("unitTestLogo", 1, 0, "'.$expected.'", "1")');
+        $sExpected = 'somePic.jpg';
+        DatabaseProvider::getDb()->execute('INSERT INTO fcpopayoneexpresslogos (oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default) VALUES ("unitTestLogo", 1, 0, "' . $sExpected . '", "1")');
 
         $oMockConfig = $this->getMockBuilder(Config::class)
             ->setMethods(['getCurrentShopUrl'])
@@ -77,19 +83,25 @@ class FcPayOneBasketViewTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneBasketView->method('getConfig')->willReturn($oMockConfig);
 
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->setMethods(['getOne'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockDatabase->method('getOne')->willReturn($sExpected);
+
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoFileExists')->willReturn(true);
+        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
+        $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneBasketView, '_oFcPoHelper', $oFcPoHelper);
         $this->invokeSetAttribute($oFcPayOneBasketView, '_sPayPalExpressLogoPath', 'somePath/');
 
         $sResponse = $this->invokeMethod($oFcPayOneBasketView, '_fcpoGetPayPalExpressPic');
-        $sExpect = 'https://someurl.com/somePath/'.$expected;
+        $sExpect = 'https://someurl.com/somePath/' . $sExpected;
 
         $this->assertEquals($sExpect, $sResponse);
 
         DatabaseProvider::getDb()->execute('DELETE FROM fcpopayoneexpresslogos WHERE oxid = "unitTestLogo"');
     }
-    */
 
     public function testFcpoUsePayPalExpress_Error()
     {
@@ -153,7 +165,7 @@ class FcPayOneBasketViewTest extends FcBaseUnitTestCase
 
     protected function _fcpoTruncateTable($sTableName)
     {
-        $sQuery = "DELETE FROM `{$sTableName}` ";
+        $sQuery = "DELETE FROM `$sTableName` ";
 
         DatabaseProvider::getDb()->Execute($sQuery);
     }

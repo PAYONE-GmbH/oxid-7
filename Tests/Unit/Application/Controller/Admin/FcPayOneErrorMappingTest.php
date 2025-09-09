@@ -2,10 +2,8 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
-use Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLog;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
-use Fatchip\PayOne\Application\Model\FcPoRequestLog;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
 use OxidEsales\Eshop\Core\Language;
@@ -84,7 +82,7 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn(true);
         $this->invokeSetAttribute($oFcPayOneErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $aExpect = $aResponse = $oFcPayOneErrorMapping->_fcpoAddNewMapping($aMockDataMappings);
+        $aExpect = $aResponse = $this->invokeMethod($oFcPayOneErrorMapping, '_fcpoAddNewMapping', [$aMockDataMappings]);
         $this->assertEquals($aExpect, $aResponse);
     }
 
@@ -97,7 +95,7 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn(true);
         $this->invokeSetAttribute($oFcPayOneErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $aExpect = $aResponse = $oFcPayOneErrorMapping->_fcpoAddNewIframeMapping($aMockDataMappings);
+        $aExpect = $aResponse = $this->invokeMethod($oFcPayOneErrorMapping, '_fcpoAddNewIframeMapping', [$aMockDataMappings]);
         $this->assertEquals($aExpect, $aResponse);
     }
 
@@ -112,7 +110,7 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
         $oFcPoErrorMapping->method('fcpoGetExistingMappings')->willReturn($aMockMappings);
         $this->invokeSetAttribute($oFcPayOneErrorMapping, '_oFcPoErrorMapping', $oFcPoErrorMapping);
 
-        $this->assertEquals($aMockMappings, $oFcPayOneErrorMapping->_fcpoGetExistingMappings());
+        $this->assertEquals($aMockMappings, $this->invokeMethod($oFcPayOneErrorMapping, '_fcpoGetExistingMappings'));
     }
 
     public function testFcpoGetExistingIframeMappings()
@@ -126,7 +124,7 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
         $oFcPoErrorMapping->method('fcpoGetExistingMappings')->willReturn($aMockMappings);
         $this->invokeSetAttribute($oFcPayOneErrorMapping, '_oFcPoErrorMapping', $oFcPoErrorMapping);
 
-        $this->assertEquals($aMockMappings, $oFcPayOneErrorMapping->_fcpoGetExistingIframeMappings());
+        $this->assertEquals($aMockMappings, $this->invokeMethod($oFcPayOneErrorMapping, '_fcpoGetExistingIframeMappings'));
     }
 
     /**

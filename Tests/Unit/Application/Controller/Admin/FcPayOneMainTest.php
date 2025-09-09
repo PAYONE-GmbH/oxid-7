@@ -6,7 +6,6 @@ use Fatchip\PayOne\Application\Controller\Admin\FcPayOneMain;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\FcCheckChecksum;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use Fatchip\PayOne\Lib\FcPoRequest;
 use Fatchip\PayOne\Tests\Unit\FcBaseUnitTestCase;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\CountryList;
@@ -14,7 +13,6 @@ use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Language;
-use OxidEsales\Eshop\Core\UtilsView;
 
 class FcPayOneMainTest extends FcBaseUnitTestCase
 {
@@ -43,7 +41,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
     public function testGetCurrencyIso()
     {
         $oFcPayOneMain = new FcPayOneMain();
-        $aMockCurrency = [(object) ['name' => 'someCurrency']];
+        $aMockCurrency = [(object)['name' => 'someCurrency']];
         $aExpected = ['someCurrency'];
 
         $oMockConfig = $this->getMockBuilder(Config::class)
@@ -186,7 +184,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
     public function testFcpoInsertProfiles()
     {
         $oFcPayOneMain = new FcPayOneMain();
-        $aMockData = ['some'=>['Data']];
+        $aMockData = ['some' => ['Data']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn($aMockData);
@@ -255,7 +253,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
     public function testFcpoGetRatePayProfiles()
     {
         $oFcPayOneMain = new FcPayOneMain();
-        $aMockData = $aExpect = ['some'=>'Data'];
+        $aMockData = $aExpect = ['some' => 'Data'];
 
         $oMockRatePay = $this->getMockBuilder(FcPoRatePay::class)->disableOriginalConstructor()->getMock();
         $oMockRatePay->method('fcpoGetRatePayProfiles')->willReturn($aMockData);
@@ -264,7 +262,8 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
         $this->assertEquals($aExpect, $oFcPayOneMain->fcpoGetRatepayProfiles());
     }
 
-    public function testFcGetAdminSeparator() {
+    public function testFcGetAdminSeparator()
+    {
         $oFcPayOneMain = new FcPayOneMain();
 
         $sExpect = '&';
@@ -310,7 +309,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
     {
         $oFcPayOneMain = new FcPayOneMain();
 
-        $oLang = (object) [
+        $oLang = (object)[
             'active' => 1,
             'oxid' => 'someOxid',
             'name' => 'someName'
@@ -335,7 +334,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
     {
         $oFcPayOneMain = new FcPayOneMain();
 
-        $oCurrency = (object)  ['name' => 'someName'];
+        $oCurrency = (object)['name' => 'someName'];
         $aCurrencies[] = $oCurrency;
 
         $oMockConfig = $this->getMockBuilder(Config::class)
@@ -507,7 +506,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneMain, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals('someValue', $this->invokeMethod($oFcPayOneMain, '_fcpoSetDefault', [['some'=>'Data'], 'any', 'value']));
+        $this->assertEquals('someValue', $this->invokeMethod($oFcPayOneMain, '_fcpoSetDefault', [['some' => 'Data'], 'any', 'value']));
     }
 
     protected function _fcpoPreparePaypalExpressLogos()
@@ -566,7 +565,7 @@ class FcPayOneMainTest extends FcBaseUnitTestCase
 
     protected function _fcpoTruncateTable($sTableName)
     {
-        $sQuery = "DELETE FROM `{$sTableName}` ";
+        $sQuery = "DELETE FROM `$sTableName` ";
 
         DatabaseProvider::getDb()->execute($sQuery);
     }

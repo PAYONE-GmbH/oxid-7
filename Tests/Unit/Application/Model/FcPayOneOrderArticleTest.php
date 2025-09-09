@@ -7,9 +7,11 @@ use Fatchip\PayOne\Application\Model\FcPayOneOrderArticle;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Order;
+use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Session;
+use OxidEsales\Eshop\Core\UtilsObject;
 
 class FcPayOneOrderArticleTest extends FcBaseUnitTestCase
 {
@@ -149,9 +151,10 @@ class FcPayOneOrderArticleTest extends FcBaseUnitTestCase
         $oMockSession->method('getBasket')->willReturn($oMockBasket);
 
         $oFcPayOneOrderArticle = $this->getMockBuilder(FcPayOneOrderArticle::class)
-            ->setMethods(['_fcpoIsPayonePaymentType'])
+            ->setMethods(['_fcpoIsPayonePaymentType', 'getCoreTableName'])
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrderArticle->method('_fcpoIsPayonePaymentType')->willReturn(false);
+        $oFcPayOneOrderArticle->method('getCoreTableName')->willReturn('oxorderarticles');
         $oFcPayOneOrderArticle->oxorderarticles__oxstorno = new Field(0);
 
         $oMockConfig = $this->getMockBuilder(Config::class)
@@ -164,10 +167,20 @@ class FcPayOneOrderArticleTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSession')->willReturn($oMockSession);
         $this->invokeSetAttribute($oFcPayOneOrderArticle, '_oFcPoHelper', $oFcPoHelper);
 
-        // Fails on Mock payment not being detected (id null from real payment object)
-//        $sResponse = $sExpect = $oFcPayOneOrderArticle->delete('someId');
+        $oMockPayment = $this->getMockBuilder(Payment::class)
+            ->setMethods(['load', 'getId'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockPayment->method('load')->willReturn(true);
+        $oMockPayment->method('getId')->willReturn('someId');
 
-//        $this->assertEquals($sExpect, $sResponse);
+        UtilsObject::setClassInstance(Payment::class, $oMockPayment);
+
+        // Fails on Mock payment not being detected (id null from real payment object)
+        $sResponse = $sExpect = $oFcPayOneOrderArticle->delete('someId');
+
+        $this->assertEquals($sExpect, $sResponse);
+
+        UtilsObject::resetClassInstances();
     }
 
     public function testDelete()
@@ -183,10 +196,11 @@ class FcPayOneOrderArticleTest extends FcBaseUnitTestCase
         $oMockSession->method('getBasket')->willReturn($oMockBasket);
 
         $oFcPayOneOrderArticle = $this->getMockBuilder(FcPayOneOrderArticle::class)
-            ->setMethods(['_fcpoIsPayonePaymentType', '_fcpoProcessBaseDelete'])
+            ->setMethods(['_fcpoIsPayonePaymentType', '_fcpoProcessBaseDelete', 'getCoreTableName'])
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrderArticle->method('_fcpoIsPayonePaymentType')->willReturn(true);
         $oFcPayOneOrderArticle->method('_fcpoProcessBaseDelete')->willReturn(true);
+        $oFcPayOneOrderArticle->method('getCoreTableName')->willReturn('oxorderarticles');
         $oFcPayOneOrderArticle->oxorderarticles__oxstorno = new Field(0);
 
         $oMockConfig = $this->getMockBuilder(Config::class)
@@ -199,10 +213,20 @@ class FcPayOneOrderArticleTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetSession')->willReturn($oMockSession);
         $this->invokeSetAttribute($oFcPayOneOrderArticle, '_oFcPoHelper', $oFcPoHelper);
 
-        // Fails on Mock payment not being detected (id null from real payment object)
-//        $sResponse = $sExpect = $oFcPayOneOrderArticle->delete('someId');
+        $oMockPayment = $this->getMockBuilder(Payment::class)
+            ->setMethods(['load', 'getId'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockPayment->method('load')->willReturn(true);
+        $oMockPayment->method('getId')->willReturn('someId');
 
-//        $this->assertEquals($sExpect, $sResponse);
+        UtilsObject::setClassInstance(Payment::class, $oMockPayment);
+
+        // Fails on Mock payment not being detected (id null from real payment object)
+        $sResponse = $sExpect = $oFcPayOneOrderArticle->delete('someId');
+
+        $this->assertEquals($sExpect, $sResponse);
+
+        UtilsObject::resetClassInstances();
     }
 
     public function testFcpoGetBefore_ExpectTrue()

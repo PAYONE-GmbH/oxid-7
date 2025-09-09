@@ -2,34 +2,37 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Exception;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
+use Fatchip\PayOne\Lib\FcPoHelper;
+use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Language;
+use OxidEsales\Eshop\Core\UtilsObject;
 
 class FcPoErrorMappingTest extends FcBaseUnitTestCase
 {
-    public function testMethod()
-    {
-        $this->assertEquals(true, true);
-    }
-
     public function testFcpoGetExistingMappings()
     {
         $oFcPoErrorMapping = new FcPoErrorMapping();
 
-        $aMockResult = array(
-            array(
-                'oxid'=>'someOxid',
-                'fcpo_error_code'=>'someErrorCode',
-                'fcpo_lang_id'=>'someLangId',
-                'fcpo_mapped_message'=>'someMappedMessage'
-            ),
-        );
-        $oMockDatabase = $this->getMock('oxDb', array('getAll'));
-        $oMockDatabase->expects($this->atLeastOnce())->method('getAll')->will($this->returnValue($aMockResult));
+        $aMockResult = [
+            [
+                'oxid' => 'someOxid',
+                'fcpo_error_code' => 'someErrorCode',
+                'fcpo_lang_id' => 'someLangId',
+                'fcpo_mapped_message' => 'someMappedMessage'
+            ]
+        ];
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetDb')->will($this->returnValue($oMockDatabase));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->setMethods(['getAll'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockDatabase->method('getAll')->willReturn($aMockResult);
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
         $aResponse = $aExpect = $oFcPoErrorMapping->fcpoGetExistingMappings();
         $this->assertEquals($aExpect, $aResponse);
@@ -37,73 +40,100 @@ class FcPoErrorMappingTest extends FcBaseUnitTestCase
 
     public function testFcpoGetAvailableErrorCodes_General()
     {
-        $aMockData = array('some'=>'Data');
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoParseXml'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoParseXml')->will($this->returnValue($aMockData));
+        $aMockData = ['some' => 'Data'];
+
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoParseXml'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoParseXml')->willReturn($aMockData);
 
         $this->assertEquals($aMockData, $oFcPoErrorMapping->fcpoGetAvailableErrorCodes());
     }
 
     public function testFcpoGetAvailableErrorCodes_Iframe()
     {
-        $aMockData = array('some'=>'Data');
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoParseXml'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoParseXml')->will($this->returnValue($aMockData));
+        $aMockData = ['some' => 'Data'];
+
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoParseXml'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoParseXml')->willReturn($aMockData);
 
         $this->assertEquals($aMockData, $oFcPoErrorMapping->fcpoGetAvailableErrorCodes('iframe'));
     }
 
     public function testFcpoGetAvailableErrorCodes_Exception()
     {
-        $this->wrapExpectException(\Exception::class);
-        $oMockException = new \Exception('someErrorMessage');
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoParseXml'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoParseXml')->will($this->throwException($oMockException));
+        $this->wrapExpectException(Exception::class);
 
-        $this->assertEquals(\Exception::class, $oFcPoErrorMapping->fcpoGetAvailableErrorCodes());
+        $oMockException = new Exception('someErrorMessage');
+
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoParseXml'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoParseXml')->willThrowException($oMockException);
+
+        $this->assertEquals(Exception::class, $oFcPoErrorMapping->fcpoGetAvailableErrorCodes());
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testFcpoUpdateMappings()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoGetQuery'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoGetQuery')->will($this->returnValue(true));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoGetQuery'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoGetQuery')->willReturn('someQuery');
 
-        $oMockDatabase = $this->getMock('oxDb', array('Execute'));
-        $oMockDatabase->expects($this->any())->method('Execute')->will($this->returnValue(true));
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->setMethods(['Execute'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockDatabase->method('Execute')->willReturn(true);
 
-        $aMockMappings = array('someIndex' => array('someValue'));
+        $aMockMappings = ['someIndex' => ['someValue']];
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetDb')->will($this->returnValue($oMockDatabase));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $this->assertEquals(null, $oFcPoErrorMapping->fcpoUpdateMappings($aMockMappings, 'someType'));
+        $oFcPoErrorMapping->fcpoUpdateMappings($aMockMappings, 'someType');
     }
 
     public function testFcpoFetchMappedErrorMessage()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoGetSearchQuery'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoGetSearchQuery')->will($this->returnValue('someQuery'));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoGetSearchQuery'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoGetSearchQuery')->willReturn('someQuery');
 
-        $oMockDb = $this->getMock('oxdb', array('GetOne'));
-        $oMockDb->expects($this->any())->method('GetOne')->will($this->returnValue('MappedMessage'));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoDb', $oMockDb);
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->setMethods(['GetOne'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockDatabase->method('GetOne')->willReturn('MappedMessage');
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoDb', $oMockDatabase);
 
-        $oMockUBase = $this->getMock('oxubase', array('getActiveLangAbbr'));
-        $oMockUBase->expects($this->any())->method('getActiveLangAbbr')->will($this->returnValue('de'));
+        $oMockUBase = $this->getMockBuilder(FrontendController::class)
+            ->setMethods(['getActiveLangAbbr'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockUBase->method('getActiveLangAbbr')->willReturn('de');
 
-        $oMockLangData = new stdClass();
-        $oMockLangData->abbr = 'de';
-        $oMockLangData->id = '1';
-        $aMockLangData = array($oMockLangData);
+        $aMockLangData = [
+            (object)[
+                'abbr' => 'de',
+                'id' => '1'
+            ]
+        ];
 
-        $oMockLang = $this->getMock('oxlang', array('getLanguageArray'));
-        $oMockLang->expects($this->any())->method('getLanguageArray')->will($this->returnValue($aMockLangData));
+        $oMockLang = $this->getMockBuilder(Language::class)
+            ->setMethods(['getLanguageArray'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockLang->method('getLanguageArray')->willReturn($aMockLangData);
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockUBase));
-        $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('getFactoryObject')->willReturn($oMockUBase);
+        $oFcPoHelper->method('fcpoGetLang')->willReturn($oMockLang);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
         $this->assertEquals('MappedMessage', $oFcPoErrorMapping->fcpoFetchMappedErrorMessage('someMessage'));
     }
@@ -113,35 +143,40 @@ class FcPoErrorMappingTest extends FcBaseUnitTestCase
         $sExpect = "WHERE fcpo_error_type='general'";
         $oFcPoErrorMapping = new FcPoErrorMapping();
 
-        $this->assertEquals($sExpect, $oFcPoErrorMapping->_fcpoGetMappingWhere('general'));
+        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetMappingWhere', ['general']));
     }
 
     public function testFcpoParseXml()
     {
         $oFcPoErrorMapping = new FcPoErrorMapping();
 
-        $oMockUBase = $this->getMock('oxubase', array('getActiveLangAbbr'));
-        $oMockUBase->expects($this->any())->method('getActiveLangAbbr')->will($this->returnValue('de'));
+        $oMockUBase = $this->getMockBuilder(FrontendController::class)
+            ->setMethods(['getActiveLangAbbr'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockUBase->method('getActiveLangAbbr')->willReturn('de');
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockUBase));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('getFactoryObject')->willReturn($oMockUBase);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $oMockXmlEntry = new stdClass();
-        $oMockXmlEntry->error_code = 'someErrorCode';
-        $oMockXmlEntry->error_message_de = 'someMessage';
-        $oMockXmlEntry->error_message_ = 'someMessage';
+        $oMockXml = (object)[
+            'entry' => [
+                (object)[
+                    'error_code' => 'someErrorCode',
+                    'error_message_de' => 'someMessage',
+                    'error_message_' => 'someMessage'
+                ]
+            ]
+        ];
 
-        $oMockXml = new stdClass();
-        $oMockXml->entry = array($oMockXmlEntry);
+        $oMockEntry = (object) [
+            'sErrorCode' => 'someErrorCode',
+            'sErrorMessage' => 'someMessage'
+        ];
 
-        $oMockEntry = new stdClass();
-        $oMockEntry->sErrorCode = 'someErrorCode';
-        $oMockEntry->sErrorMessage = 'someMessage';
+        $aExpect = [$oMockEntry];
 
-        $aExpect = array($oMockEntry);
-
-        $this->assertEquals($aExpect, $oFcPoErrorMapping->_fcpoParseXml($oMockXml));
+        $this->assertEquals($aExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoParseXml', [$oMockXml]));
     }
 
     public function testFcpoXml2Array()
@@ -150,81 +185,120 @@ class FcPoErrorMappingTest extends FcBaseUnitTestCase
 
         $sMockXml = '<root><mocknode><mockvar>mockvalue</mockvar></mocknode></root>';
         $oMockXml = simplexml_load_string($sMockXml);
-        $aExpect = array('mocknode'=>array('mockvar'=>'mockvalue'));
+        $aExpect = ['mocknode' => ['mockvar' => 'mockvalue']];
 
-        $this->assertEquals($aExpect, $oFcPoErrorMapping->_fcpoXml2Array($oMockXml));
+        $this->assertEquals($aExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoXml2Array', [$oMockXml]));
     }
 
     public function testFcpoGetQuery_Delete()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoGetUpdateQuery'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoGetUpdateQuery')->will($this->returnValue(true));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoGetUpdateQuery'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoGetUpdateQuery')->willReturn('someQuery');
 
-        $aMockData = array('delete' => true);
+        $aMockData = ['delete' => true];
         $sMockOxid = 'someId';
         $sQuotedOxid = DatabaseProvider::getDb()->quote($sMockOxid);
+        $sMockType = 'someErrorType';
 
-        $sExpect = "DELETE FROM fcpoerrormapping WHERE oxid = {$sQuotedOxid}";
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->setMethods(['quote'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockDatabase->method('quote')->willReturn($sQuotedOxid);
 
-        $this->assertEquals($sExpect, $oFcPoErrorMapping->_fcpoGetQuery($sMockOxid, $aMockData, 'someErrorType'));
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
+
+        $sExpect = "DELETE FROM fcpoerrormapping WHERE oxid = $sQuotedOxid";
+
+        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, $sMockType]));
     }
 
     public function testFcpoGetQuery_Update()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoGetUpdateQuery'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoGetUpdateQuery')->will($this->returnValue('someValue'));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoGetUpdateQuery'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoGetUpdateQuery')->willReturn('someValue');
 
-        $aMockData = array('donotdelete' => true);
+        $aMockData = ['donotdelete' => true];
         $sMockOxid = 'someId';
-        $sExpect = "someValue";
+        $sExpect = 'someValue';
+        $sMockType = 'someErrorType';
 
-        $this->assertEquals($sExpect, $oFcPoErrorMapping->_fcpoGetQuery($sMockOxid, $aMockData, 'someErrorType'));
+        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, $sMockType]));
     }
 
     public function testFcpoGetUpdateQuery_Insert()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoIsValidNewEntry'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoIsValidNewEntry')->will($this->returnValue(true));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoIsValidNewEntry'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoIsValidNewEntry')->willReturn(true);
 
-        $oMockUtilsObject = $this->getMock('oxUtilsObject', array('generateUID'));
-        $oMockUtilsObject->expects($this->any())->method('generateUID')->will($this->returnValue('someId'));
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoDb', $oMockDatabase);
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue($oMockUtilsObject));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
+            ->setMethods(['generateUID'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockUtilsObject->method('generateUID')->willReturn('someId');
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetUtilsObject')->willReturn($oMockUtilsObject);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
         $sMockMappingId = 'someMapId';
-        $sMockPaymentId = 'somePaymentId';
-        $sMockPayoneStatus = 'someStatus';
-        $sMockFolder = 'someFolder';
+        $aMockData = [
+            'sPaymentType' => 'somePaymentId',
+            'sPayoneStatus' => 'someStatus',
+            'sShopStatus' => 'someFolder',
+            'sErrorCode' => 'someErrorCode',
+            'sLangId' => 'someLangId',
+            'sMappedMessage' => 'someMessage'
+        ];
+        $sMockType = 'someErrorType';
 
-        $aMockData = array('sPaymentType' => $sMockPaymentId, 'sPayoneStatus' => $sMockPayoneStatus, 'sShopStatus' => $sMockFolder);
-
-        $sResponse = $sExpect = $oFcPoErrorMapping->_fcpoGetUpdateQuery($sMockMappingId, $aMockData, 'someErrorType');
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetUpdateQuery', [$sMockMappingId, $aMockData, $sMockType]);
 
         $this->assertEquals($sExpect, $sResponse);
     }
 
     public function testFcpoGetUpdateQuery_Update()
     {
-        $oFcPoErrorMapping = $this->getMock('fcpoerrormapping', array('_fcpoIsValidNewEntry'));
-        $oFcPoErrorMapping->expects($this->any())->method('_fcpoIsValidNewEntry')->will($this->returnValue(false));
+        $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
+            ->setMethods(['_fcpoIsValidNewEntry'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoErrorMapping->method('_fcpoIsValidNewEntry')->willReturn(false);
 
-        $oMockUtilsObject = $this->getMock('oxUtilsObject', array('generateUID'));
-        $oMockUtilsObject->expects($this->any())->method('generateUID')->will($this->returnValue('someId'));
+        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+            ->disableOriginalConstructor()->getMock();
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoDb', $oMockDatabase);
 
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetUtilsObject')->will($this->returnValue($oMockUtilsObject));
-        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcpoHelper', $oHelper);
+        $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
+            ->setMethods(['generateUID'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockUtilsObject->method('generateUID')->willReturn('someId');
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetUtilsObject')->willReturn($oMockUtilsObject);
+        $this->invokeSetAttribute($oFcPoErrorMapping, '_oFcPoHelper', $oFcPoHelper);
 
         $sMockMappingId = 'someMapId';
-        $sMockPaymentId = 'somePaymentId';
-        $sMockPayoneStatus = 'someStatus';
-        $sMockFolder = 'someFolder';
+        $aMockData = [
+            'sPaymentType' => 'somePaymentId',
+            'sPayoneStatus' => 'someStatus',
+            'sShopStatus' => 'someFolder',
+            'sErrorCode' => 'someErrorCode',
+            'sLangId' => 'someLangId',
+            'sMappedMessage' => 'someMessage'
+        ];
+        $sMockType = 'someErrorType';
 
-        $aMockData = array('sPaymentType' => $sMockPaymentId, 'sPayoneStatus' => $sMockPayoneStatus, 'sShopStatus' => $sMockFolder);
-
-        $sResponse = $sExpect = $oFcPoErrorMapping->_fcpoGetUpdateQuery($sMockMappingId, $aMockData, 'someErrorType');
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetUpdateQuery', [$sMockMappingId, $aMockData, $sMockType]);
 
         $this->assertEquals($sExpect, $sResponse);
     }
@@ -241,7 +315,7 @@ class FcPoErrorMappingTest extends FcBaseUnitTestCase
             LIMIT 1
         ";
 
-        $this->assertEquals($sExpect, $oFcPoErrorMapping->_fcpoGetSearchQuery('someErrorCode', 'someId'));
+        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoErrorMapping, '_fcpoGetSearchQuery', ['someErrorCode', 'someId']));
     }
 
     public function testFcpoIsValidNewEntry()
@@ -253,6 +327,6 @@ class FcPoErrorMappingTest extends FcBaseUnitTestCase
         $sMockPayoneStatus = 'someStatus';
         $sMockFolder = 'someFolder';
 
-        $this->assertEquals(true, $oFcPoErrorMapping->_fcpoIsValidNewEntry($sMockMappingId, $sMockPaymentId, $sMockPayoneStatus, $sMockFolder));
+        $this->assertEquals(true, $this->invokeMethod($oFcPoErrorMapping, '_fcpoIsValidNewEntry', [$sMockMappingId, $sMockPaymentId, $sMockPayoneStatus, $sMockFolder]));
     }
 }

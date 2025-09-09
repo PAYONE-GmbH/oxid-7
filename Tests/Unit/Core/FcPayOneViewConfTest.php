@@ -28,7 +28,7 @@ class FcPayOneViewConfTest extends FcBaseUnitTestCase
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $this->invokeSetAttribute($oFcPayOneViewConf, '_oFcPoHelper', $oFcPoHelper);
-        
+
         $this->assertEquals('payone-gmbh/oxid-7', $oFcPayOneViewConf->fcpoGetModulePath());
     }
 
@@ -64,7 +64,7 @@ class FcPayOneViewConfTest extends FcBaseUnitTestCase
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockErrorMapping);
         $this->invokeSetAttribute($oFcPayOneViewConf, '_oFcPoHelper', $oFcPoHelper);
-        
+
         $this->assertEquals($aMockMappings, $oFcPayOneViewConf->fcpoGetIframeMappings());
     }
 
@@ -89,7 +89,7 @@ class FcPayOneViewConfTest extends FcBaseUnitTestCase
         $oFcPayOneViewConf = new FcPayOneViewConf();
 
         $oMockTheme = $this->getMockBuilder(Theme::class)
-            ->setMethods(['getActiveThemeId','getInfo'])
+            ->setMethods(['getActiveThemeId', 'getInfo'])
             ->disableOriginalConstructor()->getMock();
         $oMockTheme->method('getActiveThemeId')->willReturn('someInheritedThemeId');
         $oMockTheme->method('getInfo')->willReturn('apex');
