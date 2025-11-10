@@ -192,6 +192,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $blShowAsRegularPaymentSelection = $this->fcpoShowBNPLPaymentSelection();
         }
 
+        if ($sPaymentId == 'fcpo_wero') {
+            $blShowAsRegularPaymentSelection = $this->fcpoShowWeroPaymentSelection();
+        }
+
         return $blShowAsRegularPaymentSelection;
     }
 
@@ -205,6 +209,27 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (!in_array($this->getUserBillCountryId(), ['a7c40f631fc920687.20179984', 'a7c40f6320aeb2ec2.72885259'])) {
             return false;
         }
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        if ($oCurr->name != 'EUR') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if WERO method can be shown (DE, BE, FR countries and EUR currency only)
+     *
+     * @return bool
+     */
+    protected function fcpoShowWeroPaymentSelection()
+    {
+        // DE, BE, FR
+        if (!in_array($this->getUserBillCountryId(), ['a7c40f631fc920687.20179984', 'a7c40f632e04633c9.47194042', 'a7c40f63272a57296.32117580'])) {
+            return false;
+        }
+
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oCurr = $oConfig->getActShopCurrencyObject();
         if ($oCurr->name != 'EUR') {

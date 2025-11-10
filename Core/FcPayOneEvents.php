@@ -412,6 +412,7 @@ class FcPayOneEvents
         'fcpopl_secinvoice' => 'PAYONE Gesicherter Rechnungskauf (neu)',
         'fcpopl_secinstallment' => 'PAYONE Gesicherter Ratenkauf',
         'fcpopl_secdebitnote' => 'PAYONE Gesicherte Lastschrift',
+        'fcpo_wero' => 'PAYONE Wero',
     ];
 
     /**
