@@ -24,9 +24,10 @@ use Fatchip\PayOne\Application\Helper\Payment;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Controller\BasketController;
 use OxidEsales\Eshop\Application\Model\Basket;
 
-class FcPayOneBasketView extends FcPayOneBasketView_parent
+class FcPayOneBasketView extends BasketController
 {
 
     /**
