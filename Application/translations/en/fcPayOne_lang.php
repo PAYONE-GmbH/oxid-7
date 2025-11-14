@@ -295,6 +295,7 @@ The smaller text field is used to name the destination file, or path to an exist
     'PAYONE WeChat Pay' => 'PAYONE WeChat Pay',
     'PAYONE Wero' => 'PAYONE Wero',
     'FCPO_KLARNA' => 'PAYONE Klarna Payments',
+    'PAYONE Google Pay' => 'PAYONE Google Pay',
 
     'FCPO_RATEPAY_RUNTIME_TITLE' => 'Duration',
     'FCPO_RATEPAY_RUNTIME_DESCRIPTION' => 'Number of monthly installments',
