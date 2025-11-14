@@ -247,3 +247,148 @@
         </div>
     {% endif %}
 {% endblock %}
+
+{% block checkout_order_next_step_side %}
+
+    {% if oViewConf.fcpoIsGooglePay() %}
+            <div id="payonegooglepaycontainer" class="btn btn-lg w-100">
+            </div>
+
+        <script async
+                src="https://pay.google.com/gp/p/js/pay.js"
+                onload="onGooglePayLoaded()">
+        </script>
+        <script>
+            const baseRequest = {
+                apiVersion: 2,
+                apiVersionMinor: 0
+            };
+            // const allowedCardNetworks = ["MASTERCARD", "VISA"];
+            const allowedCardNetworks = {{ oViewConf.fcpoGooglePayGetSupportedNetworks()|raw }};
+            // const allowedCardAuthMethods = ["PAN_ONLY", "CRYPTOGRAM_3DS"];
+            const allowedCardAuthMethods = {{ oViewConf.fcpoGooglePayGetAllowedCardAuthMethods()|raw }};
+            const tokenizationSpecification = {
+                type: 'PAYMENT_GATEWAY',
+                parameters: {
+                    'gateway': 'payonegmbh',
+                    'gatewayMerchantId': '{{ oViewConf.fcpoGooglePayGetMerchantId()|raw }}'
+                }
+            };
+            const baseCardPaymentMethod = {
+                type: 'CARD',
+                parameters: {
+                    allowedAuthMethods: allowedCardAuthMethods,
+                    allowedCardNetworks: allowedCardNetworks,
+                    allowPrepaidCards: {{ oViewConf.fcpoGooglePayGetAllowPrepaidCards()|raw }},
+                    allowCreditCards: {{ oViewConf.fcpoGooglePayGetAllowCreditCards()|raw }}
+                }
+            };
+            const cardPaymentMethod = Object.assign(
+                {},
+                baseCardPaymentMethod,
+                {
+                    tokenizationSpecification: tokenizationSpecification
+                }
+            );
+            let paymentsClient = null;
+            function getGoogleIsReadyToPayRequest() {
+                return Object.assign(
+                    {},
+                    baseRequest,
+                    {
+                        allowedPaymentMethods: [baseCardPaymentMethod]
+                    }
+                );
+            }
+            function getGooglePaymentDataRequest() {
+                const paymentDataRequest = Object.assign({}, baseRequest);
+                paymentDataRequest.allowedPaymentMethods = [cardPaymentMethod];
+                paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+                paymentDataRequest.merchantInfo = {
+                    merchantId: '{{ oViewConf.fcpoGooglePayGetGoogleMerchantId()|raw }}',
+                    merchantName: '{{ oViewConf.fcpoGooglePayGetShopName()|raw }}',
+                };
+                return paymentDataRequest;
+            }
+            function getGooglePaymentsClient() {
+                if ( paymentsClient === null ) {
+                    paymentsClient = new google.payments.api.PaymentsClient({ environment: '{{ oViewConf.fcpoGooglePayGetMode()|raw }}' });
+                }
+                return paymentsClient;
+            }
+            function onGooglePayLoaded() {
+                const paymentsClient = getGooglePaymentsClient();
+                paymentsClient.isReadyToPay(getGoogleIsReadyToPayRequest())
+                    .then(function(response) {
+                        if (response.result) {
+                            addGooglePayButton();
+                        }
+                    })
+                    .catch(function(err) {
+                        // show error in developer console for debugging
+                        console.error(err);
+                    });
+            }
+            function addGooglePayButton() {
+                const paymentsClient = getGooglePaymentsClient();
+                const button =
+                    paymentsClient.createButton({
+                            onClick: onGooglePaymentButtonClicked,
+                            buttonColor: '{{ oViewConf.fcpoGooglePayGetButtonColor()|raw }}',
+                            buttonType: '{{ oViewConf.fcpoGooglePayGetButtonType()|raw }}',
+                            buttonLocale: '{{ oViewConf.fcpoGooglePayGetButtonLocale()|raw }}',
+                        }
+                    );
+                document.getElementById('payonegooglepaycontainer').appendChild(button);
+            }
+            function getGoogleTransactionInfo() {
+                return {
+                    countryCode: '{{ oViewConf.fcpoGooglePayGetButtonLocale()|raw }}',
+                    currencyCode: '{{ oViewConf.fcpoGooglePayGetCurrency()|raw }}',
+                    totalPriceStatus: 'FINAL',
+                    // set to cart total
+                    totalPrice: '{{ oViewConf.fcpoGooglePayGetBasketSum()|raw }}',
+                    totalPriceLabel: 'Gesamtsumme',
+                    {% if oViewConf.fcpoGooglePayGetShowDisplayItems()|raw %}
+                    displayItems: {{ oViewConf.getGooglePayDisplayItems()|raw }}
+                    {% endif %}
+                };
+            }
+            function prefetchGooglePaymentData() {
+                const paymentDataRequest = getGooglePaymentDataRequest();
+                // transactionInfo must be set but does not affect cache
+                paymentDataRequest.transactionInfo = {
+                    totalPriceStatus: 'NOT_CURRENTLY_KNOWN',
+                    currencyCode: '{{ oViewConf.fcpoGooglePayGetCurrency()|raw }}'
+                };
+                const paymentsClient = getGooglePaymentsClient();
+                paymentsClient.prefetchPaymentData(paymentDataRequest);
+            }
+            function onGooglePaymentButtonClicked() {
+                const paymentDataRequest = getGooglePaymentDataRequest();
+                paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+                const paymentsClient = getGooglePaymentsClient();
+                paymentsClient.loadPaymentData(paymentDataRequest)
+                    .then(function(paymentData) {
+                        // handle the response
+                        processPayment(paymentData);
+                    })
+                    .catch(function(err) {
+                        // show error in developer console for debugging
+                        console.error(err);
+                    });
+            }
+            function processPayment(paymentData) {
+                // show returned data in developer console for debugging
+                console.log(paymentData);
+                // @todo pass payment token to your gateway to process payment
+                paymentToken = paymentData.paymentMethodData.tokenizationData.token;
+                console.log('PaymentToken:');
+                console.log(btoa(paymentToken));
+                var url = "{{ oViewConf.fcpoGooglePayGetRedirectUrl()|raw }}" + "&stoken={{ oViewConf.getSessionChallengeToken()|raw }}&sDeliveryAddressMD5={{ oView.getDeliveryAddressMD5()|raw }}" + '&fnc=execute&googlepaytoken=' + btoa(paymentToken);
+                // console.log(url);
+                window.location = url;
+            }
+        </script>
+    {% endif %}
+{% endblock %}

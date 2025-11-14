@@ -605,6 +605,13 @@ class FcPoRequest extends Base
                 $this->addParameter('wallettype', 'WRO');
                 $blAddRedirectUrls = true;
                 break;
+            case 'fcpo_googlepay':
+                $tokenData = $this->_oFcPoHelper->fcpoGetRequestParameter('googlepaytoken');
+                $this->addParameter('clearingtype', 'wlt');
+                $this->addParameter('wallettype', 'GGP');
+                $this->addParameter('add_paydata[paymentmethod_token_data]', $tokenData);
+                $blAddRedirectUrls = true;
+                break;
             default:
                 return false;
         }

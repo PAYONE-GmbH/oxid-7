@@ -1071,6 +1071,112 @@
     <div class="groupExp">
         <div>
             <a href="#" onclick="_groupExp(this);return false;"
+                class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GOOGLEPAY" })|raw }}</b></a>
+            <dl>
+                <dt>
+                        <input aria-label="Set Googlepay Country Code" type="text" class="txt" name="confstrs[sFCPOGooglepayGoogleMerchantId]" value="{{ confstrs.sFCPOGooglepayGoogleMerchantId|raw }}" {{ readonly }}>
+                        {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTID"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTID")} %}
+                </dt>
+                <dd>
+                        {{ translate({ ident: "FCPO_GOOGLEPAY_GOOGLEMERCHANTID" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOGoolepayAllowVisa]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOGoolepayAllowVisa]" value="true"
+                           {% if (confbools.blFCPOGoolepayAllowVisa) %}checked{% endif %} {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_ALLOW_VISA"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_ALLOW_VISA")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_ALLOW_VISA" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOGoolepayAllowMasterCard]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOGoolepayAllowMasterCard]" value="true"
+                           {% if (confbools.blFCPOGoolepayAllowMasterCard) %}checked{% endif %} {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_ALLOW_MASTERCARD"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_ALLOW_MASTERCARD")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_ALLOW_MASTERCARD" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOGoolepayAllowPrePaidCards]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOGoolepayAllowPrePaidCards]" value="true"
+                           {% if (confbools.blFCPOGoolepayAllowPrePaidCards) %}checked{% endif %} {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_ALLOW_PREPAIDCARDS"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_ALLOW_PREPAIDCARDS")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_ALLOW_PREPAIDCARDS" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOGooglepayAllowCreditCards]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOGooglepayAllowCreditCards]" value="true"
+                           {% if (confbools.blFCPOGooglepayAllowCreditCards) %}checked{% endif %} {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_ALLOW_CREDITCARDS"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_ALLOW_CREDITCARDS")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_ALLOW_CREDITCARDS" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="text" class="txt" name="confstrs[sFCPOGooglepayCountrycode]"
+                           value="{{ confstrs.sFCPOGooglepayCountrycode }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_COUNTRYCODE"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_COUNTRYCODE")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_COUNTRYCODE" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOGooglePayButtonColor]">
+                        <option value="default" {% if oView.getConfigParam('sFCPOGooglePayButtonColor') == "default" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONCOLOR_DEFAULT" })|raw }}</option>
+                        <option value="white" {% if oView.getConfigParam('sFCPOGooglePayButtonColor') == "white" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONCOLOR_WHITE" })|raw }}</option>
+                        <option value="black" {% if oView.getConfigParam('sFCPOGooglePayButtonColor') == "black" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONCOLOR_BLACK" })|raw }}</option>
+                    </select>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_BUTTONCOLOR"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_BUTTONCOLOR")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONCOLOR" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOGooglePayButtonType]">
+                        <option value="buy" {% if oView.getConfigParam('sFCPOGooglePayButtonType') == "buy" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE_BUY" })|raw }}</option>
+                        <option value="checkout" {% if oView.getConfigParam('sFCPOGooglePayButtonType') == "checkout" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE_CHECKOUT" })|raw }}</option>
+                        <option value="order" {% if oView.getConfigParam('sFCPOGooglePayButtonType') == "order" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE_ORDER" })|raw }}</option>
+                        <option value="pay" {% if oView.getConfigParam('sFCPOGooglePayButtonType') == "pay" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE_PAY" })|raw }}</option>
+                        <option value="plain" {% if oView.getConfigParam('sFCPOGooglePayButtonType') == "plain" %}SELECTED{% endif %}>{{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE_PLAIN" })|raw }}</option>
+                    </select>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_BUTTONTYPE"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_BUTTONTYPE")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_BUTTONTYPE" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
+    </div>
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;"
                class="rc"><b>{{ translate({ ident: "FCPO_FORWARD_REDIRECTS" })|raw }}</b></a>
             <dl>
                 <dt>
