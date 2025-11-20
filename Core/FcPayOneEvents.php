@@ -55,7 +55,12 @@ class FcPayOneEvents
         'fcpoklarna',
         'fcpopaydirekt_express',
         'fcpo_giropay',
-        'fcpoamazonpay'
+        'fcpoamazonpay',
+        'fcpocashondel',
+        'fcpobarzahlen',
+        'fcpopaydirekt',
+        'fcpo_sofort',
+        'fcpo_trustly',
     ];
     public static string $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
