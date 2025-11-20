@@ -231,7 +231,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
             }
         }
 
-        $blDelete = $this->_fcpoProcessBaseDelete($sOXID);
+        $blDelete = $this->_fcpoProcessBaseDelete($sOXID ?? '');
         if ($blDelete) {
             $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
             if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore !== false) {

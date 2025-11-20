@@ -734,8 +734,6 @@ class FcPayOnePaymentView extends PaymentController
                 $this->getAmex(),
                 $this->getDiners(),
                 $this->getJCB(),
-                $this->getMaestroInternational(),
-                $this->getMaestroUK(),
                 $this->getCarteBleue(),
             ],
             'sb' => [
@@ -837,26 +835,6 @@ class FcPayOnePaymentView extends PaymentController
     public function getJCB(): bool
     {
         return ($this->getConfigParam('blFCPOJCBActivated') && $this->isPaymentMethodAvailableToUser('J', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method MaestroInternational is available to the user
-     *
-     * @return bool
-     */
-    public function getMaestroInternational(): bool
-    {
-        return ($this->getConfigParam('blFCPOMaestroIntActivated') && $this->isPaymentMethodAvailableToUser('O', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method MaestroUK is available to the user
-     *
-     * @return bool
-     */
-    public function getMaestroUK(): bool
-    {
-        return ($this->getConfigParam('blFCPOMaestroUKActivated') && $this->isPaymentMethodAvailableToUser('U', 'cc'));
     }
 
     /**
@@ -984,8 +962,6 @@ class FcPayOnePaymentView extends PaymentController
         $this->_fcpoSetCCMetaData($oPayment, 'A', 'American Express');
         $this->_fcpoSetCCMetaData($oPayment, 'D', 'Diners Club');
         $this->_fcpoSetCCMetaData($oPayment, 'J', 'JCB');
-        $this->_fcpoSetCCMetaData($oPayment, 'O', 'Maestro International');
-        $this->_fcpoSetCCMetaData($oPayment, 'U', 'Maestro UK');
         $this->_fcpoSetCCMetaData($oPayment, 'B', 'Carte Bleue');
 
         return $this->_aPaymentCCMetaData;
@@ -1006,8 +982,6 @@ class FcPayOnePaymentView extends PaymentController
             'A' => $this->getAmex(),
             'D' => $this->getDiners(),
             'J' => $this->getJCB(),
-            'O' => $this->getMaestroInternational(),
-            'U' => $this->getMaestroUK(),
             'B' => $this->getCarteBleue(),
         ];
 
