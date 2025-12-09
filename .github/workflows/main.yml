@@ -59,7 +59,9 @@ jobs:
         run: |
           mkdir /tmp/oxid7
           cd /tmp/oxid7
-          composer create-project -n --no-progress oxid-esales/oxideshop-project . ${{ matrix.oxid-versions }}
+          composer create-project -n --no-progress --no-install oxid-esales/oxideshop-project . ${{ matrix.oxid-versions }}
+          composer config audit.block-insecure false
+          composer install --no-interaction
           cp /tmp/oxid7/source/config.inc.php.dist /tmp/oxid7/source/config.inc.php
           sed -i 's|<dbHost>|127.0.0.1|; s|<dbName>|payone_oxid7_test|; s|<dbUser>|root|; s|<dbPwd>|root|; s|<dbPort>|3306|; s|<sShopURL>|http://localhost|; s|<sShopDir>|/tmp/oxid7/source|; s|<sCompileDir>|/tmp/oxid7/source/tmp|; s|\$this->iDebug = 0|\$this->iDebug = 1|' /tmp/oxid7/source/config.inc.php
           sed -i "s|\$this->edition = ''|\$this->edition = 'CE'|" /tmp/oxid7/source/config.inc.php
