@@ -92,4 +92,10 @@ class FcPayOneBasket extends FcPayOneBasket_parent
         return $oDeliveryPrice;
     }
 
+    public function getUser()
+    {
+        $oUser = parent::getUser();
+        return $oUser ? $oUser : $this->_oUser;
+    }
+
 }
