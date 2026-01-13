@@ -530,7 +530,11 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         if ($oCountry->load($oUser->oxuser__oxcountryid->value)) {
             $sCountry = $oCountry->oxcountry__oxisoalpha2->value;
         }
-        return strtoupper($sCountry);
+        return strtolower($sCountry);
+    }
+
+    public function fcpoGooglePayGetCountryCode() {
+        return strtoupper($this->fcpoGooglePayGetButtonLocale());
     }
 
     public function fcpoGooglePayGetBasketSum() {

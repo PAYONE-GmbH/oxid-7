@@ -343,7 +343,7 @@
             }
             function getGoogleTransactionInfo() {
                 return {
-                    countryCode: '{{ oViewConf.fcpoGooglePayGetButtonLocale()|raw }}',
+                    countryCode: '{{ oViewConf.fcpoGooglePayGetCountryCode()|raw }}',
                     currencyCode: '{{ oViewConf.fcpoGooglePayGetCurrency()|raw }}',
                     totalPriceStatus: 'FINAL',
                     // set to cart total
