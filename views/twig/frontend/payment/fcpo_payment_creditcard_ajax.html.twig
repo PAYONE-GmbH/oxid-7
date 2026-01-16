@@ -26,7 +26,7 @@
                 </div>
 
                 <div class="form-floating mb-3">
-                    <select name="dynvalue[fcpo_kktype]" {% if oView.getMaestroUK() %}onchange="fcCheckType(this); return false;" {% endif %} class="form-control selectpicker" required>
+                    <select name="dynvalue[fcpo_kktype]" class="form-control selectpicker" required>
                         {% for oFcPoCCPaymentMetaData in aFcPoCCPaymentMetaData %}
                             <option value="{{ oFcPoCCPaymentMetaData.sPaymentTag }}" {% if oFcPoCCPaymentMetaData.blSelected %}selected{% endif %}>
                                 {{ oFcPoCCPaymentMetaData.sPaymentName }}
@@ -113,16 +113,6 @@
                     <span class="help-block">{{ translate({ ident: "FCPO_CARD_SECURITY_CODE_DESCRIPTION" }) }}</span>
                     <label>{{ translate({ ident: "FCPO_CARD_SECURITY_CODE" }) }}</label>
                 </div>
-
-                {% if oView.getMaestroUK() %}
-                    <div class="form-floating mb-3" style="display: none;">
-                        <input placeholder="{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}" autocomplete="off"
-                               type="text" class="form-control js-oxValidate js-oxValidate_notEmpty payment_text"
-                               size="20" maxlength="64" name="dynvalue[fcpo_kkcsn]" value="{{ dynvalue.fcpo_kkcsn }}"
-                               required="required">
-                        <label>{{ translate({ ident: "FCPO_CARDSEQUENCENUMBER" }) }}</label>
-                    </div>
-                {% endif %}
 
                 <div class="clearfix"></div>
 
