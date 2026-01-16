@@ -376,6 +376,10 @@ class FcPayOneEvents
     public static string $sQueryFcpotransactionstatusCopyTimestampData = "UPDATE fcpotransactionstatus SET OXTIMESTAMP = FCPO_TIMESTAMP;";
     public static string $sQueryFcpocheckedaddressesCopyTimestampData = "UPDATE fcpocheckedaddresses SET OXTIMESTAMP = fcpo_checkdate;";
     public static string $sQueryAlterFcpoShadowBasketFcbasketChangeToBlob = "ALTER TABLE fcposhadowbasket MODIFY FCPOBASKET BLOB;";
+    public static string $sQueryAlterOxorderClearingBankAccountHolder = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGBANKACCOUNTHOLDER VARCHAR(64) DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderClearingBankIban = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGBANKIBAN VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderClearingBankBic = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGBANKBIC VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static string $sQueryAlterOxorderClearingDueDate = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGDUEDATE VARCHAR(32) DEFAULT '' NOT NULL;";
     public static array $aPaymentMethods = [
         'fcpoinvoice' => 'PAYONE Rechnungskauf',
         'fcpopayadvance' => 'PAYONE Vorkasse',
@@ -525,6 +529,10 @@ class FcPayOneEvents
         self::addColumnIfNotExists('oxorder', 'FCPOWORKORDERID', self::$sQueryAlterOxorderWorkOrderId);
         self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGREFERENCE', self::$sQueryAlterOxorderClearingReference);
         self::addColumnIfNotExists('oxorder', 'FCPOPROFILEIDENT', self::$sQueryAlterOxorderProfileIdent);
+        self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGBANKACCOUNTHOLDER', self::$sQueryAlterOxorderClearingBankAccountHolder);
+        self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGBANKIBAN', self::$sQueryAlterOxorderClearingBankIban);
+        self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGBANKBIC', self::$sQueryAlterOxorderClearingBankBic);
+        self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGDUEDATE', self::$sQueryAlterOxorderClearingDueDate);
 
         self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDAMOUNT', self::$sQueryAlterOxorderarticlesCapturedAmount);
         self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDAMOUNT', self::$sQueryAlterOxorderarticlesDebitedAmount);

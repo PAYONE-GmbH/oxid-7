@@ -59,3 +59,19 @@ Maintenance
 
 * removed iDEAL banklist in frontend
 * tested with 7.2 
+
+==1.2.0==
+
+New Features
+ 
+* New payment method: WERO
+ 
+Bugfixes
+ 
+* Fixed error with Apple Pay
+* Fixed TxStatus handling and Ratepay calculator
+ 
+Maintenance
+ 
+* Cleaned old, duplicate, unused files
+* tested with 7.3
