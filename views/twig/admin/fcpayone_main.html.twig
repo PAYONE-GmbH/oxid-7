@@ -1074,11 +1074,21 @@
                 class="rc"><b>{{ translate({ ident: "FCPO_CONFIG_GROUP_GOOGLEPAY" })|raw }}</b></a>
             <dl>
                 <dt>
-                        <input aria-label="Set Googlepay Country Code" type="text" class="txt" name="confstrs[sFCPOGooglepayGoogleMerchantId]" value="{{ confstrs.sFCPOGooglepayGoogleMerchantId|raw }}" {{ readonly }}>
+                        <input aria-label="Set Googlepay Merchant ID" type="text" class="txt" name="confstrs[sFCPOGooglepayGoogleMerchantId]" value="{{ confstrs.sFCPOGooglepayGoogleMerchantId|raw }}" {{ readonly }}>
                         {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTID"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTID")} %}
                 </dt>
                 <dd>
                         {{ translate({ ident: "FCPO_GOOGLEPAY_GOOGLEMERCHANTID" })|raw }}
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input aria-label="Set Googlepay Merchant Name" type="text" class="txt" name="confstrs[sFCPOGooglepayGoogleMerchantName]" value="{{ confstrs.sFCPOGooglepayGoogleMerchantName|raw }}" {{ readonly }}>
+                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTID"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_GOOGLEMERCHANTNAME")} %}
+                </dt>
+                <dd>
+                    {{ translate({ ident: "FCPO_GOOGLEPAY_GOOGLEMERCHANTNAME" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>
@@ -1127,17 +1137,6 @@
                 </dt>
                 <dd>
                     {{ translate({ ident: "FCPO_GOOGLEPAY_ALLOW_CREDITCARDS" })|raw }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOGooglepayCountrycode]"
-                           value="{{ confstrs.sFCPOGooglepayCountrycode }}" {{ readonly }}>
-                    {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_GOOGLEPAY_COUNTRYCODE"), 'sHelpText': help_text("FCPO_HELP_GOOGLEPAY_COUNTRYCODE")} %}
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_GOOGLEPAY_COUNTRYCODE" })|raw }}
                 </dd>
                 <div class="spacer"></div>
             </dl>

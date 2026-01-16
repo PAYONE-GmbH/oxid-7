@@ -487,11 +487,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         return $sMode;
     }
 
-    public function fcpoGooglePayGetCountry() {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam('sFCPOGooglepayCountrycode');
-    }
-
     public function fcpoGooglePayGetCurrency() {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oCurr = $oConfig->getActShopCurrencyObject();
@@ -500,7 +495,7 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
 
     public function fcpoGooglePayGetMerchantName() {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        return $oConfig->getActiveShop()->oxshops__oxname->value;
+        return $oConfig->getConfigParam('sFCPOGooglepayGoogleMerchantName');
     }
 
     public function fcpoGooglePayGetShowDisplayItems() {
@@ -541,12 +536,6 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         return $oBasket->getPriceForPayment();
-    }
-
-    public function fcpoGooglePayGetShopName() {
-        $shop = \OxidEsales\Eshop\Core\Registry::getConfig()->getActiveShop();
-        $shopName = $shop->oxshops__oxname->value;
-        return $shopName;
     }
 
     public function fcpoGooglePayGetRedirectUrl() {
