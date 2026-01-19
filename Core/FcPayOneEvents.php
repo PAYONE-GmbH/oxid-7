@@ -399,7 +399,6 @@ class FcPayOneEvents
         'fcpoklarna_installments' => 'PAYONE Klarna Ratenkauf',
         'fcpoklarna_directdebit' => 'PAYONE Klarna Sofort bezahlen',
         'fcpobarzahlen' => 'PAYONE Barzahlen',
-        'fcpopaydirekt' => 'PAYONE Giropay',
         'fcpopo_bill' => 'PAYONE Unzer Rechnungskauf',
         'fcpopo_debitnote' => 'PAYONE Unzer Lastschrift',
         'fcpopo_installment' => 'PAYONE Unzer Ratenkauf',
@@ -952,10 +951,6 @@ class FcPayOneEvents
 
         if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
             $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
-        }
-
-        if (is_null($oConfig->getConfigParam('blFCPOPaydirektSecuredPreorder'))) {
-            $oConfig->saveShopConfVar('bool', 'blFCPOPaydirektSecuredPreorder', false);
         }
     }
 
