@@ -294,7 +294,6 @@ class FcPoRequest extends Base
         }
 
         $blIsWalletTypePaymentWithDelAddress = (
-            $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
             ($oOrder->fcIsPayPalOrder() === true && $oConfig->getConfigParam('blFCPOPayPalDelAddress') === true) ||
             ($oOrder->fcIsPayPalV2Order() === true && $oConfig->getConfigParam('blFCPOPayPalV2DelAddress') === true)
         );
@@ -525,30 +524,6 @@ class FcPoRequest extends Base
                 $this->addParameter('clearingtype', 'csh'); //Payment method
                 $this->addParameter('cashtype', 'BZN');
                 $this->addParameter('api_version', '3.10');
-                break;
-            case 'fcpopaydirekt':
-                $this->addParameter('clearingtype', 'wlt'); //Payment method
-                $this->addParameter('wallettype', 'PDT');
-                if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
-                    $this->addParameter('narrative_text', $sRefNr);
-                }
-                $blAllowOvercapture = (
-                    $oConfig->getConfigParam('blFCPOAllowOvercapture') &&
-                    $sPaymentId == 'fcpopaydirekt'
-                );
-                if ($blAllowOvercapture) {
-                    $this->addParameter('add_paydata[over_capture]', 'yes');
-                }
-
-                $blIsSecuredPreorder = $blIsPreauthorization
-                    && $oConfig->getConfigParam('blFCPOPaydirektSecuredPreorder');
-                if ($blIsSecuredPreorder) {
-                    $iPaydirektGuaranteePeriod = (int) $oConfig->getConfigParam('sFCPOPaydirektSecuredPreorderGuaranteePeriod');
-                    $this->addParameter('add_paydata[order_secured]', 'yes');
-                    $this->addParameter('add_paydata[preauthorization_validity]', $iPaydirektGuaranteePeriod);
-                }
-
-                $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
             case 'fcpopo_debitnote':
@@ -3271,17 +3246,5 @@ class FcPoRequest extends Base
         $sHashString = implode('', $aHashParams);
 
         return md5($sHashString);
-    }
-
-    /**
-     * Adding params for getting status
-     *
-     * @param string $sWorkorderId
-     * @return void
-     */
-    protected function _fcpoAddPaydirektGetStatusParams(string $sWorkorderId): void
-    {
-        $this->addParameter('add_paydata[action]', 'getstatus');
-        $this->addParameter('workorderid', $sWorkorderId);
     }
 }
