@@ -286,6 +286,7 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'PAYONE WeChat Pay' => 'PAYONE WeChat Pay',
     'PAYONE Wero' => 'PAYONE Wero',
     'FCPO_KLARNA' => 'PAYONE Klarna Payments',
+    'PAYONE Google Pay' => 'PAYONE Google Pay',
 
     'FCPO_RATEPAY_RUNTIME_TITLE' => 'Laufzeit',
     'FCPO_RATEPAY_RUNTIME_DESCRIPTION' => 'Anzahl der monatlichen Raten',

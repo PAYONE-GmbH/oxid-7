@@ -70,6 +70,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpopl_secinstallment',
         'fcpopl_secdebitnote',
         'fcpo_wero',
+        'fcpo_googlepay',
     ];
 
     /**
@@ -94,6 +95,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpo_alipay',
         'fcpo_wechatpay',
         'fcpo_wero',
+        'fcpo_googlepay',
     ];
 
     /**

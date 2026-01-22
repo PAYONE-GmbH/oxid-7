@@ -421,6 +421,7 @@ class FcPayOneEvents
         'fcpopl_secinstallment' => 'PAYONE Gesicherter Ratenkauf',
         'fcpopl_secdebitnote' => 'PAYONE Gesicherte Lastschrift',
         'fcpo_wero' => 'PAYONE Wero',
+        'fcpo_googlepay' => 'PAYONE Google Pay',
     ];
 
     /**
