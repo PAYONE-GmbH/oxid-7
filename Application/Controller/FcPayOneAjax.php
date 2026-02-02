@@ -214,7 +214,7 @@ class FcPayOneAjax extends BaseController
             foreach ($aCurrentInstallment['Months'] as $sMonth => $aRatesDetails) {
                 $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) . '<br>';
             }
-            $sDownloadUrl = $oConfig->getShopUrl() . '?login=1&cl=FcPoPopUpContent&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
+            $sDownloadUrl = $oConfig->getShopUrl() . '?login=1&cl=FcPoPopUpContent&resource=UnzerStandardCreditInformation&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
             $sHtml .= '</div>';
 
         }
