@@ -2968,7 +2968,7 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoHelper', $oFcPoHelper);
 
         $this->invokeSetAttribute($oFcPayOnePaymentView, '_sPayolutionSepaAgreement', 'https://somesepalink.com/');
-        $sExpect = 'https://someshop.com?cl=FcPoPopUpContent&resource=UnzerSepaAgreement&loadurl=https://somesepalink.com/';
+        $sExpect = 'https://someshop.com?cl=FcPayOneAjax&action=fcpopo_popup&resource=UnzerSepaAgreement&loadurl=https://somesepalink.com/';
 
         $this->assertEquals($sExpect, $oFcPayOnePaymentView->fcpoGetPayolutionSepaAgreementLink());
     }

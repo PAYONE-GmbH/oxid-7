@@ -24,20 +24,6 @@ use Exception;
 use Fatchip\PayOne\Application\Helper\Payment;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 
-function getShopBasePath(): string
-{
-    return dirname(__FILE__) . '/../../../../source';
-}
-
-include_once getShopBasePath() . "/bootstrap.php";
-
-// receive params
-$sResource = filter_input(INPUT_GET, 'resource');
-$sLoadUrl = filter_input(INPUT_GET, 'loadurl');
-$sDuration = filter_input(INPUT_GET, 'duration');
-$sUseLogin = filter_input(INPUT_GET, 'login');
-
-
 /**
  * Helper script for displaying
  *
@@ -96,6 +82,7 @@ class FcPoPopUpContent extends BaseModel
     public function __construct(string $sResource, string $sUrl, string $sDuration, bool $blPdfHeader = true, bool $blUseLogin = false)
     {
         parent::__construct();
+        $this->_oFcPoHelper = new FcPoHelper();
         $this->_sUrl = $this->_fcpoParseRequest($sResource, $sUrl);
         $this->_blUseLogin = $blUseLogin;
         $this->_blPdfHeader = $blPdfHeader;
@@ -229,6 +216,3 @@ class FcPoPopUpContent extends BaseModel
     }
 
 }
-
-$oPopupContent = new FcPoPopUpContent($sResource, $sLoadUrl, $sDuration, true, (bool)$sUseLogin);
-echo $oPopupContent->fcpo_fetch_content();
