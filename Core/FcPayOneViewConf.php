@@ -456,6 +456,14 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         return ($oBasket->getPaymentId() === 'fcpo_googlepay');
     }
 
+    public function fcpoIsApplePay()
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        /** @var oxBasket $oBasket */
+        $oBasket = $oSession->getBasket();
+        return ($oBasket->getPaymentId() === 'fcpo_apple_pay');
+    }
+
     public function fcpoGooglePayGetSupportedNetworks() {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $return = $this->getSupportedNetworks($oConfig);
