@@ -443,4 +443,148 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         return (string)$sClientId;
     }
 
+    /**
+     * Checks if selected payment method is Google ay now
+     *
+     * @return bool
+     */
+    public function fcpoIsGooglePay()
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        /** @var oxBasket $oBasket */
+        $oBasket = $oSession->getBasket();
+        return ($oBasket->getPaymentId() === 'fcpo_googlepay');
+    }
+
+    public function fcpoGooglePayGetSupportedNetworks() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $return = $this->getSupportedNetworks($oConfig);
+        return $return;
+    }
+
+    public function fcpoGooglePayGetAllowedCardAuthMethods() {
+        return '["PAN_ONLY", "CRYPTOGRAM_3DS"]';
+    }
+
+    public function fcpoGooglePayGetAllowPrepaidCards() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $allowPrepaid = $oConfig->getConfigParam('blFCPOGoolepayAllowPrePaidCards');
+        return $allowPrepaid ? 'true' : 'false';
+    }
+
+    public function fcpoGooglePayGetAllowCreditCards() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $return = $oConfig->getConfigParam('blFCPOGooglepayAllowCreditCards');
+        return $return  ? 'true' : 'false';
+    }
+
+    public function fcpoGooglePayGetMerchantId() {
+        return $this->fcpoGetMerchantId();
+    }
+
+    public function fcpoGooglePayGetMode() {
+        $sMode = PaymentHelper::getInstance()->isLiveMode('fcpo_googlepay') === true ? 'PRODUCTION' : 'TEST';
+        return $sMode;
+    }
+
+    public function fcpoGooglePayGetCurrency() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        return $oCurr->name;
+    }
+
+    public function fcpoGooglePayGetMerchantName() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam('sFCPOGooglepayGoogleMerchantName');
+    }
+
+    public function fcpoGooglePayGetShowDisplayItems() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam('blFCPOSendArticlelist');
+    }
+
+    public function fcpoGooglePayGetGoogleMerchantId() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam('sFCPOGooglepayGoogleMerchantId');
+    }
+    public function fcpoGooglePayGetButtonColor() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam('sFCPOGooglePayButtonColor');
+    }
+
+    public function fcpoGooglePayGetButtonType() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return $oConfig->getConfigParam('sFCPOGooglePayButtonType');
+    }
+
+    public function fcpoGooglePayGetButtonLocale() {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getBasketUser();
+        $oCountry = oxNew('oxcountry');
+        if ($oCountry->load($oUser->oxuser__oxcountryid->value)) {
+            $sCountry = $oCountry->oxcountry__oxisoalpha2->value;
+        }
+        return strtolower($sCountry);
+    }
+
+    public function fcpoGooglePayGetCountryCode() {
+        return strtoupper($this->fcpoGooglePayGetButtonLocale());
+    }
+
+    public function fcpoGooglePayGetBasketSum() {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        return $oBasket->getPriceForPayment();
+    }
+
+    public function fcpoGooglePayGetRedirectUrl() {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $sRedirectUrl = $oConfig->getCurrentShopUrl() . 'index.php?cl=order';
+        return $sRedirectUrl;
+    }
+
+    private function getSupportedNetworks($oConfig) {
+        if ($oConfig->getConfigParam('blFCPOGoolepayAllowVisa') == true && $oConfig->getConfigParam('blFCPOGoolepayAllowMasterCard') == true) {
+            return '["VISA", "MASTERCARD"]';
+        } else if ($oConfig->getConfigParam('blFCPOGoolepayAllowVisa') == false && $oConfig->getConfigParam('blFCPOGoolepayAllowMasterCard') == false) {
+            return '[]';
+        } else if ($oConfig->getConfigParam('blFCPOGoolepayAllowVisa') == true && $oConfig->getConfigParam('blFCPOGoolepayAllowMasterCard') == false) {
+            return '["VISA"]';
+        } else if ($oConfig->getConfigParam('blFCPOGoolepayAllowVisa') == false && $oConfig->getConfigParam('blFCPOGoolepayAllowMasterCard') == true) {
+            return '["MASTERCARD"]';
+        }
+    }
+
+    public function getGooglePayDisplayItems()
+    {
+        $aOrderlines = [];
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+
+        foreach ($oBasket->getContents() as $oBasketItem) {
+            $oArticle = $oBasketItem->getArticle();
+
+            $aOrderline = array(
+                'reference' => $oArticle->oxarticles__oxartnum->value,
+                'name' =>  $oBasketItem->getTitle(),
+                'quantity' => $oBasketItem->getAmount(),
+                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() / $oBasketItem->getAmount(),
+                'tax_rate' => $oBasketItem->getVatPercent() * 100,
+                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice(),
+            );
+            $aOrderlines[] = $aOrderline;
+        }
+        $googlePayDisplayItems = [];
+        foreach ($aOrderlines as $index => $displayItem) {
+            $googlePayDisplayItems[] = [
+                'label' => $displayItem['quantity'] . ' x ' . $displayItem['reference'] . ' : ' . $displayItem['name'],
+                'type' => 'LINE_ITEM',
+                'price' => (string) $displayItem['total_amount'],
+            ];
+        }
+        $jsonDisplayItems = json_encode($googlePayDisplayItems);
+        return $jsonDisplayItems;
+    }
+
 }

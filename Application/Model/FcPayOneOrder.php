@@ -45,7 +45,7 @@ use OxidEsales\Eshop\Core\Model\ListModel;
 use OxidEsales\Eshop\Core\Str;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-class FcPayOneOrder extends FcPayOneOrder_parent
+class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
 {
 
     /**
@@ -109,7 +109,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @var array
      */
-    protected array $_aPaymentsClearingReferenceSave = ['fcporp_bill', 'fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment', 'fcpoklarna_invoice', 'fcpoklarna_directdebit', 'fcpoklarna_installments'];
+    protected array $_aPaymentsClearingReferenceSave = ['fcporp_bill', 'fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment', 'fcpoklarna_invoice', 'fcpoklarna_directdebit', 'fcpoklarna_installments', 'fcpopl_secinvoice'];
 
     /**
      * List of Payment IDs which are foreseen for saving external shopid
@@ -636,8 +636,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $sSessionChallenge
         );
 
-        if (!$blTriggerLoadingFromSession)
-            return parent::loadFromBasket($oBasket);
+        if (!$blTriggerLoadingFromSession) {
+            parent::loadFromBasket($oBasket);
+            return true;
+        }
 
         return $this->load($sSessionChallenge);
     }
@@ -1089,6 +1091,18 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     }
 
     /**
+     * Saves clearing data returned by the response
+     *
+     * @param string $sPaymentId
+     * @param array $aResponse
+     * @return void
+     */
+    public function fcpoSaveClearingDataAfterCapture($sPaymentId, $aResponse)
+    {
+        $this->_fcpoSaveClearingReference($sPaymentId, $aResponse);
+    }
+
+    /**
      * Get the bankaccount holder of this order out of the response array
      *
      * @return string
@@ -1107,7 +1121,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     protected function getResponseParameter(string $sParameter): string
     {
         $aResponse = $this->getResponse();
-        return ($aResponse) ? $aResponse[$sParameter] : '';
+        return $aResponse[$sParameter] ?? '';
     }
 
     /**
@@ -1139,7 +1153,8 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         $blFetchCaptureResponse = (
             $this->oxorder__fcpoauthmode == 'preauthorization' &&
-            $this->oxorder__oxpaymenttype == 'fcpoinvoice'
+            ($this->oxorder__oxpaymenttype == 'fcpoinvoice'
+            || $this->oxorder__oxpaymenttype == 'fcpopl_secinvoice')
         );
 
         if ($blFetchCaptureResponse) {
@@ -1163,6 +1178,16 @@ class FcPayOneOrder extends FcPayOneOrder_parent
                 $sAnd
             )
         ";
+    }
+
+    /**
+     * Get the clearing reference of this order out of the response array
+     *
+     * @return string
+     */
+    public function getFcpoClearingReference()
+    {
+        return $this->getResponseParameter('clearing_reference');
     }
 
     /**
@@ -1213,6 +1238,16 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     public function getFcpoIbannumber(): string
     {
         return $this->getResponseParameter('clearing_bankiban');
+    }
+
+    /**
+     * Get the due payment date of this order out of the response array
+     *
+     * @return string
+     */
+    public function getFcpoDueDate()
+    {
+        return $this->getResponseParameter('clearing_duedate');
     }
 
     /**
@@ -1808,8 +1843,71 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     {
         if (in_array($sPaymentId, $this->_aPaymentsClearingReferenceSave)) {
             $sClearingReference = (isset($aResponse['add_paydata[clearing_reference]'])) ? $aResponse['add_paydata[clearing_reference]'] : false;
+            if (empty($sClearingReference)) {
+                $sClearingReference = $this->getFcpoClearingReference();
+            }
             if ($sClearingReference) {
                 $this->oxorder__fcpoclearingreference = new Field($sClearingReference, Field::T_RAW);
+            }
+
+            $this->_fcpoWriteClearingInformation($sPaymentId, $aResponse);
+        }
+    }
+
+    /**
+     * Write clearing information in DB for some payment methods
+     *
+     * @param  string $sPaymentId
+     * @param  array  $aResponse
+     * @return void
+     */
+    protected function _fcpoWriteClearingInformation(string $sPaymentId, array $aResponse) : void
+    {
+        if (in_array($sPaymentId, $this->_aPaymentsClearingReferenceSave)) {
+            $aUpdatedFields = [];
+
+            $sClearingReference = (isset($aResponse['add_paydata[clearing_reference]'])) ? $aResponse['add_paydata[clearing_reference]'] : false;
+            if (empty($sClearingReference)) {
+                $sClearingReference = $this->getFcpoClearingReference();
+            }
+            if ($sClearingReference) {
+                $this->oxorder__fcpoclearingreference = new Field($sClearingReference, Field::T_RAW);
+                $aUpdatedFields['fcpoclearingreference'] = $sClearingReference;
+            }
+
+            $sClearingBankAccountHolder = $this->getFcpoBankaccountholder();
+            if ($sClearingBankAccountHolder) {
+                $this->oxorder__fcpoclearingbankaccountholder = new Field($sClearingBankAccountHolder, Field::T_RAW);
+                $aUpdatedFields['fcpoclearingbankaccountholder'] = $sClearingBankAccountHolder;
+            }
+            $sClearingBankIban = $this->getFcpoIbannumber();
+            if ($sClearingBankIban) {
+                $this->oxorder__fcpoclearingbankiban = new Field($sClearingBankIban, Field::T_RAW);
+                $aUpdatedFields['fcpoclearingbankiban'] = $sClearingBankIban;
+            }
+            $sClearingBankBic = $this->getFcpoBiccode();
+            if ($sClearingBankBic) {
+                $this->oxorder__fcpoclearingbankbic = new Field($sClearingBankBic, Field::T_RAW);
+                $aUpdatedFields['fcpoclearingbankbic'] = $sClearingBankBic;
+            }
+            $sClearingDueDate = $this->getFcpoDueDate();
+            if ($sClearingDueDate) {
+                $this->oxorder__fcpoclearingduedate = new Field($sClearingDueDate, Field::T_RAW);
+                $aUpdatedFields['fcpoclearingduedate'] = $sClearingDueDate;
+            }
+
+            if(!empty($aUpdatedFields)) {
+                $sQuery = 'UPDATE oxorder SET ';
+
+                foreach ($aUpdatedFields as $sField => $sValue) {
+                    $sQuery .= " $sField = '$sValue',";
+                }
+
+                $sQuery = substr($sQuery, 0, strlen($sQuery)-1);
+
+                $sQuery .= " WHERE oxid='" . $this->oxorder__oxid . "'";
+
+                DatabaseProvider::getDb()->execute($sQuery);
             }
         }
     }
@@ -1978,6 +2076,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
 
         return (
             ($this->oxorder__fcpoauthmode == 'authorization' && $sPaymentId == 'fcpoinvoice') ||
+            ($this->oxorder__fcpoauthmode == 'authorization' && $sPaymentId == 'fcpopl_secinvoice') ||
             ($sPaymentId === 'fcpopayadvance')
 
         );

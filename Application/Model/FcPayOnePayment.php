@@ -27,7 +27,7 @@ use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use stdClass;
 
-class FcPayOnePayment extends FcPayOnePayment_parent
+class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
 {
 
     /**
@@ -48,7 +48,6 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpoklarna_installments',
         'fcpoklarna_directdebit',
         'fcpobarzahlen',
-        'fcpopaydirekt',
         'fcpopo_bill',
         'fcpopo_debitnote',
         'fcpopo_installment',
@@ -70,6 +69,8 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpopl_secinvoice',
         'fcpopl_secinstallment',
         'fcpopl_secdebitnote',
+        'fcpo_wero',
+        'fcpo_googlepay',
     ];
 
     /**
@@ -84,7 +85,6 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpoklarna_invoice',
         'fcpoklarna_installments',
         'fcpoklarna_directdebit',
-        'fcpopaydirekt',
         'fcpo_sofort',
         'fcpo_eps',
         'fcpo_pf_finance',
@@ -94,6 +94,8 @@ class FcPayOnePayment extends FcPayOnePayment_parent
         'fcpo_bancontact',
         'fcpo_alipay',
         'fcpo_wechatpay',
+        'fcpo_wero',
+        'fcpo_googlepay',
     ];
 
     /**

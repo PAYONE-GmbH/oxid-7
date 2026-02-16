@@ -40,7 +40,7 @@ After that, just activate the module in the Oxid backend.
 
 ## Documentation
 
-You can check [the documentation on our website here](https://docs.payone.com/display/public/INT/Oxid+6+Extension).
+You can check [the documentation on our website here](https://docs.payone.com/integration/plugins/integration-guide-oxid-7).
 
 More information can be found [on FATCHIP site](https://www.fatchip.de/Plugins/OXID-eShop/OXID-PAYONE-Connector.html).
 

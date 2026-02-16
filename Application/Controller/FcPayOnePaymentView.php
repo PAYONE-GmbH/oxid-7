@@ -26,6 +26,7 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
+use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -42,7 +43,7 @@ use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
-class FcPayOnePaymentView extends FcPayOnePaymentView_parent
+class FcPayOnePaymentView extends PaymentController
 {
 
     /**
@@ -192,6 +193,10 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             $blShowAsRegularPaymentSelection = $this->fcpoShowBNPLPaymentSelection();
         }
 
+        if ($sPaymentId == 'fcpo_wero') {
+            $blShowAsRegularPaymentSelection = $this->fcpoShowWeroPaymentSelection();
+        }
+
         return $blShowAsRegularPaymentSelection;
     }
 
@@ -205,6 +210,27 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (!in_array($this->getUserBillCountryId(), ['a7c40f631fc920687.20179984', 'a7c40f6320aeb2ec2.72885259'])) {
             return false;
         }
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        if ($oCurr->name != 'EUR') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if WERO method can be shown (DE, BE, FR countries and EUR currency only)
+     *
+     * @return bool
+     */
+    protected function fcpoShowWeroPaymentSelection()
+    {
+        // DE, BE, FR
+        if (!in_array($this->getUserBillCountryId(), ['a7c40f631fc920687.20179984', 'a7c40f632e04633c9.47194042', 'a7c40f63272a57296.32117580'])) {
+            return false;
+        }
+
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oCurr = $oConfig->getActShopCurrencyObject();
         if ($oCurr->name != 'EUR') {
@@ -708,8 +734,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $this->getAmex(),
                 $this->getDiners(),
                 $this->getJCB(),
-                $this->getMaestroInternational(),
-                $this->getMaestroUK(),
                 $this->getCarteBleue(),
             ],
             'sb' => [
@@ -811,26 +835,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     public function getJCB(): bool
     {
         return ($this->getConfigParam('blFCPOJCBActivated') && $this->isPaymentMethodAvailableToUser('J', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method MaestroInternational is available to the user
-     *
-     * @return bool
-     */
-    public function getMaestroInternational(): bool
-    {
-        return ($this->getConfigParam('blFCPOMaestroIntActivated') && $this->isPaymentMethodAvailableToUser('O', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method MaestroUK is available to the user
-     *
-     * @return bool
-     */
-    public function getMaestroUK(): bool
-    {
-        return ($this->getConfigParam('blFCPOMaestroUKActivated') && $this->isPaymentMethodAvailableToUser('U', 'cc'));
     }
 
     /**
@@ -958,8 +962,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $this->_fcpoSetCCMetaData($oPayment, 'A', 'American Express');
         $this->_fcpoSetCCMetaData($oPayment, 'D', 'Diners Club');
         $this->_fcpoSetCCMetaData($oPayment, 'J', 'JCB');
-        $this->_fcpoSetCCMetaData($oPayment, 'O', 'Maestro International');
-        $this->_fcpoSetCCMetaData($oPayment, 'U', 'Maestro UK');
         $this->_fcpoSetCCMetaData($oPayment, 'B', 'Carte Bleue');
 
         return $this->_aPaymentCCMetaData;
@@ -980,8 +982,6 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
             'A' => $this->getAmex(),
             'D' => $this->getDiners(),
             'J' => $this->getJCB(),
-            'O' => $this->getMaestroInternational(),
-            'U' => $this->getMaestroUK(),
             'B' => $this->getCarteBleue(),
         ];
 
@@ -1151,7 +1151,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      */
     protected function _assignDebitNoteParams(): void
     {
-        parent::_assignDebitNoteParams();
+        parent::assignDebitNoteParams();
         if ((bool)$this->getConfigParam('sFCPOSaveBankdata') === true) {
             if ($oUserPayment = $this->_fcGetPaymentByPaymentType($this->getUser(), 'fcpodebitnote')) {
                 $oUtils = $this->_oFcPoHelper->fcpoGetUtils();
@@ -1464,7 +1464,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sPaymentId = $this->_fcpoGetPaymentId();
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);
 
-        $mReturn = parent::validatePayment();
+        $mReturn = parent::validatePayment() ?? '';
 
         $mReturn = $this->_processParentReturnValue($mReturn);
 
@@ -3627,7 +3627,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         $sShopUrl = $oConfig->getShopUrl();
 
         return $sShopUrl .
-            '/modules/fc/fcpayone/lib/fcpopopup_content.php?loadurl=' .
+            '?cl=FcPayOneAjax&action=fcpopo_popup&resource=UnzerSepaAgreement&loadurl=' .
             $this->_sPayolutionSepaAgreement;
     }
 
@@ -3818,11 +3818,11 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
     /**
      * Returns value for ustid depending on payment or false if this hasn't been set
      *
-     * @param string $aRequestedValues
+     * @param array $aRequestedValues
      * @param string $sPaymentId
      * @return string|bool
      */
-    protected function _fcpoGetRequestedUstid(string $aRequestedValues, string $sPaymentId): bool|string
+    protected function _fcpoGetRequestedUstid(array $aRequestedValues, string $sPaymentId): bool|string
     {
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
 
