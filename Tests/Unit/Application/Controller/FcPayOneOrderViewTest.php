@@ -39,6 +39,16 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
 
     public function testExecute_Parent()
     {
+        $oMockBasket = $this->getMockBuilder(Basket::class)
+            ->setMethods(['getUser'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockBasket->method('getUser')->willReturn(true);
+
+        $oMockSession = $this->getMockBuilder(Session::class)
+            ->setMethods(['getBasket'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockSession->method('getBasket')->willReturn($oMockBasket);
+
         $oFcPayOneOrderView = $this->getMockBuilder(FcPayOneOrderView::class)
             ->setMethods(['_fcpoMandateAcceptanceNeeded'])
             ->disableOriginalConstructor()->getMock();
@@ -46,6 +56,7 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn('true');
+        $oFcPoHelper->method('getSession')->willReturn($oMockSession);
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $mResponse = $mExpect = $oFcPayOneOrderView->execute();
@@ -437,11 +448,12 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $oMockUser->oxuser__oxusername = new Field('someEmail');
 
         $oFcPayOneOrderView = $this->getMockBuilder(FcPayOneOrderView::class)
-            ->setMethods(['_fcpoHandleUser', '_fcpoDoesExpressUserAlreadyExist', '_fcpoIsSamePayPalUser'])
+            ->setMethods(['_fcpoHandleUser', '_fcpoDoesExpressUserAlreadyExist', '_fcpoIsSamePayPalUser', 'getUser'])
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrderView->method('_fcpoHandleUser')->willReturn($oMockUser);
         $oFcPayOneOrderView->method('_fcpoDoesExpressUserAlreadyExist')->willReturn('someEmail');
         $oFcPayOneOrderView->method('_fcpoIsSamePayPalUser')->willReturn(true);
+        $oFcPayOneOrderView->method('getUser')->willReturn($oMockUser);
 
         $aMockOutput = [
             'add_paydata[email]' => 'someEmail'
