@@ -25,6 +25,7 @@ use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoParamsParser;
+use Fatchip\PayOne\Lib\FcPoPopUpContent;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use JsonException;
 use OxidEsales\Eshop\Application\Controller\PaymentController;
@@ -124,7 +125,15 @@ class FcPayOneAjax extends BaseController
             if (in_array($sPaymentId, $aKlarnaPayments)) {
                 echo $this->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
             }
+
             die();
+        } else {
+            $sAction = $this->_oFcPoHelper->fcpoGetRequestParameter('action');
+            if ($sAction == 'fcpopo_popup') {
+                echo $this->fcpoPoPopup();
+
+                die();
+            }
         }
     }
 
@@ -214,7 +223,7 @@ class FcPayOneAjax extends BaseController
             foreach ($aCurrentInstallment['Months'] as $sMonth => $aRatesDetails) {
                 $sHtml .= $this->_fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) . '<br>';
             }
-            $sDownloadUrl = $oConfig->getShopUrl() . '?login=1&cl=FcPoPopUpContent&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
+            $sDownloadUrl = $oConfig->getShopUrl() . '?cl=FcPayOneAjax&action=fcpopo_popup&login=1&resource=UnzerStandardCreditInformation&loadurl=' . $aCurrentInstallment['StandardCreditInformationUrl'];
             $sHtml .= '</div>';
 
         }
@@ -991,6 +1000,21 @@ class FcPayOneAjax extends BaseController
             'fcpoWorkorderId',
             $aResponse['workorderid']
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoPoPopup()
+    {
+        $sResource = $this->_oFcPoHelper->fcpoGetRequestParameter('resource') ?? '';
+        $sLoadUrl = $this->_oFcPoHelper->fcpoGetRequestParameter('loadurl') ?? '';
+        $sDuration = $this->_oFcPoHelper->fcpoGetRequestParameter('duration') ?? '';
+        $sUseLogin = $this->_oFcPoHelper->fcpoGetRequestParameter('login') ?? false;
+
+        $oPopupContent = new FcPoPopUpContent($sResource, $sLoadUrl, $sDuration, true, (bool)$sUseLogin);
+
+        return $oPopupContent->fcpo_fetch_content();
     }
 
 }

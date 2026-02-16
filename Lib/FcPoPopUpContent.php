@@ -21,20 +21,8 @@
 namespace Fatchip\PayOne\Lib;
 
 use Exception;
+use Fatchip\PayOne\Application\Helper\Payment;
 use OxidEsales\Eshop\Core\Model\BaseModel;
-
-function getShopBasePath(): string
-{
-    return dirname(__FILE__) . '/../../../../source';
-}
-
-include_once getShopBasePath() . "/bootstrap.php";
-
-// receive params
-$sLoadUrl = filter_input(INPUT_GET, 'loadurl');
-$sDuration = filter_input(INPUT_GET, 'duration');
-$sUseLogin = filter_input(INPUT_GET, 'login');
-
 
 /**
  * Helper script for displaying
@@ -43,6 +31,9 @@ $sUseLogin = filter_input(INPUT_GET, 'login');
  */
 class FcPoPopUpContent extends BaseModel
 {
+
+    const UNZER_CREDIT_INFO_URL_RESOURCE = 'UnzerStandardCreditInformation';
+    const UNZER_SEPA_AGREEMENT_RESOURCE = 'UnzerSepaAgreement';
 
     /**
      * Helper object
@@ -82,15 +73,17 @@ class FcPoPopUpContent extends BaseModel
     /**
      * Initialization
      *
+     * @param string $sResource
      * @param string $sUrl
      * @param string $sDuration
      * @param bool $blPdfHeader
      * @param bool $blUseLogin
      */
-    public function __construct(string $sUrl, string $sDuration, bool $blPdfHeader = true, bool $blUseLogin = false)
+    public function __construct(string $sResource, string $sUrl, string $sDuration, bool $blPdfHeader = true, bool $blUseLogin = false)
     {
         parent::__construct();
-        $this->_sUrl = $sUrl;
+        $this->_oFcPoHelper = new FcPoHelper();
+        $this->_sUrl = $this->_fcpoParseRequest($sResource, $sUrl);
         $this->_blUseLogin = $blUseLogin;
         $this->_blPdfHeader = $blPdfHeader;
         $this->_sDuration = $sDuration;
@@ -103,8 +96,13 @@ class FcPoPopUpContent extends BaseModel
      */
     public function fcpo_fetch_content(): string
     {
+        if (empty($this->_sUrl)) {
+            return $this->_fcpoReturnErrorMessage('Document loading failed : Invalid URL.');
+        }
+
         $resCurl = curl_init();
-        $sUrl = $this->_sUrl . "&duration=" . $this->_sDuration;
+        $sUrl = $this->_sUrl
+            . (!empty($this->_sDuration) ? "&duration=".$this->_sDuration : '');
 
         curl_setopt($resCurl, CURLOPT_URL, $sUrl);
         curl_setopt($resCurl, CURLOPT_RETURNTRANSFER, true);
@@ -167,7 +165,54 @@ class FcPoPopUpContent extends BaseModel
         return $sReturn . '</p>';
     }
 
-}
+    /**
+     * @param string $sRequestedResource
+     * @return array
+     */
+    protected function _fcpoGetRequestMeta(string $sRequestedResource)
+    {
+        /** @var Payment $oFcpoHelper */
+        $oFcpoHelper = new Payment();
 
-$oPopupContent = new FcPoPopUpContent($sLoadUrl, $sDuration, true, (bool)$sUseLogin);
-echo $oPopupContent->fcpo_fetch_content();
+        $aRequestMeta = [
+            self::UNZER_CREDIT_INFO_URL_RESOURCE => [
+                'type' => 'regexp',
+                'meta' => '/^https:\/\/(test-)?payment\.paylater\.unzer\.com\/payolution-payment\/rest\/query\/customerinfo\/pdf\?trxId=.+$/'
+            ],
+            self::UNZER_SEPA_AGREEMENT_RESOURCE => [
+                'type' => 'url',
+                'meta' => $oFcpoHelper->getUnzerSepaAgreement()
+            ],
+        ];
+
+        return isset($aRequestMeta[$sRequestedResource]) ? $aRequestMeta[$sRequestedResource] : [];
+    }
+
+    /**
+     * @param string $sResource
+     * @param string $sUrl
+     * @return string
+     */
+    protected function _fcpoParseRequest(string $sResource, string $sUrl)
+    {
+        if (empty($sResource) || empty($sUrl)) {
+            return '';
+        }
+
+        $aMetaRequest = $this->_fcpoGetRequestMeta($sResource);
+
+        if (empty($aMetaRequest)) {
+            return '';
+        }
+
+        switch ($aMetaRequest['type']) {
+            case 'regexp':
+                return preg_match($aMetaRequest['meta'], $sUrl) ? $sUrl : '';
+            case 'url':
+                return ($aMetaRequest['meta'] == $sUrl) ? $sUrl : '';
+        }
+
+        return '';
+    }
+
+}
