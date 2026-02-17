@@ -261,7 +261,7 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
         $aResponse = $this->invokeMethod($oFcPoConfigExport, '_fcpoGetShopXmlClearingTypes', [$aShopConfVars]);
         $this->_fcpoTruncateTable('fcpostatusmapping');
 
-        $this->wrapAssertStringContainsString('<title><![CDATA[PAYONE Barzahlen]]></title>', $aResponse);
+        $this->wrapAssertStringContainsString('<title><![CDATA[PAYONE Kreditkarte]]></title>', $aResponse);
     }
 
     public function testFcpoGetShopXmlMisc()

@@ -202,6 +202,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['load'])
             ->disableOriginalConstructor()->getMock();
         $oMockOrder->method('load')->willReturn(true);
+        $oMockOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $oMockRequest = $this->getMockBuilder(FcPoRequest::class)
             ->setMethods(['load', 'sendRequestCapture'])
@@ -232,6 +233,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->setMethods(['load'])
             ->disableOriginalConstructor()->getMock();
         $oMockOrder->method('load')->willReturn(true);
+        $oMockOrder->oxorder__oxpaymenttype = new Field('fcpodebitnote');
 
         $oMockRequest = $this->getMockBuilder(FcPoRequest::class)
             ->setMethods(['load', 'sendRequestCapture'])
