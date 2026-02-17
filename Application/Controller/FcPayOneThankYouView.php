@@ -22,12 +22,11 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Controller\ThankYouController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
-class FcPayOneThankYouView extends ThankYouController
+class FcPayOneThankYouView extends FcPayOneThankYouView_parent
 {
 
     /**

@@ -21,14 +21,13 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\UserController;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\UtilsServer;
 
-class FcPayOneUserView extends UserController
+class FcPayOneUserView extends FcPayOneUserView_parent
 {
 
     /**

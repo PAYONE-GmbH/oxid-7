@@ -26,7 +26,6 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -43,7 +42,7 @@ use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
-class FcPayOnePaymentView extends PaymentController
+class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 {
 
     /**

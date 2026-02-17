@@ -24,7 +24,6 @@ use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Controller\OrderController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Order;
@@ -34,7 +33,7 @@ use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
 
-class FcPayOneOrderView extends OrderController
+class FcPayOneOrderView extends FcPayOneOrderView_parent
 {
 
     /**
