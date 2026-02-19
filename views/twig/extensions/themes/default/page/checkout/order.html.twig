@@ -34,6 +34,32 @@
 {% endblock %}
 
 {% block checkout_order_address %}
+
+    <script type="text/javascript">
+        function addSubmitButtonListener() {
+            let buttons = document.getElementsByTagName('button');
+            for (var i in buttons) {
+                if (buttons.hasOwnProperty(i)) {
+                    var button = buttons[i];
+                    var attribute = button.getAttribute('onclick');
+                    if (attribute != null && attribute.indexOf('orderConfirmAgbBottom') != -1) {
+                        button.setAttribute(
+                            'onclick',
+                            'this.disabled = true;' + attribute
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+        {% if not oViewConf.fcpoIsApplePay() %}
+        window.addEventListener("load", function(){
+            addSubmitButtonListener();
+        });
+        {% endif %}
+    </script>
+
     {% if oViewConf.fcpoUserHasSalutation() %}
         {{ parent() }}
         {% if oViewConf.fcpoIsKlarnaPaynow() %}
