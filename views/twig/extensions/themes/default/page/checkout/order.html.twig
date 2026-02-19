@@ -390,5 +390,7 @@
                 window.location = url;
             }
         </script>
+    {% else %}
+        {{ parent() }}
     {% endif %}
 {% endblock %}
