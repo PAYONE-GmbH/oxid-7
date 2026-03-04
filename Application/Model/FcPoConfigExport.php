@@ -429,6 +429,7 @@ class FcPoConfigExport extends BaseModel
 
         $aAbbreviations = [
             'fcpocreditcard' => 'cc',
+            'fcpocreditcardv2' => 'cc',
             'fcpocashondel' => 'cod',
             'fcpodebitnote' => 'elv',
             'fcpopayadvance' => 'vor',

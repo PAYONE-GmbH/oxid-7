@@ -1,0 +1,53 @@
+<div class="payment-option">
+    {% set dynvalue = oView.getDynValue() %}
+    <div class="payment-option-form">
+        <input class="form-check-input" id="payment_{{ sPaymentID }}" type="radio" name="paymentid"
+               value="{{ sPaymentID }}"{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} checked{% endif %}>
+        <label for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
+
+        <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+
+            <input type="hidden" name="dynvalue[fcpo_kkv2number]" value="">
+            <input type="hidden" name="dynvalue[fcpo_kkv2inputmode]" value="">
+            <input type="hidden" name="dynvalue[fcpo_kkv2cardholder]" value="">
+            <input type="hidden" name="dynvalue[fcpo_kkv2type]" value="">
+            <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
+
+            <div class="form-group fcpo_entry_error" id="fcpo_ccv2_error" style="display: none">
+                <div class="col-lg-9">
+                        <span class="help-block">
+                            <ul role="alert" class="list-unstyled text-danger">
+                                <li style="color:green">{{ translate({ ident: "FCPO_ERROR" }) }}<div id="fcpo_ccv2_error_content"></div></li>
+                            </ul>
+                        </span>
+                </div>
+            </div>
+
+            <div id="fcpocreditcardv2-iframe"></div>
+
+
+            {% include "@fcpayone/frontend/payment/inc/fcpo_payment_creditcardv2_script.html.twig" %}
+
+            {% block checkout_payment_longdesc %}
+                {% if paymentmethod.oxpayments__oxlongdesc.value|striptags|trim %}
+                    <div class="alert alert-info desc">
+                        {{ paymentmethod.oxpayments__oxlongdesc.value }}
+                    </div>
+                {% endif %}
+            {% endblock %}
+        </div>
+    </div>
+    {% if paymentmethod.getPrice() %}
+        <div class="payment-option-price">
+            {% set oPaymentPrice = paymentmethod.getPrice() %}
+            {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                {% if oPaymentPrice.getVatValue() > 0 %}
+                    {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                {% endif %}
+            {% else %}
+                {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

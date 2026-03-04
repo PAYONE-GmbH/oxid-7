@@ -3893,4 +3893,107 @@ class FcPayOnePaymentView extends PaymentController
         return $oConfig->getConfigParam('sFCPOApprovalText_' . $iLangId);
     }
 
+
+    /**
+     * @return string
+     */
+    public function fcpoCCV2GetJWT($sMode)
+    {
+        /** @var FcPoRequest $oRequest */
+        $oRequest = $this->_oFcPoHelper->getFactoryObject(FcPoRequest::class);
+        $aResponse = $oRequest->getJWT($sMode);
+
+        return $aResponse['token'] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoGetCurrency()
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oActCurrency = $oConfig->getActShopCurrencyObject();
+
+        return $oActCurrency->name ?? '';
+    }
+
+    /**
+     * @return array
+     */
+    public function fcpoGetUIConfig()
+    {
+        $aValues = [];
+        foreach (array_keys($this->_oFcPoHelper->fcpoGetCCV2UIConfigFields()) as $sField) {
+            $aValues[$sField] = $this->getConfigParam('sFCPOCCV2' . $sField);
+        }
+
+        return $aValues;
+    }
+
+    /**
+     * @return array
+     */
+    public function fcpoGetCTPConfig($sToken)
+    {
+        $aCTPUiConfig = [];
+        foreach (array_keys($this->_oFcPoHelper->fcpoGetCCV2CTPUIConfigFields()) as $sField) {
+            $aCTPUiConfig[$sField] = $this->getConfigParam('sFCPOCCV2' . $sField);
+        }
+
+        $aConfig = [
+            'enableCTP' => (bool) $this->getConfigParam('blFCPOCCV2CtpEnabled'),
+            'enableCustomerOnboarding' => (bool)  $this->getConfigParam('blFCPOCCV2CtpOnboardingEnabled'),
+            'schemeConfig' => $this->_oFcPoHelper->fcpoGetCCV2SchemeConfig(),
+            'transactionAmount' => [
+                'amount' => $this->getAmount(),
+                'currencyCode' => $this->fcpoGetCurrency(),
+            ],
+            'uiConfig' =>  $aCTPUiConfig,
+            'shopName' => $this->_oFcPoHelper->fcpoGetShopName(),
+            'token' => $sToken
+        ];
+
+        return $aConfig;
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoGetHostedTokenizationConfig()
+    {
+        $oPayment = $this->_oFcPoHelper->getFactoryObject('oxPayment');
+        $oPayment->load('fcpocreditcardv2');
+        $sToken = $this->fcpoCCV2GetJWT($oPayment->fcpoGetOperationMode());
+
+        $sLocale = $this->getTplLang() . '_' . $this->fcGetBillCountry();
+
+        $aConfig = [
+            'iframe' => [
+                'iframeWrapperId' => "fcpocreditcardv2-iframe",
+                'zIndex' => 10000,
+                'height' => 500,
+                'width' => 400
+            ],
+            'uiConfig' => (object) $this->fcpoGetUIConfig(),
+            'locale' => $sLocale,
+            'token' => $sToken,
+            'mode' => $oPayment->fcpoGetOperationMode(),
+            'allowedCardSchemes' => [
+                "visa",
+                "mastercard",
+                "amex",
+                "diners",
+                "jcb",
+                "discover",
+                "maestro",
+                "unionpay",
+            ],
+            'CTPConfig' => (object) $this->fcpoGetCTPConfig($sToken)
+        ];
+
+        $sReturn = json_encode($aConfig);
+
+        return ($sReturn !== false) ? $sReturn : '{}';
+    }
+
 }
