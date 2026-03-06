@@ -39,6 +39,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         'fcpodebitnote',
         'fcpocashondel',
         'fcpocreditcard',
+        'fcpocreditcardv2',
         'fcpopaypal',
         'fcpopaypal_express',
         'fcpopaypalv2',
@@ -268,6 +269,12 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
                 $blLivemode = $aMap[$sPaymentId];
             }
         }
+
+        // Click2Pay is available only as live mode
+        if ($this->getId() == 'fcpocreditcardv2') {
+            $blLivemode = true;
+        }
+
 
         return $blLivemode ? 'live' : 'test';
     }

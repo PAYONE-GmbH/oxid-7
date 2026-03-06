@@ -46,6 +46,14 @@ function fcpoTogglePreview() {
     }
 }
 
+function fcpoToggleCCV2Template() {
+    if(document.getElementById('fcpoCCV2Template').style.display !== "") {
+        document.getElementById('fcpoCCV2Template').style.display = "";
+    } else {
+        document.getElementById('fcpoCCV2Template').style.display = "none";
+    }
+}
+
 function fcpoInputEnable(sInputId) {
     document.getElementById(sInputId).disabled = false;
 }

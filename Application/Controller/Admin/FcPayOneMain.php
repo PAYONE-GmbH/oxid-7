@@ -1077,4 +1077,24 @@ class FcPayOneMain extends FcPayOneAdminDetails
         }
         return false;
     }
+
+    /**
+     * Returns fields belonging to click to pay UI style config
+     *
+     * @return array
+     */
+    public function fcpoGetCCV2UIConfigFields()
+    {
+        return $this->_oFcPoHelper->fcpoGetCCV2UIConfigFields();
+    }
+
+    /**
+     * Returns fields belonging to click to pay CTP UI style config
+     *
+     * @return array
+     */
+    public function fcpoGetCCV2CTPUIConfigFields()
+    {
+        return $this->_oFcPoHelper->fcpoGetCCV2CTPUIConfigFields();
+    }
 }

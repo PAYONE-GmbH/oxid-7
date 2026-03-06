@@ -39,7 +39,6 @@ class FcPayOnePaymentGateway extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function executePayment($dAmount, &$oOrder): bool
     {
-        // if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
         if ($oOrder->isPayOnePaymentType() === false) {
             return parent::executePayment($dAmount, $oOrder);
         }

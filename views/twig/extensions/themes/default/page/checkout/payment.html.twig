@@ -52,6 +52,8 @@
         {% include "@fcpayone/frontend/payment/fcpo_payment_creditcard_ajax.html.twig" %}
     {% elseif sPaymentID == "fcpocreditcard" and oView.fcpoGetCreditcardType() == "hosted" %}
         {% include "@fcpayone/frontend/payment/fcpo_payment_creditcard_hosted.html.twig" %}
+    {% elseif sPaymentID == "fcpocreditcardv2" %}
+        {% include "@fcpayone/frontend/payment/fcpo_payment_creditcardv2.html.twig" %}
     {% elseif sPaymentID == "fcpodebitnote" %}
         {% include "@fcpayone/frontend/payment/fcpo_payment_debitnote.html.twig" %}
     {% elseif sPaymentID == "fcpoklarna" %}
