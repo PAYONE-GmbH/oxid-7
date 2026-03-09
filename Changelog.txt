@@ -1,3 +1,13 @@
+==1.4.0==
+
+New Features
+
+* New payment method: Creditcard (Click to Pay)
+
+Maintenance
+
+* Tested with 7.4
+
 ==1.3.0==
 
 New Features
