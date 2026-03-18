@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -58,9 +59,9 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     /**
      * Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Array with all response parameters from the API order request
@@ -162,7 +163,7 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -174,14 +175,21 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetIdByUserName(string $sUserName): string
     {
-        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
-        $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . DatabaseProvider::getDb()->quote($sUserName);
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('oxid')
+            ->from('oxuser')
+            ->where('oxusername = :sUserName')
+            ->setParameter('sUserName', $sUserName);
 
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         if (!$oConfig->getConfigParam('blMallUsers')) {
-            $sQuery .= " AND oxshopid = '{$oConfig->getShopId()}'";
+            $oQuery
+                ->andWhere('oxshopid = :iShopId')
+                ->setParameter('iShopId', $oConfig->getShopId());
         }
 
-        return $this->_oFcPoDb->getOne($sQuery);
+        return $oQuery->execute()->fetchOne();
     }
 
     /**
@@ -193,9 +201,11 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetSalByFirstName(string $sFirstname): string
     {
-        $sQuery = "SELECT oxsal FROM oxuser WHERE oxfname = " . DatabaseProvider::getDb()->quote($sFirstname) . " AND oxsal != '' LIMIT 1";
+        $sQuery = "SELECT oxsal FROM oxuser WHERE oxfname = :sFName AND oxsal != '' LIMIT 1";
 
-        return $this->_oFcPoDb->getOne($sQuery);
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sFName' => $sFirstname
+        ]);
     }
 
     /**
@@ -209,20 +219,29 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetAddressIdByResponse(array $aResponse, string $sStreet, string $sStreetNr): string|bool
     {
-        $sQuery = " SELECT
-                        oxid
-                    FROM
-                        oxaddress
-                    WHERE
-                        oxfname = {$this->_oFcPoDb->quote($aResponse['add_paydata[shipping_firstname]'])} AND
-                        oxlname = {$this->_oFcPoDb->quote($aResponse['add_paydata[shipping_lastname]'])} AND
-                        oxstreet = {$this->_oFcPoDb->quote($sStreet)} AND
-                        oxstreetnr = {$this->_oFcPoDb->quote($sStreetNr)} AND
-                        oxcity = {$this->_oFcPoDb->quote($aResponse['add_paydata[shipping_city]'])} AND
-                        oxzip = {$this->_oFcPoDb->quote($aResponse['add_paydata[shipping_zip]'])} AND
-                        oxcountryid = {$this->_oFcPoDb->quote($this->fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']))}";
+        $sQuery = "SELECT
+                       oxid
+                   FROM
+                       oxaddress
+                   WHERE
+                       oxfname = :sFName AND
+                       oxlname = :sLName AND
+                       oxstreet = :sStreet AND
+                       oxstreetnr = :sStreetnr AND
+                       oxcity = :sCity AND
+                       oxzip = :sZip AND
+                       oxcountryid = :sCountryId";
+        $aParam = [
+            'sFName' => $aResponse['add_paydata[shipping_firstname]'],
+            'sLName' => $aResponse['add_paydata[shipping_lastname]'],
+            'sStreet' => $sStreet,
+            'sStreetnr' => $sStreetNr,
+            'sCity' => $aResponse['add_paydata[shipping_city]'],
+            'sZip' => $aResponse['add_paydata[shipping_zip]'],
+            'sCountryid' => $this->fcpoGetIdByCode($aResponse['add_paydata[shipping_country]'])
+        ];
 
-        return $this->_oFcPoDb->getOne($sQuery);
+        return $this->_oFcPoDb->fetchOne($sQuery, $aParam);
     }
 
     /**
@@ -234,8 +253,11 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetIdByCode(string $sCode): string|bool
     {
-        $sQuery = "SELECT oxid FROM oxcountry WHERE oxisoalpha2 = " . DatabaseProvider::getDb()->quote($sCode);
-        return $this->_oFcPoDb->getOne($sQuery);
+        $sQuery = "SELECT oxid FROM oxcountry WHERE oxisoalpha2 = :sCode";
+
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sCode' => $sCode
+        ]);
     }
 
     /**
@@ -484,27 +506,27 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetShadowBasket(bool $blByOrderId = false): mixed
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $sSessionId = $oSession->getId();
         $oShadowBasket = false;
 
-        $sWhere = "FCPOSESSIONID=" . $oDb->quote($sSessionId);
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('FCPOBASKET')
+            ->from('fcposhadowbasket')
+            ->getMaxResults(1);
+
         if ($blByOrderId) {
-            $sWhere = "OXORDERID=" . $oDb->quote($this->getId());
+            $oQuery
+                ->where('OXORDERID = :sOrderId')
+                ->setParameter('sOrderId', $this->getId());
+        } else {
+            $oQuery
+                ->where('FCPOSESSIONID = :sSessionId')
+                ->setParameter('sSessionId', $sSessionId);
         }
 
-        $sQuery = "
-            SELECT
-                FCPOBASKET
-            FROM 
-                fcposhadowbasket
-            WHERE
-                " . $sWhere . "
-            LIMIT 1
-        ";
-
-        $sSerializedShadowBasket = $oDb->getOne($sQuery);
+        $sSerializedShadowBasket = $oQuery->execute()->fetchOne();
 
         if ($sSerializedShadowBasket) {
             $oShadowBasket = unserialize(base64_decode($sSerializedShadowBasket));
@@ -559,20 +581,20 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     protected function _fcpoAddShadowBasketCheckDate(): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $sSessionId = $oSession->getId();
-
         $sQuery = "
             UPDATE            
                 fcposhadowbasket
             SET
               	FCPOCHECKED=NOW()
             WHERE
-                FCPOSESSIONID=" . $oDb->quote($sSessionId) . "
+                FCPOSESSIONID = :sSessionId
             LIMIT 1
         ";
-        $oDb->execute($sQuery);
+
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sSessionId' => $oSession->getId()
+        ]);
     }
 
     /**
@@ -584,18 +606,18 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     protected function _fcpoDeleteShadowBasket(): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $sSessionId = $oSession->getId();
-
         $sQuery = "
             DELETE FROM            
                 fcposhadowbasket
             WHERE
-                FCPOSESSIONID=" . $oDb->quote($sSessionId) . "
+                FCPOSESSIONID = :sSessionId
             LIMIT 1
         ";
-        $oDb->execute($sQuery);
+
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sSessionId' => $oSession->getId()
+        ]);
     }
 
     /**
@@ -726,8 +748,10 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
 
         $sTestOxid = '';
         if ($sTxid) {
-            $sQuery = "SELECT oxid FROM fcpotransactionstatus WHERE FCPO_TXACTION = 'appointed' AND fcpo_txid = '" . $sTxid . "'";
-            $sTestOxid = $this->_oFcPoDb->getOne($sQuery);
+            $sQuery = "SELECT oxid FROM fcpotransactionstatus WHERE FCPO_TXACTION = 'appointed' AND fcpo_txid = :sTxid";
+            $sTestOxid = $this->_oFcPoDb->fetchOne($sQuery, [
+                'sTxid' => $sTxid
+            ]);
         }
 
         if (!$sTestOxid) {
@@ -779,7 +803,13 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
         if ($sWorkorderId) {
             $this->oxorder__fcpoworkorderid = new Field($sWorkorderId, Field::T_RAW);
         }
-        $this->_oFcPoDb->execute("UPDATE fcporefnr SET fcpo_txid = '" . $sTxid . "' WHERE fcpo_refnr = '" . $this->_oFcPoHelper->fcpoGetRequestParameter('refnr') . "'");
+
+        $sQuery = "UPDATE fcporefnr SET fcpo_txid = :sTxid WHERE fcpo_refnr = :sRefNr";
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sTxid' => $sTxid,
+            'sRefNr' => $this->_oFcPoHelper->fcpoGetRequestParameter('refnr')
+        ]);
+
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoOrderNr');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoTxid');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
@@ -914,8 +944,11 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     protected function _fcpoSaveAfterRedirect(bool $blSaveAfterRedirect): void
     {
         if ($blSaveAfterRedirect === true && !empty($this->oxorder__fcpotxid->value)) {
-            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = '{$this->oxorder__oxordernr->value}' WHERE fcpo_txid = '" .$this->oxorder__fcpotxid->value. "'";
-            $this->_oFcPoDb->execute($sQuery);
+            $sQuery = "UPDATE fcpotransactionstatus SET fcpo_ordernr = :iOrderNr WHERE fcpo_txid = :sTxid";
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'iOrderNr' => $this->oxorder__oxordernr->value,
+                'sTxid' => $this->oxorder__fcpotxid->value
+            ]);
         }
     }
 
@@ -969,20 +1002,21 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     protected function _fcpoAddShadowBasketOrderId(): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $sSessionId = $oSession->getId();
-
         $sQuery = "
             UPDATE            
                 fcposhadowbasket
             SET
-              	OXORDERID=" . $oDb->quote($this->getId()) . "
+              	OXORDERID = :sOrderId
             WHERE
-                FCPOSESSIONID=" . $oDb->quote($sSessionId) . "
+                FCPOSESSIONID = :sSessionId
             LIMIT 1
         ";
-        $oDb->execute($sQuery);
+
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sOrderId' => $this->getId(),
+            'sSessionId' => $oSession->getId()
+        ]);
     }
 
     /**
@@ -1132,8 +1166,8 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     protected function getResponse(): ?array
     {
         if ($this->_aResponse === null) {
-            $sQuery = $this->_fcpoGetResponseQuery();
-            $sOxidRequest = $this->_oFcPoDb->getOne($sQuery);
+            $oQuery = $this->_fcpoGetResponseQuery();
+            $sOxidRequest = $oQuery->execute()->fetchOne();
             if ($sOxidRequest) {
                 $oRequestLog = $this->_oFcPoHelper->getFactoryObject(FcPoRequestLog::class);
                 $oRequestLog->load($sOxidRequest);
@@ -1147,37 +1181,41 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     }
 
     /**
-     * @return string
+     * @return QueryBuilder
      */
-    protected function _fcpoGetResponseQuery(): string
+    protected function _fcpoGetResponseQuery(): QueryBuilder
     {
+        $oExpressionBuilder = $this->_oFcPoDb->getExpressionBuilder();
+
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('oxid')
+            ->from('fcporequestlog');
+
         $blFetchCaptureResponse = (
             $this->oxorder__fcpoauthmode == 'preauthorization' &&
             ($this->oxorder__oxpaymenttype == 'fcpoinvoice'
-            || $this->oxorder__oxpaymenttype == 'fcpopl_secinvoice')
+                || $this->oxorder__oxpaymenttype == 'fcpopl_secinvoice')
         );
 
         if ($blFetchCaptureResponse) {
-            $sWhere = "fcpo_request LIKE '%" . $this->oxorder__fcpotxid->value . "%'";
-            $sAnd = "
-                fcpo_requesttype = 'capture'
-            ";
+            $oQuery
+                ->where('fcpo_request LIKE :sRequest')
+                ->andWhere($oExpressionBuilder->eq('fcpo_requesttype', 'capture'))
+                ->setParameter('sRequest', '%' . $this->oxorder__fcpotxid->value . '%');
         } else {
-            $sWhere = "fcpo_refnr = '{$this->oxorder__fcporefnr->value}' ";
-            $sAnd = "
-                fcpo_requesttype = 'preauthorization' OR 
-                fcpo_requesttype = 'authorization'
-            ";
+            $oQuery
+                ->where('fcpo_refnr = :sRefNr')
+                ->andWhere(
+                    $oExpressionBuilder->or(
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'preauthorization'),
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'authorization')
+                    )
+                )
+                ->setParameter('sRefNr', $this->oxorder__fcporefnr->value);
         }
 
-        return "
-            SELECT oxid 
-            FROM fcporequestlog 
-            WHERE $sWhere
-            AND (
-                $sAnd
-            )
-        ";
+        return $oQuery;
     }
 
     /**
@@ -1264,7 +1302,9 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
         }
 
         if ($blReturn) {
-            $iCount = $this->_oFcPoDb->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '{$this->oxorder__fcpotxid->value}'");
+            $iCount = $this->_oFcPoDb->fetchOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = :sTxid", [
+                'sTxid' => $this->oxorder__fcpotxid->value
+            ]);
             $blReturn = !(($iCount == 0));
         }
 
@@ -1290,11 +1330,13 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
             FROM 
                 fcpotransactionstatus 
             WHERE 
-                fcpo_txid = '{$this->oxorder__fcpotxid->value}' AND 
+                fcpo_txid = :sTxid AND 
                 fcpo_txaction = 'appointed'
         ";
 
-        $iCount = (int)$this->_oFcPoDb->getOne($sQuery);
+        $iCount = (int)$this->_oFcPoDb->fetchOne($sQuery, [
+            'sTxid' => $this->oxorder__fcpotxid->value
+        ]);
 
         return ($iCount === 1);
     }
@@ -1377,7 +1419,17 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function getSequenceNumber(): int
     {
-        $iCount = $this->_oFcPoDb->getOne("SELECT MAX(fcpo_sequencenumber) FROM fcpotransactionstatus WHERE fcpo_txid = '{$this->oxorder__fcpotxid->value}'");
+        $sQuery = "
+            SELECT 
+                MAX(fcpo_sequencenumber) 
+            FROM 
+                fcpotransactionstatus 
+            WHERE 
+                fcpo_txid = :sTxid
+        ";
+        $iCount = $this->_oFcPoDb->fetchOne($sQuery, [
+            'sTxid' => $this->oxorder__fcpotxid->value
+        ]);
 
         return ($iCount === null) ? 0 : $iCount + 1;
     }
@@ -1410,22 +1462,28 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     protected function getRequest(array $aAcceptedStatus = ['APPROVED']): ?array
     {
         if ($this->_aRequest === null) {
-            array_walk($aAcceptedStatus, function (&$sStatus) {
-                $sStatus = "'" . $sStatus . "'";
-            });
-
-            $sSelect = "
-                SELECT oxid 
-                FROM fcporequestlog 
-                WHERE fcpo_refnr = '{$this->oxorder__fcporefnr->value}' 
-                AND (
-                    fcpo_requesttype = 'preauthorization' OR 
-                    fcpo_requesttype = 'authorization'
+            $oExpressionBuilder = $this->_oFcPoDb->getExpressionBuilder();
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->select('oxid')
+                ->from('fcporequestlog')
+                ->where('fcpo_refnr = :sRefNr')
+                ->andWhere(
+                    $oExpressionBuilder->or(
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'preauthorization'),
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'authorization')
+                    )
                 )
-                AND FCPO_RESPONSESTATUS IN (" . join(',', $aAcceptedStatus) . ")
-                ORDER BY oxtimestamp DESC
-            ";
-            $sOxidRequest = $this->_oFcPoDb->getOne($sSelect);
+                ->andWhere(
+                    $oExpressionBuilder->in('FCPO_RESPONSESTATUS', ':aStatuses')
+                )
+                ->orderBy('oxtimestamp', 'DESC')
+                ->setParameters([
+                    'sRefNr' => $this->oxorder__fcporefnr->value,
+                    'aStatuses' => $aAcceptedStatus,
+                ]);
+
+            $sOxidRequest = $oQuery->execute()->fetchOne();
 
             if ($sOxidRequest) {
                 $oRequestLog = $this->_oFcPoHelper->getFactoryObject(FcPoRequestLog::class);
@@ -1464,7 +1522,21 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function getLastStatus(): object|bool
     {
-        $sOxid = $this->_oFcPoDb->getOne("SELECT * FROM fcpotransactionstatus WHERE fcpo_txid = '{$this->oxorder__fcpotxid->value}' ORDER BY fcpo_sequencenumber DESC, oxtimestamp DESC");
+        $sQuery = "
+            SELECT
+                *
+            FROM
+                fcpotransactionstatus
+            WHERE
+                fcpo_txid = :sTxid
+            ORDER BY 
+                fcpo_sequencenumber DESC, 
+                oxtimestamp DESC
+        ";
+        $sOxid = $this->_oFcPoDb->fetchOne($sQuery, [
+           'sTxid' => $this->oxorder__fcpotxid->value
+        ]);
+
         if ($sOxid) {
             $oStatus = $this->_oFcPoHelper->getFactoryObject(FcPoTransactionStatus::class);
             $oStatus->load($sOxid);
@@ -1558,9 +1630,10 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetMandateFilename(): string|bool
     {
-        $sOxid = $this->getId();
-        $sQuery = "SELECT fcpo_filename FROM fcpopdfmandates WHERE oxorderid = '$sOxid'";
-        return $this->_oFcPoDb->getOne($sQuery);
+        $sQuery = "SELECT fcpo_filename FROM fcpopdfmandates WHERE oxorderid = :sOrderId";
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sOrderId' => $this->getId()
+        ]);
     }
 
     /**
@@ -1571,8 +1644,10 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoGetStatus(): array
     {
-        $sQuery = "SELECT oxid FROM fcpotransactionstatus WHERE fcpo_txid = '{$this->oxorder__fcpotxid->value}' ORDER BY fcpo_sequencenumber ASC";
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $sQuery = "SELECT oxid FROM fcpotransactionstatus WHERE fcpo_txid = :sTxid ORDER BY fcpo_sequencenumber ASC";
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery, [
+            'sTxid' => $this->oxorder__fcpotxid->value
+        ]);
 
         $aStatus = [];
         foreach ($aRows as $aRow) {
@@ -1781,7 +1856,14 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
         $this->oxorder__fcpoauthmode = new Field($sAuthorizationType, Field::T_RAW);
         $this->oxorder__fcpomode = new Field($sMode, Field::T_RAW);
         $this->oxorder__fcpoordernotchecked = new Field($iOrderNotChecked, Field::T_RAW);
-        $this->_oFcPoDb->execute("UPDATE fcporefnr SET fcpo_txid = '{$aResponse['txid']}' WHERE fcpo_refnr = '" . $sRefNr . "'");
+
+        $this->_oFcPoDb->executeStatement("UPDATE fcporefnr SET fcpo_txid = :sTxid WHERE fcpo_refnr = :sRefNr", 
+            [
+                'sTxid' => $aResponse['txid'],
+                'sRefNr' => $sRefNr,
+            ]
+        );
+
         if ($sPaymentId == 'fcpobarzahlen' && isset($aResponse['add_paydata[instruction_notes]'])) {
             $sBarzahlenHtml = urldecode($aResponse['add_paydata[instruction_notes]']);
             $this->_oFcPoHelper->fcpoSetSessionVariable('sFcpoBarzahlenHtml', $sBarzahlenHtml);
@@ -1897,17 +1979,18 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
             }
 
             if(!empty($aUpdatedFields)) {
-                $sQuery = 'UPDATE oxorder SET ';
+                $oQuery = $this->_oFcPoDb->createQueryBuilder();
 
+                $oQuery->update('oxorder');
                 foreach ($aUpdatedFields as $sField => $sValue) {
-                    $sQuery .= " $sField = '$sValue',";
+                    $sParamName = ':val_' . $sField;
+                    $oQuery
+                        ->set($sField, $sParamName)
+                        ->setParameter($sParamName, $sValue);
                 }
-
-                $sQuery = substr($sQuery, 0, strlen($sQuery)-1);
-
-                $sQuery .= " WHERE oxid='" . $this->oxorder__oxid . "'";
-
-                DatabaseProvider::getDb()->execute($sQuery);
+                $oQuery->where('oxid = :sOxid');
+                $oQuery->setParameter('sOxid', $this->oxorder__oxid);
+                $oQuery->execute();
             }
         }
     }
@@ -2003,31 +2086,32 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
      */
     public function fcpoCreateShadowBasket(): void
     {
-        $oSession = $this->_oFcPoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $sSessionId = $oSession->getId();
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-
         $sQuery = "
-            REPLACE INTO fcposhadowbasket
-            (
-              	FCPOSESSIONID,
-              	OXORDERID,
-              	FCPOBASKET,
-              	FCPOCREATED,
-              	FCPOCHECKED
-            )
-            VALUES
-            (
-              " . $oDb->quote($sSessionId) . ",
-              NULL,
-              '" . base64_encode(serialize($oBasket)) . "',
-              NOW(),
-              NULL
-            )
+          REPLACE INTO fcposhadowbasket
+          (
+            FCPOSESSIONID,
+            OXORDERID,
+            FCPOBASKET,
+            FCPOCREATED,
+            FCPOCHECKED
+          )
+          VALUES
+          (
+            :sSessionId,
+            :sOrderId,
+            :sBasket,
+            NOW(),
+            :sChecked
+          )
         ";
 
-        $oDb->execute($sQuery);
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sSessionId' => $oSession->getId(),
+            'sOrderId' => null,
+            'sBasket' => base64_encode(serialize($oSession->getBasket())),
+            'sChecked' => null
+        ]);
     }
 
     /**

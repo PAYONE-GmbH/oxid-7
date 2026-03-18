@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
@@ -40,9 +41,9 @@ class FcPoRatePay extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
 
     /**
@@ -54,7 +55,7 @@ class FcPoRatePay extends BaseModel
         parent::__construct();
 
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -69,18 +70,26 @@ class FcPoRatePay extends BaseModel
     public function fcpoInsertProfile(string $sOxid, array $aRatePayData): void
     {
         if (array_key_exists('delete', $aRatePayData)) {
-            $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcPoDb->execute($sQuery);
+            $sQuery = "DELETE FROM fcporatepay WHERE oxid = :sOxid";
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sOxid' => $sOxid,
+            ]);
         } else {
             $sQuery = " UPDATE
                             fcporatepay
                         SET
-                            shopid = " . DatabaseProvider::getDb()->quote($aRatePayData['shopid']) . ",
-                            currency = " . DatabaseProvider::getDb()->quote($aRatePayData['currency']) . ",
-                            oxpaymentid = " . DatabaseProvider::getDb()->quote($aRatePayData['paymentid']) . "
+                            shopid = :iShopid,
+                            currency = :sCurrency,
+                            oxpaymentid = :sPaymentId
                         WHERE
-                            oxid = " . DatabaseProvider::getDb()->quote($sOxid);
-            $this->_oFcPoDb->execute($sQuery);
+                            oxid = :sOxid";
+
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'iShopid' => $aRatePayData['shopid'],
+                'sCurrency' => $aRatePayData['currency'],
+                'sPaymentId' => $aRatePayData['paymentid'],
+                'sOxid' => $sOxid
+            ]);
             $this->_fcpoUpdateRatePayProfile($sOxid);
         }
     }
@@ -110,10 +119,10 @@ class FcPoRatePay extends BaseModel
      */
     public function fcpoGetProfileData(string $sOxid): array
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
-        $sQuery = "SELECT * FROM fcporatepay WHERE OXID=" . $this->_oFcPoDb->quote($sOxid);
-
-        return $oDb->GetRow($sQuery);
+        $sQuery = "SELECT * FROM fcporatepay WHERE OXID = :sOxid";
+        return $this->_oFcPoDb->fetchAssociative($sQuery, [
+            'sOxid' => $sOxid
+        ]);
     }
 
     /**
