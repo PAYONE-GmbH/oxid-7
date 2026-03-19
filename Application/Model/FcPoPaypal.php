@@ -159,8 +159,6 @@ class FcPoPaypal extends BaseModel
     public function fcpoUpdatePayPalLogos(array $aLogos): void
     {
         foreach ($aLogos as $iId => $aLogo) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
-
             $oQuery = $this->_oFcPoDb->createQueryBuilder();
             $oQuery
                 ->update('fcpopayoneexpresslogos')

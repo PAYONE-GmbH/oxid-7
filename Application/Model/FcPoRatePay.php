@@ -137,67 +137,126 @@ class FcPoRatePay extends BaseModel
     {
         $sQuery = "
             UPDATE fcporatepay SET
-                `merchant_name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[merchant-name]']) . ",
-                `merchant_status`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[merchant-status]']) . ",
-                `shop_name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[shop-name]']) . ",
-                `name`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[name]']) . ",
-                `type`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[type]']) . ",
-                `activation_status_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-elv]']) . ",
-                `activation_status_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-installment]']) . ",
-                `activation_status_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-invoice]']) . ",
-                `activation_status_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[activation-status-prepayment]']) . ",
-                `amount_min_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[amount-min-longrun]']) . ",
-                `b2b_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-full]']) . ",
-                `b2b_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-PQ-light]'] ?? '') . ",
-                `b2b_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-elv]']) . ",
-                `b2b_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-installment]']) . ",
-                `b2b_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-invoice]']) . ",
-                `b2b_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[b2b-prepayment]']) . ",
-                `country_code_billing`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-billing]']) . ",
-                `country_code_delivery`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[country-code-delivery]']) . ",
-                `delivery_address_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-full]']) . ",
-                `delivery_address_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-PQ-light]'] ?? '') . ",
-                `delivery_address_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-elv]']) . ",
-                `delivery_address_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-installment]']) . ",
-                `delivery_address_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-invoice]']) . ",
-                `delivery_address_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[delivery-address-prepayment]']) . ",
-                `device_fingerprint_snippet_id`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[device-fingerprint-snippet-id]'] ?? '') . ",
-                `eligibility_device_fingerprint`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-device-fingerprint]'] ?? '') . ",
-                `eligibility_ratepay_elv`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-elv]']) . ",
-                `eligibility_ratepay_installment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-installment]']) . ",
-                `eligibility_ratepay_invoice`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-invoice]']) . ",
-                `eligibility_ratepay_pq_full`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-full]']) . ",
-                `eligibility_ratepay_pq_light`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-pq-light]'] ?? '') . ",
-                `eligibility_ratepay_prepayment`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[eligibility-ratepay-prepayment]']) . ",
-                `interest_rate_merchant_towards_bank`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interest-rate-merchant-towards-bank]']) . ",
-                `interestrate_default`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-default]']) . ",
-                `interestrate_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-max]']) . ",
-                `interestrate_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[interestrate-min]']) . ",
-                `min_difference_dueday`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[min-difference-dueday]']) . ",
-                `month_allowed`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-allowed]']) . ",
-                `month_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-longrun]']) . ",
-                `month_number_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-number-max]']) . ",
-                `month_number_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[month-number-min]']) . ",
-                `payment_amount`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-amount]']) . ",
-                `payment_firstday`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-firstday]']) . ",
-                `payment_lastrate`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[payment-lastrate]']) . ",
-                `rate_min_longrun`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[rate-min-longrun]']) . ",
-                `rate_min_normal`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[rate-min-normal]']) . ",
-                `service_charge`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[service-charge]']) . ",
-                `tx_limit_elv_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-elv-max]']) . ",
-                `tx_limit_elv_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-elv-min]']) . ",
-                `tx_limit_installment_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-installment-max]']) . ",
-                `tx_limit_installment_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-installment-min]']) . ",
-                `tx_limit_invoice_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-invoice-max]']) . ",
-                `tx_limit_invoice_min`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-invoice-min]']) . ",
-                `tx_limit_prepayment_max`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-prepayment-max]']) . ",
-                `txLimitPrepaymentMin`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[tx-limit-prepayment-min]']) . ",
-                `valid_payment_firstdays`=" . $this->_oFcPoDb->quote($aResponse['add_paydata[valid-payment-firstdays]']) . "
+                `merchant_name` = :sMerchantName,
+                `merchant_status` = :sMerchantStatus,
+                `shop_name` = :sShopName,
+                `name` = :sName,
+                `type` = :sType,
+                `activation_status_elv` = :sActivationStatusElv,
+                `activation_status_installment` = :sActivationStatusInstallment,
+                `activation_status_invoice` = :sActivationStatusInvoice,
+                `activation_status_prepayment` = :sActivationStatusPrepayment,
+                `amount_min_longrun` = :sAmountMinLongrun,
+                `b2b_pq_full` = :sB2bPqFull,
+                `b2b_pq_light` = :sB2bPqLight,
+                `b2b_elv` = :sB2bElv,
+                `b2b_installment` = :sB2bInstallment,
+                `b2b_invoice` = :sB2bInvoice,
+                `b2b_prepayment` = :sB2bPrepayment,
+                `country_code_billing` = :sCountryCodeBilling,
+                `country_code_delivery` = :sCountryCodeDelivery,
+                `delivery_address_pq_full` = :sDeliveryAddressPqFull,
+                `delivery_address_pq_light` = :sDeliveryAddressPqLight,
+                `delivery_address_elv` = :sDeliveryAddressElv,
+                `delivery_address_installment` = :sDeliveryAddressInstallment,
+                `delivery_address_invoice` = :sDeliveryAddressInvoice,
+                `delivery_address_prepayment` = :sDeliveryAddressPrepayment,
+                `device_fingerprint_snippet_id` = :sDeviceFingerprintSnippetId,
+                `eligibility_device_fingerprint` = :sEligibilityDeviceFingerprint,
+                `eligibility_ratepay_elv` = :sEligibilityRatepayElv,
+                `eligibility_ratepay_installment` = :sEligibilityRatepayInstallment,
+                `eligibility_ratepay_invoice` = :sEligibilityRatepayInvoice,
+                `eligibility_ratepay_pq_full` = :sEligibilityRatepayPqFull,
+                `eligibility_ratepay_pq_light` = :sEligibilityRatepayPqLight,
+                `eligibility_ratepay_prepayment` = :sEligibilityRatepayPrepayment,
+                `interest_rate_merchant_towards_bank` = :sInterestRateMerchantTowardsBank,
+                `interestrate_default` = :sInterestrateDefault,
+                `interestrate_max` = :sInterestrateMax,
+                `interestrate_min` = :sInterestrateMin,
+                `min_difference_dueday` = :sMinDifferenceDueday,
+                `month_allowed` = :sMonthAllowed,
+                `month_longrun` = :sMonthLongrun,
+                `month_number_max` = :sMonthNumberMax,
+                `month_number_min` = :sMonthNumberMin,
+                `payment_amount` = :sPaymentAmount,
+                `payment_firstday` = :sPaymentFirstday,
+                `payment_lastrate` = :sPaymentLastrate,
+                `rate_min_longrun` = :sRateMinLongrun,
+                `rate_min_normal` = :sRateMinNormal,
+                `service_charge` = :sServiceCharge,
+                `tx_limit_elv_max` = :sTxLimitElvMax,
+                `tx_limit_elv_min` = :sTxLimitElvMin,
+                `tx_limit_installment_max` = :sTxLimitInstallmentMax,
+                `tx_limit_installment_min` = :sTxLimitInstallmentMin,
+                `tx_limit_invoice_max` = :sTxLimitInvoiceMax,
+                `tx_limit_invoice_min` = :sTxLimitInvoiceMin,
+                `tx_limit_prepayment_max` = :sTxLimitPrepaymentMax,
+                `txLimitPrepaymentMin` = :sTxLimitPrepaymentMin,
+                `valid_payment_firstdays` = :sValidPaymentFirstdays,
             WHERE 
-                OXID=" . $this->_oFcPoDb->quote($sOxid) . "
+                OXID = :sOxid
         ";
+        $aParams = [
+            'sMerchantName' => $aResponse['add_paydata[merchant-name]'],
+            'sMerchantStatus' => $aResponse['add_paydata[merchant-status]'],
+            'sShopName' => $aResponse['add_paydata[shop-name]'],
+            'sName' => $aResponse['add_paydata[name]'],
+            'sType' => $aResponse['add_paydata[type]'],
+            'sActivationStatusElv' => $aResponse['add_paydata[activation-status-elv]'],
+            'sActivationStatusInstallment' => $aResponse['add_paydata[activation-status-installment]'],
+            'sActivationStatusInvoice' => $aResponse['add_paydata[activation-status-invoice]'],
+            'sActivationStatusPrepayment' => $aResponse['add_paydata[activation-status-prepayment]'],
+            'sAmountMinLongrun' => $aResponse['add_paydata[amount-min-longrun]'],
+            'sB2bPqFull' => $aResponse['add_paydata[b2b-PQ-full]'],
+            'sB2bPqLight' => $aResponse['add_paydata[b2b-PQ-light]'] ?? '',
+            'sB2bElv' => $aResponse['add_paydata[b2b-elv]'],
+            'sB2bInstallment' => $aResponse['add_paydata[b2b-installment]'],
+            'sB2bInvoice' => $aResponse['add_paydata[b2b-invoice]'],
+            'sB2bPrepayment' => $aResponse['add_paydata[b2b-prepayment]'],
+            'sCountryCodeBilling' => $aResponse['add_paydata[country-code-billing]'],
+            'sCountryCodeDelivery' => $aResponse['add_paydata[country-code-delivery]'],
+            'sDeliveryAddressPqFull' => $aResponse['add_paydata[delivery-address-PQ-full]'],
+            'sDeliveryAddressPqLight' => $aResponse['add_paydata[delivery-address-PQ-light]'] ?? '',
+            'sDeliveryAddressElv' => $aResponse['add_paydata[delivery-address-elv]'],
+            'sDeliveryAddressInstallment' => $aResponse['add_paydata[delivery-address-installment]'],
+            'sDeliveryAddressInvoice' => $aResponse['add_paydata[delivery-address-invoice]'],
+            'sDeliveryAddressPrepayment' => $aResponse['add_paydata[delivery-address-prepayment]'],
+            'sDeviceFingerprintSnippetId' => $aResponse['add_paydata[device-fingerprint-snippet-id]'] ?? '',
+            'sEligibilityDeviceFingerprint' => $aResponse['add_paydata[eligibility-device-fingerprint]'] ?? '',
+            'sEligibilityRatepayElv' => $aResponse['add_paydata[eligibility-ratepay-elv]'],
+            'sEligibilityRatepayInstallment' => $aResponse['add_paydata[eligibility-ratepay-installment]'],
+            'sEligibilityRatepayInvoice' => $aResponse['add_paydata[eligibility-ratepay-invoice]'],
+            'sEligibilityRatepayPqFull' => $aResponse['add_paydata[eligibility-ratepay-pq-full]'],
+            'sEligibilityRatepayPqLight' => $aResponse['add_paydata[eligibility-ratepay-pq-light]'] ?? '',
+            'sEligibilityRatepayPrepayment' => $aResponse['add_paydata[eligibility-ratepay-prepayment]'],
+            'sInterestRateMerchantTowardsBank' => $aResponse['add_paydata[interest-rate-merchant-towards-bank]'],
+            'sInterestrateDefault' => $aResponse['add_paydata[interestrate-default]'],
+            'sInterestrateMax' => $aResponse['add_paydata[interestrate-max]'],
+            'sInterestrateMin' => $aResponse['add_paydata[interestrate-min]'],
+            'sMinDifferenceDueday' => $aResponse['add_paydata[min-difference-dueday]'],
+            'sMonthAllowed' => $aResponse['add_paydata[month-allowed]'],
+            'sMonthLongrun' => $aResponse['add_paydata[month-longrun]'],
+            'sMonthNumberMax' => $aResponse['add_paydata[month-number-max]'],
+            'sMonthNumberMin' => $aResponse['add_paydata[month-number-min]'],
+            'sPaymentAmount' => $aResponse['add_paydata[payment-amount]'],
+            'sPaymentFirstday' => $aResponse['add_paydata[payment-firstday]'],
+            'sPaymentLastrate' => $aResponse['add_paydata[payment-lastrate]'],
+            'sRateMinLongrun' => $aResponse['add_paydata[rate-min-longrun]'],
+            'sRateMinNormal' => $aResponse['add_paydata[rate-min-normal]'],
+            'sServiceCharge' => $aResponse['add_paydata[service-charge]'],
+            'sTxLimitElvMax' => $aResponse['add_paydata[tx-limit-elv-max]'],
+            'sTxLimitElvMin' => $aResponse['add_paydata[tx-limit-elv-min]'],
+            'sTxLimitInstallmentMax' => $aResponse['add_paydata[tx-limit-installment-max]'],
+            'sTxLimitInstallmentMin' => $aResponse['add_paydata[tx-limit-installment-min]'],
+            'sTxLimitInvoiceMax' => $aResponse['add_paydata[tx-limit-invoice-max]'],
+            'sTxLimitInvoiceMin' => $aResponse['add_paydata[tx-limit-invoice-min]'],
+            'sTxLimitPrepaymentMax' => $aResponse['add_paydata[tx-limit-prepayment-max]'],
+            'sTxLimitPrepaymentMin' => $aResponse['add_paydata[tx-limit-prepayment-min]'],
+            'sValidPaymentFirstdays' => $aResponse['add_paydata[valid-payment-firstdays]'],
+            'sOxid' => $sOxid
+        ];
 
-        $this->_oFcPoDb->execute($sQuery);
+        $this->_oFcPoDb->executeStatement($sQuery, $aParams);
     }
 
     /**
@@ -210,16 +269,20 @@ class FcPoRatePay extends BaseModel
      */
     public function fcpoGetRatePayProfiles(string $sPaymentId = null): array
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
         $aReturn = [];
 
-        $sFilterPaymentId = "";
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('*')
+            ->from('fcporatepay');
+
         if (is_string($sPaymentId)) {
-            $sFilterPaymentId = "WHERE OXPAYMENTID=" . $oDb->quote($sPaymentId);
+            $oQuery
+                ->where('OXPAYMENTID = :sPaymentId')
+                ->setParameter('sPaymentId', $sPaymentId);
         }
 
-        $sQuery = "SELECT * FROM fcporatepay $sFilterPaymentId";
-        $aRatePayProfiles = $oDb->getAll($sQuery);
+        $aRatePayProfiles = $oQuery->execute()->fetchAllAssociative();
 
         foreach ($aRatePayProfiles as $aRatePayProfile) {
             $sOxid = $aRatePayProfile['OXID'];
@@ -305,12 +368,14 @@ class FcPoRatePay extends BaseModel
             ) 
             VALUES 
             (
-                '" . $sNewOxid . "', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
+                :sNewOxid, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
             )
         ";
-        $this->_oFcPoDb->execute($sQuery);
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sNewOxid' => $sNewOxid,
+        ]);
     }
 
     /**
@@ -322,8 +387,10 @@ class FcPoRatePay extends BaseModel
      */
     public function fcpoGetProfileDataByPaymentId(string $sPaymentId): array
     {
-        $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID=" . $this->_oFcPoDb->quote($sPaymentId) . " LIMIT 1";
-        $sOxid = $this->_oFcPoDb->getOne($sQuery);
+        $sQuery = "SELECT * FROM fcporatepay WHERE OXPAYMENTID = :sPaymentId LIMIT 1";
+        $sOxid = $this->_oFcPoDb->fetchOne($sQuery, [
+            'sPaymentId' => $sPaymentId,
+        ]);
         $aProfile = [];
         if ($sOxid) {
             $aProfile = $this->fcpoGetProfileData($sOxid);
@@ -341,8 +408,7 @@ class FcPoRatePay extends BaseModel
     public function fcpoGetFields(): array
     {
         $sQuery = "SHOW FIELDS FROM fcporatepay";
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
-        $aRow = $oDb->getRow($sQuery);
+        $aRow = $this->_oFcPoDb->fetchAssociative($sQuery);
         $aReturn = [];
 
         if (count($aRow) > 0) {

@@ -367,8 +367,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoAddMandateToDb(string $sOrderId, string $sMandateIdentification): void
     {
-        $sOrderId = DatabaseProvider::getDb()->quote($sOrderId);
-        $sMandateIdentification = DatabaseProvider::getDb()->quote(basename($sMandateIdentification . '.pdf'));
+        $sMandateIdentification = basename($sMandateIdentification . '.pdf');
 
         $sQuery = "
             INSERT INTO fcpopdfmandates 
