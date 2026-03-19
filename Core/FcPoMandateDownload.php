@@ -77,9 +77,8 @@ class FcPoMandateDownload extends FrontendController
      */
     protected function _fcpoMandateDownloadAction(): void
     {
-        $oDb = DatabaseProvider::getDb();
-        $sQuery = $this->_fcpoGetMandateQuery();
-        $aResult = $oDb->GetRow($sQuery);
+        $oQuery = $this->_fcpoGetMandateQuery();
+        $aResult = $oQuery->execute()->fetchNumeric();
 
         if (!is_array($aResult)) {
             echo 'Permission denied!';
@@ -109,41 +108,35 @@ class FcPoMandateDownload extends FrontendController
     /**
      * Return query for fetching mandate mandatory information
      *
-     * @return string
+     * @return QueryBuilder
      * @throws DatabaseConnectionException
      */
-    protected function _fcpoGetMandateQuery(): string
+    protected function _fcpoGetMandateQuery(): QueryBuilder
     {
-        $sOrderId = $this->_oFcPoHelper->fcpoGetRequestParameter('id');
+        $oQuery = $this->_oFcPoHelper->fcpoGetPdoDb()->createQueryBuilder();
+
+        $oQuery
+            ->select('a.fcpo_filename', 'b.oxid', 'b.fcpomode', 'b.oxpaymenttype')
+            ->from('fcpopdfmandates', 'a')
+            ->innerJoin('a', 'oxorder', 'b', 'a.oxorderid = b.oxid')
+            ->getMaxResults(1);
+
         $sUserId = $this->_fcpoGetUserId();
 
-        $sWhere = "
-            b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
-        ";
-        $sOrderBy = "
-            ORDER BY
-                b.oxorderdate DESC        
-        ";
+        $sOrderId = $this->_oFcPoHelper->fcpoGetRequestParameter('id');
         if ($sOrderId) {
-            $sWhere = "
-                b.oxid = " . DatabaseProvider::getDb()->quote($sOrderId) . " AND
-                b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
-            ";
-            $sOrderBy = "";
+            $oQuery
+                ->where('b.oxid = :sOxid AND b.oxuserid = :sUserId')
+                ->setParameter('sOxid', $sOrderId)
+                ->setParameter('sUserId', $sUserId);
+            return $oQuery;
         }
-
-        return "
-            SELECT 
-                a.fcpo_filename,
-                b.oxid,
-                b.fcpomode,
-                b.oxpaymenttype
-            FROM 
-                fcpopdfmandates AS a
-            INNER JOIN
-                oxorder AS b ON a.oxorderid = b.oxid
-            WHERE $sWhere $sOrderBy LIMIT 1        
-        ";
+        
+        $oQuery
+            ->where('b.oxuserid = :sUserId')
+            ->setParameter('sUserId', $sUserId)
+            ->orderBy('b.oxorderdate', 'DESC');
+        return $oQuery;
     }
 
     /**

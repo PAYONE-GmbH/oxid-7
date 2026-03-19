@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoForwarding;
@@ -29,7 +30,6 @@ use Fatchip\PayOne\Application\Model\FcPoPaypal;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
 use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use stdClass;
@@ -47,9 +47,9 @@ class FcPayOneAdminDetails extends AdminDetailsController
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * fcpoconfigexport instance
@@ -110,7 +110,7 @@ class FcPayOneAdminDetails extends AdminDetailsController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
         $this->_oFcPoConfigExport = oxNew(FcPoConfigExport::class);
         $this->_oFcPoPayPal = oxNew(FcPoPayPal::class);
         $this->_oFcPoKlarna = oxNew(FcPoKlarna::class);

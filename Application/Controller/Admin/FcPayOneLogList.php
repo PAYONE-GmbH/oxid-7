@@ -132,12 +132,12 @@ class FcPayOneLogList extends FcPayOneAdminList
         $sQ = parent::prepareWhereQuery($aWhere, $sQ);
 
         $aPortalIds = [
-            "'" . $this->getPortalId() . "'",
-            "'" . $this->getSecInvoicePortalId() . "'",
-            "'" . $this->getBNPLPortalId() . "'",
+            $this->_oFcPoDb->quote($this->getPortalId()),
+            $this->_oFcPoDb->quote($this->getSecInvoicePortalId()),
+            $this->_oFcPoDb->quote($this->getBNPLPortalId()),
         ];
         $sAid = $this->getSubAccountId();
-        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = '$sAid' ";
+        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = " . $this->_oFcPoDb->quote($sAid);
     }
 
     /**

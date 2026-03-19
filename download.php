@@ -164,8 +164,7 @@ class FcPayOneMandateDownload extends FrontendController
      */
     private function _redownloadMandate(string $sMandateFilename, string $sOrderId, string $sPaymentId): void
     {
-        $sMandateIdentification = str_replace('.pdf', 
-    '', $sMandateFilename);
+        $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
         $oPayment = oxNew('oxPayment');
         $oPayment->load($sPaymentId);
         $sMode = $oPayment->fcpoGetOperationMode();
