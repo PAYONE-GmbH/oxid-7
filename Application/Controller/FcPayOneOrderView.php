@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -29,8 +30,6 @@ use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\DeliverySetList;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\User;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
 
@@ -47,9 +46,9 @@ class FcPayOneOrderView extends OrderController
     /**
      * Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Boolean of option "blConfirmAGB" error
@@ -68,7 +67,7 @@ class FcPayOneOrderView extends OrderController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**

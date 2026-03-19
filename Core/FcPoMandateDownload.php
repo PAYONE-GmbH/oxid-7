@@ -25,7 +25,6 @@ use Fatchip\PayOne\Lib\FcPoRequest;
 use JetBrains\PhpStorm\NoReturn;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Payment;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 

@@ -23,7 +23,6 @@ namespace Fatchip\PayOne\Application\Controller\Admin\Inc;
 use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
 
 $aColumns = ['container1' => [

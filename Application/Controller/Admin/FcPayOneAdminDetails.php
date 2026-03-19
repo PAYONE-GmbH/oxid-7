@@ -30,7 +30,6 @@ use Fatchip\PayOne\Application\Model\FcPoPaypal;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use stdClass;
 

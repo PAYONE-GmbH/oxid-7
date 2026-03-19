@@ -28,8 +28,6 @@ use JsonException;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -225,9 +223,8 @@ class FcPoConfigExport extends BaseModel
      */
     public function fcpoGetConfig(string $sShopId, int $iLang = 0): array
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetPdoDb();
         $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = :sShopId AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
-        $aResult = $oDb->fetchAllAssociative($sQuery, ['sShopId' => $sShopId]);
+        $aResult = $this->_oFcPoDb->fetchAllAssociative($sQuery, ['sShopId' => $sShopId]);
 
         if (count($aResult) > 0) {
             $oStr = Str::getStr();

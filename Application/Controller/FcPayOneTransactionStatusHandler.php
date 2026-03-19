@@ -22,7 +22,6 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Language;
 
@@ -281,8 +280,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         ];
 
         try {
-            $oDb = $this->_oFcPoHelper->fcpoGetPdoDb();
-            $oDb->executeStatement($sQuery, $aParams);
+            $this->_oFcPoDb->executeStatement($sQuery, $aParams);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -296,20 +294,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      */
     protected function _getOrderNr(): int
     {
-        $oDb = DatabaseProvider::getDb();
-        $sTxid = $this->fcGetPostParam('txid');
-
         $sQuery = "
             SELECT 
                 oxordernr 
             FROM 
                 oxorder 
             WHERE 
-                fcpotxid = " . $oDb->quote($sTxid) . "
+                fcpotxid = :sTxid
             LIMIT 1
         ";
 
-        return (int)$oDb->getOne($sQuery);
+        return (int)$this->_oFcPoDb->fetchOne($sQuery, [
+            'sTxid' => $this->fcGetPostParam('txid')
+        ]);
     }
 
     /**
@@ -324,11 +321,15 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $sTxid = $this->fcGetPostParam('txid');
 
         $blReturn = false;
-        $sAuthMode = DatabaseProvider::getDb()->getOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '$sTxid'");
+        $sAuthMode = $this->_oFcPoDb->fetchOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = :sTxid", [
+            'sTxid' => $sTxid
+        ]);
         if ($sAuthMode == 'authorization') {
             $blReturn = true;
         } else {
-            $iCount = DatabaseProvider::getDb()->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '$sTxid' AND fcpo_txaction = 'capture'");
+            $iCount = $this->_oFcPoDb->fetchOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = :sTxid AND fcpo_txaction = 'capture'", [
+                'sTxid' => $sTxid
+            ]);
             if ($iCount > 0) {
                 $blReturn = true;
             }
@@ -339,10 +340,11 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         }
 
         $oOrder = $this->_getOrder();
-        $sOrderId = $oOrder->getId();
-        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = '$sOrderId'";
+        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = :sOxid";
         try {
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sOxid' => $oOrder->getId()
+            ]);
 
         } catch (Exception $oEx) {
             throw $oEx;
@@ -363,9 +365,10 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                 $sTxid = $this->fcGetPostParam('txid');
             }
 
-            $oDb = DatabaseProvider::getDb();
-            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = '$sTxid'";
-            $sOrderId = $oDb->getOne($sQuery);
+            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = :sTxid";
+            $sOrderId = $this->_oFcPoDb->fetchOne($sQuery, [
+                'sTxid' => $sTxid
+            ]);
 
             $oOrder = oxNew(Order::class);
             $oOrder->load($sOrderId);
@@ -402,14 +405,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '$sReplacement', '')
+                            oxremark = REPLACE(oxremark, :sReplacement, '')
                         WHERE 
-                            oxid = '$sOrderId' AND 
-                            oxtransstatus IN ('ERROR') AND 
+                            oxid = :sOxid
+                        AND 
+                            oxtransstatus IN ('ERROR')
+                        AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sReplacement' => $sReplacement,
+                'sOxid' => $sOrderId
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -440,14 +448,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '$sReplacement', '')
+                            oxremark = REPLACE(oxremark, :sReplacement, '')
                         WHERE 
-                            oxid = '$sOrderId' AND 
-                            oxtransstatus IN ('INCOMPLETE', 'ERROR') AND 
+                            oxid = :sOxid
+                        AND 
+                            oxtransstatus IN ('INCOMPLETE', 'ERROR')
+                        AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sReplacement' => $sReplacement,
+                'sOxid' => $sOrderId
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -469,20 +482,22 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             return;
         }
 
-        $oDb = DatabaseProvider::getDb();
         $oOrder = $this->_getOrder($sTxid);
-        $sPaymentId = $oDb->quote($oOrder->oxorder__oxpaymenttype->value);
 
         $sQuery = "
             SELECT fcpo_folder 
             FROM fcpostatusmapping 
             WHERE 
-                  fcpo_payonestatus = '$sPayoneStatus' AND 
-                  fcpo_paymentid = $sPaymentId 
+                  fcpo_payonestatus = :sPayoneStatus 
+            AND 
+                  fcpo_paymentid = :sPaymentId 
             ORDER BY oxid ASC 
             LIMIT 1
         ";
-        $sFolder = $oDb->getOne($sQuery);
+        $sFolder = $this->_oFcPoDb->fetchOne($sQuery, [
+            'sPayoneStatus' => $sPayoneStatus,
+            'sPaymentId' => $oOrder->oxorder__oxpaymenttype->value
+        ]);
         if (empty($sFolder)) {
             return;
         }
@@ -490,10 +505,13 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         try {
             $sQuery = "
                 UPDATE oxorder 
-                SET oxfolder = '$sFolder' 
-                WHERE oxid = '" . $oOrder->getId() . "'
+                SET oxfolder = :sFolder 
+                WHERE oxid = :sOxid
             ";
-            $oDb->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sFolder' => $sFolder,
+                'sOxid' => $oOrder->getId()
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }

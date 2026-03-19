@@ -20,10 +20,9 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\UserController;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\UtilsServer;
@@ -41,9 +40,9 @@ class FcPayOneUserView extends UserController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
 
     /**
@@ -55,7 +54,7 @@ class FcPayOneUserView extends UserController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**

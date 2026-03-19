@@ -23,7 +23,6 @@ namespace Fatchip\PayOne\Application\Controller\Admin;
 use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneAdminList extends AdminListController

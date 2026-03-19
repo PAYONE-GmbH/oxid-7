@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
@@ -34,8 +35,6 @@ use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Application\Model\UserPayment;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Exception\LanguageNotFoundException;
@@ -67,9 +66,9 @@ class FcPayOnePaymentView extends PaymentController
     /**
      * Helper object for dealing with different shop versions
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
     /**
      * bill country id of the user object
      *
@@ -172,7 +171,7 @@ class FcPayOnePaymentView extends PaymentController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
