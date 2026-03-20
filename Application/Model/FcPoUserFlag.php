@@ -20,9 +20,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -64,9 +63,9 @@ class FcPoUserFlag extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * The timestamp that should be used to determine penalty times
@@ -99,7 +98,7 @@ class FcPoUserFlag extends BaseModel
         parent::__construct();
 
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
         $this->init($this->_sCoreTbl);
     }
 
@@ -125,12 +124,15 @@ class FcPoUserFlag extends BaseModel
      */
     protected function _fcpoGetIdByErrorCode(string $sErrorCode): string
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         $sQuery = "SELECT OXID FROM "
             . $this->_sCoreTbl
-            . " WHERE FCPOCODE=" . $oDb->quote($sErrorCode);
+            . " WHERE FCPOCODE = :sCode";
+        
+        $sOxid = (string) $this->_oFcPoDb->fetchOne($sQuery, [
+            'sCode' => $sErrorCode
+        ]);
 
-        return (string)$oDb->getOne($sQuery);
+        return $sOxid;
     }
 
     /**
@@ -273,14 +275,17 @@ class FcPoUserFlag extends BaseModel
     {
         if ($this->_sAssignId) {
             // mandatory for persisting the message
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
-            $sQuery = "
-                UPDATE fcpouser2flag 
-                SET FCPODISPLAYMESSAGE=" . $oDb->quote($sMessage) . "
-                WHERE OXID=" . $oDb->quote($this->_sAssignId) . "
-                LIMIT 1
-            ";
-            $oDb->execute($sQuery);
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->update('fcpouser2flag')
+                ->set('FCPODISPLAYMESSAGE', ':sMessage')
+                ->where('OXID = :sOxid')
+                ->setParameters([
+                    'sMessage' => $sMessage,
+                    'sOxid' => $this->_sAssignId
+                ])
+                ->getMaxResults(1);
+            $oQuery->execute();
         }
     }
 
@@ -293,13 +298,17 @@ class FcPoUserFlag extends BaseModel
     protected function _fcpoGetMessageFromDb(): string
     {
         if ($this->_sAssignId) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
             $sQuery = "
-            SELECT FCPODISPLAYMESSAGE 
-            FROM fcpouser2flag 
-            WHERE OXID=" . $oDb->quote($this->_sAssignId);
+                SELECT FCPODISPLAYMESSAGE 
+                FROM fcpouser2flag 
+                WHERE OXID = :sOxid
+            ";
+            
+            $sMessage = $this->_oFcPoDb->fetchOne($sQuery, [
+                'sOxid' => $this->_sAssignId
+            ]);
 
-            return (string)$oDb->getOne($sQuery);
+            return $sMessage;
         }
 
         return '';

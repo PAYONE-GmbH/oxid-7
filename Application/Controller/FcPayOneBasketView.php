@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Helper\Payment;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -36,6 +37,13 @@ class FcPayOneBasketView extends BasketController
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var Connection
+     */
+    protected Connection $_oFcPoDb;
 
     /**
      * Path where PayPal logos can be found
@@ -61,6 +69,7 @@ class FcPayOneBasketView extends BasketController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -113,9 +122,11 @@ class FcPayOneBasketView extends BasketController
     protected function _fcpoGetPayPalExpressPicFromDb(): string
     {
         $iLangId = $this->_oFcPoHelper->fcpoGetLang()->getBaseLanguage();
-        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = '$iLangId' ORDER BY fcpo_default DESC";
+        $sQuery = "SELECT fcpo_logo FROM fcpopayoneexpresslogos WHERE fcpo_logo != '' AND fcpo_langid = :iLangId ORDER BY fcpo_default DESC";
 
-        return $this->_oFcPoHelper->fcpoGetDb()->getOne($sQuery);
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'iLangId' => $iLangId,
+        ]);
     }
 
     /**

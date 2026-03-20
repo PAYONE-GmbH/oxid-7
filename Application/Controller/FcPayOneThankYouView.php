@@ -20,11 +20,10 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Controller\ThankYouController;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 
 class FcPayOneThankYouView extends ThankYouController
@@ -38,11 +37,11 @@ class FcPayOneThankYouView extends ThankYouController
     protected FcPoHelper $_oFcPoHelper;
 
     /**
-     * Instance of DatabaseProvider
+     * Instance of Connection
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Mandate pdf url
@@ -67,7 +66,7 @@ class FcPayOneThankYouView extends ThankYouController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**

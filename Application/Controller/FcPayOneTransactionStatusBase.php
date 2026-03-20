@@ -20,12 +20,12 @@
 
 namespace Fatchip\PayOne\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Controller\BaseController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -65,6 +65,13 @@ class FcPayOneTransactionStatusBase extends BaseController
     protected FcPoHelper $_oFcPoHelper;
 
     /**
+     * Centralized Database instance
+     *
+     * @var Connection
+     */
+    protected Connection $_oFcPoDb;
+
+    /**
      * @var string
      */
     protected $_sThisTemplate = '@fcpayone/frontend/fcpo_txstatus_base';
@@ -77,6 +84,7 @@ class FcPayOneTransactionStatusBase extends BaseController
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -161,7 +169,7 @@ class FcPayOneTransactionStatusBase extends BaseController
             $aShops = [];
 
             $sQuery = "SELECT oxid FROM oxshops";
-            $aRows = DatabaseProvider::getDb()->getAll($sQuery);
+            $aRows = $this->_oFcPoDb->fetchAllNumeric($sQuery);
 
             foreach ($aRows as $aRow) {
                 $aShops[] = $aRow[0];
@@ -233,9 +241,11 @@ class FcPayOneTransactionStatusBase extends BaseController
             FROM 
                 fcpostatusforwarding 
             WHERE 
-                fcpo_payonestatus = '$sPayoneStatus'";
+                fcpo_payonestatus = :sPayoneStatus";
 
-            $aRows = DatabaseProvider::getDb()->getAll($sQuery);
+            $aRows = $this->_oFcPoDb->fetchAllNumeric($sQuery, [
+                'sPayoneStatus' => $sPayoneStatus
+            ]);
 
             $this->_logForwardMessage('Add forwardings to queue: ' . print_r($aRows, true));
 
@@ -320,9 +330,9 @@ class FcPayOneTransactionStatusBase extends BaseController
                 )
                 VALUES
                 (
-                    '$sOxid',
-                    '$sStatusmessageId',
-                    '$sForwardId',
+                    :sOxid,
+                    :sStatusmessageId,
+                    :sForwardId,
                     '0',
                     '0000-00-00 00:00:00',
                     '',
@@ -330,7 +340,11 @@ class FcPayOneTransactionStatusBase extends BaseController
                 )
             ";
 
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sOxid' => $sOxid,
+                'sStatusmessageId' => $sStatusmessageId,
+                'sForwardId' => $sForwardId,
+            ]);
         } catch (Exception $e) {
             throw $e;
         }
@@ -351,11 +365,15 @@ class FcPayOneTransactionStatusBase extends BaseController
                 SELECT COUNT(*) 
                 FROM fcpostatusforwardqueue
                 WHERE
-                    FCSTATUSMESSAGEID='$sStatusmessageId' AND
-                    FCSTATUSFORWARDID='$sForwardId'
+                    FCSTATUSMESSAGEID = :sStatusmessageId
+                 AND
+                    FCSTATUSFORWARDID = :sForwardId
         ";
 
-        $iRows = (int)DatabaseProvider::getDb()->getOne($sQuery);
+        $iRows = (int) $this->_oFcPoDb->fetchOne($sQuery, [
+            'sStatusmessageId' => $sStatusmessageId,
+            'sForwardId' => $sForwardId
+        ]);
 
         return ($iRows > 0);
     }

@@ -20,12 +20,12 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\User;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Field;
@@ -42,6 +42,13 @@ class FcPayOneUser extends User
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var Connection
+     */
+    protected Connection $_oFcPoDb;
 
     /**
      * List of userflag ids of user
@@ -73,6 +80,7 @@ class FcPayOneUser extends User
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -163,8 +171,6 @@ class FcPayOneUser extends User
     protected function _fcpoGetUserFlagInfos(): array
     {
         $aUserFlagInfos = [];
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
-        $sUserId = $this->getId();
         $sQuery = "
           SELECT
             OXID, 
@@ -174,9 +180,10 @@ class FcPayOneUser extends User
           FROM 
             fcpouser2flag 
           WHERE
-            OXUSERID=" . $oDb->quote($sUserId) . "
-        ";
-        $aRows = $oDb->getAll($sQuery);
+            OXUSERID = :sUserId";
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery, [
+            'sUserId' => $this->getId()
+        ]);
 
         foreach ($aRows as $aRow) {
             $oUserFlag = new stdClass();
@@ -216,12 +223,6 @@ class FcPayOneUser extends User
      */
     public function fcpoAddPayoneUserFlag(object $oUserFlag): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $oUtilsObject = $this->_oFcPoHelper->getFactoryObject(UtilsObject::class);
-        $sUserFlagId = $oUserFlag->fcpouserflags__oxid->value;
-        $sUserId = $this->getId();
-        $sNewOxid = $oUtilsObject->generateUId();
-
         $sQuery = "
           REPLACE INTO fcpouser2flag
           (
@@ -232,14 +233,19 @@ class FcPayOneUser extends User
           )
           VALUES
           (
-            " . $oDb->quote($sNewOxid) . ",
-            " . $oDb->quote($sUserId) . ",
-            " . $oDb->quote($sUserFlagId) . ",
+            :sNewOxid,
+            :sUserId,
+            :sUserFlagId,
             NOW()
           )
         ";
 
-        $oDb->execute($sQuery);
+        $oUtilsObject = $this->_oFcPoHelper->getFactoryObject(UtilsObject::class);
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sNewOxid' => $oUtilsObject->generateUId(),
+            'sUserId' => $this->getId(),
+            'sUserFlagId' => $oUserFlag->fcpouserflags__oxid->value
+        ]);
     }
 
     /**
@@ -834,8 +840,11 @@ class FcPayOneUser extends User
      */
     public function fcpoDoesUserAlreadyExist(string $sEmail): false|string
     {
-        $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . DatabaseProvider::getDb()->quote($sEmail) . " AND oxpassword != ''";
-        $sUserId = DatabaseProvider::getDb()->getOne($sQuery);
+        $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = :sUsername AND oxpassword != ''";
+        $sUserId = $this->_oFcPoDb->fetchOne($sQuery, [
+            'sUsername' => $sEmail
+        ]);
+
         return $sUserId ?: false;
     }
 

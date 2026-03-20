@@ -20,9 +20,8 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use stdClass;
@@ -135,9 +134,9 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     /**
      * Database object instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * @var array|string[]
@@ -170,7 +169,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -335,8 +334,10 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoGetCountryIsoAlphaById(string $sCountryId): string
     {
-        $sQuery = "SELECT oxisoalpha2 FROM oxcountry WHERE oxid = " . DatabaseProvider::getDb()->quote($sCountryId);
-        return $this->_oFcPoDb->getOne($sQuery);
+        $sQuery = "SELECT oxisoalpha2 FROM oxcountry WHERE oxid = :sOxid";
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sOxid' => $sCountryId,
+        ]);
     }
 
     /**
@@ -348,8 +349,10 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoGetCountryNameById(string $sCountryId): string
     {
-        $sQuery = "SELECT oxtitle FROM oxcountry WHERE oxid = " . DatabaseProvider::getDb()->quote($sCountryId);
-        return $this->_oFcPoDb->getOne($sQuery);
+        $sQuery = "SELECT oxtitle FROM oxcountry WHERE oxid = :sOxid";
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sOxid' => $sCountryId,
+        ]);
     }
 
     /**
@@ -362,11 +365,24 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoAddMandateToDb(string $sOrderId, string $sMandateIdentification): void
     {
-        $sOrderId = DatabaseProvider::getDb()->quote($sOrderId);
-        $sMandateIdentification = DatabaseProvider::getDb()->quote(basename($sMandateIdentification . '.pdf'));
+        $sMandateIdentification = basename($sMandateIdentification . '.pdf');
 
-        $sQuery = "INSERT INTO fcpopdfmandates (OXORDERID, FCPO_FILENAME) VALUES (" . $sOrderId . ", " . $sMandateIdentification . ")";
-        $this->_oFcPoDb->execute($sQuery);
+        $sQuery = "
+            INSERT INTO fcpopdfmandates 
+            (
+                OXORDERID,
+                FCPO_FILENAME
+            )
+            VALUES
+            (
+                :sOrderId,
+                :sMandateId
+            )
+        ";
+        $this->_oFcPoDb->executeStatement($sQuery, [
+            'sOrderId' => $sOrderId,
+            'sMandateId' => $sMandateIdentification,
+        ]);
     }
 
     /**
@@ -379,10 +395,22 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function fcpoGetUserPaymentId(string $sUserOxid, string $sPaymentType): string|bool
     {
-        $oDb = DatabaseProvider::getDb();
-        $sQ = 'select oxpaymentid from oxorder where oxpaymenttype=' . $oDb->quote($sPaymentType) . ' and
-                oxuserid=' . $oDb->quote($sUserOxid) . ' order by oxorderdate desc';
-        return $this->_oFcPoDb->getOne($sQ);
+        $sQuery = "
+            SELECT
+                oxpaymentid
+            FROM
+                oxorder
+            WHERE
+                oxpaymenttype = :sPaymentType
+            AND 
+                oxuserid = :sUserId
+            ORDER BY
+                oxorderdate DESC
+        ";
+        return $this->_oFcPoDb->fetchOne($sQuery, [
+            'sPaymentType' => $sPaymentType,
+            'sUserId' => $sUserOxid,
+        ]);
     }
 
     /**
@@ -396,15 +424,43 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      */
     public function isPaymentMethodAvailableToUser(string $sSubPaymentId, string $sType, string $sUserBillCountryId, string $sUserDelCountryId): bool
     {
-        $sBaseQuery = "SELECT COUNT(*) FROM fcpopayment2country WHERE fcpo_paymentid = '$sSubPaymentId' AND fcpo_type = '$sType'";
-        if ($sUserDelCountryId !== '' && $sUserBillCountryId != $sUserDelCountryId) {
-            $sWhereCountry = "AND (fcpo_countryid = '$sUserBillCountryId' || fcpo_countryid = '$sUserDelCountryId')";
-        } else {
-            $sWhereCountry = "AND fcpo_countryid = '$sUserBillCountryId'";
-        }
-        $sQuery = "SELECT IF(($sBaseQuery LIMIT 1) > 0,IF(($sBaseQuery $sWhereCountry LIMIT 1) > 0,1,0),1)";
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('COUNT(*)')
+            ->from('fcpopayment2country')
+            ->where('fcpo_paymentid = :sPaymentId')
+            ->andWhere('fcpo_type = :sType')
+            ->setParameters([
+                'sPaymentId' => $sSubPaymentId,
+                'sType' => $sType,
+            ])
+            ->getMaxResults(1);
+        $iBaseCount = $oQuery->execute()->fetchOne();
 
-        return $this->_oFcPoDb->getOne($sQuery);
+        if ($iBaseCount <= 0) {
+            return 1;
+        }
+
+        $oExpressionBuilder = $this->_oFcPoDb->getExpressionBuilder();
+        if ($sUserDelCountryId !== '' && $sUserBillCountryId != $sUserDelCountryId) {
+            $oQuery
+                ->andWhere(
+                    $oExpressionBuilder->or(
+                        $oExpressionBuilder->eq('fcpo_countryid', ':sCountryIdBill'),
+                        $oExpressionBuilder->eq('fcpo_countryid', ':sCountryIdDel'),
+                    )
+                )
+                ->setParameters([
+                    'sCountryIdBill' => $sUserBillCountryId,
+                    'sCountryIdDel' => $sUserDelCountryId
+                ]);
+        } else {
+            $oQuery
+                ->andWhere('fcpo_countryid = :sCountryIdBill')
+                ->setParameter('sCountryIdBill', $sUserBillCountryId);
+        }
+
+        return $oQuery->execute()->fetchOne() > 0 ? 1 : 0;
     }
 
     /**
@@ -475,7 +531,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
         $aPaymentTypes = [];
 
         $sQuery = "SELECT oxid, oxdesc FROM oxpayments WHERE fcpoispayone = 1";
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery);
         foreach ($aRows as $aRow) {
             $sOxid = (isset($aRow['oxid'])) ? $aRow['oxid'] : $aRow[0];
             $sDesc = (isset($aRow['oxdesc'])) ? $aRow['oxdesc'] : $aRow[1];
@@ -499,7 +555,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     {
         $sPayments = '';
         $sQuery = 'SELECT oxid FROM oxpayments WHERE fcpoispayone = 1 AND oxfromboni <= 100';
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery);
         foreach ($aRows as $aRow) {
             $sPayment = (isset($aRow[0])) ? $aRow[0] : $aRow['oxid'];
             $sPayments .= $sPayment . ',';
@@ -517,7 +573,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     {
         $sPayments = '';
         $sQuery = 'SELECT oxid FROM oxpayments WHERE fcpoispayone = 1 AND oxfromboni > 100 AND oxfromboni <= 300';
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery);
         foreach ($aRows as $aRow) {
             $sPayment = (isset($aRow[0])) ? $aRow[0] : $aRow['oxid'];
             $sPayments .= $sPayment . ',';
@@ -548,8 +604,10 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
     {
         $aCountries = [];
 
-        $sQuery = "SELECT fcpo_countryid FROM fcpopayment2country WHERE fcpo_paymentid = 'KLR_$sCampaignId'";
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $sQuery = "SELECT fcpo_countryid FROM fcpopayment2country WHERE fcpo_paymentid = :sPaymentId";
+        $aRows = $this->_oFcPoDb->fetchAllNumeric($sQuery, [
+            'sPaymentId' => 'KLR_' . $sCampaignId
+        ]);
         foreach ($aRows as $aRow) {
             $aCountries[] = $aRow[0];
         }

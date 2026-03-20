@@ -22,7 +22,6 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
 use OxidEsales\Eshop\Application\Model\Order;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Language;
 
@@ -170,63 +169,118 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                 FCPO_CLEARING_REFERENCE,
                 FCPO_CLEARING_INSTRUCTIONNOTE
             ) VALUES (
-                '$sOxid',
-                '$iOrderNr',
-                '" . $this->fcGetPostParam('key') . "',
-                '" . $this->fcGetPostParam('txaction') . "',
-                '" . $this->fcGetPostParam('portalid') . "',
-                '" . $this->fcGetPostParam('aid') . "',
-                '" . $this->fcGetPostParam('clearingtype') . "',
-                FROM_UNIXTIME('" . $this->fcGetPostParam('txtime') . "'),
-                '" . $this->fcGetPostParam('currency') . "',
-                '" . $this->fcGetPostParam('userid') . "',
-                '" . $this->fcGetPostParam('accessname') . "',
-                '" . $this->fcGetPostParam('accesscode') . "',
-                '" . $this->fcGetPostParam('param') . "', 
-                '" . $this->fcGetPostParam('mode') . "',  
-                '" . $this->fcGetPostParam('price') . "', 
-                '" . $this->fcGetPostParam('txid') . "',  
-                '" . $this->fcGetPostParam('reference') . "', 
-                '" . $this->fcGetPostParam('sequencenumber') . "',
-                '" . $this->fcGetPostParam('company') . "',   
-                '" . $this->fcGetPostParam('firstname') . "', 
-                '" . $this->fcGetPostParam('lastname') . "',  
-                '" . $this->fcGetPostParam('street') . "',    
-                '" . $this->fcGetPostParam('zip') . "',   
-                '" . $this->fcGetPostParam('city') . "',  
-                '" . $this->fcGetPostParam('email') . "', 
-                '" . $this->fcGetPostParam('country') . "',   
-                '" . $this->fcGetPostParam('shipping_company') . "',  
-                '" . $this->fcGetPostParam('shipping_firstname') . "',    
-                '" . $this->fcGetPostParam('shipping_lastname') . "', 
-                '" . $this->fcGetPostParam('shipping_street') . "',   
-                '" . $this->fcGetPostParam('shipping_zip') . "',  
-                '" . $this->fcGetPostParam('shipping_city') . "', 
-                '" . $this->fcGetPostParam('shipping_country') . "',  
-                '" . $this->fcGetPostParam('bankcountry') . "',   
-                '" . $this->fcGetPostParam('bankaccount') . "',   
-                '" . $this->fcGetPostParam('bankcode') . "',  
-                '" . $this->fcGetPostParam('bankaccountholder') . "', 
-                '" . $this->fcGetPostParam('cardexpiredate') . "',    
-                '" . $this->fcGetPostParam('cardtype') . "',  
-                '" . $this->fcGetPostParam('cardpan') . "',   
-                '" . $this->fcGetPostParam('customerid') . "',    
-                '" . $this->fcGetPostParam('balance') . "',   
-                '" . $this->fcGetPostParam('receivable') . "',
-                '" . $this->fcGetPostParam('clearing_bankaccountholder') . "',
-                '" . $this->fcGetPostParam('clearing_bankaccount') . "',  
-                '" . $this->fcGetPostParam('clearing_bankcode') . "', 
-                '" . $this->fcGetPostParam('clearing_bankname') . "', 
-                '" . $this->fcGetPostParam('clearing_bankbic') . "',  
-                '" . $this->fcGetPostParam('clearing_bankiban') . "', 
-                '" . $this->fcGetPostParam('clearing_legalnote') . "',
-                '" . $this->fcGetPostParam('clearing_duedate') . "',  
-                '" . $this->fcGetPostParam('clearing_reference') . "',
-                '" . $this->fcGetPostParam('clearing_instructionnote') . "'
+                :sOxid,
+                :iOrderNr,
+                :key,
+                :txaction,
+                :portalid,
+                :aid,
+                :clearingtype,
+                FROM_UNIXTIME(:txtime),
+                :currency,
+                :userid,
+                :accessname,
+                :accesscode,
+                :param, 
+                :mode,  
+                :price, 
+                :txid,  
+                :reference, 
+                :sequencenumber,
+                :company,   
+                :firstname, 
+                :lastname,  
+                :street,    
+                :zip,   
+                :city,  
+                :email, 
+                :country,   
+                :shipping_company,  
+                :shipping_firstname,    
+                :shipping_lastname, 
+                :shipping_street,   
+                :shipping_zip,  
+                :shipping_city, 
+                :shipping_country,  
+                :bankcountry,   
+                :bankaccount,   
+                :bankcode,  
+                :bankaccountholder, 
+                :cardexpiredate,    
+                :cardtype,  
+                :cardpan,   
+                :customerid,    
+                :balance,   
+                :receivable,
+                :clearing_bankaccountholder,
+                :clearing_bankaccount,  
+                :clearing_bankcode, 
+                :clearing_bankname, 
+                :clearing_bankbic,  
+                :clearing_bankiban, 
+                :clearing_legalnote,
+                :clearing_duedate,  
+                :clearing_reference,
+                :clearing_instructionnote
             )";
+        $aParams = [
+            'sOxid' => $sOxid,
+            'iOrderNr' => $iOrderNr,
+            'key' => $this->fcGetPostParam('key'),
+            'txaction' => $this->fcGetPostParam('txaction'),
+            'portalid' => $this->fcGetPostParam('portalid'),
+            'aid' => $this->fcGetPostParam('aid'),
+            'clearingtype' => $this->fcGetPostParam('clearingtype'),
+            'txtime' => $this->fcGetPostParam('txtime'),
+            'currency' => $this->fcGetPostParam('currency'),
+            'userid' => $this->fcGetPostParam('userid'),
+            'accessname' => $this->fcGetPostParam('accessname'),
+            'accesscode' => $this->fcGetPostParam('accesscode'),
+            'param' => $this->fcGetPostParam('param'),
+            'mode' => $this->fcGetPostParam('mode'),
+            'price' => $this->fcGetPostParam('price'),
+            'txid' => $this->fcGetPostParam('txid'),
+            'reference' => $this->fcGetPostParam('reference'),
+            'sequencenumber' => $this->fcGetPostParam('sequencenumber'),
+            'company' => $this->fcGetPostParam('company'),
+            'firstname' => $this->fcGetPostParam('firstname'),
+            'lastname' => $this->fcGetPostParam('lastname'),
+            'street' => $this->fcGetPostParam('street'),
+            'zip' => $this->fcGetPostParam('zip'),
+            'city' => $this->fcGetPostParam('city'),
+            'email' => $this->fcGetPostParam('email'),
+            'country' => $this->fcGetPostParam('country'),
+            'shipping_company' => $this->fcGetPostParam('shipping_company'),
+            'shipping_firstname' => $this->fcGetPostParam('shipping_firstname'),
+            'shipping_lastname' => $this->fcGetPostParam('shipping_lastname'),
+            'shipping_street' => $this->fcGetPostParam('shipping_street'),
+            'shipping_zip' => $this->fcGetPostParam('shipping_zip'),
+            'shipping_city' => $this->fcGetPostParam('shipping_city'),
+            'shipping_country' => $this->fcGetPostParam('shipping_country'),
+            'bankcountry' => $this->fcGetPostParam('bankcountry'),
+            'bankaccount' => $this->fcGetPostParam('bankaccount'),
+            'bankcode' => $this->fcGetPostParam('bankcode'),
+            'bankaccountholder' => $this->fcGetPostParam('bankaccountholder'),
+            'cardexpiredate' => $this->fcGetPostParam('cardexpiredate'),
+            'cardtype' => $this->fcGetPostParam('cardtype'),
+            'cardpan' => $this->fcGetPostParam('cardpan'),
+            'customerid' => $this->fcGetPostParam('customerid'),
+            'balance' => $this->fcGetPostParam('balance'),
+            'receivable' => $this->fcGetPostParam('receivable'),
+            'clearing_bankaccountholder' => $this->fcGetPostParam('clearing_bankaccountholder'),
+            'clearing_bankaccount' => $this->fcGetPostParam('clearing_bankaccount'),
+            'clearing_bankcode' => $this->fcGetPostParam('clearing_bankcode'),
+            'clearing_bankname' => $this->fcGetPostParam('clearing_bankname'),
+            'clearing_bankbic' => $this->fcGetPostParam('clearing_bankbic'),
+            'clearing_bankiban' => $this->fcGetPostParam('clearing_bankiban'),
+            'clearing_legalnote' => $this->fcGetPostParam('clearing_legalnote'),
+            'clearing_duedate' => $this->fcGetPostParam('clearing_duedate'),
+            'clearing_reference' => $this->fcGetPostParam('clearing_reference'),
+            'clearing_instructionnote' => $this->fcGetPostParam('clearing_instructionnote')
+        ];
 
         try {
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, $aParams);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -240,20 +294,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      */
     protected function _getOrderNr(): int
     {
-        $oDb = DatabaseProvider::getDb();
-        $sTxid = $this->fcGetPostParam('txid');
-
         $sQuery = "
             SELECT 
                 oxordernr 
             FROM 
                 oxorder 
             WHERE 
-                fcpotxid = " . $oDb->quote($sTxid) . "
+                fcpotxid = :sTxid
             LIMIT 1
         ";
 
-        return (int)$oDb->getOne($sQuery);
+        return (int)$this->_oFcPoDb->fetchOne($sQuery, [
+            'sTxid' => $this->fcGetPostParam('txid')
+        ]);
     }
 
     /**
@@ -268,11 +321,15 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         $sTxid = $this->fcGetPostParam('txid');
 
         $blReturn = false;
-        $sAuthMode = DatabaseProvider::getDb()->getOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = '$sTxid'");
+        $sAuthMode = $this->_oFcPoDb->fetchOne("SELECT fcpoauthmode FROM oxorder WHERE fcpotxid = :sTxid", [
+            'sTxid' => $sTxid
+        ]);
         if ($sAuthMode == 'authorization') {
             $blReturn = true;
         } else {
-            $iCount = DatabaseProvider::getDb()->getOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = '$sTxid' AND fcpo_txaction = 'capture'");
+            $iCount = $this->_oFcPoDb->fetchOne("SELECT COUNT(*) FROM fcpotransactionstatus WHERE fcpo_txid = :sTxid AND fcpo_txaction = 'capture'", [
+                'sTxid' => $sTxid
+            ]);
             if ($iCount > 0) {
                 $blReturn = true;
             }
@@ -283,10 +340,11 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         }
 
         $oOrder = $this->_getOrder();
-        $sOrderId = $oOrder->getId();
-        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = '$sOrderId'";
+        $sQuery = "UPDATE oxorder SET oxpaid = NOW() WHERE oxid = :sOxid";
         try {
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sOxid' => $oOrder->getId()
+            ]);
 
         } catch (Exception $oEx) {
             throw $oEx;
@@ -307,9 +365,10 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                 $sTxid = $this->fcGetPostParam('txid');
             }
 
-            $oDb = DatabaseProvider::getDb();
-            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = '$sTxid'";
-            $sOrderId = $oDb->getOne($sQuery);
+            $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = :sTxid";
+            $sOrderId = $this->_oFcPoDb->fetchOne($sQuery, [
+                'sTxid' => $sTxid
+            ]);
 
             $oOrder = oxNew(Order::class);
             $oOrder->load($sOrderId);
@@ -346,14 +405,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '$sReplacement', '')
+                            oxremark = REPLACE(oxremark, :sReplacement, '')
                         WHERE 
-                            oxid = '$sOrderId' AND 
-                            oxtransstatus IN ('ERROR') AND 
+                            oxid = :sOxid
+                        AND 
+                            oxtransstatus IN ('ERROR')
+                        AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sReplacement' => $sReplacement,
+                'sOxid' => $sOrderId
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -384,14 +448,19 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
                         SET 
                             oxfolder = 'ORDERFOLDER_NEW', 
                             oxtransstatus = 'OK',
-                            oxremark = REPLACE(oxremark, '$sReplacement', '')
+                            oxremark = REPLACE(oxremark, :sReplacement, '')
                         WHERE 
-                            oxid = '$sOrderId' AND 
-                            oxtransstatus IN ('INCOMPLETE', 'ERROR') AND 
+                            oxid = :sOxid
+                        AND 
+                            oxtransstatus IN ('INCOMPLETE', 'ERROR')
+                        AND 
                             oxfolder = 'ORDERFOLDER_PROBLEMS'
             ";
 
-            DatabaseProvider::getDb()->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sReplacement' => $sReplacement,
+                'sOxid' => $sOrderId
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }
@@ -413,20 +482,22 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
             return;
         }
 
-        $oDb = DatabaseProvider::getDb();
         $oOrder = $this->_getOrder($sTxid);
-        $sPaymentId = $oDb->quote($oOrder->oxorder__oxpaymenttype->value);
 
         $sQuery = "
             SELECT fcpo_folder 
             FROM fcpostatusmapping 
             WHERE 
-                  fcpo_payonestatus = '$sPayoneStatus' AND 
-                  fcpo_paymentid = $sPaymentId 
+                  fcpo_payonestatus = :sPayoneStatus 
+            AND 
+                  fcpo_paymentid = :sPaymentId 
             ORDER BY oxid ASC 
             LIMIT 1
         ";
-        $sFolder = $oDb->getOne($sQuery);
+        $sFolder = $this->_oFcPoDb->fetchOne($sQuery, [
+            'sPayoneStatus' => $sPayoneStatus,
+            'sPaymentId' => $oOrder->oxorder__oxpaymenttype->value
+        ]);
         if (empty($sFolder)) {
             return;
         }
@@ -434,10 +505,13 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
         try {
             $sQuery = "
                 UPDATE oxorder 
-                SET oxfolder = '$sFolder' 
-                WHERE oxid = '" . $oOrder->getId() . "'
+                SET oxfolder = :sFolder 
+                WHERE oxid = :sOxid
             ";
-            $oDb->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sFolder' => $sFolder,
+                'sOxid' => $oOrder->getId()
+            ]);
         } catch (Exception $oEx) {
             throw $oEx;
         }
