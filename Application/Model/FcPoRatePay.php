@@ -190,7 +190,7 @@ class FcPoRatePay extends BaseModel
                 `tx_limit_invoice_min` = :sTxLimitInvoiceMin,
                 `tx_limit_prepayment_max` = :sTxLimitPrepaymentMax,
                 `txLimitPrepaymentMin` = :sTxLimitPrepaymentMin,
-                `valid_payment_firstdays` = :sValidPaymentFirstdays,
+                `valid_payment_firstdays` = :sValidPaymentFirstdays
             WHERE 
                 OXID = :sOxid
         ";

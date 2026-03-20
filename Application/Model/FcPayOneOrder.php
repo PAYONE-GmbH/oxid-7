@@ -1200,18 +1200,21 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
         if ($blFetchCaptureResponse) {
             $oQuery
                 ->where('fcpo_request LIKE :sRequest')
-                ->andWhere($oExpressionBuilder->eq('fcpo_requesttype', 'capture'))
-                ->setParameter('sRequest', '%' . $this->oxorder__fcpotxid->value . '%');
+                ->andWhere($oExpressionBuilder->eq('fcpo_requesttype', ':sCapture'))
+                ->setParameter('sRequest', '%' . $this->oxorder__fcpotxid->value . '%')
+                ->setParameter('sCapture', 'capture');
         } else {
             $oQuery
                 ->where('fcpo_refnr = :sRefNr')
                 ->andWhere(
                     $oExpressionBuilder->or(
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'preauthorization'),
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'authorization')
+                        $oExpressionBuilder->eq('fcpo_requesttype', ':sPreauthorization'),
+                        $oExpressionBuilder->eq('fcpo_requesttype', ':sAuthorization')
                     )
                 )
-                ->setParameter('sRefNr', $this->oxorder__fcporefnr->value);
+                ->setParameter('sRefNr', $this->oxorder__fcporefnr->value)
+                ->setParameter('sPreauthorization', 'preauthorization')
+                ->setParameter('sAuthorization', 'authorization');
         }
 
         return $oQuery;
@@ -1469,8 +1472,8 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
                 ->where('fcpo_refnr = :sRefNr')
                 ->andWhere(
                     $oExpressionBuilder->or(
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'preauthorization'),
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'authorization')
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'sPreauthorization'),
+                        $oExpressionBuilder->eq('fcpo_requesttype', 'sAuthorization')
                     )
                 )
                 ->andWhere(
@@ -1480,6 +1483,8 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
                 ->setParameters([
                     'sRefNr' => $this->oxorder__fcporefnr->value,
                     'aStatuses' => $aAcceptedStatus,
+                    'sPreauthorization' => 'preauthorization',
+                    'sAuthorization' => 'authorization',
                 ]);
 
             $sOxidRequest = $oQuery->execute()->fetchOne();
