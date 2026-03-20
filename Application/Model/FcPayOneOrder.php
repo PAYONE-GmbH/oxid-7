@@ -1472,8 +1472,8 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
                 ->where('fcpo_refnr = :sRefNr')
                 ->andWhere(
                     $oExpressionBuilder->or(
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'sPreauthorization'),
-                        $oExpressionBuilder->eq('fcpo_requesttype', 'sAuthorization')
+                        $oExpressionBuilder->eq('fcpo_requesttype', ':sPreauthorization'),
+                        $oExpressionBuilder->eq('fcpo_requesttype', ':sAuthorization')
                     )
                 )
                 ->andWhere(
