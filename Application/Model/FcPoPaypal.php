@@ -266,7 +266,7 @@ class FcPoPaypal extends BaseModel
 
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 1 WHERE oxid = :sOxid";
             $this->_oFcPoDb->executeStatement($sQuery, [
-                'oxid' => $iDefault,
+                'sOxid' => $iDefault,
             ]);
         }
     }

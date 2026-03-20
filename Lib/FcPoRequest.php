@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Lib;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Helper\PayPal;
 use Fatchip\PayOne\Application\Helper\Redirect;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
@@ -48,6 +49,13 @@ class FcPoRequest extends Base
      * @var FcPoHelper
      */
     protected FcPoHelper $_oFcPoHelper;
+
+    /**
+     * Centralized Database instance
+     *
+     * @var Connection
+     */
+    protected Connection $_oFcPoDb;
 
     /**
      * Array or request parameters
@@ -193,6 +201,7 @@ class FcPoRequest extends Base
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
 
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $this->addParameter('mid', $oConfig->getConfigParam('sFCPOMerchantID')); //PayOne Merchant ID
@@ -436,7 +445,7 @@ class FcPoRequest extends Base
     {
         $sQuery = "SELECT OXISOALPHA2 FROM oxstates WHERE oxid = :sOxid LIMIT 1";
 
-        return $this->_oFcPoHelper->fcpoGetPdoDb()->fetchOne($sQuery, [
+        return $this->_oFcPoDb->fetchOne($sQuery, [
             'sOxid' => $sStateId
         ]);
     }
@@ -1585,7 +1594,7 @@ class FcPoRequest extends Base
         }
 
         $sQuery = "SELECT IF(SUM(fcpocapturedamount) = 0, 1, 0) AS b FROM oxorderarticles WHERE oxorderid = :sOrderId GROUP BY oxorderid";
-        $blFirstCapture = (bool)$this->_oFcPoHelper->fcpoGetPdoDb()->fetchOne($sQuery, [
+        $blFirstCapture = (bool)$this->_oFcPoDb->fetchOne($sQuery, [
             'sOrderId' => $oOrder->getId()
         ]);
 
@@ -1809,8 +1818,8 @@ class FcPoRequest extends Base
     {
         $aResponse = [];
 
-        $sPostUrl = $aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path'];
-        $sPostData = $aUrlArray['query'];
+        $sPostUrl = escapeshellarg($aUrlArray['scheme'] . "://" . $aUrlArray['host'] . $aUrlArray['path']);
+        $sPostData = escapeshellarg($aUrlArray['query']);
 
         $sCommand = $sCurlPath . " -m 45 -k -d \"" . $sPostData . "\" " . $sPostUrl;
         $iSysOut = -1;
@@ -1950,7 +1959,7 @@ class FcPoRequest extends Base
             'sPortalId' => $oConfig->getConfigParam('sFCPOPortalID'),
             'sAid' => $oConfig->getConfigParam('sFCPOSubAccountID')
         ];
-        $this->_oFcPoHelper->fcpoGetPdoDb()->executeStatement($sQuery, $aParams);
+        $this->_oFcPoDb->executeStatement($sQuery, $aParams);
     }
 
     /**
@@ -2270,19 +2279,17 @@ class FcPoRequest extends Base
                 $sRawPrefix . $sSessionRefNr : $sSessionRefNr;
         }
 
-        $oDb = $this->_oFcPoHelper->fcpoGetPdoDb();
-
         if ($oOrder && !empty($oOrder->oxorder__oxordernr->value)) {
             $sRefNr = $oOrder->oxorder__oxordernr->value;
         } else {
             $sQuery = "SELECT MAX(fcpo_refnr) FROM fcporefnr WHERE fcpo_refprefix = :sPrefix";
-            $iMaxRefNr = $oDb->fetchOne($sQuery, [
+            $iMaxRefNr = $this->_oFcPoDb->fetchOne($sQuery, [
                 'sPrefix' => $sRawPrefix
             ]);
             $sRefNr = (int)$iMaxRefNr + 1;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES (:sRefNr, '', :sPrefix)";
 
-            $oDb->executeStatement($sQuery, [
+            $this->_oFcPoDb->executeStatement($sQuery, [
                 'sRefNr' => $sRefNr,
                 'sPrefix' => $sRawPrefix
             ]);
@@ -2537,7 +2544,7 @@ class FcPoRequest extends Base
         if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 $sQuery = "UPDATE oxorderarticles SET fcpocapturedamount = fcpocapturedamount + :iAmount WHERE oxid = :sOxid";
-                $this->_oFcPoHelper->fcpoGetPdoDb()->executeStatement($sQuery, [
+                $this->_oFcPoDb->executeStatement($sQuery, [
                     'iAmount' => $aPos['amount'],
                     'sOxid' => $sOrderArtId,
                 ]);
@@ -2703,7 +2710,7 @@ class FcPoRequest extends Base
                         $aParams['iAmount'] = $aPos['amount'];
                         break;
                 }
-                $this->_oFcPoHelper->fcpoGetPdoDb()->executeStatement($sQuery, $aParams);
+                $this->_oFcPoDb->executeStatement($sQuery, $aParams);
             }
         }
 
@@ -2856,7 +2863,7 @@ class FcPoRequest extends Base
     {
         $sCheckHash = $this->_getAddressHash();
         $sQuery = "SELECT oxtimestamp FROM fcpocheckedaddresses WHERE fcpo_address_hash = :sAddressHash";
-        $sDate = $this->_oFcPoHelper->fcpoGetPdoDb()->fetchOne($sQuery, [
+        $sDate = $this->_oFcPoDb->fetchOne($sQuery, [
             'sAddressHash' => $sCheckHash
         ]);
         if ($sDate) {
@@ -2967,7 +2974,7 @@ class FcPoRequest extends Base
     {
         $sCheckHash = $this->_getAddressHash($aResponse);
         $sQuery = "REPLACE INTO fcpocheckedaddresses ( fcpo_address_hash ) VALUES ( :sCheckHash )";
-        $this->_oFcPoHelper->fcpoGetPdoDb()->executeStatement($sQuery, [
+        $this->_oFcPoDb->executeStatement($sQuery, [
             'sCheckHash' => $sCheckHash
         ]);
     }
@@ -3010,7 +3017,7 @@ class FcPoRequest extends Base
 
                 // setting it somehow is not saved, so save it this way
                 $sQuery = "UPDATE oxuser SET oxboni = :iNewBoni'$iNewBoni' WHERE oxid = :sOxid";
-                $this->_oFcPoHelper->fcpoGetPdoDb()->executeStatement($sQuery, [
+                $this->_oFcPoDb->executeStatement($sQuery, [
                     'iNewBoni' => $iNewBoni,
                     'sOxid' => $oUser->getId(),
                 ]);
@@ -3164,7 +3171,7 @@ class FcPoRequest extends Base
                     ORDER BY 
                         oxtimestamp DESC 
                     LIMIT 1";
-        return $this->_oFcPoHelper->fcpoGetPdoDb()->fetchOne($sQuery, [
+        return $this->_oFcPoDb->fetchOne($sQuery, [
             'sCustId' => $sCustNr
         ]);
     }
@@ -3201,7 +3208,6 @@ class FcPoRequest extends Base
         $sReturn = false;
         $sStatus = 'ERROR';
         $sResponse = '';
-        $oDb = $this->_oFcPoHelper->fcpoGetPdoDb();
 
         $this->addParameter('request', 'getfile'); //Request method
         $this->addParameter('file_reference', $sMandateIdentification);
@@ -3226,12 +3232,12 @@ class FcPoRequest extends Base
             file_put_contents($sDestinationFile, $oContent);
 
             if (file_exists($sDestinationFile)) {
-                $sExists = $oDb->fetchOne("SELECT oxorderid FROM fcpopdfmandates WHERE oxorderid = :sOrderId LIMIT 1", [
+                $sExists = $this->_oFcPoDb->fetchOne("SELECT oxorderid FROM fcpopdfmandates WHERE oxorderid = :sOrderId LIMIT 1", [
                     'sOrderId' => $sOrderId
                 ]);
                 if (!$sExists) {
                     $sQuery = "INSERT INTO fcpopdfmandates (OXORDERID, FCPO_FILENAME) VALUES (:sOrderId, :sDestinationFile)";
-                    $oDb->executeStatement($sQuery, [
+                    $this->_oFcPoDb->executeStatement($sQuery, [
                         'sOrderId' => $sOrderId,
                         'sDestinationFile' => basename($sDestinationFile),
                     ]);

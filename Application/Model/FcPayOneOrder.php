@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;

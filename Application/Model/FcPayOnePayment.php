@@ -430,11 +430,11 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
             ->from('fcpopayment2country')
             ->where('fcpo_paymentid = :sPaymentId')
             ->andWhere('fcpo_type = :sType')
-            ->getMaxResults(1)
             ->setParameters([
                 'sPaymentId' => $sSubPaymentId,
                 'sType' => $sType,
-            ]);
+            ])
+            ->getMaxResults(1);
         $iBaseCount = $oQuery->execute()->fetchOne();
 
         if ($iBaseCount <= 0) {

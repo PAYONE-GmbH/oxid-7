@@ -41,6 +41,7 @@ use OxidEsales\Eshop\Core\UtilsServer;
 use OxidEsales\Eshop\Core\UtilsView;
 use OxidEsales\Eshop\Core\ViewConfig;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 class FcPoHelper extends BaseModel
 {
@@ -618,7 +619,8 @@ class FcPoHelper extends BaseModel
     public function fcpoGetPdoDb()
     {
         $oContainer = ContainerFactory::getInstance()->getContainer();
+        $oFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
 
-        return $oContainer->get('fcpayone.db_connection');
+        return  $oFactory->create()->getConnection();
     }
 }
