@@ -127,7 +127,7 @@ class FcPoUserFlag extends BaseModel
         $sQuery = "SELECT OXID FROM "
             . $this->_sCoreTbl
             . " WHERE FCPOCODE = :sCode";
-        
+
         $sOxid = (string) $this->_oFcPoDb->fetchOne($sQuery, [
             'sCode' => $sErrorCode
         ]);
@@ -143,7 +143,7 @@ class FcPoUserFlag extends BaseModel
      */
     public function load($sOXID): mixed
     {
-        $mReturn = null;
+        $mReturn = parent::load($sOXID);
         if ($mReturn !== false) {
             $this->_fcpoSetEffects();
         }
