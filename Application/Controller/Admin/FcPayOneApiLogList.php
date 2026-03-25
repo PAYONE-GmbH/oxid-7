@@ -132,7 +132,7 @@ class FcPayOneApiLogList extends FcPayOneAdminList
         $sQ = parent::prepareWhereQuery($aWhere, $sQ);
         $sPortalId = $this->getPortalId();
         $sAid = $this->getSubAccountId();
-        return $sQ . " AND fcporequestlog.fcpo_portalid = '$sPortalId' AND fcporequestlog.fcpo_aid = '$sAid' ";
+        return $sQ . " AND fcporequestlog.fcpo_portalid = " . $this->_oFcPoDb->quote($sPortalId) . " AND fcporequestlog.fcpo_aid = " . $this->_oFcPoDb->quote($sAid);
     }
 
     /**

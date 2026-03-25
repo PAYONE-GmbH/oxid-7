@@ -20,9 +20,9 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -41,21 +41,20 @@ class FcPoMapping extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
 
     /**
      * Init needed data
-     * @throws DatabaseConnectionException
      */
     public function __construct()
     {
         parent::__construct();
 
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -68,10 +67,14 @@ class FcPoMapping extends BaseModel
     public function fcpoGetExistingMappings(): array
     {
         $aMappings = [];
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
 
-        $sQuery = "SELECT oxid, fcpo_paymentid, fcpo_payonestatus, fcpo_folder FROM fcpostatusmapping ORDER BY oxid ASC";
-        $aRows = $oDb->getAll($sQuery);
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('oxid', 'fcpo_paymentid', 'fcpo_payonestatus', 'fcpo_folder')
+            ->from('fcpostatusmapping')
+            ->orderBy('oxid', 'ASC');
+
+        $aRows = $oQuery->execute()->fetchAllAssociative();
         foreach ($aRows as $aRow) {
             // collect data
             $sOxid = $aRow['oxid'];
@@ -100,11 +103,10 @@ class FcPoMapping extends BaseModel
      */
     public function fcpoUpdateMappings(array $aMappings): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         // iterate through mappings
         foreach ($aMappings as $sMappingId => $aData) {
-            $sQuery = $this->_fcpoGetQuery($sMappingId, $aData);
-            $oDb->execute($sQuery);
+            $oQuery = $this->_fcpoGetQuery($sMappingId, $aData);
+            $oQuery->execute();
         }
     }
 
@@ -113,21 +115,22 @@ class FcPoMapping extends BaseModel
      *
      * @param string $sMappingId
      * @param array $aData
-     * @return string
+     * @return QueryBuilder
      * @throws DatabaseConnectionException
      */
-    protected function _fcpoGetQuery(string $sMappingId, array $aData): string
+    protected function _fcpoGetQuery(string $sMappingId, array $aData): QueryBuilder
     {
-        // quote values from outer space
         if (array_key_exists('delete', $aData)) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
-            $sOxid = $oDb->quote($sMappingId);
-            $sQuery = "DELETE FROM fcpostatusmapping WHERE oxid = $sOxid";
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->delete('fcpostatusmapping')
+                ->where('oxid = :sOxid')
+                ->setParameter('sOxid', $sMappingId);
         } else {
-            $sQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData);
+            $oQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData);
         }
 
-        return $sQuery;
+        return $oQuery;
     }
 
     /**
@@ -135,34 +138,48 @@ class FcPoMapping extends BaseModel
      *
      * @param string $sMappingId
      * @param array $aData
-     * @return string
+     * @return QueryBuilder
      */
-    protected function _fcpoGetUpdateQuery(string $sMappingId, array $aData): string
+    protected function _fcpoGetUpdateQuery(string $sMappingId, array $aData): QueryBuilder
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sMappingId, $aData['sPaymentType'], $aData['sPayoneStatus'], $aData['sShopStatus']);
 
-        $sOxid = $this->_oFcPoDb->quote($sMappingId);
-        $sPaymentId = $this->_oFcPoDb->quote($aData['sPaymentType']);
-        $sPayoneStatus = $this->_oFcPoDb->quote($aData['sPayoneStatus']);
-        $sFolder = $this->_oFcPoDb->quote($aData['sShopStatus']);
-
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
         if ($blValidNewEntry) {
-            $sQuery = " INSERT INTO fcpostatusmapping (
-                            fcpo_paymentid,     fcpo_payonestatus,  fcpo_folder
-                        ) VALUES (
-                            $sPaymentId, $sPayoneStatus, $sFolder
-                        )";
+            $oQuery
+                ->insert('fcpostatusmapping')
+                ->values(
+                    [
+                        'fcpo_paymentid' => ':sPaymentId',
+                        'fcpo_payonestatus' => ':sPayoneStatus',
+                        'fcpo_folder' => ':sFolder',
+                    ]
+                )
+                ->setParameters(
+                    [
+                        'sPaymentId' => $aData['sPaymentType'],
+                        'sPayoneStatus' => $aData['sPayoneStatus'],
+                        'sFolder' => $aData['sShopStatus'],
+                    ]
+                );
         } else {
-            $sQuery = " UPDATE fcpostatusmapping
-                        SET
-                            fcpo_paymentid = $sPaymentId,
-                            fcpo_payonestatus = $sPayoneStatus,
-                            fcpo_folder = $sFolder
-                        WHERE
-                            oxid = $sOxid";
+            $oQuery
+                ->update('fcpostatusmapping')
+                ->set('fcpo_paymentid', ':sPaymentId')
+                ->set('fcpo_payonestatus', ':sPayoneStatus')
+                ->set('fcpo_folder', ':sFolder')
+                ->where('oxid = :sOxid')
+                ->setParameters(
+                    [
+                        'sPaymentId' => $aData['sPaymentType'],
+                        'sPayoneStatus' => $aData['sPayoneStatus'],
+                        'sFolder' => $aData['sShopStatus'],
+                        'sOxid' => $sMappingId
+                    ]
+                );
         }
 
-        return $sQuery;
+        return $oQuery;
     }
 
     /**

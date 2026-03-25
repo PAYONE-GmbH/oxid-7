@@ -20,13 +20,13 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Exception\StandardException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
 class FcPoPaypal extends BaseModel
 {
@@ -48,9 +48,9 @@ class FcPoPaypal extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Path of payone images
@@ -69,7 +69,7 @@ class FcPoPaypal extends BaseModel
         parent::__construct();
 
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -92,8 +92,7 @@ class FcPoPaypal extends BaseModel
     public function fcpoGetPayPalLogos(): array
     {
         $sQuery = "SELECT oxid, fcpo_active, fcpo_langid, fcpo_logo, fcpo_default FROM fcpopayoneexpresslogos";
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
-        $aRows = $oDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllNumeric($sQuery);
         $aLogos = [];
 
         foreach ($aRows as $aRow) {
@@ -158,19 +157,28 @@ class FcPoPaypal extends BaseModel
     public function fcpoUpdatePayPalLogos(array $aLogos): void
     {
         foreach ($aLogos as $iId => $aLogo) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->update('fcpopayoneexpresslogos')
+                ->set('FCPO_ACTIVE', ':blActive')
+                ->set('FCPO_LANGID', ':sLangId')
+                ->where('oxid = :oxid')
+                ->setParameters(
+                    [
+                        'blActive' => $aLogo['active'],
+                        'sLangId' => $aLogo['langid'],
+                        'oxid' => $iId,
+                    ]
+                );
+
             $sLogoQuery = $this->_handleUploadPaypalExpressLogo($iId);
+            if (!empty($sLogoQuery)) {
+                $oQuery
+                    ->set('FCPO_LOGO', ':sLogo')
+                    ->setParameter("sLogo", $sLogoQuery);
+            }
 
-            $sQuery = " UPDATE
-                                fcpopayoneexpresslogos
-                            SET
-                                FCPO_ACTIVE = " . DatabaseProvider::getDb()->quote($aLogo['active']) . ",
-                                FCPO_LANGID = " . DatabaseProvider::getDb()->quote($aLogo['langid']) . "
-                                $sLogoQuery
-                            WHERE
-                                oxid = " . DatabaseProvider::getDb()->quote($iId);
-
-            $oDb->execute($sQuery);
+            $oQuery->execute();
             $this->_fcpoTriggerUpdateLogos();
         }
     }
@@ -183,16 +191,14 @@ class FcPoPaypal extends BaseModel
      */
     protected function _handleUploadPaypalExpressLogo(int $iId): string
     {
-        $sLogoQuery = '';
         $aFiles = $this->_oFcPoHelper->fcpoGetFiles();
 
         $blFileValid = $this->_fcpoValidateFile($iId, $aFiles);
         if ($blFileValid) {
-            // $sFilename = $aFiles['logo_' . $iId]['name'];
-            $sLogoQuery = $this->_fcpoHandleFile($iId, $aFiles);
+            return $this->_fcpoHandleFile($iId, $aFiles);
         }
 
-        return $sLogoQuery;
+        return '';
     }
 
     /**
@@ -219,16 +225,14 @@ class FcPoPaypal extends BaseModel
      */
     protected function _fcpoHandleFile(int $iId, array $aFiles): string
     {
-        $sLogoQuery = '';
-
         $sMediaUrl = $this->_fcpoFetchMediaUrl($iId, $aFiles);
 
         if ($sMediaUrl) {
-            $sLogoQuery = ", FCPO_LOGO = " . DatabaseProvider::getDb()->quote(basename((string)$sMediaUrl));
             $this->_aAdminMessages["blLogoAdded"] = true;
+            return $sMediaUrl;
         }
 
-        return $sLogoQuery;
+        return '';
     }
 
     /**
@@ -258,10 +262,12 @@ class FcPoPaypal extends BaseModel
         $iDefault = $this->_oFcPoHelper->fcpoGetRequestParameter('defaultlogo');
         if ($iDefault) {
             $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 0";
-            $this->_oFcPoDb->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery);
 
-            $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 1 WHERE oxid = " . DatabaseProvider::getDb()->quote($iDefault);
-            $this->_oFcPoDb->execute($sQuery);
+            $sQuery = "UPDATE fcpopayoneexpresslogos SET fcpo_default = 1 WHERE oxid = :sOxid";
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sOxid' => $iDefault,
+            ]);
         }
     }
 
@@ -272,7 +278,7 @@ class FcPoPaypal extends BaseModel
     public function fcpoAddPaypalExpressLogo(): void
     {
         $sQuery = "INSERT INTO fcpopayoneexpresslogos (FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES (0, 0, '', 0)";
-        $this->_oFcPoDb->execute($sQuery);
+        $this->_oFcPoDb->executeStatement($sQuery);
     }
 
 }

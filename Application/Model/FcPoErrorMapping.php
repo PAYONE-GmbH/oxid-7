@@ -20,11 +20,11 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Exception;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -48,9 +48,9 @@ class FcPoErrorMapping extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
 
     /**
@@ -61,7 +61,7 @@ class FcPoErrorMapping extends BaseModel
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -76,12 +76,20 @@ class FcPoErrorMapping extends BaseModel
     {
         $aMappings = [];
 
-        $sWhere = $this->_fcpoGetMappingWhere($sType);
+        $blIsValidType = $this->_fcpoValidateMappingType($sType);
 
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        $oQuery
+            ->select('oxid', 'fcpo_error_code', 'fcpo_lang_id', 'fcpo_mapped_message')
+            ->from('fcpoerrormapping');
+        if ($blIsValidType) {
+            $oQuery
+                ->where('fcpo_error_type = :sType')
+                ->setParameter('sType', $sType);
+        }
+        $oQuery->orderBy('oxid', 'ASC');
 
-        $sQuery = "SELECT oxid, fcpo_error_code, fcpo_lang_id, fcpo_mapped_message FROM fcpoerrormapping $sWhere ORDER BY oxid ASC";
-        $aRows = $oDb->getAll($sQuery);
+        $aRows = $oQuery->execute()->fetchAllAssociative();
         foreach ($aRows as $aRow) {
             // collect data
             $sOxid = $aRow['oxid'];
@@ -102,22 +110,16 @@ class FcPoErrorMapping extends BaseModel
     }
 
     /**
-     * Returns where part of requesting error mappings from errormapping table
+     * Checks if the submitted type is valid
      *
      * @param string $sType
-     * @return string
+     * @return bool
      */
-    protected function _fcpoGetMappingWhere(string $sType): string
+    protected function _fcpoValidateMappingType(string $sType): string
     {
         $aValidTypes = ['general', 'iframe'];
 
-        $blValid = in_array($sType, $aValidTypes);
-        $sWhere = '';
-        if ($blValid) {
-            $sWhere = "WHERE fcpo_error_type=" . $this->_oFcPoDb->quote($sType);
-        }
-
-        return $sWhere;
+        return in_array($sType, $aValidTypes);
     }
 
     /**
@@ -191,11 +193,10 @@ class FcPoErrorMapping extends BaseModel
      */
     public function fcpoUpdateMappings(array $aMappings, string $sType): void
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb();
         // iterate through mappings
         foreach ($aMappings as $sMappingId => $aData) {
-            $sQuery = $this->_fcpoGetQuery($sMappingId, $aData, $sType);
-            $oDb->execute($sQuery);
+            $oQuery = $this->_fcpoGetQuery($sMappingId, $aData, $sType);
+            $oQuery->execute();
         }
     }
 
@@ -205,21 +206,22 @@ class FcPoErrorMapping extends BaseModel
      * @param string $sMappingId
      * @param array $aData
      * @param string $sType
-     * @return string
+     * @return QueryBuilder
      * @throws DatabaseConnectionException
      */
-    protected function _fcpoGetQuery(string $sMappingId, array $aData, string $sType): string
+    protected function _fcpoGetQuery(string $sMappingId, array $aData, string $sType): QueryBuilder
     {
-        // quote values from outer space
         if (array_key_exists('delete', $aData)) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
-            $sOxid = $oDb->quote($sMappingId);
-            $sQuery = "DELETE FROM fcpoerrormapping WHERE oxid = $sOxid";
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->delete('fcpoerrormapping')
+                ->where('oxid = :sOxid')
+                ->setParameter('sOxid', $sMappingId);
         } else {
-            $sQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData, $sType);
+            $oQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData, $sType);
         }
 
-        return $sQuery;
+        return $oQuery;
     }
 
     /**
@@ -228,36 +230,52 @@ class FcPoErrorMapping extends BaseModel
      * @param string $sMappingId
      * @param array $aData
      * @param string $sType
-     * @return string
+     * @return QueryBuilder
      */
-    protected function _fcpoGetUpdateQuery(string $sMappingId, array $aData, string $sType): string
+    protected function _fcpoGetUpdateQuery(string $sMappingId, array $aData, string $sType): QueryBuilder
     {
         $blValidNewEntry = $this->_fcpoIsValidNewEntry($sMappingId, $aData['sErrorCode'], $aData['sLangId'], $aData['sMappedMessage']);
 
-        $sOxid = $this->_oFcPoDb->quote($sMappingId);
-        $sErrorCode = $this->_oFcPoDb->quote($aData['sErrorCode']);
-        $sLangId = $this->_oFcPoDb->quote($aData['sLangId']);
-        $sMappedMessage = $this->_oFcPoDb->quote($aData['sMappedMessage']);
-        $sType = $this->_oFcPoDb->quote($sType);
-
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
         if ($blValidNewEntry) {
-            $sQuery = " INSERT INTO fcpoerrormapping (
-                            fcpo_error_code,     fcpo_lang_id,  fcpo_mapped_message, fcpo_error_type
-                        ) VALUES (
-                            $sErrorCode,    $sLangId, $sMappedMessage, $sType
-                        )";
+            $oQuery
+                ->insert('fcpoerrormapping')
+                ->values(
+                    [
+                        'fcpo_error_code' => ':sErrorCode',
+                        'fcpo_lang_id' => ':sLangId',
+                        'fcpo_mapped_message' => ':sMappedMessage',
+                        'fcpo_error_type' => ':sType'
+                    ]
+                )
+                ->setParameters(
+                    [
+                        'sErrorCode' => $aData['sErrorCode'],
+                        'sLangId' => $aData['sLangId'],
+                        'sMappedMessage' => $aData['sMappedMessage'],
+                        'sType' => $sType
+                    ]
+                );
         } else {
-            $sQuery = " UPDATE fcpoerrormapping
-                        SET
-                            fcpo_error_code = $sErrorCode,
-                            fcpo_lang_id = $sLangId,
-                            fcpo_mapped_message = $sMappedMessage,
-                            fcpo_error_type = $sType
-                        WHERE
-                            oxid = $sOxid";
+            $oQuery
+                ->update('fcpoerrormapping')
+                ->set('fcpo_error_code', ':sErrorCode')
+                ->set('fcpo_lang_id', ':sLangId')
+                ->set('fcpo_mapped_message', ':sMappedMessage')
+                ->set('fcpo_error_type', ':sType')
+                ->where('oxid = :sOxid')
+                ->setParameters(
+                    [
+                        'sErrorCode' => $aData['sErrorCode'],
+                        'sLangId' => $aData['sLangId'],
+                        'sMappedMessage' => $aData['sMappedMessage'],
+                        'sType' => $sType,
+                        'sOxid' => $sMappingId
+                    ]
+                );
         }
 
-        return $sQuery;
+        return $oQuery;
     }
 
     /**
@@ -297,8 +315,8 @@ class FcPoErrorMapping extends BaseModel
 
         $sMappedMessage = '';
         if ($sLangId) {
-            $sQuery = $this->_fcpoGetSearchQuery($sErrorCode, $sLangId);
-            $sMappedMessage = $this->_oFcPoDb->getOne($sQuery);
+            $oQuery = $this->_fcpoGetSearchQuery($sErrorCode, $sLangId);
+            $sMappedMessage = $oQuery->execute()->fetchOne();
         }
 
         return $sMappedMessage;
@@ -309,20 +327,22 @@ class FcPoErrorMapping extends BaseModel
      *
      * @param string $sErrorCode
      * @param string $sLangId
-     * @return string
+     * @return QueryBuilder
      */
-    protected function _fcpoGetSearchQuery(string $sErrorCode, string $sLangId): string
+    protected function _fcpoGetSearchQuery(string $sErrorCode, string $sLangId): QueryBuilder
     {
-        $sErrorCode = $this->_oFcPoDb->quote($sErrorCode);
-        $sLangId = $this->_oFcPoDb->quote($sLangId);
-
-        return "
-            SELECT fcpo_mapped_message FROM fcpoerrormapping 
-            WHERE 
-            fcpo_error_code = $sErrorCode AND
-            fcpo_lang_id = $sLangId
-            LIMIT 1
-        ";
+        $oQuery = $this->_oFcPoDb->createQueryBuilder();
+        
+        $oQuery
+            ->select('fcpo_mapped_message')
+            ->from('fcpoerrormapping')
+            ->where('fcpo_error_code = :sErrorCode')
+            ->where('fcpo_lang_id = :sLangId')
+            ->setParameter('sErrorCode', $sErrorCode)
+            ->setParameter('sLangId', $sLangId)
+            ->setMaxResults(1);
+        
+        return $oQuery;
     }
 
     /**

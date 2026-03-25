@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Lib;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use JetBrains\PhpStorm\NoReturn;
 use OxidEsales\Eshop\Application\Model\BasketItem;
@@ -39,6 +40,8 @@ use OxidEsales\Eshop\Core\UtilsObject;
 use OxidEsales\Eshop\Core\UtilsServer;
 use OxidEsales\Eshop\Core\UtilsView;
 use OxidEsales\Eshop\Core\ViewConfig;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 class FcPoHelper extends BaseModel
 {
@@ -608,5 +611,16 @@ class FcPoHelper extends BaseModel
                 'srcDpaId' => $oConfig->getConfigParam('sFCPOCCV2MastercardDpaId'),
             ]
         ];
+    }
+
+    /**
+     * @return Connection
+     */
+    public function fcpoGetPdoDb()
+    {
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        $oFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+
+        return  $oFactory->create()->getConnection();
     }
 }

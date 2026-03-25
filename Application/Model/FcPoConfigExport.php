@@ -20,6 +20,7 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Exception;
 use Fatchip\PayOne\FcCheckChecksum;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -27,8 +28,6 @@ use JsonException;
 use OxidEsales\Eshop\Application\Model\Country;
 use OxidEsales\Eshop\Application\Model\Payment;
 use OxidEsales\Eshop\Application\Model\Shop;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -52,9 +51,9 @@ class FcPoConfigExport extends BaseModel
     /**
      * Centralized Database instance
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Holds config values for all available shop ids
@@ -125,7 +124,7 @@ class FcPoConfigExport extends BaseModel
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -183,7 +182,7 @@ class FcPoConfigExport extends BaseModel
      */
     public function fcpoGetShopIds(): array
     {
-        return $this->_oFcPoDb->getCol("SELECT `oxid` FROM `oxshops`");
+        return $this->_oFcPoDb->fetchFirstColumn("SELECT `oxid` FROM `oxshops`");
     }
 
     /**
@@ -224,9 +223,8 @@ class FcPoConfigExport extends BaseModel
      */
     public function fcpoGetConfig(string $sShopId, int $iLang = 0): array
     {
-        $oDb = $this->_oFcPoHelper->fcpoGetDb(true);
-        $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
-        $aResult = $oDb->getAll($sQuery);
+        $sQuery = "select oxvarname, oxvartype, oxvarvalue from oxconfig where oxshopid = :sShopId AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
+        $aResult = $this->_oFcPoDb->fetchAllAssociative($sQuery, ['sShopId' => $sShopId]);
 
         if (count($aResult) > 0) {
             $oStr = Str::getStr();
@@ -572,8 +570,7 @@ class FcPoConfigExport extends BaseModel
         $aPayments = [];
 
         $sQuery = "SELECT oxid FROM oxpayments WHERE fcpoispayone = 1";
-        $this->_oFcPoDb->setFetchMode(DatabaseInterface::FETCH_MODE_NUM);
-        $aRows = $this->_oFcPoDb->getAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllNumeric($sQuery);
         foreach ($aRows as $aRow) {
             $oPayment = oxNew(Payment::class);
             $sOxid = $aRow[0];

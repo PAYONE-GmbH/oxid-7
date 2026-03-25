@@ -21,7 +21,6 @@
 namespace Fatchip\PayOne\Application\Controller;
 
 use Exception;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 
 set_time_limit(0);
 ini_set('memory_limit', '1024M');
@@ -227,27 +226,21 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     protected function _forwardRequests(): void
     {
         try {
-            $sLimitStatusmessageId =
-                $this->fcGetPostParam('statusmessageid');
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->select('OXID', 'FCSTATUSMESSAGEID', 'FCSTATUSFORWARDID')
+                ->from('fcpostatusforwardqueue')
+                ->where('FCFULFILLED = 0');
 
-            $sQueryLimitStatusmessageId = '';
+            $sLimitStatusmessageId = $this->fcGetPostParam('statusmessageid');
             if ($sLimitStatusmessageId !== '' && $sLimitStatusmessageId !== '0') {
                 $this->_createMissingQueueEntries($sLimitStatusmessageId);
-                $sQueryLimitStatusmessageId =
-                    " AND  FCSTATUSMESSAGEID='$sLimitStatusmessageId' ";
+                $oQuery
+                    ->andWhere('FCSTATUSMESSAGEID = :sStatusmessageid')
+                    ->setParameter('sStatusmessageid', $sLimitStatusmessageId);
             }
 
-            $sQuery = "
-                SELECT
-                    OXID,
-                    FCSTATUSMESSAGEID,
-                    FCSTATUSFORWARDID
-                FROM fcpostatusforwardqueue
-                WHERE FCFULFILLED='0'
-                $sQueryLimitStatusmessageId
-            ";
-            $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-            $aRows = $oDb->getAll($sQuery);
+            $aRows = $oQuery->execute()->fetchAllAssociative();
             $this->_logForwardMessage('Found requests to forward: ' . print_r($aRows, true));
 
             foreach ($aRows as $aRow) {
@@ -292,13 +285,14 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     protected function _fetchPostParams(string $sStatusmessageId): array
     {
         try {
-            $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
             $sQuery = "
                 SELECT * 
                 FROM fcpotransactionstatus 
-                WHERE OXID=" . $oDb->quote($sStatusmessageId);
+                WHERE OXID = :sOxid";
 
-            $aRow = $oDb->getRow($sQuery);
+            $aRow = $this->_oFcPoDb->fetchAssociative($sQuery, [
+                'sOxid' => $sStatusmessageId
+            ]);
             if (empty($aRow)) {
                 $sExceptionMessage =
                     'Could not find transaction status message for ID ' . $sStatusmessageId . '!';
@@ -401,15 +395,16 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
      */
     protected function _getForwardData(string $sForwardId): array
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
         $sQuery = "
                 SELECT 
                     FCPO_URL,
                     FCPO_TIMEOUT
                 FROM fcpostatusforwarding 
-                WHERE OXID=" . $oDb->quote($sForwardId);
+                WHERE OXID = :sOxid";
 
-        $aRow = $oDb->getRow($sQuery);
+        $aRow = $this->_oFcPoDb->fetchAssociative($sQuery, [
+            'sOxid' => $sForwardId
+        ]);
         if (empty($aRow)) {
             throw new Exception('Could not find forward data for ID ' . $sForwardId . '!');
         }
@@ -434,27 +429,26 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
     protected function _setForwardingResult(string $sQueueId, bool $blValidResult, array $aRequest, mixed $mResult, mixed $mCurlInfo): void
     {
         try {
-            $oDb = DatabaseProvider::getDb();
-            $sFulfilled = ($blValidResult) ? '1' : '0';
-            $sFulfilled = $oDb->quote($sFulfilled);
-            $sRequest = $oDb->quote(print_r($aRequest, true));
-            $sResponse = $oDb->quote((string)$mResult);
-            $sResponseInfo = $oDb->quote((string)print_r($mCurlInfo, true));
-
             $sQuery = "
             UPDATE fcpostatusforwardqueue
             SET 
-                FCTRIES=FCTRIES+1,
-                FCLASTTRY=NOW(),
-                FCLASTREQUEST=" . $sRequest . ",
-                FCLASTRESPONSE=" . $sResponse . ",
-                FCRESPONSEINFO=" . $sResponseInfo . ",
-                FCFULFILLED=" . $sFulfilled . "
+                FCTRIES = FCTRIES+1,
+                FCLASTTRY = NOW(),
+                FCLASTREQUEST = :sRequest,
+                FCLASTRESPONSE = :sResponse,
+                FCRESPONSEINFO = :sResponseInfo,
+                FCFULFILLED = :sFulfilled
             WHERE
-                OXID=" . $oDb->quote($sQueueId);
+                OXID = :sOxid";
             $this->_logForwardMessage("Updating Request with query:\n" . $sQuery . "\n");
 
-            $oDb->execute($sQuery);
+            $this->_oFcPoDb->executeStatement($sQuery, [
+                'sRequest' => print_r($aRequest, true),
+                'sResponse' => (string)$mResult,
+                'sResponseInfo' => (string)print_r($mCurlInfo, true),
+                'sFulfilled' => ($blValidResult) ? '1' : '0',
+                'sOxid' => $sQueueId,
+            ]);
 
             // update entry in transactionlog table for filtering tries and status
             $sForwardState = ($blValidResult) ? 'OK' : 'ERROR';
@@ -462,13 +456,19 @@ class FcPayOneTransactionStatusForwarder extends FcPayOneTransactionStatusBase
             $sQueryUpdateTransactionlog = "
             UPDATE fcpotransactionstatus
             SET 
-                FCPO_FORWARD_TRIES=FCPO_FORWARD_TRIES+1,
-                FCPO_FORWARD_STATE='" . $sForwardState . "'
+                FCPO_FORWARD_TRIES = FCPO_FORWARD_TRIES+1,
+                FCPO_FORWARD_STATE = :sForwardState
             WHERE
-                FCPO_TXID='" . $aRequest['txid'] . "' AND FCPO_TXACTION = '" . $aRequest['txaction'] . "'";
+                FCPO_TXID = :sTxid 
+            AND 
+                FCPO_TXACTION = :sTxAction";
 
             $this->_logForwardMessage("Updating transaction log with query:\n" . $sQueryUpdateTransactionlog . "\n");
-            $oDb->execute($sQueryUpdateTransactionlog);
+            $this->_oFcPoDb->executeStatement($sQueryUpdateTransactionlog, [
+                'sForwardState' => $sForwardState,
+                'sTxid' => $aRequest['txid'],
+                'sTxAction' => $aRequest['txaction'],
+            ]);
 
         } catch (Exception $oEx) {
             throw $oEx;

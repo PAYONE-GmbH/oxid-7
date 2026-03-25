@@ -29,6 +29,7 @@ ini_set('error_log',
 
 include_once __DIR__ . "/../../../bootstrap.php";
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
@@ -74,9 +75,8 @@ class FcPayOneMandateDownload extends FrontendController
      */
     private function _fcpoMandateDownloadAction(): void
     {
-        $database = DatabaseProvider::getDb();
-        $sQuery = $this->_fcpoGetMandateQuery();
-        $aResult = $database->GetRow($sQuery);
+        $oQuery = $this->_fcpoGetMandateQuery();
+        $aResult = $oQuery->execute()->fetchNumeric();
 
         if (!is_array($aResult)) {
             echo 'Permission denied!';
@@ -106,41 +106,35 @@ class FcPayOneMandateDownload extends FrontendController
     /**
      * Return query for fetching mandate mandatory information
      *
-     * 
-     * @return string
+     *
+     * @return QueryBuilder
      */
     private function _fcpoGetMandateQuery()
     {
-        $sOrderId = $this->_oFcpoHelper->fcpoGetRequestParameter('id');
+        $oQuery = $this->_oFcpoHelper->fcpoGetPdoDb()->createQueryBuilder();
+
+        $oQuery
+            ->select('a.fcpo_filename', 'b.oxid', 'b.fcpomode', 'b.oxpaymenttype')
+            ->from('fcpopdfmandates', 'a')
+            ->innerJoin('a', 'oxorder', 'b', 'a.oxorderid = b.oxid')
+            ->getMaxResults(1);
+
         $sUserId = $this->_fcpoGetUserId();
 
-        $sWhere = "
-            b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
-        ";
-        $sOrderBy = "
-            ORDER BY
-                b.oxorderdate DESC        
-        ";
+        $sOrderId = $this->_oFcpoHelper->fcpoGetRequestParameter('id');
         if ($sOrderId) {
-            $sWhere = "
-                b.oxid = " . DatabaseProvider::getDb()->quote($sOrderId) . " AND
-                b.oxuserid = " . DatabaseProvider::getDb()->quote($sUserId) . "
-            ";
-            $sOrderBy = "";
+            $oQuery
+                ->where('b.oxid = :sOxid AND b.oxuserid = :sUserId')
+                ->setParameter('sOxid', $sOrderId)
+                ->setParameter('sUserId', $sUserId);
+            return $oQuery;
         }
-
-        return "
-            SELECT 
-                a.fcpo_filename,
-                b.oxid,
-                b.fcpomode,
-                b.oxpaymenttype
-            FROM 
-                fcpopdfmandates AS a
-            INNER JOIN
-                oxorder AS b ON a.oxorderid = b.oxid
-            WHERE {$sWhere} {$sOrderBy} LIMIT 1        
-        ";
+        
+        $oQuery
+            ->where('b.oxuserid = :sUserId')
+            ->setParameter('sUserId', $sUserId)
+            ->orderBy('b.oxorderdate', 'DESC');
+        return $oQuery;
     }
 
     /**
@@ -170,8 +164,7 @@ class FcPayOneMandateDownload extends FrontendController
      */
     private function _redownloadMandate(string $sMandateFilename, string $sOrderId, string $sPaymentId): void
     {
-        $sMandateIdentification = str_replace('.pdf', 
-    '', $sMandateFilename);
+        $sMandateIdentification = str_replace('.pdf', '', $sMandateFilename);
         $oPayment = oxNew('oxPayment');
         $oPayment->load($sPaymentId);
         $sMode = $oPayment->fcpoGetOperationMode();

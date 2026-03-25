@@ -20,10 +20,9 @@
 
 namespace Fatchip\PayOne\Application\Model;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Order;
-use OxidEsales\Eshop\Core\Database\Adapter\DatabaseInterface;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Exception\DatabaseErrorException;
 use OxidEsales\Eshop\Core\Model\BaseModel;
@@ -49,9 +48,9 @@ class FcPoTransactionStatus extends BaseModel
     /**
      * Instance of oxid database
      *
-     * @var DatabaseInterface
+     * @var Connection
      */
-    protected DatabaseInterface $_oFcPoDb;
+    protected Connection $_oFcPoDb;
 
     /**
      * Object core table name
@@ -78,7 +77,7 @@ class FcPoTransactionStatus extends BaseModel
 
         $this->init('fcpotransactionstatus');
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = DatabaseProvider::getDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -125,7 +124,9 @@ class FcPoTransactionStatus extends BaseModel
      */
     protected function _fcpoGetOrderByTxid(string $sTxid): Order
     {
-        $sOxid = $this->_oFcPoDb->getOne("SELECT oxid FROM oxorder WHERE fcpotxid = '$sTxid'");
+        $sQuery = "SELECT oxid FROM oxorder WHERE fcpotxid = :sTxid";
+        $sOxid = $this->_oFcPoDb->fetchOne($sQuery, ['sTxid' => $sTxid]);
+
         $oOrder = $this->_oFcPoHelper->getFactoryObject(Order::class);
         $oOrder->load($sOxid);
 
@@ -236,10 +237,10 @@ class FcPoTransactionStatus extends BaseModel
                 sfq.FCRESPONSEINFO
             FROM fcpostatusforwardqueue sfq
             LEFT JOIN fcpostatusforwarding sf ON (sfq.FCSTATUSFORWARDID = sf.OXID)
-            WHERE sfq.FCSTATUSMESSAGEID='$sStatusmessageId'  
+            WHERE sfq.FCSTATUSMESSAGEID = :sStatusmessageId
         ";
 
-        $aRows = $this->_oFcPoDb->GetAll($sQuery);
+        $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery, ['sStatusmessageId' => $sStatusmessageId]);
 
         if (!is_array($aRows) || count($aRows) == 0) {
             return false;

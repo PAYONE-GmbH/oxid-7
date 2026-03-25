@@ -63,12 +63,18 @@ class FcPayOneLog extends FcPayOneAdminDetails
     public function getStatus(Order $oOrder): array
     {
         if (!$this->_aStatus) {
-            $oDb = $this->_oFcPoHelper->fcpoGetDb();
-            $aRows = $oDb->getAll("SELECT oxid FROM fcpotransactionstatus WHERE fcpo_txid = '{$oOrder->oxorder__fcpotxid->value}' ORDER BY oxid ASC");
+            $sQuery = "
+                SELECT oxid
+                FROM fcpotransactionstatus
+                WHERE fcpo_txid = :sTxid
+                ORDER BY oxid ASC";
+            $aRows = $this->_oFcPoDb->fetchAllAssociative($sQuery, [
+                'sTxid' => $oOrder->oxorder__fcpotxid->value
+            ]);
             $aStatus = [];
             foreach ($aRows as $aRow) {
                 $oTransactionStatus = oxNew(FcPoTransactionStatus::class);
-                $oTransactionStatus->load($aRow[0]);
+                $oTransactionStatus->load($aRow['oxid']);
                 $aStatus[] = $oTransactionStatus;
             }
             $this->_aStatus = $aStatus;

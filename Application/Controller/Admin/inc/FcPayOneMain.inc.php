@@ -20,9 +20,9 @@
 
 namespace Fatchip\PayOne\Application\Controller\Admin\Inc;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Controller\Admin\ListComponentAjax;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Field;
 
 $aColumns = ['container1' => [
@@ -60,6 +60,13 @@ class ajaxComponent extends ListComponentAjax
     protected $_oFcPoHelper;
 
     /**
+     * Database instance
+     *
+     * @var Connection
+     */
+    protected Connection $_oFcPoDb;
+
+    /**
      * init object construction
      *
      * @group  untestable
@@ -68,6 +75,7 @@ class ajaxComponent extends ListComponentAjax
     {
         parent::__construct();
         $this->_oFcpoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcpoHelper->fcpoGetPdoDb();
     }
 
     /**
@@ -116,13 +124,13 @@ class ajaxComponent extends ListComponentAjax
             $sQAdd = " from $sCountryTable where $sCountryTable.oxactive = '1' ";
         } else {
             $sQAdd = " from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
-            $sQAdd .= "where $sCountryTable.oxactive = '1' and fcpopayment2country.fcpo_paymentid = '$sCountryId' and fcpopayment2country.fcpo_type = '{$sType}' ";
+            $sQAdd .= "where $sCountryTable.oxactive = '1' and fcpopayment2country.fcpo_paymentid = " . $this->_oFcPoDb->quote($sCountryId) . " and fcpopayment2country.fcpo_type = " . $this->_oFcPoDb->quote($sType);
         }
 
         if ($sSynchCountryId && $sSynchCountryId != $sCountryId) {
             $sQAdd .= "and $sCountryTable.oxid not in ( ";
             $sQAdd .= "select $sCountryTable.oxid from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
-            $sQAdd .= "where fcpopayment2country.fcpo_paymentid = '$sSynchCountryId' and fcpopayment2country.fcpo_type = '{$sType}' ) ";
+            $sQAdd .= "where fcpopayment2country.fcpo_paymentid = " . $this->_oFcPoDb->quote($sSynchCountryId) . " and fcpopayment2country.fcpo_type = " . $this->_oFcPoDb->quote($sType);
         }
 
         return $sQAdd;
@@ -135,13 +143,19 @@ class ajaxComponent extends ListComponentAjax
      */
     public function removepaycountry(): void
     {
-        $aChosenCntr = $this->_getActionIds('fcpopayment2country.oxid');
+        $aChosenCntr = $this->getActionIds('fcpopayment2country.oxid');
         if ($this->_oFcPoHelper->fcpoGetRequestParameter('all')) {
-            $sQ = $this->_addFilter("delete fcpopayment2country.* " . $this->_getQuery());
-            DatabaseProvider::getDb()->Execute($sQ);
+            $sQ = $this->addFilter("delete fcpopayment2country.* " . $this->_getQuery());
+            $this->_oFcPoDb->executeStatement($sQ);
         } elseif (is_array($aChosenCntr)) {
-            $sQ = "delete from fcpopayment2country where fcpopayment2country.oxid in (" . implode(", ", DatabaseProvider::getInstance()->quoteArray($aChosenCntr)) . ") ";
-            DatabaseProvider::getDb()->Execute($sQ);
+            $oExpressionBuilder = $this->_oFcPoDb->getExpressionBuilder();
+            $oQuery = $this->_oFcPoDb->createQueryBuilder();
+            $oQuery
+                ->delete('fcpopayment2country')
+                ->where(
+                    $oExpressionBuilder->in('fcpopayment2country.oxid', $aChosenCntr)
+                );
+            $oQuery->execute();
         }
     }
 }
