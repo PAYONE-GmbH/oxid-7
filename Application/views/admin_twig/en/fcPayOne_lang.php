@@ -341,6 +341,7 @@ $aLang = [
     'FCPO_CONFIG_ADD_PP_EXPRESS_LOGO' => "Add another language",
 
     'FCPO_CONFIG_GROUP_PAYPALV2' => "PayPal V2",
+    'FCPO_PAYPALV2_DELADDRESS' => "Send billing address to PayPal if no shipping address has been given",
     'FCPO_PAYPALV2_BNPL' => "Show Buy Now Pay Later Button",
 
     'FCPO_PAYPALV2_MERCHANT_ID' => "PayPal Merchant ID",
