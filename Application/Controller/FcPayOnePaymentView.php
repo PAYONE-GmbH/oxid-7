@@ -3917,6 +3917,18 @@ class FcPayOnePaymentView extends PaymentController
     }
 
     /**
+     * Template getter for email address
+     *
+     * @param  void
+     * @return bool
+     */
+    public function getEmail()
+    {
+        $oUser = $this->getUser();
+        return $oUser->oxuser__oxusername->value;
+    }
+
+    /**
      * @return array
      */
     public function fcpoGetUIConfig()
@@ -3942,7 +3954,6 @@ class FcPayOnePaymentView extends PaymentController
         $aConfig = [
             'enableCTP' => (bool) $this->getConfigParam('blFCPOCCV2CtpEnabled'),
             'enableCustomerOnboarding' => (bool)  $this->getConfigParam('blFCPOCCV2CtpOnboardingEnabled'),
-            'schemeConfig' => $this->_oFcPoHelper->fcpoGetCCV2SchemeConfig(),
             'transactionAmount' => [
                 'amount' => $this->getAmount(),
                 'currencyCode' => $this->fcpoGetCurrency(),
@@ -3976,6 +3987,7 @@ class FcPayOnePaymentView extends PaymentController
             'uiConfig' => (object) $this->fcpoGetUIConfig(),
             'locale' => $sLocale,
             'token' => $sToken,
+            'email' => $this->getEmail(),
             'mode' => $oPayment->fcpoGetOperationMode(),
             'allowedCardSchemes' => [
                 "visa",

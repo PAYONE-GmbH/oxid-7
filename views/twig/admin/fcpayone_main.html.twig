@@ -472,27 +472,6 @@
                 <div class="spacer"></div>
             </dl>
             <dl>
-                <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOCCV2VisaDpaId]" value="{{ confstrs.sFCPOCCV2VisaDpaId|raw }}"
-                            {{ readonly }}>
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_CCV2_CTP_VISA_DPAID" })|raw }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
-                    <input type="text" class="txt" name="confstrs[sFCPOCCV2MastercardDpaId]" value="{{ confstrs.sFCPOCCV2MastercardDpaId|raw }}"
-                            {{ readonly }}>
-                </dt>
-                <dd>
-                    {{ translate({ ident: "FCPO_CCV2_CTP_MASTERCARD_DPAID" })|raw }}
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-
-            <dl>
                 <dd>
                     <a href="#" onclick="fcpoToggleCCV2Template();" style="text-decoration: underline;">{{ translate({ ident: "FCPO_CCV2_CUSTOM_TEMPLATE" })|raw }}</a>
                     <div id="fcpoCCV2Template" style="display:none;padding-top:10px;">
