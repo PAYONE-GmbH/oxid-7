@@ -22,12 +22,11 @@ namespace Fatchip\PayOne\Application\Controller;
 
 use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Lib\FcPoHelper;
-use OxidEsales\Eshop\Application\Controller\UserController;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\UtilsServer;
 
-class FcPayOneUserView extends UserController
+class FcPayOneUserView extends FcPayOneUserView_parent
 {
 
     /**
