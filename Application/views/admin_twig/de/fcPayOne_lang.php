@@ -292,6 +292,7 @@ $aLang = [
     'FCPO_CONFIG_ADD_PP_EXPRESS_LOGO' => "Weitere Sprache hinzufügen",
 
     'FCPO_CONFIG_GROUP_PAYPALV2' => "PayPal V2",
+    'FCPO_PAYPALV2_DELADDRESS' => "Wenn keine Lieferadresse angegeben Rechnungsadresse als Fallback an Paypal übergeben",
     'FCPO_PAYPALV2_BNPL' => "Später Bezahlen Express Button anzeigen",
 
     'FCPO_PAYPALV2_MERCHANT_ID' => "PayPal Merchant ID",
