@@ -68,12 +68,10 @@ jobs:
           composer require --dev -n --no-progress oxid-esales/mink-selenium-driver:dev-b-8.0.x
           composer require --dev -n --no-progress oxid-esales/testing-library:dev-b-8.0.x
           chmod -R 777 /tmp/oxid7/source/log
-      - name: Require the current PR branch
-        run: |
-           branch_name=${{ github.head_ref }}
       - name: Install plugin
         run: |
-          composer -n --no-progress --working-dir=/tmp/oxid7 require payone-gmbh/oxid-7:dev-${branch_name}
+          mkdir -p /tmp/oxid7/vendor/payone-gmbh/oxid-7
+          cp -R $GITHUB_WORKSPACE/* /tmp/oxid7/vendor/payone-gmbh/oxid-7
       - name: Run tests
         run: |
           mv /tmp/oxid7/vendor/payone-gmbh/oxid-7/.github/test_config.yml /tmp/oxid7/test_config.yml
