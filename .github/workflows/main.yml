@@ -70,7 +70,7 @@ jobs:
           chmod -R 777 /tmp/oxid7/source/log
       - name: Install plugin
         run: |
-          mkdir -p /tmp/oxid7/vendor/payone-gmbh/oxid-7
+          composer -n --no-progress --working-dir=/tmp/oxid7 require payone-gmbh/oxid-7:dev-master
           cp -a $GITHUB_WORKSPACE/. /tmp/oxid7/vendor/payone-gmbh/oxid-7/
           cd /tmp/oxid7
           composer dump-autoload
