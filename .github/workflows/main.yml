@@ -71,7 +71,9 @@ jobs:
       - name: Install plugin
         run: |
           mkdir -p /tmp/oxid7/vendor/payone-gmbh/oxid-7
-          cp -R $GITHUB_WORKSPACE/* /tmp/oxid7/vendor/payone-gmbh/oxid-7
+          cp -a $GITHUB_WORKSPACE/. /tmp/oxid7/vendor/payone-gmbh/oxid-7/
+          cd /tmp/oxid7
+          composer dump-autoload
       - name: Run tests
         run: |
           mv /tmp/oxid7/vendor/payone-gmbh/oxid-7/.github/test_config.yml /tmp/oxid7/test_config.yml
