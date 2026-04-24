@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Order;
@@ -60,11 +61,11 @@ class FcPoTransactionStatusTest extends FcBaseUnitTestCase
     {
         $oFcPoTransactionStatus = new FcPoTransactionStatus();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someOxid');
-        $this->invokeSetAttribute($oFcPoTransactionStatus, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchOne')->willReturn('someOxid');
+        $this->invokeSetAttribute($oFcPoTransactionStatus, '_oFcPoDb', $oFcPoDb);
 
         $oMockOrder = $this->getMockBuilder(Order::class)
             ->setMethods(['load'])

@@ -2009,7 +2009,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
     protected function _fcpoSaveProfileIdent(string $sPaymentId, array $aResponse): void
     {
         if (in_array($sPaymentId, $this->_aPaymentsProfileIdentSave)) {
-            $oRatePay = oxNew(FcPoRatePay::class);
+            $oRatePay = $this->_oFcPoHelper->getFactoryObject(FcPoRatePay::class);
             $sProfileId = $this->_oFcPoHelper->fcpoGetSessionVariable('ratepayprofileid');
             $aProfileData = $oRatePay->fcpoGetProfileData($sProfileId);
             $sRatePayShopId = $aProfileData['shopid'];

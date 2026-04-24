@@ -770,7 +770,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
         if (array_key_exists($sSubPaymentId . '_' . $sType, $this->_aCheckedSubPayments) === false) {
             $sUserBillCountryId = $this->getUserBillCountryId();
             $sUserDelCountryId = $this->getUserDelCountryId();
-            $oPayment = oxNew(Payment::class);
+            $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
             $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType] = $oPayment->isPaymentMethodAvailableToUser($sSubPaymentId, $sType, $sUserBillCountryId, $sUserDelCountryId);
         }
         return $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType];

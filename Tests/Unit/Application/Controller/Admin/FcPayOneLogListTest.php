@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneLogList;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
@@ -49,6 +50,17 @@ class FcPayOneLogListTest extends ConfigUnitTestCase
         $oFcPayOneLogList->method('getPortalId')->willReturn('myportalid');
         $oFcPayOneLogList->method('getSecInvoicePortalId')->willReturn('mysecinvportalid');
         $oFcPayOneLogList->method('getBNPLPortalId')->willReturn('mybnplportalid');
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('quote')->willReturnOnConsecutiveCalls(
+            "'myportalid'",
+            "'mysecinvportalid'",
+            "'mybnplportalid'",
+            "'mysubaccountid'",
+        );
+        $this->invokeSetAttribute($oFcPayOneLogList, '_oFcPoDb', $oFcPoDb);
 
         $sExpectString = " AND fcpotransactionstatus.fcpo_portalid IN ('myportalid','mysecinvportalid','mybnplportalid') AND fcpotransactionstatus.fcpo_aid = 'mysubaccountid' ";
 

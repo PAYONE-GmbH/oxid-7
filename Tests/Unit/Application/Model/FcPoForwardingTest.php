@@ -2,6 +2,9 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use Fatchip\PayOne\Application\Model\FcPoForwarding;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -40,20 +43,26 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
      */
     public function testFcpoUpdateForwardings()
     {
+        $oMockQueryResult = $this->createMock(Result::class);
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->setMethods(['execute'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockQueryBuilder->method('execute')->willReturn($oMockQueryResult);
+
         $oFcPoForwarding = $this->getMockBuilder(FcPoForwarding::class)
             ->setMethods(['_fcpoGetQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoForwarding->method('_fcpoGetQuery')->willReturn('someQuery');
+        $oFcPoForwarding->method('_fcpoGetQuery')->willReturn($oMockQueryBuilder);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
             ->setMethods(['Execute'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
+        $oFcPoDb->method('Execute')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoForwarding, '_oFcPoDb', $oFcPoDb);
 
         $aMockForwardings = ['someIndex' => ['someValue']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoForwarding, '_oFcPoHelper', $oFcPoHelper);
 
         $oFcPoForwarding->fcpoUpdateForwardings($aMockForwardings);
@@ -61,33 +70,57 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
 
     public function testFcpoGetQuery_Delete()
     {
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+        $oMockQueryBuilder->method('delete')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+
         $oFcPoForwarding = $this->getMockBuilder(FcPoForwarding::class)
             ->setMethods(['_fcpoGetUpdateQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoForwarding->method('_fcpoGetUpdateQuery')->willReturn('someUpdateQuery');
+        $oFcPoForwarding->method('_fcpoGetUpdateQuery')->willReturn($oMockQueryBuilder);
 
-        $aMockData = ['delete' => true];
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoForwarding, '_oFcPoDb', $oFcPoDb);
+
+        $aMockData = [
+            'delete' => true,
+            'sPayoneStatus' => 'someStatus',
+            'sForwardingUrl' => 'someUrl',
+            'iForwardingTimeout' => 0
+        ];
         $sMockOxid = 'someId';
         $sQuotedOxid = DatabaseProvider::getDb()->quote($sMockOxid);
 
-        $sExpect = "DELETE FROM fcpostatusforwarding WHERE oxid = $sQuotedOxid";
+        $oResponse = $oExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetQuery', [$sMockOxid, $aMockData]);
 
-        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoForwarding, '_fcpoGetQuery', [$sMockOxid, $aMockData]));
+        $this->assertEquals($oExpect, $oResponse);
     }
 
     public function testFcpoGetQuery_Update()
     {
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoForwarding = $this->getMockBuilder(FcPoForwarding::class)
             ->setMethods(['_fcpoGetUpdateQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoForwarding->method('_fcpoGetUpdateQuery')->willReturn('someValue');
+        $oFcPoForwarding->method('_fcpoGetUpdateQuery')->willReturn($oMockQueryBuilder);
 
-        $aMockData = ['donotdelete' => true];
+        $aMockData = [
+            'donotdelete' => true,
+            'sPayoneStatus' => 'someStatus',
+            'sForwardingUrl' => 'someUrl',
+            'iForwardingTimeout' => 0
+        ];
         $sMockOxid = 'someId';
-        $sExpect = "someValue";
 
-        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoForwarding, '_fcpoGetQuery', [$sMockOxid, $aMockData]));
+        $oResponse = $oExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetQuery', [$sMockOxid, $aMockData]);
 
+        $this->assertEquals($oExpect, $oResponse);
     }
 
     public function testFcpoGetUpdateQuery_Insert()
@@ -97,6 +130,20 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPoForwarding->method('_fcpoIsValidNewEntry')->willReturn(true);
 
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+        $oMockQueryBuilder->method('insert')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('values')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('update')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('set')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoForwarding, '_oFcPoDb', $oFcPoDb);
+
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])
             ->disableOriginalConstructor()->getMock();
@@ -112,9 +159,9 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
         $iMockTimeout = 90;
         $sMockOxid = 'someOxid';
 
-        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
+        $oResponse = $oExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
 
-        $this->assertEquals($sExpect, $sResponse);
+        $this->assertEquals($oExpect, $oResponse);
     }
 
     public function testFcpoGetUpdateQuery_Update()
@@ -124,6 +171,20 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPoForwarding->method('_fcpoIsValidNewEntry')->willReturn(false);
 
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+        $oMockQueryBuilder->method('insert')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('values')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('update')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('set')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoForwarding, '_oFcPoDb', $oFcPoDb);
+
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])
             ->disableOriginalConstructor()->getMock();
@@ -139,9 +200,9 @@ class FcPoForwardingTest extends FcBaseUnitTestCase
         $iMockTimeout = 90;
         $sMockOxid = 'someOxid';
 
-        $sResponse = $sExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
+        $oResponse = $oExpect = $this->invokeMethod($oFcPoForwarding, '_fcpoGetUpdateQuery', [$sMockForwardingId, $sMockPayoneStatus, $sMockUrl, $iMockTimeout, $sMockOxid]);
 
-        $this->assertEquals($sExpect, $sResponse);
+        $this->assertEquals($oExpect, $oResponse);
     }
 
     public function testFcpoIsValidNewEntry()
