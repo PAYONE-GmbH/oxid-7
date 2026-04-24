@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneApiLogList;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Tests\Unit\ConfigUnitTestCase;
@@ -48,7 +49,13 @@ class FcPayOneApiLogListTest extends ConfigUnitTestCase
         $oFcPayOneApiLogList->method('getSubAccountId')->willReturn('mysubaccountid');
         $oFcPayOneApiLogList->method('getPortalId')->willReturn('myportalid');
 
-        $sExpectString = " AND fcporequestlog.fcpo_portalid = 'myportalid' AND fcporequestlog.fcpo_aid = 'mysubaccountid' ";
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('quote')->willReturnOnConsecutiveCalls("'myportalid'", "'mysubaccountid'");
+        $this->invokeSetAttribute($oFcPayOneApiLogList, '_oFcPoDb', $oFcPoDb);
+
+        $sExpectString = " AND fcporequestlog.fcpo_portalid = 'myportalid' AND fcporequestlog.fcpo_aid = 'mysubaccountid'";
 
         $this->assertEquals($sExpectString, $this->invokeMethod($oFcPayOneApiLogList, '_prepareWhereQuery', [[], '']));
     }

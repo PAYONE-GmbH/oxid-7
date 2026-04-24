@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Model\FcPoConfigExport;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -28,15 +29,14 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
             ]
         ];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getAll', 'quote'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'fetchAllAssociative'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $oMockDatabase->method('quote')->willReturn('');
-        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchAllAssociative')->willReturn($aMockResult);
+        $oFcPoDb->method('quote')->willReturn("");
+        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoHelper', $oFcPoHelper);
 
@@ -168,11 +168,12 @@ class FcPoConfigExportTest extends FcBaseUnitTestCase
     {
         $oFcPoConfigExport = new FcPoConfigExport();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getCol'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchFirstColumn'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getCol')->willReturn(['someCol' => 'someValue']);
-        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchFirstColumn')->willReturn(['someCol' => 'someValue']);
+        $this->invokeSetAttribute($oFcPoConfigExport, '_oFcPoDb', $oFcPoDb);
+
 
         $this->assertEquals(['someCol' => 'someValue'], $oFcPoConfigExport->fcpoGetShopIds());
     }

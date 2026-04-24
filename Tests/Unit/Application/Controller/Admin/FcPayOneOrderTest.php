@@ -2,11 +2,13 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneOrder;
 use Fatchip\PayOne\Application\Model\FcPoTransactionStatus;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use Fatchip\PayOne\Tests\Unit\FcBaseUnitTestCase;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Config;
 use OxidEsales\Eshop\Core\Database\Adapter\Doctrine\Database;
@@ -19,10 +21,21 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
     {
         $oFcPayOneOrder = new FcPayOneOrder();
 
+        $oMockShadowBasket = $this->getMockBuilder(Basket::class)->disableOriginalConstructor()->getMock();
+
         $oMockOrder = $this->getMockBuilder(Order::class)
-            ->setMethods(['load'])
+            ->setMethods(['load', 'fcpoGetShadowBasket'])
             ->disableOriginalConstructor()->getMock();
         $oMockOrder->method('load')->willReturn(true);
+        $oMockOrder->method('fcpoGetShadowBasket')->willReturn($oMockShadowBasket);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'executeStatement'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('quote')->willReturn("'someQuotedString'");
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oFcPoDb);
+        $this->invokeSetAttribute($oMockOrder, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn(1);
@@ -122,13 +135,20 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrder->method('fcpoGetStatusOxid')->willReturn('someId');
 
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'executeStatement', 'fetchAllAssociative'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('quote')->willReturn("'someQuotedString'");
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $oFcPoDb->method('fetchAllAssociative')->willReturn(['someId']);
+
         $oMockOrder = $this->getMockBuilder(Order::class)
             ->setMethods(['load', 'fcpoGetStatusfcpoGetStatus'])
             ->disableOriginalConstructor()->getMock();
         $oMockOrder->method('load')->willReturn(true);
         $oMockOrder->method('fcpoGetStatusfcpoGetStatus')->willReturn(true);
         $oMockOrder->oxorder__fcpotxid = new Field('156452317');
-        $this->invokeSetAttribute($oMockOrder, '_oFcPoDb', DatabaseProvider::getDb());
+        $this->invokeSetAttribute($oMockOrder, '_oFcPoDb', $oFcPoDb);
 
 
         $oMockTransactionStatus = $this->getMockBuilder(FcPoTransactionStatus::class)
@@ -144,6 +164,7 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOneOrder, '_aStatus', null);
 
         $this->invokeSetAttribute($oMockOrder, '_oFcPoHelper', $oFcPoHelper);
+        $this->invokeSetAttribute($oMockOrder, '_oFcPoDb', $oFcPoDb);
 
         $aResponse = $aExpect = $oFcPayOneOrder->getStatus();
 
@@ -332,12 +353,6 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
 
-        $oMockDb = $this->getMockBuilder(Database::class)
-            ->setMethods(['GetOne'])
-            ->disableOriginalConstructor()->getMock();
-        $oMockDb->method('GetOne')->willReturn('1');
-        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDb);
-
         $sResponse = $sExpect = $oFcPayOneOrder->fcpoGetMandatePdfUrl();
 
         $this->assertEquals($sExpect, $sResponse);
@@ -364,12 +379,6 @@ class FcPayOneOrderTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturn($oMockOrder);
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoHelper', $oFcPoHelper);
-
-        $oMockDb = $this->getMockBuilder(Database::class)
-            ->setMethods(['GetOne'])
-            ->disableOriginalConstructor()->getMock();
-        $oMockDb->method('GetOne')->willReturn('1');
-        $this->invokeSetAttribute($oFcPayOneOrder, '_oFcPoDb', $oMockDb);
 
         $sResponse = $sExpect = $oFcPayOneOrder->fcpoGetMandatePdfUrl();
 

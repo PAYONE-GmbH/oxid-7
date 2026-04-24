@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneMain;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\FcCheckChecksum;

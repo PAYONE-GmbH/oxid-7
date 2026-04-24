@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\Config;
@@ -51,11 +52,11 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchOne')->willReturn('someValue');
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oFcPoDb);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryIsoAlphaById', ['someCountryId']));
     }
@@ -64,11 +65,11 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someName');
-        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchOne')->willReturn('someName');
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oFcPoDb);
 
         $this->assertEquals('someName', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryNameById', ['someCountryId']));
     }
@@ -77,11 +78,11 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchOne')->willReturn('someValue');
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oFcPoDb);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetCountryNameById', ['someCountryId']));
     }
@@ -90,11 +91,11 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
     {
         $oFcPayOnePayment = new FcPayOnePayment();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('fetchOne')->willReturn('someValue');
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oFcPoDb);
 
         $this->assertEquals('someValue', $this->invokeMethod($oFcPayOnePayment, 'fcpoGetUserPaymentId', ['someUserId', 'somePaymentType']));
     }
@@ -144,12 +145,11 @@ class FcPayOnePaymentTest extends FcBaseUnitTestCase
 
         $aMockResult = [['someValue', 'someValue', 'someValue', 'someValue', 'someValue']];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getAll'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchAllNumeric'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oMockDatabase);
-
+        $oFcPoDb->method('fetchAllNumeric')->willReturn($aMockResult);
+        $this->invokeSetAttribute($oFcPayOnePayment, '_oFcPoDb', $oFcPoDb);
 
         $aExpect = ['someValue'];
 
