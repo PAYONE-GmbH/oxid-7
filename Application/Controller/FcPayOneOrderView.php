@@ -602,7 +602,7 @@ class FcPayOneOrderView extends OrderController
                 $blValid = false;
             }
 
-            $blServiceProductsAgreement = $oConfig->getRequestParameter('fcspa');
+            $blServiceProductsAgreement = $this->_oFcPoHelper->fcpoGetRequestParameter('fcspa');
             if ($blValid && $oBasket->hasArticlesWithIntangibleAgreement() && !$blServiceProductsAgreement) {
                 $blValid = false;
             }
