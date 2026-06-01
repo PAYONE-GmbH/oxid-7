@@ -305,7 +305,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @return bool
      */
-    public function isPayOnePaymentType(string $sPaymenttype = null): bool
+    public function isPayOnePaymentType(?string $sPaymenttype): bool
     {
         if (!$sPaymenttype) {
             $sPaymenttype = $this->oxorder__oxpaymenttype->value;
