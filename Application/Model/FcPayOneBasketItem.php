@@ -57,7 +57,7 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      *
      * @return OrderArticle|Article
      */
-    public function getArticle($blCheckProduct = false, string $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
+    public function getArticle($blCheckProduct = false, $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
@@ -81,7 +81,7 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      * @param bool $blDisableLazyLoading
      * @return Article|OrderArticle
      */
-    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, string $sProductId = null, ?bool $blDisableLazyLoading = false): Article|OrderArticle
+    protected function _fcpoParentGetArticle(?bool $blCheckProduct = false, ?string $sProductId = null, ?bool $blDisableLazyLoading = false): Article|OrderArticle
     {
         return parent::getArticle($blCheckProduct, $sProductId, $blDisableLazyLoading);
     }
