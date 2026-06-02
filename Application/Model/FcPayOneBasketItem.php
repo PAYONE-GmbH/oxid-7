@@ -57,7 +57,6 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      *
      * @return OrderArticle|Article
      */
-    // @php-ignore  
     public function getArticle($blCheckProduct = false, string $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
