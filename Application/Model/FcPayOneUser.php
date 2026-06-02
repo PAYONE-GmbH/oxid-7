@@ -591,7 +591,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      */
     protected function _fcpoCalculateBoniFromScoreValue(string $sScoreValue): string
     {
-        $dScoreValue = (double)$sScoreValue;
+        $dScoreValue = (float)$sScoreValue;
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
 

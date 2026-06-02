@@ -1230,28 +1230,28 @@ class FcPoRequest extends Base
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
         $sDeliveryCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxdelivery');
-        $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
+        $sDeliveryCosts = (float)str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addInvoicePosition($iIndex, 'delivery', $sDeliveryCosts, 'shipment', 1, $oLang->translateString('FCPO_SHIPPINGCOST', null, false), $this->_fcpoFetchVatCostsFromBasket($oBasket, 'oxdelivery'));
             $iIndex++;
         }
 
         $sWrappingCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxwrapping');
-        $sWrappingCosts = (double)str_replace(',', '.', $sWrappingCosts);
+        $sWrappingCosts = (float)str_replace(',', '.', $sWrappingCosts);
         if ($sWrappingCosts > 0) {
             $this->addInvoicePosition($iIndex, 'wrapping', $sWrappingCosts, 'goods', 1, $oLang->translateString('FCPO_WRAPPING', null, false), 0);
             $iIndex++;
         }
 
         $sGiftcardCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxgiftcard');
-        $sGiftcardCosts = (double)str_replace(',', '.', $sGiftcardCosts);
+        $sGiftcardCosts = (float)str_replace(',', '.', $sGiftcardCosts);
         if ($sGiftcardCosts > 0) {
             $this->addInvoicePosition($iIndex, 'giftcard', $sGiftcardCosts, 'goods', 1, $oLang->translateString('FCPO_GIFTCARD', null, false), $this->_fcpoFetchVatCostsFromBasket($oBasket, 'oxgiftcard'));
             $iIndex++;
         }
 
         $sPaymentCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxpayment');
-        $sPaymentCosts = (double)str_replace(',', '.', $sPaymentCosts);
+        $sPaymentCosts = (float)str_replace(',', '.', $sPaymentCosts);
         if ($sPaymentCosts != 0) {
             $sPayDesc = $oLang->translateString('FCPO_DEDUCTION', null, false);
             if ($sPaymentCosts > 0) {
@@ -1295,7 +1295,7 @@ class FcPoRequest extends Base
         }
 
         $oCur = $oConfig->getActShopCurrencyObject();
-        $dFactor = (double)pow(10, $oCur->decimal);
+        $dFactor = (float)pow(10, $oCur->decimal);
 
         $dReturnPrice = $dBruttoPrice * $dFactor;
 
@@ -2659,7 +2659,7 @@ class FcPoRequest extends Base
         if ($oOrder->isDetailedProductInfoNeeded()) {
             $dAmount = $this->addProductInfo($oOrder, $aPositions, true);
             // amount for credit entry has to be negative
-            $dAmount = (double)$dAmount * -1;
+            $dAmount = (float)$dAmount * -1;
             if (!empty($aPositions)) {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in the smallest currency unit
