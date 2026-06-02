@@ -358,7 +358,7 @@ class FcPayOneTransactionStatusHandler extends FcPayOneTransactionStatusBase
      * @return Order
      * @throws DatabaseConnectionException
      */
-    protected function _getOrder(string $sTxid = null): Order
+    protected function _getOrder(?string $sTxid = null): Order
     {
         if (empty($this->_oFcOrder)) {
             if ($sTxid === null) {

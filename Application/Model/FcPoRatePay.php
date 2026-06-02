@@ -265,7 +265,7 @@ class FcPoRatePay extends BaseModel
      * @throws DatabaseConnectionException
      * @throws DatabaseErrorException
      */
-    public function fcpoGetRatePayProfiles(string $sPaymentId = null): array
+    public function fcpoGetRatePayProfiles(?string $sPaymentId = null): array
     {
         $aReturn = [];
 

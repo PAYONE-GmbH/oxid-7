@@ -2095,7 +2095,7 @@ class FcPoRequest extends Base
      * @throws DatabaseErrorException
      * @throws LanguageNotFoundException
      */
-    public function sendRequestPayolutionPreCheck(string $sPaymentId, User $oUser, array $aBankData, string $sWorkorderId = null): array
+    public function sendRequestPayolutionPreCheck(string $sPaymentId, User $oUser, array $aBankData, ?string $sWorkorderId = null): array
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -2269,7 +2269,7 @@ class FcPoRequest extends Base
      * @throws DatabaseConnectionException
      * @throws DatabaseErrorException
      */
-    public function getRefNr(Order $oOrder = null, bool $blAddPrefixToSession = false): string
+    public function getRefNr(?Order $oOrder = null, bool $blAddPrefixToSession = false): string
     {
         $sRawPrefix = (string)$this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('sFCPORefPrefix');
         $sSessionRefNr = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoRefNr');
