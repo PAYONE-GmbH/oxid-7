@@ -499,7 +499,7 @@ class FcPoHelper extends BaseModel
         }
 
         $oCur = $oConfig->getActShopCurrencyObject();
-        $dFactor = (double)pow(10, $oCur->decimal);
+        $dFactor = (float)pow(10, $oCur->decimal);
 
         return $dBruttoPrice * $dFactor;
     }

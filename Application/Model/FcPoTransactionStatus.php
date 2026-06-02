@@ -89,8 +89,8 @@ class FcPoTransactionStatus extends BaseModel
     {
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
         $sAction = $this->fcpotransactionstatus__fcpo_txaction->value;
-        $dReceivable = (double)$this->fcpotransactionstatus__fcpo_txreceivable->value;
-        $dBalance = (double)$this->fcpotransactionstatus__fcpo_balance->value;
+        $dReceivable = (float)$this->fcpotransactionstatus__fcpo_txreceivable->value;
+        $dBalance = (float)$this->fcpotransactionstatus__fcpo_balance->value;
 
         if ($sAction == 'paid' && ($dReceivable + $dBalance) < 0) {
             $sAction = 'overpaid';
