@@ -239,7 +239,7 @@ class FcPayOnePayment extends \OxidEsales\Eshop\Application\Model\Payment
      * @param string|null $sPaymentId
      * @return bool
      */
-    public function fcpoShowAsRegularPaymentSelection(string $sPaymentId = null): bool
+    public function fcpoShowAsRegularPaymentSelection(?string $sPaymentId = null): bool
     {
         $sPaymentId = $sPaymentId ?: $this->getId();
         return !in_array($sPaymentId, $this->_aExpressPayments);

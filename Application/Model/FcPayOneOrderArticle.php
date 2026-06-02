@@ -216,7 +216,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      *
      * @return bool
      */
-    public function delete($sOXID = null): bool
+    public function delete(?string $sOXID = null): bool
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();

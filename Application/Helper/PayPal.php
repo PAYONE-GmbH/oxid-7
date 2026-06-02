@@ -135,7 +135,7 @@ class PayPal extends Base
      * @param  string $sLocale
      * @return string
      */
-    protected function getSupportedLocaleCode($sLocale = null)
+    protected function getSupportedLocaleCode(?string $sLocale = null)
     {
         if (!$sLocale || !in_array($sLocale, $this->aSupportedLocales)) {
             return 'en_US';

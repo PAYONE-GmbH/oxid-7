@@ -1173,7 +1173,7 @@ class FcPayOnePaymentView extends PaymentController
      *
      * @return bool|UserPayment
      */
-    protected function _fcGetPaymentByPaymentType(User $oUser = null, string $sPaymentType = null): bool|UserPayment
+    protected function _fcGetPaymentByPaymentType(?User $oUser = null, ?string $sPaymentType = null): bool|UserPayment
     {
         $mReturn = false;
         if ($oUser && $sPaymentType != null) {
@@ -2724,7 +2724,7 @@ class FcPayOnePaymentView extends PaymentController
      * @param string|null $sWorkOrderId
      * @return bool
      */
-    protected function _fcpoPerformPayolutionPreCheck(string $sPaymentId, string $sWorkOrderId = null): bool
+    protected function _fcpoPerformPayolutionPreCheck(string $sPaymentId, ?string $sWorkOrderId = null): bool
     {
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
         if ($blPreCheckNeeded) {
@@ -3844,7 +3844,7 @@ class FcPayOnePaymentView extends PaymentController
      *
      * @return void
      */
-    protected function _setValues(array &$aPaymentList, Basket $oBasket = null): void
+    protected function _setValues(array &$aPaymentList, ?Basket $oBasket = null): void
     {
         parent::_setValues($aPaymentList, $oBasket);
 

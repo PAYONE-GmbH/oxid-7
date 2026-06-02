@@ -228,7 +228,7 @@ class FcPayOneTransactionStatusBase extends BaseController
      * @return void
      * @throws Exception
      */
-    protected function _addQueueEntries(string $sStatusmessageId, string $sPayoneStatus = null): void
+    protected function _addQueueEntries(string $sStatusmessageId, ?string $sPayoneStatus = null): void
     {
         try {
             if ($sPayoneStatus === null) {
