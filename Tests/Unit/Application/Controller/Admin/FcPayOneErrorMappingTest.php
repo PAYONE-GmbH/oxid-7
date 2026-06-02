@@ -2,6 +2,8 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller\Admin;
 
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use Fatchip\PayOne\Application\Controller\Admin\FcPayOneErrorMapping;
 use Fatchip\PayOne\Application\Model\FcPoErrorMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -136,10 +138,14 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
             'some' => ['Data']
         ];
 
+        $oMockQueryResult = $this->createMock(Result::class);
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
             ->setMethods(['_fcpoGetQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoErrorMapping->method('_fcpoGetQuery')->willReturn('someQuery');
+        $oFcPoErrorMapping->method('_fcpoGetQuery')->willReturn($oMockQueryBuilder);
 
         $oFcPayOneErrorMapping = $this->getMockBuilder(FcPayOneErrorMapping::class)
             ->setMethods(['fcpoGetInstance'])
@@ -163,10 +169,14 @@ class FcPayOneErrorMappingTest extends ConfigUnitTestCase
             'some' => ['Data']
         ];
 
+        $oMockQueryResult = $this->createMock(Result::class);
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoErrorMapping = $this->getMockBuilder(FcPoErrorMapping::class)
             ->setMethods(['_fcpoGetQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoErrorMapping->method('_fcpoGetQuery')->willReturn('someQuery');
+        $oFcPoErrorMapping->method('_fcpoGetQuery')->willReturn($oMockQueryBuilder);
 
         $oFcPayOneErrorMapping = $this->getMockBuilder(FcPayOneErrorMapping::class)
             ->setMethods(['fcpoGetInstance'])

@@ -80,7 +80,7 @@ class FcPayOneMainAjax extends ListComponentAjax
     {
         parent::__construct();
         $this->_oFcPoHelper = oxNew(FcPoHelper::class);
-        $this->_oFcPoDb = $this->_oFcpoHelper->fcpoGetPdoDb();
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
     }
 
     /**

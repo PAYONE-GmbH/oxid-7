@@ -71,6 +71,9 @@ jobs:
       - name: Install plugin
         run: |
           composer -n --no-progress --working-dir=/tmp/oxid7 require payone-gmbh/oxid-7:dev-master
+          cp -a $GITHUB_WORKSPACE/. /tmp/oxid7/vendor/payone-gmbh/oxid-7/
+          cd /tmp/oxid7
+          composer dump-autoload
       - name: Run tests
         run: |
           mv /tmp/oxid7/vendor/payone-gmbh/oxid-7/.github/test_config.yml /tmp/oxid7/test_config.yml

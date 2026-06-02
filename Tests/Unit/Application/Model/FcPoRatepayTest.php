@@ -2,6 +2,8 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Result;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
@@ -21,11 +23,11 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
             ->setMethods(['_fcpoUpdateRatePayProfile'])
             ->disableOriginalConstructor()->getMock();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(null);
-        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoRatepay->fcpoInsertProfile('someId', $aMockData);
     }
@@ -41,11 +43,11 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
             ->setMethods(['_fcpoUpdateRatePayProfile'])
             ->disableOriginalConstructor()->getMock();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(null);
-        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoRatepay->fcpoInsertProfile('someId', $aMockData);
     }
@@ -64,15 +66,24 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
             ]
         ];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getAll', 'quote'])
+        $oMockQueryResult = $this->createMock(Result::class);
+        $oMockQueryResult->method('fetchAllAssociative')->willReturn($aMockResult);
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->setMethods(['execute', 'select', 'from', 'where', 'setParameter'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $oMockDatabase->method('quote')->willReturn(null);
-        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $oMockQueryBuilder->method('execute')->willReturn($oMockQueryResult);
+        $oMockQueryBuilder->method('select')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('from')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('setParameter')->willReturn($oMockQueryBuilder);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoHelper', $oFcPoHelper);
 
         $aExpect = [
@@ -95,11 +106,11 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
     {
         $oFcPoRatepay = new FcPoRatepay();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(null);
-        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $oMockOxUtils = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUId'])
@@ -126,8 +137,13 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
         $oMockDatabase->method('GetRow')->willReturn($aMockResult);
         $oMockDatabase->method('quote')->willReturn(null);
 
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchAssociative'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('fetchAssociative')->willReturn($aMockResult);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
+
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoHelper', $oFcPoHelper);
 
         $this->assertEquals($aExpect, $oFcPoRatepay->fcpoGetProfileData('someId'));
@@ -139,13 +155,13 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
 
         $aMockResult = ['someValue'];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getRow'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchAssociative'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getRow')->willReturn($aMockResult);
+        $oFcPoDb->method('fetchAssociative')->willReturn($aMockResult);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoHelper', $oFcPoHelper);
 
         $aExpect = ['someValue'];
@@ -184,12 +200,12 @@ class FcPoRatepayTest extends FcBaseUnitTestCase
     {
         $oFcPoRatepay = new FcPoRatepay();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute', 'quote'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(null);
-        $oMockDatabase->method('quote')->willReturn(null);
-        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(false);
+        $oFcPoDb->method('quote')->willReturn(false);
+        $this->invokeSetAttribute($oFcPoRatepay, '_oFcPoDb', $oFcPoDb);
 
         $this->invokeMethod($oFcPoRatepay, '_fcpoUpdateRatePayProfileByResponse', ['someId', []]);
     }

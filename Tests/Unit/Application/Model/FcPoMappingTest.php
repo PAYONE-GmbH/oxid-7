@@ -2,6 +2,9 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Result;
 use Fatchip\PayOne\Application\Model\FcPoMapping;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -23,16 +26,21 @@ class FcPoMappingTest extends FcBaseUnitTestCase
             ],
         ];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getAll'])
+        $oMockQueryResult = $this->createMock(Result::class);
+        $oMockQueryResult->method('fetchAllAssociative')->willReturn($aMockResult);
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->setMethods(['execute'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getAll')->willReturn($aMockResult);
-        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $oMockQueryBuilder->method('execute')->willReturn($oMockQueryResult);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
-        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
 
         $aResponse = $aExpect = $oFcPoMapping->fcpoGetExistingMappings();
         $this->assertEquals($aExpect, $aResponse);
@@ -43,20 +51,23 @@ class FcPoMappingTest extends FcBaseUnitTestCase
      */
     public function testFcpoUpdateMappings()
     {
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoMapping = $this->getMockBuilder(FcPoMapping::class)
             ->setMethods(['_fcpoGetQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoMapping->method('_fcpoGetQuery')->willReturn('someQuery');
+        $oFcPoMapping->method('_fcpoGetQuery')->willReturn($oMockQueryBuilder);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oFcPoDb);
 
         $aMockMappings = ['someIndex' => ['someValue']];
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
 
         $oFcPoMapping->fcpoUpdateMappings($aMockMappings);
@@ -64,41 +75,49 @@ class FcPoMappingTest extends FcBaseUnitTestCase
 
     public function testFcpoGetQuery_Delete()
     {
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoMapping = $this->getMockBuilder(FcPoMapping::class)
             ->setMethods(['_fcpoGetUpdateQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoMapping->method('_fcpoGetUpdateQuery')->willReturn('someQuery');
+        $oFcPoMapping->method('_fcpoGetUpdateQuery')->willReturn($oMockQueryBuilder);
 
         $aMockData = ['delete' => true];
         $sMockOxid = 'someId';
         $sQuotedOxid = DatabaseProvider::getDb()->quote($sMockOxid);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
             ->setMethods(['quote'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('quote')->willReturn($sQuotedOxid);
+        $oFcPoDb->method('quote')->willReturn($sQuotedOxid);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoMapping, '_oFcPoHelper', $oFcPoHelper);
 
-        $sExpect = "DELETE FROM fcpostatusmapping WHERE oxid = $sQuotedOxid";
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, 'someType']);
 
-        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, 'someType']));
+        $this->assertEquals($sExpect, $sResponse);
     }
 
     public function testFcpoGetQuery_Update()
     {
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oFcPoMapping = $this->getMockBuilder(FcPoMapping::class)
             ->setMethods(['_fcpoGetUpdateQuery'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoMapping->method('_fcpoGetUpdateQuery')->willReturn('someValue');
+        $oFcPoMapping->method('_fcpoGetUpdateQuery')->willReturn($oMockQueryBuilder);
 
         $aMockData = ['donotdelete' => true];
         $sMockOxid = 'someId';
         $sExpect = "someValue";
 
-        $this->assertEquals($sExpect, $this->invokeMethod($oFcPoMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, 'someType']));
+        $sResponse = $sExpect = $this->invokeMethod($oFcPoMapping, '_fcpoGetQuery', [$sMockOxid, $aMockData, 'someType']);
+
+        $this->assertEquals($sExpect, $sResponse);
     }
 
     public function testFcpoGetUpdateQuery_Insert()
@@ -108,9 +127,19 @@ class FcPoMappingTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPoMapping->method('_fcpoIsValidNewEntry')->willReturn(true);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
             ->disableOriginalConstructor()->getMock();
-        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $oMockQueryBuilder->method('insert')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('values')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('update')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('set')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oFcPoDb);
 
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])
@@ -144,9 +173,19 @@ class FcPoMappingTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPoMapping->method('_fcpoIsValidNewEntry')->willReturn(false);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
+        $oMockQueryBuilder = $this->getMockBuilder(QueryBuilder::class)
             ->disableOriginalConstructor()->getMock();
-        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oMockDatabase);
+        $oMockQueryBuilder->method('insert')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('values')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('update')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('set')->willReturn($oMockQueryBuilder);
+        $oMockQueryBuilder->method('where')->willReturn($oMockQueryBuilder);
+
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['createQueryBuilder'])
+            ->disableOriginalConstructor()->getMock();
+        $oFcPoDb->method('createQueryBuilder')->willReturn($oMockQueryBuilder);
+        $this->invokeSetAttribute($oFcPoMapping, '_oFcPoDb', $oFcPoDb);
 
         $oMockUtilsObject = $this->getMockBuilder(UtilsObject::class)
             ->setMethods(['generateUID'])

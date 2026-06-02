@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Model\FcPoPaypal;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use OxidEsales\Eshop\Core\DatabaseProvider;
@@ -64,15 +65,15 @@ class FcPoPaypalTest extends FcBaseUnitTestCase
 
         $aMockLogos = [1 => ['active' => 'existingLogo', 'langid' => 'someId']];
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute', 'quote'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
-        $oMockDatabase->method('quote')->willReturn('');
-        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $oFcPoDb->method('quote')->willReturn("");
+        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oFcPoDb);
+
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoHelper', $oFcPoHelper);
 
         $oFcPoPaypal->fcpoUpdatePayPalLogos($aMockLogos);
@@ -85,12 +86,12 @@ class FcPoPaypalTest extends FcBaseUnitTestCase
     {
         $oFcPoPaypal = new FcPoPaypal();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute', 'quote'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['quote', 'executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
-        $oMockDatabase->method('quote')->willReturn('');
-        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $oFcPoDb->method('quote')->willReturn("");
+        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn(1);
@@ -106,11 +107,11 @@ class FcPoPaypalTest extends FcBaseUnitTestCase
     {
         $oFcPoPaypal = new FcPoPaypal();
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['executeStatement'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
-        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oMockDatabase);
+        $oFcPoDb->method('executeStatement')->willReturn(1);
+        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoPaypal->fcpoAddPaypalExpressLogo();
     }
@@ -149,10 +150,19 @@ class FcPoPaypalTest extends FcBaseUnitTestCase
 
     public function testFcpoHandleFile()
     {
+        $sExpected = ", FCPO_LOGO = 'someValue'";
+
         $oFcPoPaypal = $this->getMockBuilder(FcPoPaypal::class)
-            ->setMethods(['_fcpoFetchMediaUrl'])
             ->disableOriginalConstructor()->getMock();
-        $oFcPoPaypal->method('_fcpoFetchMediaUrl')->willReturn('someValue');
+
+        $oMockUtils = $this->getMockBuilder(UtilsFile::class)
+            ->setMethods(['processFile'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockUtils->method('processFile')->willReturn($sExpected);
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('fcpoGetUtilsFile')->willReturn($oMockUtils);
+        $this->invokeSetAttribute($oFcPoPaypal, '_oFcPoHelper', $oFcPoHelper);
 
         $aFiles = [
             'logo_1' => [
@@ -160,7 +170,7 @@ class FcPoPaypalTest extends FcBaseUnitTestCase
             ],
         ];
 
-        $this->assertEquals(", FCPO_LOGO = 'someValue'", $this->invokeMethod($oFcPoPaypal, '_fcpoHandleFile', [1, $aFiles]));
+        $this->assertEquals($sExpected, $this->invokeMethod($oFcPoPaypal, '_fcpoHandleFile', [1, $aFiles]));
     }
 
     public function testFcpoFetchMediaUrl_NewerShopVersion()

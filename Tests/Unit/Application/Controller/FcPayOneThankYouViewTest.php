@@ -65,11 +65,6 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
 
     public function testFcpoGetMandatePdfUrl_Inactive()
     {
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['Execute'])
-            ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('Execute')->willReturn(true);
-
         $oMockConfig = $this->getMockBuilder(Config::class)
             ->setMethods(['getConfigParam', 'getShopUrl'])
             ->disableOriginalConstructor()->getMock();
@@ -114,7 +109,6 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $oFcPoHelper->method('getFactoryObject')->willReturnOnConsecutiveCalls($oMockPayment, $oMockRequest);
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneThankYouView, '_oFcPoHelper', $oFcPoHelper);
-        $this->invokeSetAttribute($oFcPayOneThankYouView, '_oFcPoDb', $oMockDatabase);
 
         $sExpect = 'https://www.someurl.org/somepdf.pdf&uid=someUserId';
 

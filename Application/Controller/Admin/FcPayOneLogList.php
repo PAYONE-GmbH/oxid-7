@@ -137,7 +137,7 @@ class FcPayOneLogList extends FcPayOneAdminList
             $this->_oFcPoDb->quote($this->getBNPLPortalId()),
         ];
         $sAid = $this->getSubAccountId();
-        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = " . $this->_oFcPoDb->quote($sAid);
+        return $sQ . " AND fcpotransactionstatus.fcpo_portalid IN (" . implode(',', $aPortalIds) . ") AND fcpotransactionstatus.fcpo_aid = " . $this->_oFcPoDb->quote($sAid) . " ";
     }
 
     /**

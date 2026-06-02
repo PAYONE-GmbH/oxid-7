@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\FcPayOneBasketView;
 use Fatchip\PayOne\Application\Helper\Payment;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -83,15 +84,16 @@ class FcPayOneBasketViewTest extends FcBaseUnitTestCase
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneBasketView->method('getConfig')->willReturn($oMockConfig);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['getOne'])
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->setMethods(['fetchOne'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('getOne')->willReturn($sExpected);
+        $oFcPoDb->method('fetchOne')->willReturn($sExpected);
+        $this->invokeSetAttribute($oFcPayOneBasketView, '_oFcPoDb', $oFcPoDb);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoFileExists')->willReturn(true);
-        $oFcPoHelper->method('fcpoGetDb')->willReturn($oMockDatabase);
         $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
+        $oFcPoHelper->method('fcpoGetPdoDb')->willReturn($oFcPoDb);
         $this->invokeSetAttribute($oFcPayOneBasketView, '_oFcPoHelper', $oFcPoHelper);
         $this->invokeSetAttribute($oFcPayOneBasketView, '_sPayPalExpressLogoPath', 'somePath/');
 

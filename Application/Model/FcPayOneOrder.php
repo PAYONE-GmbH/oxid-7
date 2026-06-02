@@ -45,7 +45,7 @@ use OxidEsales\Eshop\Core\Model\ListModel;
 use OxidEsales\Eshop\Core\Str;
 use OxidEsales\Eshop\Core\ViewConfig;
 
-class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
+class FcPayOneOrder extends FcPayOneOrder_parent
 {
 
     /**
@@ -2009,7 +2009,7 @@ class FcPayOneOrder extends \OxidEsales\Eshop\Application\Model\Order
     protected function _fcpoSaveProfileIdent(string $sPaymentId, array $aResponse): void
     {
         if (in_array($sPaymentId, $this->_aPaymentsProfileIdentSave)) {
-            $oRatePay = oxNew(FcPoRatePay::class);
+            $oRatePay = $this->_oFcPoHelper->getFactoryObject(FcPoRatePay::class);
             $sProfileId = $this->_oFcPoHelper->fcpoGetSessionVariable('ratepayprofileid');
             $aProfileData = $oRatePay->fcpoGetProfileData($sProfileId);
             $sRatePayShopId = $aProfileData['shopid'];

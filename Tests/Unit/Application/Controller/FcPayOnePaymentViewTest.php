@@ -2,6 +2,7 @@
 
 namespace Fatchip\PayOne\Tests\Unit\Application\Controller;
 
+use Doctrine\DBAL\Connection;
 use Fatchip\PayOne\Application\Controller\FcPayOnePaymentView;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
@@ -222,11 +223,14 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
         $oFcPayOnePaymentView->method('getUserBillCountryId')->willReturn('');
         $oFcPayOnePaymentView->method('getUserDelCountryId')->willReturn(true);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oMockPayment = $this->getMockBuilder(Payment::class)
+            ->setMethods(['isPaymentMethodAvailableToUser'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoDb', $oMockDatabase);
+        $oMockPayment->method('isPaymentMethodAvailableToUser')->willReturn(true);
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('getFactoryObject')->willReturn($oMockPayment);
+        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoHelper', $oFcPoHelper);
 
         $this->assertEquals('1', $this->invokeMethod($oFcPayOnePaymentView, 'isPaymentMethodAvailableToUser', ['paymentid', 'type']));
     }
@@ -239,11 +243,14 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
         $oFcPayOnePaymentView->method('getUserBillCountryId')->willReturn('');
         $oFcPayOnePaymentView->method('getUserDelCountryId')->willReturn(false);
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
+        $oMockPayment = $this->getMockBuilder(Payment::class)
+            ->setMethods(['isPaymentMethodAvailableToUser'])
             ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoDb', $oMockDatabase);
+        $oMockPayment->method('isPaymentMethodAvailableToUser')->willReturn(true);
+
+        $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
+        $oFcPoHelper->method('getFactoryObject')->willReturn($oMockPayment);
+        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoHelper', $oFcPoHelper);
 
         $this->assertEquals('1', $this->invokeMethod($oFcPayOnePaymentView, 'isPaymentMethodAvailableToUser', ['paymentid', 'type']));
     }
@@ -807,6 +814,9 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
 
     public function testGetPaymentList_1()
     {
+        $oFcPoDb = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()->getMock();
+
         $oMockConfig = $this->getMockBuilder(Config::class)
             ->setMethods(['getConfigParam'])
             ->disableOriginalConstructor()->getMock();
@@ -816,6 +826,7 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
             ->setMethods(['checkAddressAndScore'])
             ->disableOriginalConstructor()->getMock();
         $oMockUser->method('checkAddressAndScore')->willReturn(true);
+        $this->invokeSetAttribute($oMockUser, '_oFcPoDb', $oFcPoDb);
 
         $oMockUtils = $this->getMockBuilder(Utils::class)
             ->setMethods(['redirect'])
@@ -833,6 +844,7 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoHelper', $oFcPoHelper);
         $this->invokeSetAttribute($oMockUser, '_oFcPoHelper', $oFcPoHelper);
 
+        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoDb', $oFcPoDb);
         $this->invokeSetAttribute($oFcPayOnePaymentView, '_oPaymentList', null);
 
         $mResponse = $mExpect = $this->invokeMethod($oFcPayOnePaymentView, 'getPaymentList');
@@ -1363,12 +1375,6 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
 
         $sMockPaymentType = 'fcpopayadvance';
 
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
-            ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoDb', $oMockDatabase);
-
         $oMockUserPayment = $this->getMockBuilder(UserPayment::class)
             ->setMethods(['load'])
             ->disableOriginalConstructor()->getMock();
@@ -1398,12 +1404,6 @@ class FcPayOnePaymentViewTest extends FcBaseUnitTestCase
         $oMockUser->method('getId')->willReturn('someId');
 
         $sMockPaymentType = null;
-
-        $oMockDatabase = $this->getMockBuilder(DatabaseProvider::getDb()::class)
-            ->setMethods(['GetOne'])
-            ->disableOriginalConstructor()->getMock();
-        $oMockDatabase->method('GetOne')->willReturn('someValue');
-        $this->invokeSetAttribute($oFcPayOnePaymentView, '_oFcPoDb', $oMockDatabase);
 
         $oMockUserPayment = $this->getMockBuilder(UserPayment::class)
             ->setMethods(['load'])

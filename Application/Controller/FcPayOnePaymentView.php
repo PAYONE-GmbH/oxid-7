@@ -27,7 +27,6 @@ use Fatchip\PayOne\Application\Model\FcPayOnePayment;
 use Fatchip\PayOne\Application\Model\FcPoRatePay;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
-use OxidEsales\Eshop\Application\Controller\PaymentController;
 use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Application\Model\Country;
@@ -42,7 +41,7 @@ use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\ViewConfig;
 use stdClass;
 
-class FcPayOnePaymentView extends PaymentController
+class FcPayOnePaymentView extends FcPayOnePaymentView_parent
 {
 
     /**
@@ -771,7 +770,7 @@ class FcPayOnePaymentView extends PaymentController
         if (array_key_exists($sSubPaymentId . '_' . $sType, $this->_aCheckedSubPayments) === false) {
             $sUserBillCountryId = $this->getUserBillCountryId();
             $sUserDelCountryId = $this->getUserDelCountryId();
-            $oPayment = oxNew(Payment::class);
+            $oPayment = $this->_oFcPoHelper->getFactoryObject(Payment::class);
             $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType] = $oPayment->isPaymentMethodAvailableToUser($sSubPaymentId, $sType, $sUserBillCountryId, $sUserDelCountryId);
         }
         return $this->_aCheckedSubPayments[$sSubPaymentId . '_' . $sType];
