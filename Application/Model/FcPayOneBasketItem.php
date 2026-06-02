@@ -52,12 +52,13 @@ class FcPayOneBasketItem extends FcPayOneBasketItem_parent
      * is not buyable or visible.
      *
      * @param bool|null $blCheckProduct checks if product is buyable and visible
-     * @param null $sProductId product id
+     * @param string|null $sProductId product id
      * @param bool $blDisableLazyLoading disable lazy loading
      *
      * @return OrderArticle|Article
      */
-    public function getArticle($blCheckProduct = false,?string $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
+    // @php-ignore  
+    public function getArticle($blCheckProduct = false, string $sProductId = null, $blDisableLazyLoading = false): OrderArticle|Article
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
