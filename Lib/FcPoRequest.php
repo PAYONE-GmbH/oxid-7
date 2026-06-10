@@ -3222,8 +3222,7 @@ class FcPoRequest extends Base
             $this->removeParameter('solution_version');
         }
 
-        $sPath = 'modules/fc/fcpayone/mandates/' . $sMandateIdentification . '.pdf';
-        $sDestinationFile = getShopBasePath() . $sPath;
+        $sDestinationFile = realpath(getShopBasePath() . '../' . 'vendor/payone-gmbh/oxid-7/mandates') . '/' .  $sMandateIdentification . '.pdf';
 
         $aOptions = ['http' => ['header' => "Content-type: application/x-www-form-urlencoded\r\n", 'method' => 'POST', 'content' => http_build_query($this->_aParameters)]];
         $oContext = stream_context_create($aOptions);
@@ -3243,7 +3242,7 @@ class FcPoRequest extends Base
                     ]);
                 }
 
-                $sReturn = $this->_oFcPoHelper->fcpoGetConfig()->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
+                $sReturn = $this->_oFcPoHelper->fcpoGetConfig()->getShopUrl() . "index.php?cl=FcPayOneMandateDownload&id=" . $sOrderId;
                 $sStatus = 'SUCCESS';
 
                 $aOutput = ['file' => $sDestinationFile];

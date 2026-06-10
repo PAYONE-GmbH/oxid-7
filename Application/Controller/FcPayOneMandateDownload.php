@@ -18,22 +18,12 @@
  * @version       OXID eShop CE
  */
 
-namespace Fatchip\PayOne;
-
-set_time_limit(0);
-ini_set('memory_limit', 
-    '1024M');
-ini_set('log_errors', 1);
-ini_set('error_log', 
-    'error.log');
-
-include_once __DIR__ . "/../../../bootstrap.php";
+namespace Fatchip\PayOne\Application\Controller;
 
 use Doctrine\DBAL\Query\QueryBuilder;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Controller\FrontendController;
-use OxidEsales\Eshop\Core\DatabaseProvider;
 
 /**
  * Description of FcPayOneMandateDownload
@@ -86,8 +76,7 @@ class FcPayOneMandateDownload extends FrontendController
         $sFilename = (string)$aResult[0];
         $sOrderId = (string)$aResult[1];
         $sPaymentId = (string)$aResult[2];
-
-        $sPath = getShopBasePath() . 'modules/fc/fcpayone/mandates/' . $sFilename;
+        $sPath = realpath(getShopBasePath() . '../' . 'vendor/payone-gmbh/oxid-7/mandates/') . '/' . $sFilename;
 
         if (!file_exists($sPath)) {
             $this->_redownloadMandate($sFilename, $sOrderId, $sPaymentId);
