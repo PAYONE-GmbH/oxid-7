@@ -58,7 +58,7 @@ class FcPayOneThankYouViewTest extends FcBaseUnitTestCase
         $this->invokeSetAttribute($oFcPayOneThankYouView, '_oFcPoHelper', $oFcPoHelper);
         $this->invokeSetAttribute($oMockPayment, '_oFcPoHelper', $oFcPoHelper);
 
-        $sExpect = 'https://www.someshopurl.org/modules/fc/fcpayone/download.php?id=someId&uid=someUserId';
+        $sExpect = 'https://www.someshopurl.org/index.php?cl=FcPayOneMandateDownload&id=someId&uid=someUserId';
 
         $this->assertEquals($sExpect, $oFcPayOneThankYouView->fcpoGetMandatePdfUrl());
     }
