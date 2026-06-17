@@ -957,6 +957,7 @@ class FcPoRequest extends Base
         $oUser = $oOrder->getOrderUser();
         $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_workorderid');
         $aBankData = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_bankdata');
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
         $sInstallmentDuration = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_installment_duration');
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
 
@@ -967,6 +968,7 @@ class FcPoRequest extends Base
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');
         $this->addParameter('mode', $this->getOperationMode($oOrder->oxorder__oxpaymenttype->value));
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
@@ -2046,6 +2048,9 @@ class FcPoRequest extends Base
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
         $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
+
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
@@ -2114,10 +2119,12 @@ class FcPoRequest extends Base
         $this->addParameter('currency', $oCurr->name);
 
         $sPaymentType = $this->_fcpoGetPayolutionPaymentTypeById($sPaymentId);
-        $sFinancignType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
+        $sFinancingType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
 
-        $this->addParameter('financingtype', $sFinancignType);
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
+        $this->addParameter('financingtype', $sFinancingType);
         $this->addParameter('add_paydata[action]', 'pre_check');
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');

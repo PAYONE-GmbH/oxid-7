@@ -595,4 +595,48 @@ class FcPayOneViewConf extends FcPayOneViewConf_parent
         return $jsonDisplayItems;
     }
 
+    /**
+     * Checks if session variable paySafeSessionId exists and returns it if true
+     * Otherwise value will be generated, saved and returned
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetPaySafeSessionId()
+    {
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();;
+        $sPaySafeSessionId = $oSession->getVariable('paySafeSessionId');
+
+        if ($sPaySafeSessionId) {
+            return $sPaySafeSessionId;
+        }
+
+        $sPaySafeSessionId =
+            $this->_fcpoGetGeneratedPaySafeSessionId();
+        $oSession->setVariable('paySafeSessionId', $sPaySafeSessionId);
+
+        return (string) $sPaySafeSessionId;
+    }
+
+    /**
+     * Creates and returns a pay safe session id
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetGeneratedPaySafeSessionId()
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oSession = $this->_oFcPoHelper->fcpoGetSession();
+
+        $sMerchantId = $oConfig->getConfigParam('sFCPOMerchantID');
+        $sPhpSessionId = $oSession->getId();
+        $sTimestamp = microtime(false);
+        $sSessionIdInput = $sMerchantId.$sPhpSessionId.$sTimestamp;
+        $sPortalKey = $oConfig->getConfigParam('sFCPOPortalKey');
+        $sHashSha2 = hash_hmac('sha384', $sSessionIdInput, $sPortalKey);
+
+        return $sHashSha2;
+    }
+
 }

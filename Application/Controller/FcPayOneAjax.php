@@ -116,6 +116,10 @@ class FcPayOneAjax extends BaseController
                 echo json_encode($this->fcpoGetBNPLInstallment());
             }
 
+            if ($sAction == 'getpaysafefraudsnippet') {
+                echo $this->fcpoGetPaysafeFraudProtectionSnippet();
+            }
+
             $aKlarnaPayments = [
                 'fcpoklarna_invoice',
                 'fcpoklarna_installments',
@@ -1015,6 +1019,30 @@ class FcPayOneAjax extends BaseController
         $oPopupContent = new FcPoPopUpContent($sResource, $sLoadUrl, $sDuration, true, (bool)$sUseLogin);
 
         return $oPopupContent->fcpo_fetch_content();
+    }
+
+    /**
+     * Returns JS snippet via ajax if user confirms GDPR
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetPaysafeFraudProtectionSnippet(): string
+    {
+        /** @var ViewConfig $config */
+        $oViewConfig = $this->_oFcPoHelper->fcpoGetViewConfig();
+        $sPaySafeSessionId = $oViewConfig->fcpoGetPaySafeSessionId();
+        $sSrc = "https://h.online-metrix.net/fp/tags?org_id=363t8kgq&session_id=".$sPaySafeSessionId;
+        $sStyleNoScript = "width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;";
+
+        $sSnippet = '
+            <script type="text/javascript" src="'.$sSrc.'"></script>
+            <noscript>
+                <iframe style="'.$sStyleNoScript.'" src="'.$sSrc.'"></iframe>
+            </noscript>
+        ';
+
+        return $sSnippet;
     }
 
 }

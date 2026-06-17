@@ -7,6 +7,7 @@
                 for="payment_{{ sPaymentID }}">{{ translate({ ident: paymentmethod.oxpayments__oxdesc.value }) }}</label>
 
         <div class="payment-option-info{% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %} activePayment{% endif %}">
+            <div id="paysafe_fraud_prevention_bill"></div>
             <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
             <link href="{{ oViewConf.getModuleUrl("fcpayone", "css/lightview.css") }}" rel="stylesheet">
             <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/jquery-3.6.0.min.js") }}"></script>
@@ -62,7 +63,9 @@
             {% endif %}
 
             <div class="form-floating mb-3">
-                <input name="dynvalue[fcpo_payolution_bill_agreed]" value="agreed" type="checkbox">&nbsp;{{ oView.fcpoGetPoAgreementInit(sPaymentID)|raw }}
+                <input name="dynvalue[fcpo_payolution_bill_agreed]"
+                       onchange="fcpoGetPaySafeFraudSnippet('fcpo_payolution_bill_agreed', 'paysafe_fraud_prevention_bill')"
+                       value="agreed" type="checkbox">&nbsp;{{ oView.fcpoGetPoAgreementInit(sPaymentID)|raw }}
                 <a href='{{ oView.fcpoGetPayolutionAgreementLink() }}' class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">
                     {{ translate({ ident: "FCPO_PAYOLUTION_AGREE" }) }}
                 </a>
