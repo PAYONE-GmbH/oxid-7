@@ -305,7 +305,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @return bool
      */
-    public function isPayOnePaymentType(string $sPaymenttype = null): bool
+    public function isPayOnePaymentType(?string $sPaymenttype = null): bool
     {
         if (!$sPaymenttype) {
             $sPaymenttype = $this->oxorder__oxpaymenttype->value;
@@ -1610,7 +1610,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @return float|int
      */
-    public function fcGetArtStockInBasket(Basket $oBasket, string $sArtId, string $sExpiredArtId = null): float|int
+    public function fcGetArtStockInBasket(Basket $oBasket, string $sArtId, ?string $sExpiredArtId = null): float|int
     {
         $dArtStock = 0;
 
@@ -1718,7 +1718,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @return ?bool
      * @throws DatabaseErrorException
      */
-    public function fcHandleAuthorization(bool $blReturnRedirectUrl = false, PaymentGateway $oPayGateway = null): ?bool
+    public function fcHandleAuthorization(bool $blReturnRedirectUrl = false, ?PaymentGateway $oPayGateway = null): ?bool
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $aDynvalueForm = $this->_oFcPoHelper->fcpoGetRequestParameter('dynvalue');
@@ -2144,7 +2144,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @param string|null $sPaymenttype
      * @return bool
      */
-    public function isPayOneIframePayment(string $sPaymenttype = null): bool
+    public function isPayOneIframePayment(?string $sPaymenttype = null): bool
     {
         if (!$sPaymenttype) {
             $sPaymenttype = $this->oxorder__oxpaymenttype->value;

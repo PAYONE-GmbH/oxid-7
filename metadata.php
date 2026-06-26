@@ -85,6 +85,7 @@ $aModule = [
         'FcPayOneTransactionStatusBase' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusBase::class,
         'FcPayOneTransactionStatusHandler' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusHandler::class,
         'FcPayOneTransactionStatusForwarder' => Fatchip\PayOne\Application\Controller\FcPayOneTransactionStatusForwarder::class,
+        'FcPayOneMandateDownload' => Fatchip\PayOne\Application\Controller\FcPayOneMandateDownload::class,
         // Model
         'FcPoUserFlag' => Fatchip\PayOne\Application\Model\FcPouserflag::class,
         'FcPoRequestLog' => Fatchip\PayOne\Application\Model\FcPoRequestLog::class,

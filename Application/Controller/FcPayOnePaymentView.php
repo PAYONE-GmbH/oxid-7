@@ -602,8 +602,8 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
                 $sProfileBasketMaxIndex = 'tx_limit_' . $sPaymentStringAddition . '_max';
                 $sProfileBasketMinIndex = 'tx_limit_' . $sPaymentStringAddition . '_min';
                 $sProfileActivationStatusIndex = 'activation_status_' . $sPaymentStringAddition;
-                $dProfileBasketValueMax = (double)$aCurrentRatePayProfile[$sProfileBasketMaxIndex];
-                $dProfileBasketValueMin = (double)$aCurrentRatePayProfile[$sProfileBasketMinIndex];
+                $dProfileBasketValueMax = (float)$aCurrentRatePayProfile[$sProfileBasketMaxIndex];
+                $dProfileBasketValueMin = (float)$aCurrentRatePayProfile[$sProfileBasketMinIndex];
                 $sProfileActivationStatus = $aCurrentRatePayProfile[$sProfileActivationStatusIndex];
                 $sProfileCountryBilling = $aCurrentRatePayProfile['country_code_billing'];
                 $sProfileCurrency = $aCurrentRatePayProfile['currency'];
@@ -1172,7 +1172,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return bool|UserPayment
      */
-    protected function _fcGetPaymentByPaymentType(User $oUser = null, string $sPaymentType = null): bool|UserPayment
+    protected function _fcGetPaymentByPaymentType(?User $oUser = null, ?string $sPaymentType = null): bool|UserPayment
     {
         $mReturn = false;
         if ($oUser && $sPaymentType != null) {
@@ -2723,7 +2723,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      * @param string|null $sWorkOrderId
      * @return bool
      */
-    protected function _fcpoPerformPayolutionPreCheck(string $sPaymentId, string $sWorkOrderId = null): bool
+    protected function _fcpoPerformPayolutionPreCheck(string $sPaymentId, ?string $sWorkOrderId = null): bool
     {
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
         if ($blPreCheckNeeded) {
@@ -3843,7 +3843,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return void
      */
-    protected function _setValues(array &$aPaymentList, Basket $oBasket = null): void
+    protected function _setValues(array &$aPaymentList, ?Basket $oBasket = null): void
     {
         parent::_setValues($aPaymentList, $oBasket);
 

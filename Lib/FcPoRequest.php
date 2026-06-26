@@ -957,6 +957,7 @@ class FcPoRequest extends Base
         $oUser = $oOrder->getOrderUser();
         $sWorkorderId = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_workorderid');
         $aBankData = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_bankdata');
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
         $sInstallmentDuration = $this->_oFcPoHelper->fcpoGetSessionVariable('payolution_installment_duration');
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
 
@@ -967,6 +968,7 @@ class FcPoRequest extends Base
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');
         $this->addParameter('mode', $this->getOperationMode($oOrder->oxorder__oxpaymenttype->value));
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
@@ -1230,28 +1232,28 @@ class FcPoRequest extends Base
         $oLang = $this->_oFcPoHelper->fcpoGetLang();
 
         $sDeliveryCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxdelivery');
-        $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
+        $sDeliveryCosts = (float)str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addInvoicePosition($iIndex, 'delivery', $sDeliveryCosts, 'shipment', 1, $oLang->translateString('FCPO_SHIPPINGCOST', null, false), $this->_fcpoFetchVatCostsFromBasket($oBasket, 'oxdelivery'));
             $iIndex++;
         }
 
         $sWrappingCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxwrapping');
-        $sWrappingCosts = (double)str_replace(',', '.', $sWrappingCosts);
+        $sWrappingCosts = (float)str_replace(',', '.', $sWrappingCosts);
         if ($sWrappingCosts > 0) {
             $this->addInvoicePosition($iIndex, 'wrapping', $sWrappingCosts, 'goods', 1, $oLang->translateString('FCPO_WRAPPING', null, false), 0);
             $iIndex++;
         }
 
         $sGiftcardCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxgiftcard');
-        $sGiftcardCosts = (double)str_replace(',', '.', $sGiftcardCosts);
+        $sGiftcardCosts = (float)str_replace(',', '.', $sGiftcardCosts);
         if ($sGiftcardCosts > 0) {
             $this->addInvoicePosition($iIndex, 'giftcard', $sGiftcardCosts, 'goods', 1, $oLang->translateString('FCPO_GIFTCARD', null, false), $this->_fcpoFetchVatCostsFromBasket($oBasket, 'oxgiftcard'));
             $iIndex++;
         }
 
         $sPaymentCosts = $this->_fcpoFetchCostsFromBasket($oBasket, 'oxpayment');
-        $sPaymentCosts = (double)str_replace(',', '.', $sPaymentCosts);
+        $sPaymentCosts = (float)str_replace(',', '.', $sPaymentCosts);
         if ($sPaymentCosts != 0) {
             $sPayDesc = $oLang->translateString('FCPO_DEDUCTION', null, false);
             if ($sPaymentCosts > 0) {
@@ -1295,7 +1297,7 @@ class FcPoRequest extends Base
         }
 
         $oCur = $oConfig->getActShopCurrencyObject();
-        $dFactor = (double)pow(10, $oCur->decimal);
+        $dFactor = (float)pow(10, $oCur->decimal);
 
         $dReturnPrice = $dBruttoPrice * $dFactor;
 
@@ -2046,6 +2048,9 @@ class FcPoRequest extends Base
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
         $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
+
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
@@ -2095,7 +2100,7 @@ class FcPoRequest extends Base
      * @throws DatabaseErrorException
      * @throws LanguageNotFoundException
      */
-    public function sendRequestPayolutionPreCheck(string $sPaymentId, User $oUser, array $aBankData, string $sWorkorderId = null): array
+    public function sendRequestPayolutionPreCheck(string $sPaymentId, User $oUser, array $aBankData, ?string $sWorkorderId = null): array
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
@@ -2114,10 +2119,12 @@ class FcPoRequest extends Base
         $this->addParameter('currency', $oCurr->name);
 
         $sPaymentType = $this->_fcpoGetPayolutionPaymentTypeById($sPaymentId);
-        $sFinancignType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
+        $sFinancingType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
+        $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
 
-        $this->addParameter('financingtype', $sFinancignType);
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
+        $this->addParameter('financingtype', $sFinancingType);
         $this->addParameter('add_paydata[action]', 'pre_check');
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');
@@ -2269,7 +2276,7 @@ class FcPoRequest extends Base
      * @throws DatabaseConnectionException
      * @throws DatabaseErrorException
      */
-    public function getRefNr(Order $oOrder = null, bool $blAddPrefixToSession = false): string
+    public function getRefNr(?Order $oOrder = null, bool $blAddPrefixToSession = false): string
     {
         $sRawPrefix = (string)$this->_oFcPoHelper->fcpoGetConfig()->getConfigParam('sFCPORefPrefix');
         $sSessionRefNr = $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoRefNr');
@@ -2659,7 +2666,7 @@ class FcPoRequest extends Base
         if ($oOrder->isDetailedProductInfoNeeded()) {
             $dAmount = $this->addProductInfo($oOrder, $aPositions, true);
             // amount for credit entry has to be negative
-            $dAmount = (double)$dAmount * -1;
+            $dAmount = (float)$dAmount * -1;
             if (!empty($aPositions)) {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in the smallest currency unit
@@ -3222,8 +3229,7 @@ class FcPoRequest extends Base
             $this->removeParameter('solution_version');
         }
 
-        $sPath = 'modules/fc/fcpayone/mandates/' . $sMandateIdentification . '.pdf';
-        $sDestinationFile = getShopBasePath() . $sPath;
+        $sDestinationFile = realpath(getShopBasePath() . '../' . 'vendor/payone-gmbh/oxid-7/mandates') . '/' .  $sMandateIdentification . '.pdf';
 
         $aOptions = ['http' => ['header' => "Content-type: application/x-www-form-urlencoded\r\n", 'method' => 'POST', 'content' => http_build_query($this->_aParameters)]];
         $oContext = stream_context_create($aOptions);
@@ -3243,7 +3249,7 @@ class FcPoRequest extends Base
                     ]);
                 }
 
-                $sReturn = $this->_oFcPoHelper->fcpoGetConfig()->getShopUrl() . "modules/fc/fcpayone/download.php?id=" . $sOrderId;
+                $sReturn = $this->_oFcPoHelper->fcpoGetConfig()->getShopUrl() . "index.php?cl=FcPayOneMandateDownload&id=" . $sOrderId;
                 $sStatus = 'SUCCESS';
 
                 $aOutput = ['file' => $sDestinationFile];

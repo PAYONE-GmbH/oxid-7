@@ -239,7 +239,7 @@ class FcPoParamsParser
 
         $oDelivery = $oBasket->getCosts('oxdelivery');
 
-        $sDeliveryCosts = (double)str_replace(',', '.', $sDeliveryCosts);
+        $sDeliveryCosts = (float)str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $aOrderlineShipping = ['reference' => 'delivery', 'name' => 'Standard Versand', 'quantity' => 1, 'unit_price' => $sDeliveryCosts * 100, 'tax_rate' => (string)$oDelivery->getVat() * 100, 'total_amount' => $sDeliveryCosts * 100];
             $aOrderlines[] = $aOrderlineShipping;

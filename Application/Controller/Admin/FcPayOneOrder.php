@@ -315,7 +315,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
             }
 
             if ($sAmount) {
-                $dAmount = (double)str_replace(',', '.', (string)$sAmount);
+                $dAmount = (float)str_replace(',', '.', (string)$sAmount);
 
                 // amount for credit entry has to be negative
                 if ($dAmount > 0) {
@@ -332,7 +332,7 @@ class FcPayOneOrder extends FcPayOneAdminDetails
                         unset($aPositions[$sOrderArtKey]);
                         continue;
                     }
-                    $dAmount += (double)$aOrderArt['price'];
+                    $dAmount += (float)$aOrderArt['price'];
                 }
                 $oResponse = $oPoRequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankAccountHolder, $aPositions);
             }
