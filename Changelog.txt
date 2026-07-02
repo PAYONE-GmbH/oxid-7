@@ -1,3 +1,13 @@
+==1.5.0==
+
+Maintenance
+
+* compatibility with version 7.5 established
+* compatibility with PHP 8.5 established
+* updated Click to Pay to version 1.5
+* refactored admin and frontend controllers
+* tested with 7.5 
+
 ==1.4.0==
 
 New Features
