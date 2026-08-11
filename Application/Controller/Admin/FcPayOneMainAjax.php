@@ -136,6 +136,7 @@ class FcPayOneMainAjax extends ListComponentAjax
             $sQAdd .= "and $sCountryTable.oxid not in ( ";
             $sQAdd .= "select $sCountryTable.oxid from fcpopayment2country left join $sCountryTable on $sCountryTable.oxid=fcpopayment2country.fcpo_countryid ";
             $sQAdd .= "where fcpopayment2country.fcpo_paymentid = " . $this->_oFcPoDb->quote($sSynchCountryId) . " and fcpopayment2country.fcpo_type = " . $this->_oFcPoDb->quote($sType);
+            $sQAdd .= ") ";
         }
 
         return $sQAdd;
