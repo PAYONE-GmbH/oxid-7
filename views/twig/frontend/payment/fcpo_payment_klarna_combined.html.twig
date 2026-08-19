@@ -3,7 +3,7 @@
     {% set checkedPaymentId = oView.getCheckedPaymentId() %}
     <div class="payment-option-form">
         <input class="form-check-input" id="payment_klarna_combined" type="radio" name="paymentid" value="{{ sPaymentID }}"
-               {% if oView.fcpoIsKlarnaCombined(checkedPaymentId) %}checked{% endif %}>
+               {% if checkedPaymentId and oView.fcpoIsKlarnaCombined(checkedPaymentId) %}checked{% endif %}>
         <label for="payment_klarna_combined">{{ translate({ ident: "FCPO_KLARNA" }) }}</label>
 
         <div class="hidden">

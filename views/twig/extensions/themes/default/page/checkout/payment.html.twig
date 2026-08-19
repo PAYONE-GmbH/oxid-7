@@ -86,7 +86,7 @@
         {% include "@fcpayone/frontend/payment/fcpo_payment_eps.html.twig" %}
     {% elseif sPaymentID == "fcpo_ideal" %}
         {% include "@fcpayone/frontend/payment/fcpo_payment_ideal.html.twig" %}
-    {% elseif oView.fcpoIsKlarnaCombined(sPaymentID) %}
+    {% elseif sPaymentID and oView.fcpoIsKlarnaCombined(sPaymentID) %}
         {% if oView.fcpoShowKlarnaCombined(sPaymentID) %}
             {% include "@fcpayone/frontend/payment/fcpo_payment_klarna_combined.html.twig" %}
         {% endif %}
