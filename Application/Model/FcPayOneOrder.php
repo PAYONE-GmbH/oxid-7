@@ -282,7 +282,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @return bool|int|string
      * @throws Exception
      */
-    public function finalizeOrder(Basket $oBasket, $oUser, $blRecalculatingOrder = false): bool|int|string
+    public function finalizeOrder(Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
         $sPaymentId = $oBasket->getPaymentId();
         $this->_sFcpoPaymentId = $sPaymentId;
@@ -646,7 +646,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @return mixed
      * @see https://integrator.payone.de/jira/browse/OXID-263
      */
-    public function loadFromBasket($oBasket): mixed
+    public function loadFromBasket($oBasket)
     {
 
         $sSessionChallenge =

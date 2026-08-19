@@ -83,7 +83,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      *
      * @return ?string
      */
-    public function execute(): ?string
+    public function execute()
     {
         $sFcpoMandateCheckbox = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
 
@@ -580,7 +580,7 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      *
      * @return bool
      */
-    protected function validateTermsAndConditions(): bool
+    protected function validateTermsAndConditions()
     {
         if (parent::validateTermsAndConditions() === true) {
             return true;
