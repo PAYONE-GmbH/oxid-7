@@ -92,7 +92,7 @@ class FcPayOnePaymentMain extends FcPayOnePaymentMain_parent
      * @return void
      * @throws DatabaseConnectionException
      */
-    public function save(): void
+    public function save()
     {
         parent::save();
 

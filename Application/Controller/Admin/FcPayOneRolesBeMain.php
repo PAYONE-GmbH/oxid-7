@@ -29,7 +29,7 @@ class FcPayOneRolesBeMain extends FcPayOneRolesBeMain_parent
      * @return string
      * @extend render
      */
-    public function render(): string
+    public function render()
     {
         $sReturn = parent::render();
 

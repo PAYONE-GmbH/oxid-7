@@ -1457,7 +1457,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return mixed
      */
-    public function validatePayment(): mixed
+    public function validatePayment()
     {
         $sPaymentId = $this->_fcpoGetPaymentId();
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);
