@@ -859,7 +859,7 @@ class FcPoRequest extends Base
     {
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $sKlarnaAuthToken =
-            $this->_oFcPoHelper->fcpoGetSessionVariable('klarna_authorization_token');
+            $this->_oFcPoHelper->fcpoGetSessionVariable('klarna_authorization_token') ?? '';
         $this->addParameter('add_paydata[authorization_token]', $sKlarnaAuthToken);
         $this->addParameter('clearingtype', 'fnc');
         $this->addParameter('financingtype', $this->_fcpoGetKlarnaFinancingType($sPaymentId));
