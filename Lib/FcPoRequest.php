@@ -1216,9 +1216,6 @@ class FcPoRequest extends Base
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
             $sArticleIdent = $oArticle->oxarticles__oxartnum->value;
-            if (!empty($oArticle->oxarticles__oxean->value)) {
-                $sArticleIdent = $oArticle->oxarticles__oxean->value;
-            }
             $this->addInvoicePosition($iIndex, $sArticleIdent, $oBasketItem, 'goods', $oBasketItem->getAmount(), $oBasketItem->getTitle(), $oBasketItem->getPrice()->getVat());
             $iIndex++;
         }

@@ -970,7 +970,9 @@
                     {% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_KEY"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_KEY")} %}
 
                     <br/>
-                    <textarea name="fcpoAplKeyText"></textarea>
+                    <textarea name="fcpoAplKeyText" style="width: 210px"></textarea>
+                    &nbsp;{% include "inputhelp.html.twig" with {'sHelpId': help_id("FCPO_HELP_APPLE_PAY_KEY_TEXT"), 'sHelpText': help_text("FCPO_HELP_APPLE_PAY_KEY_TEXT")} %}
+                    &nbsp;<span style="font-weight: normal">{{ translate({ ident: "FCPO_APPLE_PAY_KEY_TEXT" })|raw }}</span>
                 </dt>
                 <dd>
                     {{ translate({ ident: "FCPO_APPLE_PAY_KEY" })|raw }}
