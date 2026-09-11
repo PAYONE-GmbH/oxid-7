@@ -883,4 +883,22 @@ class FcPayOneUser extends FcPayOneUser_parent
         $this->_oFcPoHelper->fcpoSetSessionVariable('usr', $sUserId);
     }
 
+    public function __sleep()
+    {
+        $aRet = [];
+        foreach (get_object_vars($this) as $sKey => $sVar) {
+            if ($sKey != '_oArticle') {
+                $aRet[] = $sKey;
+            }
+        }
+
+        $aRet = array_diff($aRet, ["_oFcPoDb", "_oFcPoHelper"]);
+        return $aRet;
+    }
+
+    public function __wakeup()
+    {
+        $this->_oFcPoHelper = oxNew(FcPoHelper::class);
+        $this->_oFcPoDb = $this->_oFcPoHelper->fcpoGetPdoDb();
+    }
 }

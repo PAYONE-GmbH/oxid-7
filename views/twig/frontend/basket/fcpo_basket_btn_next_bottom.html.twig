@@ -8,6 +8,5 @@
 {% endif %}
 
 {% if oViewConf.getActiveClassName() == 'basket' and oViewConf.fcpoCanDisplayPayPalExpressV2Button() %}
-    {{ style({ include: oViewConf.getModuleUrl('fcpayone','css/fcpopaypalexpress.css') }) }}
     {% include_dynamic "@fcpayone/frontend/fcpo_paypal_express_v2.html.twig" with {type: "payone", position: "BasketBottom", layout: "vertical"} %}
 {% endif %}
