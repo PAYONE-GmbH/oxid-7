@@ -11,6 +11,7 @@
             <input type="hidden" name="fcpo_mode_{{ sPaymentID }}" value="{{ paymentmethod.fcpoGetOperationMode() }}">
             <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/jquery-3.6.0.min.js") }}"></script>
             <script src="{{ oViewConf.getModuleUrl("fcpayone", "js/lightview/lightview.js") }}"></script>
+            <input type="hidden" id="fcpo_ajax_controller_url" name="fcpo_ajax_controller_url_name" value="{{ oViewConf.fcpoGetAjaxControllerUrl()}}">
 
             {% if oView.fcpoShowPayolutionB2C() %}
                     <div class="mb-3">
