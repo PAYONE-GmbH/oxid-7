@@ -968,7 +968,7 @@ class FcPoRequest extends Base
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
         $this->addParameter('api_version', '3.10');
         $this->addParameter('mode', $this->getOperationMode($oOrder->oxorder__oxpaymenttype->value));
-        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId ?? '');
 
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
@@ -993,7 +993,7 @@ class FcPoRequest extends Base
         $this->addParameter('encoding', 'UTF-8');
 
         $sIp = $this->_fcpoGetRemoteAddress();
-        if ($sIp != '') {
+        if (!is_null($sIp) && $sIp != '') {
             $this->addParameter('ip', $sIp);
         }
 
@@ -2104,7 +2104,7 @@ class FcPoRequest extends Base
 
         $this->addParameter('request', 'genericpayment'); //Request method
         $this->addParameter('mode', $this->getOperationMode($sPaymentId)); //PayOne Portal Operation Mode (live or test)
-        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID') ?? ''); //ID of PayOne Sub-Account
 
         $this->addParameter('clearingtype', 'fnc');
 
@@ -2113,14 +2113,14 @@ class FcPoRequest extends Base
         $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
 
         $oCurr = $oConfig->getActShopCurrencyObject();
-        $this->addParameter('currency', $oCurr->name);
+        $this->addParameter('currency', $oCurr->name ?? '');
 
         $sPaymentType = $this->_fcpoGetPayolutionPaymentTypeById($sPaymentId);
         $sFinancingType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
         $sPaySafeSessionId = $this->_oFcPoHelper->fcpoGetSessionVariable('paySafeSessionId');
 
-        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId ?? '');
         $this->addParameter('financingtype', $sFinancingType);
         $this->addParameter('add_paydata[action]', 'pre_check');
         $this->addParameter('add_paydata[payment_type]', $sPaymentType);
@@ -2133,7 +2133,7 @@ class FcPoRequest extends Base
         $this->addParameter('encoding', 'UTF-8');
 
         $sIp = $this->_fcpoGetRemoteAddress();
-        if ($sIp != '') {
+        if (!is_null($sIp) && $sIp != '') {
             $this->addParameter('ip', $sIp);
         }
 
