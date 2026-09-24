@@ -642,11 +642,11 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * Overloading of basket load method for handling
      * basket loading from session => avoiding loading it twice
      *
-     * @param $oBasket
+     * @param Basket $oBasket
      * @return mixed
      * @see https://integrator.payone.de/jira/browse/OXID-263
      */
-    public function loadFromBasket($oBasket)
+    public function loadFromBasket(Basket $oBasket)
     {
 
         $sSessionChallenge =
@@ -1555,11 +1555,10 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @param Basket $oBasket basket object
      *
-     * @return void
      * @throws Exception
      *
      */
-    public function validateStock($oBasket): void
+    public function validateStock($oBasket)
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
