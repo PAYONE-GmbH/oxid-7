@@ -109,8 +109,8 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
         if (($blSave = parent::save()) && $this->isNewOrderItem() || $blBefore === false) {
             if ($oConfig->getConfigParam('blUseStock')) {
                 if ($oConfig->getConfigParam('blPsBasketReservationEnabled')) {
-                    $this->getSession()
-                        ->getBasketReservations()
+                    $oSession = $this->_oFcPoHelper->fcpoGetSession();
+                    $oSession->getBasketReservations()
                         ->commitArticleReservation(
                             $this->oxorderarticles__oxartid->value,
                             $this->oxorderarticles__oxamount->value
