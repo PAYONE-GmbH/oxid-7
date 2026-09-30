@@ -161,8 +161,9 @@ class FcPayOneMainAjax extends ListComponentAjax
             $oQuery
                 ->delete('fcpopayment2country')
                 ->where(
-                    $oExpressionBuilder->in('fcpopayment2country.oxid', $aChosenCntr)
+                    $oExpressionBuilder->in('fcpopayment2country.oxid', ':countries')
                 );
+            $oQuery->setParameter('countries', $aChosenCntr, Connection::PARAM_STR_ARRAY);
             $oQuery->execute();
         }
     }
