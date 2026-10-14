@@ -119,12 +119,12 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
             $sOrderId = $this->_oFcPoHelper->fcpoGetSessionVariable('sess_challenge');
             /** @var \OxidEsales\Eshop\Application\Model\Order $oOrder */
             $oOrder = $this->_oFcPoHelper->getFactoryObject('oxorder');
-            if (!$oOrder->load($sOrderId)) {
+            if (!$oOrder->load($sOrderId) || empty($oOrder->getId())) {
                 Registry::getLogger()->error("Order not found.");
                 $blValidCheckout = false;
             }
 
-            if ($oOrder->oxorder__oxstorno->value == 1) {
+            if ($blValidCheckout && $oOrder->oxorder__oxstorno->value == 1) {
                 Registry::getLogger()->error("Order was cancelled.");
                 $blValidCheckout = false;
             }
