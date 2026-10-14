@@ -23,6 +23,7 @@ namespace Fatchip\PayOne\Application\Controller;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Fatchip\PayOne\Application\Helper\PayPal;
+use Fatchip\PayOne\Application\Helper\Redirect;
 use Fatchip\PayOne\Lib\FcPoHelper;
 use Fatchip\PayOne\Lib\FcPoRequest;
 use OxidEsales\Eshop\Application\Model\Address;
@@ -31,6 +32,7 @@ use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Registry;
 
 class FcPayOneOrderView extends FcPayOneOrderView_parent
 {
@@ -70,6 +72,33 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
     }
 
     /**
+     *  Extends oxid standard method render()
+     *  Checks if checkout flow was not broken by browser navigation
+     */
+    public function render()
+    {
+        if ($this->fcpoIsOnGoingRedirect() && $this->fcpoIsPresaveOrder()) {
+            Registry::getLogger()->error("Checkout interrupted due to irregular navigation.");
+
+            $sOrderId = $this->_oFcPoHelper->fcpoGetSessionVariable('sess_challenge');
+            $oOrder = $this->_oFcPoHelper->getFactoryObject('oxorder');
+            if ($oOrder->load($sOrderId)) {
+                Registry::getLogger()->error("Order " . $oOrder->oxorder__oxordernr->value . " got cancelled due to back navigation during redirection.");
+                $oOrder->cancelOrder();
+            }
+
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('sess_challenge');
+            $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRedirectOnGoing');
+
+            $sCancelUrl = Redirect::getInstance()->getCancelUrl('payment');
+
+            Registry::getUtils()->redirect($sCancelUrl);
+        } else {
+            return parent::render();
+        }
+    }
+
+    /**
      * Extends oxid standard method execute()
      * Check if debitnote mandate was accepted
      *
@@ -85,6 +114,30 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
      */
     public function execute()
     {
+        if ($this->fcpoIsFcposuccessPresent() && $this->fcpoIsPresaveOrder()) {
+            $blValidCheckout = true;
+            $sOrderId = $this->_oFcPoHelper->fcpoGetSessionVariable('sess_challenge');
+            /** @var \OxidEsales\Eshop\Application\Model\Order $oOrder */
+            $oOrder = $this->_oFcPoHelper->getFactoryObject('oxorder');
+            if (!$oOrder->load($sOrderId) || empty($oOrder->getId())) {
+                Registry::getLogger()->error("Order not found.");
+                $blValidCheckout = false;
+            }
+
+            if ($blValidCheckout && $oOrder->oxorder__oxstorno->value == 1) {
+                Registry::getLogger()->error("Order was cancelled.");
+                $blValidCheckout = false;
+            }
+
+            if (!$blValidCheckout) {
+                $oUtilsView = $this->_oFcPoHelper->fcpoGetUtilsView();
+                $oLang = $this->_oFcPoHelper->fcpoGetLang();
+                $sTranslatedMessage = $oLang->translateString('FCPO_CHECKOUT_MANIPULATION');
+                $oUtilsView->addErrorToDisplay($sTranslatedMessage);
+                return "basket";
+            }
+        }
+
         $sFcpoMandateCheckbox = $this->_oFcPoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
 
         $blConfirmMandateError = (
@@ -608,6 +661,33 @@ class FcPayOneOrderView extends FcPayOneOrderView_parent
         }
 
         return $blValid;
+    }
+
+    /**
+     * @return bool
+     */
+    public function fcpoIsPresaveOrder()
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        return (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+    }
+
+    /**
+     * @return bool
+     */
+    public function fcpoIsOnGoingRedirect()
+    {
+        return (bool) $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoRedirectOnGoing');
+    }
+
+    /**
+     * Checks if fcposuccess parameter exists, whichever value
+     * Indicates the return from a redirection
+     * @return bool
+     */
+    public function fcpoIsFcposuccessPresent()
+    {
+        return !is_null($this->_oFcPoHelper->fcpoGetRequestParameter('fcposuccess'));
     }
 
 }
