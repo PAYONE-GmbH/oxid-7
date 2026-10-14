@@ -451,10 +451,13 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             $this->checkOrderExist($sGetChallenge)
         );
 
-        if ($blSaveAfterRedirect === false && $this->checkOrderExist($sGetChallenge)) {
-            \OxidEsales\Eshop\Core\Registry::getLogger()->debug('finalizeOrder: Order already exists: ' . $sGetChallenge, [$oBasket, $oUser]);
-            // we might use this later, this means that somebody klicked like mad on order button
-            return self::ORDER_STATE_ORDEREXISTS;
+        $blIsRedirectionOnGoing = (bool) $this->_oFcPoHelper->fcpoGetSessionVariable('fcpoRedirectOnGoing');
+        if ($blSaveAfterRedirect === false && !$blIsRedirectionOnGoing) {
+            if ($this->checkOrderExist($sGetChallenge)) {
+                \OxidEsales\Eshop\Core\Registry::getLogger()->debug('finalizeOrder: Order already exists: ' . $sGetChallenge, [$oBasket, $oUser]);
+                // we might use this later, this means that somebody klicked like mad on order button
+                return self::ORDER_STATE_ORDEREXISTS;
+            }
         }
 
         // check if basket is still the same as it was before
@@ -814,6 +817,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoAuthMode');
         $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRedirectUrl');
+        $this->_oFcPoHelper->fcpoDeleteSessionVariable('fcpoRedirectOnGoing');
     }
 
     /**
@@ -2074,6 +2078,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
             } else {
                 $sRedirectUrl = $aResponse['redirecturl'];
             }
+            $this->_oFcPoHelper->fcpoSetSessionVariable('fcpoRedirectOnGoing', '1');
             $oUtils->redirect($sRedirectUrl, false);
         }
 
