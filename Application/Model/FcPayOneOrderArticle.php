@@ -79,7 +79,7 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      *
      * @return bool
      */
-    public function save(): bool
+    public function save()
     {
         $oOrder = $this->getOrder();
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
@@ -212,11 +212,11 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
      * Deletes order article object. If deletion succeeded - updates
      * article stock information. Returns deletion status
      *
-     * @param string|null $sOXID Article id
+     * @param string|null $oxid Article id
      *
      * @return bool
      */
-    public function delete($sOXID = null): bool
+    public function delete($oxid = null)
     {
         $oSession = $this->_oFcPoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
@@ -227,11 +227,11 @@ class FcPayOneOrderArticle extends FcPayOneOrderArticle_parent
             $oPayment = oxNew(Payment::class);
             $oPayment->load($sPaymentId);
             if ($this->_fcpoIsPayonePaymentType($oPayment->getId()) === false) {
-                return parent::delete($sOXID);
+                return parent::delete($oxid);
             }
         }
 
-        $blDelete = $this->_fcpoProcessBaseDelete($sOXID ?? '');
+        $blDelete = $this->_fcpoProcessBaseDelete($oxid ?? '');
         if ($blDelete) {
             $blReduceStockBefore = !$oConfig->getConfigParam('blFCPOReduceStock');
             if ($this->oxorderarticles__oxstorno->value != 1 && $blReduceStockBefore !== false) {

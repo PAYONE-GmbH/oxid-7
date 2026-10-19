@@ -134,7 +134,7 @@ class FcPayOneThankYouView extends FcPayOneThankYouView_parent
      *
      * @return string
      */
-    public function render(): string
+    public function render()
     {
         $oUser = $this->getUser();
         if ($oUser) {
