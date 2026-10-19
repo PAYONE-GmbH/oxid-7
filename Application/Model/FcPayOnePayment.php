@@ -284,7 +284,7 @@ class FcPayOnePayment extends FcPayOnePayment_parent
      * @extend getDynValues
      * @return array dyn values
      */
-    public function getDynValues(): array
+    public function getDynValues()
     {
         $aDynValues = parent::getDynValues();
         return $this->_fcGetDynValues($aDynValues);
