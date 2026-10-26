@@ -277,7 +277,12 @@
 {% block checkout_order_next_step_side %}
 
     {% if oViewConf.fcpoIsGooglePay() %}
-            <div id="payonegooglepaycontainer" class="btn btn-lg w-100">
+        {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
+
+            <div id='payonegoogleoverlay' class='fcpo-googlepay-disabled'>
+                <div id="payonegooglepaycontainer" class="btn btn-lg w-100">
+                </div>
+                <div class='fcpo-googlepay-disabled-error-msg'>{{ translate({ ident: 'READ_AND_CONFIRM_TERMS' }) }}</div>
             </div>
 
         <script async
@@ -366,6 +371,17 @@
                         }
                     );
                 document.getElementById('payonegooglepaycontainer').appendChild(button);
+
+                const overlay = document.getElementById('payonegoogleoverlay');
+                const checkbox = document.querySelector('input[name="ord_agb"][type="checkbox"]');
+
+                if (checkbox) {
+                    checkbox.addEventListener('change', function () {
+                        overlay.classList.toggle('fcpo-googlepay-disabled', !this.checked);
+                    });
+                } else {
+                    overlay.classList.remove('fcpo-googlepay-disabled');
+                }
             }
             function getGoogleTransactionInfo() {
                 return {
@@ -391,18 +407,25 @@
                 paymentsClient.prefetchPaymentData(paymentDataRequest);
             }
             function onGooglePaymentButtonClicked() {
-                const paymentDataRequest = getGooglePaymentDataRequest();
-                paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
-                const paymentsClient = getGooglePaymentsClient();
-                paymentsClient.loadPaymentData(paymentDataRequest)
-                    .then(function(paymentData) {
-                        // handle the response
-                        processPayment(paymentData);
-                    })
-                    .catch(function(err) {
-                        // show error in developer console for debugging
-                        console.error(err);
-                    });
+                if (!fcpoIsAcceptedAGB()) {
+                    var url = "{{ oViewConf.fcpoGooglePayGetRedirectUrl()|raw }}" + "&stoken={{ oViewConf.getSessionChallengeToken()|raw }}&sDeliveryAddressMD5={{ oView.getDeliveryAddressMD5()|raw }}" + '&fnc=execute&ord_agb=0';
+
+                    window.location = url;
+                    return false;
+                } else {
+                    const paymentDataRequest = getGooglePaymentDataRequest();
+                    paymentDataRequest.transactionInfo = getGoogleTransactionInfo();
+                    const paymentsClient = getGooglePaymentsClient();
+                    paymentsClient.loadPaymentData(paymentDataRequest)
+                        .then(function(paymentData) {
+                            // handle the response
+                            processPayment(paymentData);
+                        })
+                        .catch(function(err) {
+                            // show error in developer console for debugging
+                            console.error(err);
+                        });
+                }
             }
             function processPayment(paymentData) {
                 // show returned data in developer console for debugging
@@ -411,9 +434,18 @@
                 paymentToken = paymentData.paymentMethodData.tokenizationData.token;
                 console.log('PaymentToken:');
                 console.log(btoa(paymentToken));
-                var url = "{{ oViewConf.fcpoGooglePayGetRedirectUrl()|raw }}" + "&stoken={{ oViewConf.getSessionChallengeToken()|raw }}&sDeliveryAddressMD5={{ oView.getDeliveryAddressMD5()|raw }}" + '&fnc=execute&googlepaytoken=' + btoa(paymentToken);
+                var url = "{{ oViewConf.fcpoGooglePayGetRedirectUrl()|raw }}" + "&ord_agb=1&stoken={{ oViewConf.getSessionChallengeToken()|raw }}&sDeliveryAddressMD5={{ oView.getDeliveryAddressMD5()|raw }}" + '&fnc=execute&googlepaytoken=' + btoa(paymentToken);
                 // console.log(url);
                 window.location = url;
+            }
+            function fcpoIsAcceptedAGB() {
+                const checkbox = document.querySelector('input[name="ord_agb"][type="checkbox"]');
+
+                if (checkbox && !checkbox.checked) {
+                    return 0;
+                }
+
+                return 1;
             }
         </script>
     {% else %}
