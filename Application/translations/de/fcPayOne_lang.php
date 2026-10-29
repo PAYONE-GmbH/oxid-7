@@ -338,7 +338,7 @@ Das kleinere Textfeld wird verwendet, um die Zieldatei oder den Pfad zu einer vo
     'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_TRANSFER_LINK' => 'Ich m&ouml;chte die Ratenzahlungen selbst vornehmen und nicht per Lastschrift begleichen',
     'FCPO_RATEPAY_INSTALLMENT_SWITCH_TO_DEBIT_LINK' => 'Ich m&ouml;chte die Ratenzahlungen bequem per Lastschrift begleichen',
 
-
+    'FCPO_CHECKOUT_MANIPULATION' => 'Aufgrund einer ungültigen Seitenaktualisierung im Browser wurde der Bezahlvorgang unterbrochen.',
 ];
 
 /*

@@ -189,6 +189,8 @@ $aLang = [
     'FCPO_APPLE_PAY_CREDITCARD' => "Allowed credit cards to use with Apple Pay",
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR' => "Error while establishing connection to Apple Pay service.",
     'FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS' => "No valid credit cards type is allowed in the configuration. Apple Pay session cannot be initialized.",
+
+    'FCPO_CHECKOUT_MANIPULATION' => 'The payment process was interrupted due to an invalid page refresh in the browser.',
 ];
 
 /*
