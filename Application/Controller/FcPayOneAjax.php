@@ -512,7 +512,8 @@ class FcPayOneAjax extends BaseController
                 'currency' => $sCurrency,
                 'country' => $sCountry,
                 'supportedNetworks' => $aSupportedNetwork,
-                'errorMessage' => ''
+                'errorMessage' => '',
+                'agbError' => $oLang->translateString('READ_AND_CONFIRM_TERMS')
             ]
         ];
 

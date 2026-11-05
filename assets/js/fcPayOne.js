@@ -710,7 +710,10 @@ function fcpoStartPayPalExpress() {
 
 // >>> APPLE PAY
 
-function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) {
+function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm, initialSubmit) {
+    if (typeof amount === 'number') {
+        amount = amount.toFixed(2);
+    }
     var session = new ApplePaySession(3, {
         countryCode: country,
         currencyCode: currency,
@@ -774,10 +777,11 @@ function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) 
                     errors: []
                 });
 
-                checkoutForm.submit();
+                initialSubmit.call(checkoutForm);
                 return true;
             },
             error: function (response) {
+                console.error('Apple Pay payment error:', response);
                 var data = JSON.parse(response);
                 session.completePayment({
                     status: ApplePaySession.STATUS_FAILURE,
@@ -789,11 +793,20 @@ function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) 
         });
     };
 
+    session.oncancel = function (evt) {
+        console.log('Apple Pay session cancelled', evt);
+    };
+
+    session.onerror = function (evt) {
+        console.error('Apple Pay session error', evt);
+    };
+
+    console.log('Starting Apple Pay session...');
     session.begin()
 }
 
 function fcpoAplCheckDevice() {
-    /*var allowedDevice = 0;
+    var allowedDevice = 0;
     if (window.ApplePaySession) {
         var canMakePayments = ApplePaySession.canMakePayments();
         if (canMakePayments) {
@@ -812,7 +825,7 @@ function fcpoAplCheckDevice() {
         },
         success: fcpoAplCheckDeviceSuccess,
         error: fcpoAplCheckDeviceFailure
-    });*/
+    });
 }
 
 function fcpoAplCheckDeviceSuccess(response) {
@@ -848,22 +861,41 @@ function fcpoGetAplOrderInfo(placeOrderButtonForm) {
 
             var info = responseData.info;
             if (info.isApl) {
-                placeOrderButtonForm.on('submit', function (e) {
-                    e.preventDefault();
+                if (typeof HTMLFormElement !== 'undefined' && HTMLFormElement.prototype.submit) {
+                    let initialSubmit = HTMLFormElement.prototype.submit;
+                    placeOrderButtonForm.submit = function () {
+                        if (info.supportedNetworks.length < 1) {
+                            alert(info.errorMessage);
+                            return false;
+                        }
 
-                    if (info.supportedNetworks.length < 1) {
-                        alert(info.errorMessage);
-                        return false;
-                    }
+                        let fcpoAgbCheck = 0;
+                        let fcpoAgbCheckElem = window.document.getElementsByName('ord_agb');
+                        fcpoAgbCheckElem.forEach(function (elem) {
+                            if (!fcpoAgbCheck && elem.checked) {
+                                fcpoAgbCheck = 1;
+                            }
+                        });
 
-                    fcpoPayWithApplePay(
-                        info.amount,
-                        info.country,
-                        info.currency,
-                        info.supportedNetworks,
-                        this
-                    );
-                });
+                        if (fcpoAgbCheck === 0) {
+                            alert(info.agbError);
+                            return false;
+                        }
+
+                        fcpoPayWithApplePay(
+                            info.amount,
+                            info.country,
+                            info.currency,
+                            info.supportedNetworks,
+                            placeOrderButtonForm,
+                            initialSubmit
+                        );
+                    };
+                    $(placeOrderButtonForm).on('submit', function (e) {
+                        e.preventDefault();
+                        placeOrderButtonForm.submit();
+                    });
+                }
             }
 
             return true;
@@ -1231,7 +1263,7 @@ function fcpoGetPaySafeFraudSnippet(inputCheckId, containerId) {
 $(document).ready(function () {
     var fcpoPlaceOrderButtonForm = $('#orderConfirmAgbBottom');
     if (fcpoPlaceOrderButtonForm && fcpoPlaceOrderButtonForm.length > 0) {
-        fcpoGetAplOrderInfo(fcpoPlaceOrderButtonForm);
+        fcpoGetAplOrderInfo(fcpoPlaceOrderButtonForm[0]);
     }
 
     if ($('body').hasClass('cl-basket')
