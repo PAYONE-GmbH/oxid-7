@@ -104,6 +104,10 @@ class FcPayOneAjax extends BaseController
                 echo $this->fcpoAplOrderInfo();
             }
 
+            if ($sAction == 'fcpoapl_is_enabled' && $sPaymentId == 'fcpo_apple_pay') {
+                echo $this->fcpoAplIsEnabled();
+            }
+
             if ($sAction == 'fcporp_calculation' && $sPaymentId == 'fcporp_installment') {
                 echo $this->fcpoRatepayCalculation($sParamsJson);
             }
@@ -520,6 +524,26 @@ class FcPayOneAjax extends BaseController
         if (count($aSupportedNetwork) < 1) {
             $aResponse['info']['errorMessage'] = $oLang->translateString('FCPO_APPLE_PAY_CREATE_SESSION_ERROR_CARDS');
         }
+
+        return json_encode($aResponse);
+    }
+
+    /**
+     * @return string
+     */
+    public function fcpoAplIsEnabled(): string
+    {
+        $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
+        $oPayment = oxNew(Payment::class);
+        $blEnabled = false;
+        if ($oPayment->load('fcpo_apple_pay')) {
+            $blEnabled = (bool)$oPayment->oxpayments__oxactive->value;
+        }
+
+        $aResponse = [
+            'status' => 'SUCCESS',
+            'enabled' => $blEnabled
+        ];
 
         return json_encode($aResponse);
     }
