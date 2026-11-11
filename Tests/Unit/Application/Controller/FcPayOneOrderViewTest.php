@@ -24,12 +24,19 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
     public function testExecute_Mandate()
     {
         $oFcPayOneOrderView = $this->getMockBuilder(FcPayOneOrderView::class)
-            ->setMethods(['_fcpoMandateAcceptanceNeeded'])
+            ->setMethods(['_fcpoMandateAcceptanceNeeded', 'fcpoIsPresaveOrder'])
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrderView->method('_fcpoMandateAcceptanceNeeded')->willReturn(true);
+        $oFcPayOneOrderView->method('fcpoIsPresaveOrder')->willReturn(false);
+
+        $oMockConfig = $this->getMockBuilder(Config::class)
+            ->setMethods(['getConfigParam'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockConfig->method('getConfigParam')->willReturn(true);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn('false');
+        $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $mResponse = $mExpect = $oFcPayOneOrderView->execute();
@@ -50,13 +57,20 @@ class FcPayOneOrderViewTest extends FcBaseUnitTestCase
         $oMockSession->method('getBasket')->willReturn($oMockBasket);
 
         $oFcPayOneOrderView = $this->getMockBuilder(FcPayOneOrderView::class)
-            ->setMethods(['_fcpoMandateAcceptanceNeeded'])
+            ->setMethods(['_fcpoMandateAcceptanceNeeded', 'fcpoIsPresaveOrder'])
             ->disableOriginalConstructor()->getMock();
         $oFcPayOneOrderView->method('_fcpoMandateAcceptanceNeeded')->willReturn(false);
+        $oFcPayOneOrderView->method('fcpoIsPresaveOrder')->willReturn(false);
+
+        $oMockConfig = $this->getMockBuilder(Config::class)
+            ->setMethods(['getConfigParam'])
+            ->disableOriginalConstructor()->getMock();
+        $oMockConfig->method('getConfigParam')->willReturn(true);
 
         $oFcPoHelper = $this->getMockBuilder(FcPoHelper::class)->disableOriginalConstructor()->getMock();
         $oFcPoHelper->method('fcpoGetRequestParameter')->willReturn('true');
         $oFcPoHelper->method('getSession')->willReturn($oMockSession);
+        $oFcPoHelper->method('fcpoGetConfig')->willReturn($oMockConfig);
         $this->invokeSetAttribute($oFcPayOneOrderView, '_oFcPoHelper', $oFcPoHelper);
 
         $mResponse = $mExpect = $oFcPayOneOrderView->execute();
