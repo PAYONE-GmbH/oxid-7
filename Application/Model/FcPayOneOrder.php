@@ -646,7 +646,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      * @return mixed
      * @see https://integrator.payone.de/jira/browse/OXID-263
      */
-    public function loadFromBasket(Basket $oBasket)
+    protected function loadFromBasket(Basket $oBasket)
     {
 
         $sSessionChallenge =
@@ -915,7 +915,7 @@ class FcPayOneOrder extends FcPayOneOrder_parent
      *
      * @return ListModel
      */
-    public function getOrderArticles($blExcludeCanceled = false): ListModel
+    public function getOrderArticles($blExcludeCanceled = false)
     {
         $sSessionChallenge =
             $this->_oFcPoHelper->fcpoGetSessionVariable('sess_challenge');

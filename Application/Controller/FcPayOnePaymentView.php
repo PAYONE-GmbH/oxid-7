@@ -258,7 +258,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return void
      */
-    public function init(): void
+    public function init()
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
 
@@ -1021,7 +1021,7 @@ class FcPayOnePaymentView extends FcPayOnePaymentView_parent
      *
      * @return array
      */
-    public function getDynValue(): array
+    public function getDynValue()
     {
         parent::getDynValue();
         if ((bool)$this->getConfigParam('sFCPOSaveBankdata') === true) {

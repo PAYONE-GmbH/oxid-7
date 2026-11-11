@@ -200,12 +200,12 @@ class FcPayOneUser extends FcPayOneUser_parent
     /**
      * Overwriting load method for directly setting user flags onload
      *
-     * @param $sOXID
+     * @param $oxID
      * @return mixed
      */
-    public function load($sOXID): mixed
+    public function load($oxID)
     {
-        $mReturn = parent::load($sOXID);
+        $mReturn = parent::load($oxID);
         if ($mReturn !== false) {
             $this->_fcpoSetUserFlags();
         }
@@ -487,7 +487,7 @@ class FcPayOneUser extends FcPayOneUser_parent
      * @return float|int|string
      * @extend getBoni()
      */
-    public function getBoni(): float|int|string
+    public function getBoni()
     {
         $oConfig = $this->_oFcPoHelper->fcpoGetConfig();
         $iDefaultBoni = $oConfig->getConfigParam('sFCPODefaultBoni');
