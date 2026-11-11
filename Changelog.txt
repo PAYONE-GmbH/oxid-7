@@ -1,3 +1,14 @@
+==1.5.3==
+
+Bugfix(es)
+
+* fixed back/forward browser navigation during payment redirects, the presaved order is now cancelled
+* fixed return types, parameter names and visibility of extended OXID classes
+
+Maintenance
+
+* tested with OXID eShop 7.5.2
+
 ==1.5.2==
 
 Bugfix(es)
