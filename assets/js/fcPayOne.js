@@ -710,7 +710,10 @@ function fcpoStartPayPalExpress() {
 
 // >>> APPLE PAY
 
-function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) {
+function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm, initialSubmit) {
+    if (typeof amount === 'number') {
+        amount = amount.toFixed(2);
+    }
     var session = new ApplePaySession(3, {
         countryCode: country,
         currencyCode: currency,
@@ -732,16 +735,24 @@ function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) 
                 params: JSON.stringify({"validationUrl": validationUrl})
             },
             success: function (response) {
-                var data = JSON.parse(response);
-                if ('SUCCESS' !== data.status) {
-                    alert(data.status + ' : ' + data.message + '\n(' + data.errorDetails + ')');
-                    return
+                try {
+                    var data = JSON.parse(response);
+                    if ('SUCCESS' !== data.status) {
+                        alert(data.status + ' : ' + data.message + '\n(' + data.errorDetails + ')');
+                        return
+                    }
+                    session.completeMerchantValidation(data.merchantSession);
+                } catch (e) {
+                    console.error('Apple Pay merchant validation response parse error:', e, response);
                 }
-                session.completeMerchantValidation(data.merchantSession);
             },
             error: function (response) {
-                var data = JSON.parse(response);
-                alert(data.status + ' ' + response.status + ' : ' + data.message);
+                try {
+                    var data = JSON.parse(response);
+                    alert(data.status + ' ' + response.status + ' : ' + data.message);
+                } catch (e) {
+                    console.error('Apple Pay merchant validation failure response parse error:', e, response);
+                }
             }
         });
     };
@@ -759,41 +770,68 @@ function fcpoPayWithApplePay(amount, country, currency, networks, checkoutForm) 
                 params: JSON.stringify({"token": token})
             },
             success: function (response) {
-                var data = JSON.parse(response);
+                try {
+                    var data = JSON.parse(response);
 
-                if ('SUCCESS' !== data.status) {
+                    if ('SUCCESS' !== data.status) {
+                        session.completePayment({
+                            status: ApplePaySession.STATUS_FAILURE,
+                            errors: [data.message]
+                        });
+                        return false;
+                    }
+
+                    session.completePayment({
+                        status: ApplePaySession.STATUS_SUCCESS,
+                        errors: []
+                    });
+
+                    initialSubmit.call(checkoutForm);
+                    return true;
+                } catch (e) {
+                    console.error('Apple Pay payment response parse error:', e, response);
+                    session.completePayment({
+                        status: ApplePaySession.STATUS_FAILURE,
+                        errors: ['Invalid server response']
+                    });
+                    return false;
+                }
+            },
+            error: function (response) {
+                console.error('Apple Pay payment AJAX error:', response);
+                try {
+                    var data = JSON.parse(response);
                     session.completePayment({
                         status: ApplePaySession.STATUS_FAILURE,
                         errors: [data.message]
                     });
-                    return false;
+                } catch (e) {
+                    console.error('Apple Pay payment failure response parse error:', e, response);
+                    session.completePayment({
+                        status: ApplePaySession.STATUS_FAILURE,
+                        errors: ['AJAX error']
+                    });
                 }
-
-                session.completePayment({
-                    status: ApplePaySession.STATUS_SUCCESS,
-                    errors: []
-                });
-
-                checkoutForm.submit();
-                return true;
-            },
-            error: function (response) {
-                var data = JSON.parse(response);
-                session.completePayment({
-                    status: ApplePaySession.STATUS_FAILURE,
-                    errors: [data.message]
-                });
 
                 return false;
             }
         });
     };
 
+    session.oncancel = function (evt) {
+        console.log('Apple Pay session cancelled', evt);
+    };
+
+    session.onerror = function (evt) {
+        console.error('Apple Pay session error', evt);
+    };
+
+    console.log('Starting Apple Pay session...');
     session.begin()
 }
 
 function fcpoAplCheckDevice() {
-    /*var allowedDevice = 0;
+    var allowedDevice = 0;
     if (window.ApplePaySession) {
         var canMakePayments = ApplePaySession.canMakePayments();
         if (canMakePayments) {
@@ -812,20 +850,58 @@ function fcpoAplCheckDevice() {
         },
         success: fcpoAplCheckDeviceSuccess,
         error: fcpoAplCheckDeviceFailure
-    });*/
+    });
+}
+
+function fcpoIsAplEnabled(callback) {
+    $.ajax({
+        url: payoneAjaxControllerUrl,
+        method: 'POST',
+        type: 'POST',
+        data: {
+            paymentid: 'fcpo_apple_pay',
+            action: 'fcpoapl_is_enabled',
+            params: '{}'
+        },
+        success: function (response) {
+            try {
+                var responseData = JSON.parse(response);
+                if (responseData.status === 'SUCCESS') {
+                    callback(responseData.enabled);
+                } else {
+                    console.error('Apple Pay enabled check failed:', responseData.message);
+                    callback(false);
+                }
+            } catch (e) {
+                console.error('Apple Pay enabled check response parse error:', e, response);
+                callback(false);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Apple Pay enabled check AJAX error:', status, error);
+            callback(false);
+        }
+    });
 }
 
 function fcpoAplCheckDeviceSuccess(response) {
-    var responseData = JSON.parse(response);
-
-    if ('SUCCESS' !== responseData.status) {
-        alert("Bad response\n" + responseData.message);
+    try {
+        var responseData = JSON.parse(response);
+        if ('SUCCESS' !== responseData.status) {
+            alert("Bad response\n" + responseData.message);
+        }
+    } catch (e) {
+        console.error('Apple Pay check device response parse error:', e, response);
     }
 }
 
 function fcpoAplCheckDeviceFailure(response) {
-    var responseData = JSON.parse(response);
-    alert("Failure : Call failed\n" + responseData.message);
+    try {
+        var responseData = JSON.parse(response);
+        alert("Failure : Call failed\n" + responseData.message);
+    } catch (e) {
+        console.error('Apple Pay check device failure response parse error:', e, response);
+    }
 }
 
 function fcpoGetAplOrderInfo(placeOrderButtonForm) {
@@ -839,43 +915,83 @@ function fcpoGetAplOrderInfo(placeOrderButtonForm) {
             params: '{}'
         },
         success: function (response) {
-            var responseData = JSON.parse(response);
+            try {
+                var responseData = JSON.parse(response);
 
-            if ('SUCCESS' !== responseData.status) {
-                alert("Bad response\n" + responseData.message);
+                if ('SUCCESS' !== responseData.status) {
+                    alert("Bad response\n" + responseData.message);
+                    return false;
+                }
+
+                var info = responseData.info;
+                if (info.isApl) {
+                    if (typeof HTMLFormElement !== 'undefined' && HTMLFormElement.prototype.submit) {
+                        let initialSubmit = HTMLFormElement.prototype.submit;
+                        placeOrderButtonForm.submit = function () {
+                            if (info.supportedNetworks.length < 1) {
+                                alert(info.errorMessage);
+                                return false;
+                            }
+
+                            if (!fcpoIsAcceptedAGB()) {
+                                alert(info.agbError);
+                                return false;
+                            }
+
+                            fcpoPayWithApplePay(
+                                info.amount,
+                                info.country,
+                                info.currency,
+                                info.supportedNetworks,
+                                placeOrderButtonForm,
+                                initialSubmit
+                            );
+                        };
+                        $(placeOrderButtonForm).on('submit', function (e) {
+                            e.preventDefault();
+                            placeOrderButtonForm.submit();
+                        });
+                    }
+                }
+
+                return true;
+            } catch (e) {
+                console.error('Apple Pay order info response parse error:', e, response);
                 return false;
             }
-
-            var info = responseData.info;
-            if (info.isApl) {
-                placeOrderButtonForm.on('submit', function (e) {
-                    e.preventDefault();
-
-                    if (info.supportedNetworks.length < 1) {
-                        alert(info.errorMessage);
-                        return false;
-                    }
-
-                    fcpoPayWithApplePay(
-                        info.amount,
-                        info.country,
-                        info.currency,
-                        info.supportedNetworks,
-                        this
-                    );
-                });
-            }
-
-            return true;
         },
         error: function (response) {
-            var responseData = JSON.parse(response);
-            alert("Failure : Call failed\n" + responseData.message);
+            try {
+                var responseData = JSON.parse(response);
+                alert("Failure : Call failed\n" + responseData.message);
+            } catch (e) {
+                console.error('Apple Pay order info failure response parse error:', e, response);
+            }
             return false;
         }
     });
 }
 
+function fcpoCheckInitApl(enabled) {
+    if (!enabled) {
+        return false;
+    }
+
+    if ($('body').hasClass('cl-start')
+        || $('body').hasClass('cl-basket')
+        || $('body').hasClass('cl-user')
+        || $('body').hasClass('cl-payment')
+    ) {
+        fcpoAplCheckDevice(payoneAjaxControllerUrl);
+    }
+
+    if ($('body').hasClass('cl-order')) {
+        var fcpoPlaceOrderButtonForm = $('#orderConfirmAgbBottom');
+        if (fcpoPlaceOrderButtonForm && fcpoPlaceOrderButtonForm.length > 0) {
+            fcpoGetAplOrderInfo(fcpoPlaceOrderButtonForm[0]);
+        }
+    }
+}
 // APPLE PAY <<<
 
 
@@ -1229,17 +1345,7 @@ function fcpoGetPaySafeFraudSnippet(inputCheckId, containerId) {
 
 
 $(document).ready(function () {
-    var fcpoPlaceOrderButtonForm = $('#orderConfirmAgbBottom');
-    if (fcpoPlaceOrderButtonForm && fcpoPlaceOrderButtonForm.length > 0) {
-        fcpoGetAplOrderInfo(fcpoPlaceOrderButtonForm);
-    }
-
-    if ($('body').hasClass('cl-basket')
-        || $('body').hasClass('cl-user')
-        || $('body').hasClass('cl-payment')
-    ) {
-        fcpoAplCheckDevice(payoneAjaxControllerUrl);
-    }
+    fcpoIsAplEnabled(fcpoCheckInitApl);
 });
 
 /**

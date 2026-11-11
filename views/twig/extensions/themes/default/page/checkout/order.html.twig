@@ -276,6 +276,20 @@
 
 {% block checkout_order_next_step_side %}
 
+    {% if oViewConf.fcpoIsApplePay() or oViewConf.fcpoIsGooglePay() %}
+        <script>
+            function fcpoIsAcceptedAGB() {
+                const checkbox = document.querySelector('input[name="ord_agb"][type="checkbox"]');
+
+                if (checkbox && !checkbox.checked) {
+                    return 0;
+                }
+
+                return 1;
+            }
+        </script>
+    {% endif %}
+
     {% if oViewConf.fcpoIsGooglePay() %}
         {{ style({ include: oViewConf.getModuleUrl("fcpayone", "css/fcPayOne.css") }) }}
 
@@ -437,15 +451,6 @@
                 var url = "{{ oViewConf.fcpoGooglePayGetRedirectUrl()|raw }}" + "&ord_agb=1&stoken={{ oViewConf.getSessionChallengeToken()|raw }}&sDeliveryAddressMD5={{ oView.getDeliveryAddressMD5()|raw }}" + '&fnc=execute&googlepaytoken=' + btoa(paymentToken);
                 // console.log(url);
                 window.location = url;
-            }
-            function fcpoIsAcceptedAGB() {
-                const checkbox = document.querySelector('input[name="ord_agb"][type="checkbox"]');
-
-                if (checkbox && !checkbox.checked) {
-                    return 0;
-                }
-
-                return 1;
             }
         </script>
     {% else %}
