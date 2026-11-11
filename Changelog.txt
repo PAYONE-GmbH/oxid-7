@@ -1,3 +1,17 @@
+==1.5.2==
+
+Bugfix(es)
+
+* restored Apple Pay incl. terms check and browser back-navigation handling
+* improved Apple Pay device detection, terms are no longer accepted implicitly
+* fixed terms check before Google Pay payment
+* fixed query parameter building for the country-to-payment-method association
+* fixed session call when reserving basket articles
+
+Maintenance
+
+* tested with OXID eShop 7.5.2
+
 ==1.5.1==
 
 New Features
